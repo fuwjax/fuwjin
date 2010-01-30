@@ -1,5 +1,5 @@
+#summary Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java.
 #labels Featured
-#Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java.
 
 = Introduction =
 
