@@ -1,0 +1,28 @@
+#labels Featured
+#Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java.
+
+= Introduction =
+
+Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java. It is designed to meet the needs of software developers interested in adding custom language support to their applications.
+
+= Why Parsing Expression Grammars? =
+
+Parsing Expression Grammars[1] provide some unique features desirable to parsing
+* Composable -- A non-terminal may be replaced by its definition everywhere in the grammar without changing the grammar.
+* Deterministic -- A single valid input has a unique unambiguous parse.
+* Linear -- The parse can be constructed in O(n) where n is the length of the input.
+
+There are key features which PEG's lack compared to their CFG(Context Free Grammar) counterparts
+* Transparent -- Portions of a rule definition may be completely or partially masked by an earlier portion of the rule.
+
+So, if you're willing to trade transparency for composability, PEG's are probably more usable than CFG's. In particular, in a dynamic, changing environment, composability allows for easier refactoring and testing can take away the sting of masking.
+
+= Does the world need another Parser Parser? =
+
+There are various PEG implementations in many languages. Pogo seeks to take advantage of the particular advantages of PEG parsing to define a transformation language. In other words, by using Pogo to define an input grammar and an output grammar, it is possible to transform instead of just a simple parse. In addition, by using a PEG definition to perform input and output on both object graphs and character streams, it is possible to build the desired object hierarchy straight from the character stream and vice versa simply by declaring two grammars.
+
+= What can you do with Pogo? =
+
+The end goal of Pogo is to be a general framework for transformation services. So object hierarchy transformations, test languages, domain languages, static analysis, code generation and data migration are all well within the scope of Pogo's use cases. In addition, as a general purpose parser, we hope to make parsing accessible and usable to people who don't have the privilege of being trained language experts.
+
+fn1. http://pdos.csail.mit.edu/~baford/packrat/popl04/
