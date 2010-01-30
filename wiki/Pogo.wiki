@@ -26,4 +26,4 @@ There are various PEG implementations in many languages. Pogo seeks to take adva
 The end goal of Pogo is to be a general framework for transformation services. So object hierarchy transformations, test languages, domain languages, static analysis, code generation and data migration are all well within the scope of Pogo's use cases. In addition, as a general purpose parser, we hope to make parsing accessible and usable to people who don't have the privilege of being trained language experts.
 
 
-[1] [http://pdos.csail.mit.edu/~baford/packrat/popl04/]
+1. [http://pdos.csail.mit.edu/~baford/packrat/popl04/]
