@@ -1,0 +1,11 @@
+(org.fuwjax.sample.FilterService){
+	filter:(org.fuwjax.sample.FilterService$AndFilter){
+		filters:[
+			(org.fuwjax.sample.FilterService$NameFilter){nameStart:"Mike"},
+			(org.fuwjax.sample.FilterService$PhoneTypeFilter){
+				type:WORK,
+				filter:(org.fuwjax.sample.FilterService$PassFilter){}
+			}
+		]
+	}
+}
