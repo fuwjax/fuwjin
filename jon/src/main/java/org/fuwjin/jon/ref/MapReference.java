@@ -1,0 +1,47 @@
+package org.fuwjin.jon.ref;
+
+import java.util.Iterator;
+import java.util.Map;
+
+public class MapReference extends BaseReference implements BaseReference.MapReference {
+   private final Map<?, ?> value;
+   private final ReferenceStorage storage;
+   private final Class<?> keyType;
+   private final Class<?> valueType;
+
+   public MapReference(final String name, final ReferenceStorage storage, final Object type, final Map<?, ?> value,
+         final Class<?> keyType, final Class<?> valueType) {
+      super(name, type);
+      this.storage = storage;
+      this.value = value;
+      this.keyType = keyType;
+      this.valueType = valueType;
+   }
+
+   @Override
+   public Iterator<EntryReference> iterator() {
+      final Iterator<? extends Map.Entry<?, ?>> iter = value.entrySet().iterator();
+      return new Iterator<EntryReference>() {
+         @Override
+         public boolean hasNext() {
+            return iter.hasNext();
+         }
+
+         @Override
+         public EntryReference next() {
+            return newEntry(iter.next());
+         }
+
+         @Override
+         public void remove() {
+            throw new UnsupportedOperationException();
+         }
+      };
+   }
+
+   EntryReference newEntry(final Map.Entry<?, ?> entry) {
+      final Object key = storage.get(entry.getKey(), keyType);
+      final Object val = storage.get(entry.getValue(), valueType);
+      return new EntryReference(key, val);
+   }
+}
