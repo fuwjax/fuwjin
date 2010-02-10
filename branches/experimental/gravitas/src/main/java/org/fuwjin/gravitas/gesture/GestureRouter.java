@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class GestureRouter{
    private static class Event{
-
       private final Integration source;
       private final Object gesture;
 
@@ -17,7 +16,6 @@ public class GestureRouter{
          this.source = source;
          this.gesture = gesture;
       }
-      
    }
    private BlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
    

@@ -1,3 +1,7 @@
-ConsoleIntegration =org.fuwjin.gravitas.command.SampleCommand~new
+ConsoleIntegration <- hello:return / quit:return
+
+quit =org.fuwjin.gravitas.engine.QuitCommand~new
+	<- 'quit'
+hello =org.fuwjin.gravitas.command.SampleCommand~new
                 <-  'hello ' StringArg:name
 StringArg   <- .+

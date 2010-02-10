@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.util.Properties;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.fuwjin.gravitas.console.PollConsole;
+import org.fuwjin.gravitas.console.ConsoleIntegration;
 import org.fuwjin.gravitas.gesture.GestureProcessor;
 import org.fuwjin.pogo.Grammar;
 
@@ -29,10 +29,10 @@ public class GravitasModule extends AbstractModule{
    @Override
    protected void configure(){
       Names.bindProperties(binder(), props);
-      Multibinder<Runnable> startCommands = newSetBinder(binder(), Runnable.class, named("gravitas.commands.startup"));
-      startCommands.addBinding().to(PollConsole.class);
+      Multibinder<Runnable> startCommands = newSetBinder(binder(), Runnable.class, named("internal.commands.startup"));
       startCommands.addBinding().to(GestureProcessor.class);
       bind(ScheduledExecutorService.class).toInstance(newScheduledThreadPool(5));
+      bind(ConsoleIntegration.class).asEagerSingleton();
    }
    
    @Provides
