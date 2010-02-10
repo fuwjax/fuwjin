@@ -29,7 +29,7 @@ public class Gravitas{
    @Inject
    private ExecutionEngine exec;
    @Inject
-   @Named("gravitas.commands.startup")
+   @Named("internal.commands.startup")
    private Set<Runnable> bootstrapCommands;
    
    private void start(){
