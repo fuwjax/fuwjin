@@ -1,0 +1,3 @@
+ConsoleIntegration =org.fuwjin.gravitas.command.SampleCommand~new
+                <-  'hello ' StringArg:name
+StringArg   <- .+
