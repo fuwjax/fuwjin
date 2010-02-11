@@ -13,4 +13,9 @@ public class SampleCommand implements Runnable{
    public void run(){
       reply.notify(String.format("%s says hi to you!",name));
    }
+   
+   @Override
+	public String toString() {
+		return "hello "+name;
+	}
 }

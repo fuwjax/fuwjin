@@ -1,10 +1,8 @@
 package org.fuwjin.gravitas.gesture;
 
-import java.text.ParseException;
-
 import org.fuwjin.gravitas.engine.ExecutionEngine;
-import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Pogo;
+import org.fuwjin.gravitas.parser.Context;
+import org.fuwjin.gravitas.parser.Parser;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -12,7 +10,7 @@ import com.google.inject.Injector;
 
 public class GestureProcessor extends GestureHandler{
    @Inject
-   private Grammar grammar;
+   private Parser parser;
    @Inject
    private Injector injector;
    @Inject
@@ -23,9 +21,9 @@ public class GestureProcessor extends GestureHandler{
       if(!(gesture instanceof String)){
          return false;
       }
-      Pogo parser = grammar.get(source.getClass().getSimpleName());
+      Context context = parser.getContext(source);
       try{
-         Runnable command = (Runnable)parser.parse((String)gesture);
+         Runnable command = context.parse((String)gesture);
          injector.createChildInjector(new AbstractModule(){
             @Override
             protected void configure(){
@@ -34,8 +32,13 @@ public class GestureProcessor extends GestureHandler{
          }).injectMembers(command);
          engine.execute(command);
          return true;
-      }catch(ParseException e){
+      }catch(Exception e){
          return false;
       }
    }
+
+   @Override
+	public String toString() {
+		return "*Gesture Processor*";
+	}
 }

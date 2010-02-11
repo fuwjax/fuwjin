@@ -15,4 +15,9 @@ public class QuitCommand implements Runnable{
 		source.notify("Shutting down now");
 		engine.shutdown();
 	}
+	
+	@Override
+	public String toString() {
+		return "quit";
+	}
 }
