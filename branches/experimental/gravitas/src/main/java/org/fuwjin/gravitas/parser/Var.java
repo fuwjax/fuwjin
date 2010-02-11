@@ -2,9 +2,10 @@ package org.fuwjin.gravitas.parser;
 
 import static org.fuwjin.pogo.reflect.invoke.Invoker.isSuccess;
 
+import org.fuwjin.gravitas.util.ClassUtils;
 import org.fuwjin.pogo.reflect.invoke.Invoker;
 
-public class Var implements Atom{
+class Var implements Atom{
 	private String name;
 	private Invoker invoker;
 	private Invoker converter;
@@ -20,6 +21,11 @@ public class Var implements Atom{
 	public void resolve(Class<?> type) {
 		invoker = new Invoker(type,name);
 		Class<?> expectedType = invoker.paramTypes(1)[0];
-		converter = new Invoker(expectedType, "valueOf");
+		converter = new Invoker(ClassUtils.getWrapper(expectedType), "valueOf");
+	}
+	
+	@Override
+	public String toIdent(){
+	   return '$'+name;
 	}
 }

@@ -30,7 +30,7 @@ public class GestureProcessor extends GestureHandler{
                bind(Integration.class).toInstance(source);
             }
          }).injectMembers(command);
-         engine.execute(command);
+         engine.execute(gesture,command);
          return true;
       }catch(Exception e){
          return false;

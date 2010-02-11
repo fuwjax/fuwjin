@@ -1,9 +1,44 @@
-use org.fuwjin.gravitas.command
-use org.fuwjin.gravitas.engine
 use org.fuwjin.gravitas.console
+use org.fuwjin.gravitas.command
+use org.fuwjin.gravitas.engine.command
+use org.fuwjin.gravitas.gesture.command
+use org.fuwjin.gravitas.parser.command
 
 from ConsoleIntegration
-status        => StatusCommand
-exit          => QuitCommand
-quit          => QuitCommand
-hello $name   => SampleCommand
+	#Displays the current status of all known jobs
+	jobs          => StatusCommand
+	status        => StatusCommand
+	
+	#Displays the current status of a single job
+	#   jobId: the id of the job to display
+	jobs $jobId   => SingleStatusCommand
+	status $jobId => SingleStatusCommand
+	
+	#Stops a pending job
+	kill $jobId   => CancelCommand
+	
+	#Displays the pending unhandled events
+	queue		  => QueueCommand
+	
+	#Shuts the platform down
+	quit          => QuitCommand
+	exit          => QuitCommand
+	
+	#Delays shutting the platform down
+	#   delay: the seconds to wait before initiating shutdown
+	quit $delay   => QuitCommand
+	
+	#Sample loopback command
+	#   name: the text to use in the response
+	hello $name   => SampleCommand
+	$name says hi => SampleCommand
+	
+	#Displays this help
+	help		  => HelpCommand
+	usage         => HelpCommand
+	
+	#Displays command specific help
+	help $name    => HelpOnCommand
+	
+	#Clears any finished, interrupted, or failed jobs
+	clear jobs    => ClearFinishedJobsCommand
