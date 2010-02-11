@@ -29,4 +29,10 @@ public class GestureRouter{
    public Iterable<Event> queue(){
       return unmodifiableCollection(events);
    }
+
+   public int clear(){
+      int count = events.size();
+      events.clear();
+      return count;
+   }
 }

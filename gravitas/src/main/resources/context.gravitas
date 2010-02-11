@@ -42,3 +42,6 @@ from ConsoleIntegration
 	
 	#Clears any finished, interrupted, or failed jobs
 	clear jobs    => ClearFinishedJobsCommand
+
+	#Clears any pending unhandled events
+	clear events  => ClearEventsCommand
