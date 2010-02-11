@@ -45,7 +45,7 @@ public class GravitasModule extends AbstractModule {
 	protected Parser provideParser(
 			@Named("gravitas.command.grammar") String grammarFile)
 			throws ParseException, IOException {
-		Grammar grammar = readGrammar("gravitas.grammar");
+		Grammar grammar = readGrammar("gravitas.pogo");
 		InputStreamReader reader = new InputStreamReader(open(grammarFile));
 		return (Parser) grammar.parse(reader);
 	}
