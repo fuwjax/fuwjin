@@ -33,12 +33,16 @@ public class GravitasModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		Names.bindProperties(binder(), props);
-		Multibinder<Runnable> startCommands = newSetBinder(binder(),
-				Runnable.class, named("internal.commands.startup"));
-		startCommands.addBinding().to(GestureProcessor.class);
+		bindToBootstrap();
 		bind(ScheduledExecutorService.class).toInstance(
 				newScheduledThreadPool(5));
 	}
+
+   private void bindToBootstrap(){
+      Multibinder<Runnable> startCommands = newSetBinder(binder(),
+				Runnable.class, named("internal.commands.startup"));
+		startCommands.addBinding().to(GestureProcessor.class);
+   }
 
 	@Provides
 	@Singleton

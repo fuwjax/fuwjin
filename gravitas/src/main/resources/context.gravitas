@@ -45,3 +45,4 @@ from ConsoleIntegration
 
 	#Clears any pending unhandled events
 	clear events  => ClearEventsCommand
+	clear queue   => ClearEventsCommand
