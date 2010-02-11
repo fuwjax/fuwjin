@@ -50,4 +50,9 @@ public class ConsoleIntegration implements Integration {
 			// continue
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "console";
+	}
 }

@@ -1,7 +1,7 @@
 package org.fuwjin.gravitas.engine;
 
 import static java.util.Collections.unmodifiableCollection;
-import static org.fuwjin.gravitas.util.AnnotationUtils.getAnnotation;
+import static org.fuwjin.gravitas.util.ClassUtils.getAnnotation;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 public class ExecutionEngine{
    @Inject
    private ScheduledExecutorService executor;
-   private BlockingQueue<ScheduledFuture<?>> executions = new LinkedBlockingQueue<ScheduledFuture<?>>();
+   private BlockingQueue<Execution> executions = new LinkedBlockingQueue<Execution>();
    
    public void execute(Runnable command){
       RepeatExecution repeat = getAnnotation(command.getClass(),RepeatExecution.class);
@@ -28,10 +28,10 @@ public class ExecutionEngine{
       }else{
          future = executor.schedule(command, delay.delay(), delay.unit());
       }
-      executions.add(future);
+      executions.add(new Execution(executions.size()+1,command,future));
    }
    
-   public Iterable<ScheduledFuture<?>> executions(){
+   public Iterable<Execution> executions(){
 	   return unmodifiableCollection(executions);
    }
    

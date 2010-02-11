@@ -1,0 +1,11 @@
+ConsoleIntegration <- hello:return / quit:return / status:return
+
+status=org.fuwjin.gravitas.engine.StatusCommand~new
+	<- 'status'
+quit =org.fuwjin.gravitas.engine.QuitCommand~new
+	<- 'quit' int:delay?
+hello =org.fuwjin.gravitas.command.SampleCommand~new
+                <-  'hello ' String:name
+
+String   <- .+
+int     <- [0-9]+

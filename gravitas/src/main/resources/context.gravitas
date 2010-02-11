@@ -1,0 +1,9 @@
+use org.fuwjin.gravitas.command
+use org.fuwjin.gravitas.engine
+use org.fuwjin.gravitas.console
+
+from ConsoleIntegration
+status        => StatusCommand
+exit          => QuitCommand
+quit          => QuitCommand
+hello $name   => SampleCommand
