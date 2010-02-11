@@ -18,6 +18,6 @@ class ClassResolver {
 				// continue;
 			}
 		}
-		throw new RuntimeException("Could not locate "+type);
+		throw new RuntimeException("Could not locate "+type+". Add a \"use\" statement to context.gravitas.");
 	}
 }

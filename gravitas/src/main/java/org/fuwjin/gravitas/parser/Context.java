@@ -1,5 +1,7 @@
 package org.fuwjin.gravitas.parser;
 
+import static java.util.Collections.unmodifiableCollection;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,5 +35,9 @@ public class Context {
 		for(Command command: commands){
 			command.resolve(resolver);
 		}
+	}
+	
+	public Iterable<Command> commands(){
+	   return unmodifiableCollection(commands);
 	}
 }

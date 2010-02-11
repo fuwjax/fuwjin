@@ -62,7 +62,7 @@ public class Gravitas {
 
 	private void start() {
 		for (Runnable command : bootstrapCommands) {
-			exec.execute(command);
+			exec.execute("*bootstrap*",command);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package org.fuwjin.gravitas.parser;
 
-public class Literal implements Atom {
+class Literal implements Atom {
 	private String value;
 
 	@Override
@@ -11,5 +11,10 @@ public class Literal implements Atom {
 	@Override
 	public void resolve(Class<?> type) {
 		//ignore
+	}
+	
+	@Override
+	public String toIdent(){
+	   return value;
 	}
 }

@@ -9,8 +9,8 @@ import java.util.concurrent.ScheduledFuture;
 
 public class Execution {
 	private final ScheduledFuture<?> future;
-	private final Runnable command;
 	private int id;
+   private Object gesture;
 
 	public enum Status{
 		Interrupted,
@@ -20,10 +20,10 @@ public class Execution {
 		Failed
 	}
 
-	public Execution(int id, Runnable command, ScheduledFuture<?> future) {
+	public Execution(int id, Object gesture, ScheduledFuture<?> future) {
 		this.id = id;
-		this.command = command;
 		this.future = future;
+		this.gesture = gesture;
 	}
 
 	public Status status() {
@@ -47,11 +47,18 @@ public class Execution {
 	}
 
 	public String desc() {
-		return command.toString();
+		return gesture.toString();
 	}
 
 	public int id() {
 		return id;
 	}
 
+   public boolean isDone(){
+      return future.isDone();
+   }
+
+   public boolean cancel(){
+      return future.cancel(true);
+   }
 }
