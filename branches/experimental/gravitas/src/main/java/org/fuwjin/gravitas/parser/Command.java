@@ -28,6 +28,7 @@ class Command {
 
 	void resolve(ClassResolver resolver) {
 		cls = resolver.forName(type);
+		assert Runnable.class.isAssignableFrom(cls);
 		for(Atom atom: atoms){
 			atom.resolve(cls);
 		}

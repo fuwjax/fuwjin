@@ -3,6 +3,8 @@ package org.fuwjin.gravitas.parser;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.fuwjin.gravitas.gesture.Integration;
+
 public class Context {
 	private String type;
 	private Class<?> cls;
@@ -27,6 +29,7 @@ public class Context {
 	}
 	void resolve(ClassResolver resolver) {
 		cls = resolver.forName(type);
+		assert Integration.class.isAssignableFrom(cls);
 		for(Command command: commands){
 			command.resolve(resolver);
 		}
