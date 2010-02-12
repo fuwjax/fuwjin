@@ -13,22 +13,22 @@ import com.google.inject.Inject;
 
 public class HelpCommand implements Runnable{
    @Inject
-   private Integration source;
-   @Inject
    private Parser parser;
-   
+   @Inject
+   private Integration source;
+
    @Override
    public void run(){
-      Context context = parser.getContext(source);
-      StringBuilder builder = new StringBuilder();
-      Object commandSeparator = join("\n");
-      for(Command command: context.commands()){
+      final Context context = parser.getContext(source);
+      final StringBuilder builder = new StringBuilder();
+      final Object commandSeparator = join("\n");
+      for(final Command command: context.commands()){
          builder.append(commandSeparator);
-         Object instructionSeparator = join(", ");
-         for(Instruction instruction: command.instructions()){
+         final Object instructionSeparator = join(", ");
+         for(final Instruction instruction: command.instructions()){
             builder.append(instructionSeparator);
-            Object atomSeparator = join(" ");
-            for(Atom atom: instruction.atoms()){
+            final Object atomSeparator = join(" ");
+            for(final Atom atom: instruction.atoms()){
                builder.append(atomSeparator);
                builder.append(atom.toIdent());
             }

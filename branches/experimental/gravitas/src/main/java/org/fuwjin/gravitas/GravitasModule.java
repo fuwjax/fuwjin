@@ -23,34 +23,32 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
-public class GravitasModule extends AbstractModule {
-	private final Properties props;
+public class GravitasModule extends AbstractModule{
+   private final Properties props;
 
-	public GravitasModule(Properties props) {
-		this.props = props;
-	}
-
-	@Override
-	protected void configure() {
-		Names.bindProperties(binder(), props);
-		bindToBootstrap();
-		bind(ScheduledExecutorService.class).toInstance(
-				newScheduledThreadPool(5));
-	}
-
-   private void bindToBootstrap(){
-      Multibinder<Runnable> startCommands = newSetBinder(binder(),
-				Runnable.class, named("internal.commands.startup"));
-		startCommands.addBinding().to(GestureProcessor.class);
+   public GravitasModule(final Properties props){
+      this.props = props;
    }
 
-	@Provides
-	@Singleton
-	protected Parser provideParser(
-			@Named("gravitas.command.grammar") String grammarFile)
-			throws ParseException, IOException {
-		Grammar grammar = readGrammar("gravitas.pogo");
-		InputStreamReader reader = new InputStreamReader(open(grammarFile));
-		return (Parser) grammar.parse(reader);
-	}
+   @Override
+   protected void configure(){
+      Names.bindProperties(binder(), props);
+      bindToBootstrap();
+      bind(ScheduledExecutorService.class).toInstance(newScheduledThreadPool(5));
+   }
+
+   @Provides
+   @Singleton
+   protected Parser provideParser(@Named("gravitas.command.grammar") final String grammarFile) throws ParseException,
+         IOException{
+      final Grammar grammar = readGrammar("gravitas.pogo");
+      final InputStreamReader reader = new InputStreamReader(open(grammarFile));
+      return (Parser)grammar.parse(reader);
+   }
+
+   private void bindToBootstrap(){
+      final Multibinder<Runnable> startCommands = newSetBinder(binder(), Runnable.class,
+            named("internal.commands.startup"));
+      startCommands.addBinding().to(GestureProcessor.class);
+   }
 }

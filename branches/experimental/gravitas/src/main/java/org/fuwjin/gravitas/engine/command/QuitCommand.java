@@ -8,14 +8,16 @@ import org.fuwjin.gravitas.gesture.Integration;
 import com.google.inject.Inject;
 
 public class QuitCommand implements Runnable{
+   private long delay;
    @Inject
    private ExecutionEngine engine;
    @Inject
    private Integration source;
-   private long delay;
-   
-   public QuitCommand(){}
-   private QuitCommand(ExecutionEngine engine, Integration source){
+
+   public QuitCommand(){
+   }
+
+   private QuitCommand(final ExecutionEngine engine, final Integration source){
       this.engine = engine;
       this.source = source;
    }
@@ -27,7 +29,7 @@ public class QuitCommand implements Runnable{
          engine.shutdown();
       }else{
          source.notify(String.format("Shutting down in %s seconds", delay));
-         engine.execute("*delayed quit*",new QuitCommand(engine,source),delay,-1,-1,SECONDS);
+         engine.execute("*delayed quit*", new QuitCommand(engine, source), delay, -1, -1, SECONDS);
       }
    }
 }

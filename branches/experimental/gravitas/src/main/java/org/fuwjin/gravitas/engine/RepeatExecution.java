@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit;
 @Retention(RUNTIME)
 public @interface RepeatExecution{
    long repeatEvery() default -1;
-   long waitBetween() default -1;
+
    TimeUnit unit() default MILLISECONDS;
+
+   long waitBetween() default -1;
 }

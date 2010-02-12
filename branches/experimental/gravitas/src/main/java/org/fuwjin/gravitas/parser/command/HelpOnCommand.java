@@ -12,31 +12,31 @@ import org.fuwjin.gravitas.parser.Parser;
 import com.google.inject.Inject;
 
 public class HelpOnCommand implements Runnable{
-   @Inject
-   private Integration source;
+   private String name;
    @Inject
    private Parser parser;
-   private String name;
-   
+   @Inject
+   private Integration source;
+
    @Override
    public void run(){
-      Context context = parser.getContext(source);
-      StringBuilder builder = new StringBuilder();
-      Object commandSeparator = join("\n\n");
-      for(Command command: context.commands()){
-         Instruction primary = findPrimary(command);
+      final Context context = parser.getContext(source);
+      final StringBuilder builder = new StringBuilder();
+      final Object commandSeparator = join("\n\n");
+      for(final Command command: context.commands()){
+         final Instruction primary = findPrimary(command);
          if(primary == null){
             continue;
          }
          builder.append(commandSeparator);
          appendInstruction(primary, builder);
          builder.append(" - ");
-         Object lineSeparator = join("\n");
-         for(String line: command.helpLines()){
+         final Object lineSeparator = join("\n");
+         for(final String line: command.helpLines()){
             builder.append(lineSeparator).append(line);
          }
-         Object aliasSeparator = join("\n   Aliases: ",", ");
-         for(Instruction instruction: command.instructions()){
+         final Object aliasSeparator = join("\n   Aliases: ", ", ");
+         for(final Instruction instruction: command.instructions()){
             if(instruction != primary){
                builder.append(aliasSeparator);
                appendInstruction(instruction, builder);
@@ -45,23 +45,23 @@ public class HelpOnCommand implements Runnable{
       }
       source.notify(builder);
    }
-   
-   private Instruction findPrimary(Command command){
-      for(Instruction instruction: command.instructions()){
-         for(Atom atom: instruction.atoms()){
+
+   private void appendInstruction(final Instruction instruction, final StringBuilder builder){
+      final Object atomSeparator = join(" ");
+      for(final Atom atom: instruction.atoms()){
+         builder.append(atomSeparator);
+         builder.append(atom.toIdent());
+      }
+   }
+
+   private Instruction findPrimary(final Command command){
+      for(final Instruction instruction: command.instructions()){
+         for(final Atom atom: instruction.atoms()){
             if(atom.toIdent().equals(name)){
                return instruction;
             }
          }
       }
       return null;
-   }
-
-   private void appendInstruction(Instruction instruction, StringBuilder builder){
-      Object atomSeparator = join(" ");
-      for(Atom atom: instruction.atoms()){
-         builder.append(atomSeparator);
-         builder.append(atom.toIdent());
-      }
    }
 }

@@ -8,21 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ClassUtils{
-   public static <A extends Annotation>A getAnnotation(Class<?> type, Class<A> annotation){
-      while(type != null){
-         A ann = type.getAnnotation(annotation);
-         if(ann != null){
-            return ann;
-         }
-         type = type.getSuperclass();
-      }
-      return newProxy(annotation, new AnnotationHandler(annotation));
-   }
-
-   public static <T>T newProxy(Class<T> type, InvocationHandler handler){
-      return type.cast(newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler));
-   }
-
    private static Map<Class<?>, Class<?>> wrappers;
    static{
       wrappers = new HashMap<Class<?>, Class<?>>();
@@ -35,20 +20,34 @@ public final class ClassUtils{
       wrappers.put(Long.TYPE, Long.class);
       wrappers.put(Short.TYPE, Short.class);
    }
+   static{
+      new ClassUtils();
+   }
+   
+   public static <A extends Annotation>A getAnnotation(Class<?> type, final Class<A> annotation){
+      while(type != null){
+         final A ann = type.getAnnotation(annotation);
+         if(ann != null){
+            return ann;
+         }
+         type = type.getSuperclass();
+      }
+      return newProxy(annotation, new AnnotationHandler(annotation));
+   }
 
-   public static Class<?> getWrapper(Class<?> type){
-      Class<?> wrapper = wrappers.get(type);
+   public static Class<?> getWrapper(final Class<?> type){
+      final Class<?> wrapper = wrappers.get(type);
       if(wrapper == null){
          return type;
       }
       return wrapper;
    }
-   
+
+   public static <T>T newProxy(final Class<T> type, final InvocationHandler handler){
+      return type.cast(newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler));
+   }
+
    private ClassUtils(){
       // singleton
-   }
-   
-   static{
-      new ClassUtils();
    }
 }
