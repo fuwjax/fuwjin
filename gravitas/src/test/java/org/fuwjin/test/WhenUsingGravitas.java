@@ -6,7 +6,7 @@ import static org.fuwjin.gravitas.util.SystemUtils.clearOut;
 import static org.fuwjin.gravitas.util.SystemUtils.in;
 import static org.fuwjin.gravitas.util.SystemUtils.out;
 import static org.fuwjin.gravitas.util.SystemUtils.release;
-import static org.fuwjin.gravitas.util.matcher.RegExMatcher.matches;
+import static org.fuwjin.gravitas.util.matcher.PatternMatcher.matches;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
