@@ -15,11 +15,11 @@ public class ClearEventsCommand implements Runnable {
 	public void run() {
        int removed = router.clear();
        if(removed == 0){
-          source.notify("No events to remove");
+          source.notify("The queue is empty");
        }else if(removed == 1){
           source.notify("Removed 1 event");
        }else{
-          source.notify(String.format("Removed %d event",removed));
+          source.notify(String.format("Removed %d events",removed));
        }
 	}
 }

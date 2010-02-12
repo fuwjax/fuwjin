@@ -24,7 +24,7 @@ Var 		= org.fuwjin.gravitas.parser.Var~new
 Ident 		<- IdentLit:return Space*
 
 #Literals
-IdentLit	<- (![- \t\r\n=$] .)+
+IdentLit	<- (![ \t\r\n=$] .)+
 CommentLit	<- (![\r\n] .)*
 
 #Symbols

@@ -1,5 +1,4 @@
 use org.fuwjin.gravitas.console
-use org.fuwjin.gravitas.command
 use org.fuwjin.gravitas.engine.command
 use org.fuwjin.gravitas.gesture.command
 use org.fuwjin.gravitas.parser.command
@@ -14,6 +13,10 @@ from ConsoleIntegration
 	jobs $jobId   => SingleStatusCommand
 	status $jobId => SingleStatusCommand
 	
+	#Displays the current status of the last job
+	jobs last     => SingleStatusCommand
+	last job      => SingleStatusCommand
+	
 	#Stops a pending job
 	kill $jobId   => CancelCommand
 	
@@ -27,11 +30,6 @@ from ConsoleIntegration
 	#Delays shutting the platform down
 	#   delay: the seconds to wait before initiating shutdown
 	quit $delay   => QuitCommand
-	
-	#Sample loopback command
-	#   name: the text to use in the response
-	hello $name   => SampleCommand
-	$name says hi => SampleCommand
 	
 	#Displays this help
 	help		  => HelpCommand
