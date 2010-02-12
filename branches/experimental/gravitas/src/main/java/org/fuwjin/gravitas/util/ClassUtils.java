@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassUtils{
+public final class ClassUtils{
    public static <A extends Annotation>A getAnnotation(Class<?> type, Class<A> annotation){
       while(type != null){
          A ann = type.getAnnotation(annotation);
@@ -42,5 +42,13 @@ public class ClassUtils{
          return type;
       }
       return wrapper;
+   }
+   
+   private ClassUtils(){
+      // singleton
+   }
+   
+   static{
+      new ClassUtils();
    }
 }
