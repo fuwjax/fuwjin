@@ -5,8 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.fuwjin.gravitas.util.ClassUtils.getAnnotation;
 
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +22,7 @@ public class ExecutionEngine{
    
    @Inject
    private ScheduledExecutorService executor;
-   private BlockingQueue<Execution> executions = new LinkedBlockingQueue<Execution>();
+   private LinkedBlockingDeque<Execution> executions = new LinkedBlockingDeque<Execution>();
    private AtomicInteger idGenerator = new AtomicInteger();
    
    public Execution execute(Object gesture, Runnable command){

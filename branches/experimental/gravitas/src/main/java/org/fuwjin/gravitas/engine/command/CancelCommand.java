@@ -17,7 +17,7 @@ public class CancelCommand implements Runnable {
 	public void run() {
 		Execution execution = engine.execution(jobId);
 		if(execution == null){
-		   source.notify("There is no execution "+jobId);
+		   source.notify("There is no job "+jobId);
 		}else{
 		   if(execution.cancel()){
 		      source.notify("Job "+jobId+" has been cancelled");
