@@ -15,44 +15,44 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ConsoleIntegration implements Integration {
-	@Inject
-	private GestureRouter router;
-	private BufferedReader reader = new BufferedReader(
-			new InputStreamReader(in));
-	private Runnable runner = new Runnable() {
-		public void run() {
-			readFromIn();
-		}
-	};
-	public ConsoleIntegration(){
-		Thread readThread = new Thread(runner);
-		readThread.setDaemon(true);
-		readThread.start();
-	}
+public class ConsoleIntegration implements Integration{
+   private final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+   @Inject
+   private GestureRouter router;
+   private final Runnable runner = new Runnable(){
+      public void run(){
+         readFromIn();
+      }
+   };
 
-	@Override
-	public void notify(Object... messages) {
-		for (Object message : messages) {
-			out.println(message);
-		}
-	}
+   public ConsoleIntegration(){
+      final Thread readThread = new Thread(runner);
+      readThread.setDaemon(true);
+      readThread.start();
+   }
 
-	protected void readFromIn() {
-		try{
-			while(!interrupted()){
-				String line = reader.readLine();
-				if(line != null){
-					router.raise(this, line);
-				}
-			}
-		}catch(IOException e){
-			// continue
-		}
-	}
-	
-	@Override
-	public String toString() {
-		return "console";
-	}
+   @Override
+   public void notify(final Object... messages){
+      for(final Object message: messages){
+         out.println(message);
+      }
+   }
+
+   @Override
+   public String toString(){
+      return "console";
+   }
+
+   protected void readFromIn(){
+      try{
+         while(!interrupted()){
+            final String line = reader.readLine();
+            if(line != null){
+               router.raise(this, line);
+            }
+         }
+      }catch(final IOException e){
+         // continue
+      }
+   }
 }

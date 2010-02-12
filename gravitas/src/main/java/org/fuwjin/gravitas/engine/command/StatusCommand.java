@@ -8,24 +8,20 @@ import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
 
-public class StatusCommand implements Runnable {
-	@Inject
-	private ExecutionEngine engine;
-	@Inject
-	private Integration source;
-	
-	@Override
-	public void run() {
-		StringBuilder builder = new StringBuilder();
-        Object separator = join("\n");
-		for(Execution execution: engine.executions()){
-			builder.append(separator)
-			    .append(execution.id())
-				.append(") [")
-				.append(execution.status())
-				.append("] ")
-				.append(execution.desc());
-		}
-		source.notify(builder);
-	}
+public class StatusCommand implements Runnable{
+   @Inject
+   private ExecutionEngine engine;
+   @Inject
+   private Integration source;
+
+   @Override
+   public void run(){
+      final StringBuilder builder = new StringBuilder();
+      final Object separator = join("\n");
+      for(final Execution execution: engine.executions()){
+         builder.append(separator).append(execution.id()).append(") [").append(execution.status()).append("] ").append(
+               execution.desc());
+      }
+      source.notify(builder);
+   }
 }

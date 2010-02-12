@@ -10,35 +10,35 @@ import com.google.inject.Injector;
 
 public class GestureProcessor extends GestureHandler{
    @Inject
-   private Parser parser;
+   private ExecutionEngine engine;
    @Inject
    private Injector injector;
    @Inject
-   private ExecutionEngine engine;
-   
+   private Parser parser;
+
    @Override
-   public boolean handle(final Integration source, Object gesture){
+   public boolean handle(final Integration source, final Object gesture){
       if(!(gesture instanceof String)){
          return false;
       }
-      Context context = parser.getContext(source);
+      final Context context = parser.getContext(source);
       try{
-         Runnable command = context.parse((String)gesture);
+         final Runnable command = context.parse((String)gesture);
          injector.createChildInjector(new AbstractModule(){
             @Override
             protected void configure(){
                bind(Integration.class).toInstance(source);
             }
          }).injectMembers(command);
-         engine.execute(gesture,command);
+         engine.execute(gesture, command);
          return true;
-      }catch(Exception e){
+      }catch(final Exception e){
          return false;
       }
    }
 
    @Override
-	public String toString() {
-		return "*Gesture Processor*";
-	}
+   public String toString(){
+      return "*Gesture Processor*";
+   }
 }

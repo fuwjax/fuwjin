@@ -10,29 +10,29 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class GestureRouter{
-   private BlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
+   private final BlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
 
-   public void raise(Integration source, Object gesture){
-      events.add(new Event(source, gesture));
+   public synchronized int clear(){
+      final int count = events.size();
+      events.clear();
+      return count;
    }
 
-   public void dispatch(GestureHandler handler){
-      Iterator<Event> iter = events.iterator();
+   public synchronized void dispatch(final GestureHandler handler){
+      final Iterator<Event> iter = events.iterator();
       while(iter.hasNext()){
-         Event event = iter.next();
+         final Event event = iter.next();
          if(handler.handle(event.source(), event.gesture())){
             iter.remove();
          }
       }
    }
 
-   public Iterable<Event> queue(){
+   public synchronized Iterable<Event> queue(){
       return unmodifiableCollection(events);
    }
 
-   public int clear(){
-      int count = events.size();
-      events.clear();
-      return count;
+   public void raise(final Integration source, final Object gesture){
+      events.add(new Event(source, gesture));
    }
 }

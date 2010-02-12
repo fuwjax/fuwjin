@@ -14,23 +14,117 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class OutputStreamToReader{
-   private CharBuffer chars;
    private final ByteBuffer bytes;
+
+   private CharBuffer chars;
+
+   private volatile boolean closed;
    private final Charset conversion;
-   private final InnerReader reader = new InnerReader();
-   private final InnerOutputStream outputStream = new InnerOutputStream();
    private final ReentrantLock lock = new ReentrantLock();
    private final Condition hasBytes = lock.newCondition();
-   private volatile boolean closed;
    private PrintStream log;
-
+   private final InnerOutputStream outputStream = new InnerOutputStream();
+   private final InnerReader reader = new InnerReader();
    public OutputStreamToReader(){
       this(1000, "UTF-8");
    }
-
-   public OutputStreamToReader(int bufferSize, String charset){
+   public OutputStreamToReader(final int bufferSize, final String charset){
       bytes = ByteBuffer.allocate(bufferSize);
       conversion = Charset.forName(charset);
+   }
+
+   public void logTo(final PrintStream log){
+      this.log = log;
+   }
+
+   public OutputStream outputStream(){
+      return outputStream;
+   }
+
+   public Reader reader(){
+      return reader;
+   }
+
+   void assertOpen() throws EOFException{
+      if(closed){
+         throw new EOFException();
+      }
+   }
+
+   void closeImpl(){
+      closed = true;
+   }
+
+   boolean readyImpl(){
+      return chars != null && chars.hasRemaining();
+   }
+
+   void waitForChars() throws InterruptedIOException{
+      lock.lock();
+      try{
+         if(bytes.position() == 0){
+            hasBytes.await();
+         }
+         bytes.flip();
+         chars = conversion.decode(bytes);
+         if(log != null){
+            log.print(chars.toString());
+         }
+         bytes.compact();
+      }catch(final InterruptedException e){
+         throw new InterruptedIOException();
+      }finally{
+         lock.unlock();
+      }
+   }
+
+   private class InnerOutputStream extends OutputStream{
+      @Override
+      public void close() throws IOException{
+         closeImpl();
+      }
+
+      @Override
+      public void write(final byte[] b) throws IOException{
+         assertOpen();
+         lock.lock();
+         try{
+            bytes.put(b);
+            hasBytes.signalAll();
+         }catch(final BufferOverflowException e){
+            throw new IOException(e);
+         }finally{
+            lock.unlock();
+         }
+      }
+
+      @Override
+      public void write(final byte[] b, final int off, final int len) throws IOException{
+         assertOpen();
+         lock.lock();
+         try{
+            bytes.put(b, off, len);
+            hasBytes.signalAll();
+         }catch(final BufferOverflowException e){
+            throw new IOException(e);
+         }finally{
+            lock.unlock();
+         }
+      }
+
+      @Override
+      public void write(final int b) throws IOException{
+         assertOpen();
+         lock.lock();
+         try{
+            bytes.put((byte)b);
+            hasBytes.signalAll();
+         }catch(final BufferOverflowException e){
+            throw new IOException(e);
+         }finally{
+            lock.unlock();
+         }
+      }
    }
 
    private class InnerReader extends Reader{
@@ -51,49 +145,14 @@ public class OutputStreamToReader{
       }
 
       @Override
-      public boolean ready(){
-         return readyImpl();
-      }
-
-      @Override
-      public long skip(long n) throws IOException{
+      public int read(final char[] cbuf, final int off, final int len) throws IOException{
          if(closed){
             return -1;
          }
          if(!ready()){
             waitForChars();
          }
-         int rem = chars.remaining();
-         if(rem < n){
-            chars.position(chars.limit());
-            return rem;
-         }
-         chars.position(chars.position() + (int)n);
-         return (int)n;
-      }
-
-      @Override
-      public int read(CharBuffer target) throws IOException{
-         if(closed){
-            return -1;
-         }
-         if(!ready()){
-            waitForChars();
-         }
-         int start = target.position();
-         target.put(chars);
-         return target.position() - start;
-      }
-
-      @Override
-      public int read(char[] cbuf, int off, int len) throws IOException{
-         if(closed){
-            return -1;
-         }
-         if(!ready()){
-            waitForChars();
-         }
-         int rem = chars.remaining();
+         final int rem = chars.remaining();
          if(rem < len){
             chars.get(cbuf, off, rem);
             return rem;
@@ -101,104 +160,40 @@ public class OutputStreamToReader{
          chars.get(cbuf, off, len);
          return len;
       }
-   }
 
-   public Reader reader(){
-      return reader;
-   }
-
-   public OutputStream outputStream(){
-      return outputStream;
-   }
-
-   void closeImpl(){
-      closed = true;
-   }
-
-   void assertOpen() throws EOFException{
-      if(closed){
-         throw new EOFException();
-      }
-   }
-
-   boolean readyImpl(){
-      return chars != null && chars.hasRemaining();
-   }
-
-   void waitForChars() throws InterruptedIOException{
-      lock.lock();
-      try{
-         if(bytes.position() == 0){
-            hasBytes.await();
-         }
-         bytes.flip();
-         chars = conversion.decode(bytes);
-         if(log != null){
-            log.print(chars.toString());
-         }
-         bytes.compact();
-      }catch(InterruptedException e){
-         throw new InterruptedIOException();
-      }finally{
-         lock.unlock();
-      }
-   }
-
-   private class InnerOutputStream extends OutputStream{
       @Override
-      public void write(int b) throws IOException{
-         assertOpen();
-         lock.lock();
-         try{
-            bytes.put((byte)b);
-            hasBytes.signalAll();
-         }catch(BufferOverflowException e){
-            throw new IOException(e);
-         }finally{
-            lock.unlock();
+      public int read(final CharBuffer target) throws IOException{
+         if(closed){
+            return -1;
          }
+         if(!ready()){
+            waitForChars();
+         }
+         final int start = target.position();
+         target.put(chars);
+         return target.position() - start;
       }
 
       @Override
-      public void write(byte[] b) throws IOException{
-         assertOpen();
-         lock.lock();
-         try{
-            bytes.put(b);
-            hasBytes.signalAll();
-         }catch(BufferOverflowException e){
-            throw new IOException(e);
-         }finally{
-            lock.unlock();
-         }
+      public boolean ready(){
+         return readyImpl();
       }
 
       @Override
-      public void write(byte[] b, int off, int len) throws IOException{
-         assertOpen();
-         lock.lock();
-         try{
-            bytes.put(b, off, len);
-            hasBytes.signalAll();
-         }catch(BufferOverflowException e){
-            throw new IOException(e);
-         }finally{
-            lock.unlock();
+      public long skip(final long n) throws IOException{
+         if(closed){
+            return -1;
          }
+         if(!ready()){
+            waitForChars();
+         }
+         final int rem = chars.remaining();
+         if(rem < n){
+            chars.position(chars.limit());
+            return rem;
+         }
+         chars.position(chars.position() + (int)n);
+         return (int)n;
       }
-
-      @Override
-      public void close() throws IOException{
-         closeImpl();
-      }
-   }
-
-   public void clear(){
-      bytes.clear();
-      chars = null;
-   }
-
-   public void logTo(PrintStream log){
-      this.log = log;
    }
 }

@@ -6,19 +6,18 @@ import org.fuwjin.gravitas.gesture.Integration;
 import com.google.inject.Inject;
 
 public class ClearFinishedJobsCommand implements Runnable{
-	@Inject
-	private ExecutionEngine engine;
-	@Inject
-	private Integration source;
-	
-	@Override
-	public void run() {
-		int removed = engine.clear();
-		if(removed == 1){
-		   source.notify("Removed 1 job");
-		}else{
-		   source.notify(String.format("Removed %d jobs",removed));
-		}
-		
-	}
+   @Inject
+   private ExecutionEngine engine;
+   @Inject
+   private Integration source;
+
+   @Override
+   public void run(){
+      final int removed = engine.clear();
+      if(removed == 1){
+         source.notify("Removed 1 job");
+      }else{
+         source.notify(String.format("Removed %d jobs", removed));
+      }
+   }
 }
