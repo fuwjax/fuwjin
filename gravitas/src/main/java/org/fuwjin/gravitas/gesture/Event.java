@@ -7,20 +7,35 @@
  *******************************************************************************/
 package org.fuwjin.gravitas.gesture;
 
-public class Event{
-   private final Object gesture;
-   private final Integration source;
+import java.util.concurrent.atomic.AtomicInteger;
 
-   public Event(final Integration source, final Object gesture){
+public class Event{
+   private static final AtomicInteger idGenerator = new AtomicInteger();
+   private final Object gesture;
+   private final Context source;
+   private final int id;
+   private final boolean broadcast;
+
+   public Event(final Context source, final Object gesture, boolean broadcast){
       this.source = source;
       this.gesture = gesture;
+      this.broadcast = broadcast;
+      id = idGenerator.incrementAndGet();
    }
 
    public Object gesture(){
       return gesture;
    }
 
-   public Integration source(){
+   public Context source(){
       return source;
+   }
+   
+   public int id(){
+      return id;
+   }
+   
+   public boolean isBroadcast(){
+      return broadcast;
    }
 }

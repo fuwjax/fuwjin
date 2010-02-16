@@ -8,7 +8,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class UserInstructionEventHandler extends EventHandler{
+public class UserInstructionEventHandler extends AbstractEventHandler{
    @Inject
    private ExecutionEngine engine;
    @Inject
@@ -17,17 +17,17 @@ public class UserInstructionEventHandler extends EventHandler{
    private GravitasConfig parser;
 
    @Override
-   public boolean handle(final Context source, final Object gesture) throws Exception{
-      final ContextConfig context = parser.configure(source);
-      final Runnable command = context.parse((String)gesture);
+   public boolean handle(final Event event) throws Exception{
+      final ContextConfig context = parser.configure(event.source());
+      final Runnable command = context.parse((String)event.gesture());
       injector.createChildInjector(new AbstractModule(){
          @Override
          protected void configure(){
-            bind(Context.class).toInstance(source);
-            bind(Integration.class).toInstance(source);
+            bind(Context.class).toInstance(event.source());
+            bind(Integration.class).toInstance(event.source());
          }
       }).injectMembers(command);
-      engine.execute(source, gesture, command);
+      engine.execute(event.source(), event.gesture(), command);
       return true;
    }
 
