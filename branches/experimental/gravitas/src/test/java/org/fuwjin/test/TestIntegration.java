@@ -12,7 +12,7 @@ import com.google.inject.Inject;
 
 public class TestIntegration implements Integration{
    @Inject
-   private EventRouter<String> router;
+   private EventRouter router;
    private BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
    @Override
@@ -48,5 +48,10 @@ public class TestIntegration implements Integration{
          throw new AssertionError("Expected "+pattern+" but found "+msg);
       }
       return msg;
+   }
+   
+   @Override
+   public String name(){
+      return "test";
    }
 }

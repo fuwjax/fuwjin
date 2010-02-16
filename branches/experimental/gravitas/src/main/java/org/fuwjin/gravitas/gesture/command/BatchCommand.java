@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 
 public class BatchCommand implements Runnable{
    @Inject
-   private EventRouter<String> router;
+   private EventRouter router;
    @Inject
    private Integration source;
    private String script;

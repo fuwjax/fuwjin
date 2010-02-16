@@ -15,17 +15,17 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ConsoleContext implements Integration{
+public class ConsoleIntegration implements Integration{
    private final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
    @Inject
-   private EventRouter<String> router;
+   private EventRouter router;
    private final Runnable runner = new Runnable(){
       public void run(){
          readFromIn();
       }
    };
 
-   public ConsoleContext(){
+   public ConsoleIntegration(){
       final Thread readThread = new Thread(runner);
       readThread.setDaemon(true);
       readThread.start();
@@ -39,7 +39,7 @@ public class ConsoleContext implements Integration{
    }
 
    @Override
-   public String toString(){
+   public String name(){
       return "console";
    }
 

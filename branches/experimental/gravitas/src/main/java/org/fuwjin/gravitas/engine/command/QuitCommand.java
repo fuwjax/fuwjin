@@ -3,7 +3,7 @@ package org.fuwjin.gravitas.engine.command;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import org.fuwjin.gravitas.engine.ExecutionEngine;
-import org.fuwjin.gravitas.gesture.Integration;
+import org.fuwjin.gravitas.gesture.Context;
 
 import com.google.inject.Inject;
 
@@ -12,12 +12,12 @@ public class QuitCommand implements Runnable{
    @Inject
    private ExecutionEngine engine;
    @Inject
-   private Integration source;
+   private Context source;
 
    public QuitCommand(){
    }
 
-   private QuitCommand(final ExecutionEngine engine, final Integration source){
+   private QuitCommand(final ExecutionEngine engine, final Context source){
       this.engine = engine;
       this.source = source;
    }
@@ -29,7 +29,7 @@ public class QuitCommand implements Runnable{
          engine.shutdown();
       }else{
          source.send(String.format("Shutting down in %s seconds", delay));
-         engine.execute("*delayed quit*", new QuitCommand(engine, source), delay, -1, -1, SECONDS);
+         engine.execute(source, "*delayed quit*", new QuitCommand(engine, source), delay, -1, -1, SECONDS);
       }
    }
 }

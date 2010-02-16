@@ -1,21 +1,20 @@
 package org.fuwjin.gravitas.engine.command;
 
+import static org.fuwjin.gravitas.engine.ExecutionEngine.execution;
+
 import org.fuwjin.gravitas.engine.Execution;
-import org.fuwjin.gravitas.engine.ExecutionEngine;
-import org.fuwjin.gravitas.gesture.Integration;
+import org.fuwjin.gravitas.gesture.Context;
 
 import com.google.inject.Inject;
 
 public class CancelCommand implements Runnable{
-   @Inject
-   private ExecutionEngine engine;
    private int jobId;
    @Inject
-   private Integration source;
+   private Context source;
 
    @Override
    public void run(){
-      final Execution execution = engine.execution(jobId);
+      final Execution execution = execution(source, jobId);
       if(execution == null){
          source.send("There is no job " + jobId);
       }else{

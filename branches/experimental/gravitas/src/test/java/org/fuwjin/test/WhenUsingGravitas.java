@@ -55,7 +55,6 @@ public class WhenUsingGravitas{
       test.input("clear jobs");
       test.expect("Removed 1 job");
       test.input("jobs");
-      test.matches("1\\) \\[(Pending|Executing)] \\*Bootstrap\\*");
       test.matches("\\d+\\) \\[Finished] clear jobs");
       test.matches("\\d+\\) \\[Executing] jobs");
       test.input("quit 30");
@@ -83,7 +82,7 @@ public class WhenUsingGravitas{
       test.expect("The queue is empty");
       test.input("silly command");
       test.input("queue");
-      test.expect("1) [console] silly command");
+      test.expect("1) [test] silly command");
       test.input("clear queue");
       test.expect("Removed 1 event");
       test.input("clear queue");
