@@ -17,12 +17,12 @@ public class CancelCommand implements Runnable{
    public void run(){
       final Execution execution = engine.execution(jobId);
       if(execution == null){
-         source.notify("There is no job " + jobId);
+         source.send("There is no job " + jobId);
       }else{
          if(execution.cancel()){
-            source.notify("Job " + jobId + " has been cancelled");
+            source.send("Job " + jobId + " has been cancelled");
          }else{
-            source.notify("Could not cancel job " + jobId);
+            source.send("Could not cancel job " + jobId);
          }
       }
    }

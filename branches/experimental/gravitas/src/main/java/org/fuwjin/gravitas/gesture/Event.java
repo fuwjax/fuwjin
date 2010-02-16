@@ -7,16 +7,16 @@
  *******************************************************************************/
 package org.fuwjin.gravitas.gesture;
 
-public class Event{
-   private final Object gesture;
+public class Event<T>{
+   private final T gesture;
    private final Integration source;
 
-   public Event(final Integration source, final Object gesture){
+   public Event(final Integration source, final T gesture){
       this.source = source;
       this.gesture = gesture;
    }
 
-   public Object gesture(){
+   public T gesture(){
       return gesture;
    }
 

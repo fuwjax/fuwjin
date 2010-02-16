@@ -32,6 +32,6 @@ public class SingleStatusCommand implements Runnable{
       }else{
          builder.append(execution.id()).append(") [").append(execution.status()).append("] ").append(execution.desc());
       }
-      source.notify(builder);
+      source.send(builder);
    }
 }

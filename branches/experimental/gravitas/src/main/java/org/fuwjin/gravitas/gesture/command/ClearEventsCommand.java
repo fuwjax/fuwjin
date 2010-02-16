@@ -1,13 +1,13 @@
 package org.fuwjin.gravitas.gesture.command;
 
-import org.fuwjin.gravitas.gesture.GestureRouter;
+import org.fuwjin.gravitas.gesture.EventRouter;
 import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
 
 public class ClearEventsCommand implements Runnable{
    @Inject
-   private GestureRouter router;
+   private EventRouter<?> router;
    @Inject
    private Integration source;
 
@@ -15,11 +15,11 @@ public class ClearEventsCommand implements Runnable{
    public void run(){
       final int removed = router.clear();
       if(removed == 0){
-         source.notify("The queue is empty");
+         source.send("The queue is empty");
       }else if(removed == 1){
-         source.notify("Removed 1 event");
+         source.send("Removed 1 event");
       }else{
-         source.notify(String.format("Removed %d events", removed));
+         source.send(String.format("Removed %d events", removed));
       }
    }
 }

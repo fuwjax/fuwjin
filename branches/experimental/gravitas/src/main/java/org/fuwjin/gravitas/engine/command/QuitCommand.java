@@ -25,10 +25,10 @@ public class QuitCommand implements Runnable{
    @Override
    public void run(){
       if(delay == 0){
-         source.notify("Shutting down now");
+         source.send("Shutting down now");
          engine.shutdown();
       }else{
-         source.notify(String.format("Shutting down in %s seconds", delay));
+         source.send(String.format("Shutting down in %s seconds", delay));
          engine.execute("*delayed quit*", new QuitCommand(engine, source), delay, -1, -1, SECONDS);
       }
    }

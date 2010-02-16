@@ -2,7 +2,7 @@ package org.fuwjin.test;
 
 import java.io.FileNotFoundException;
 
-import org.fuwjin.gravitas.util.StreamUtils;
+import org.fuwjin.util.StreamUtils;
 import org.junit.Test;
 
 public class StreamUtilsTest{
