@@ -2,12 +2,12 @@ package org.fuwjin.gravitas.config.command;
 
 import static org.fuwjin.util.StringUtils.join;
 
-import org.fuwjin.gravitas.config.Token;
 import org.fuwjin.gravitas.config.CommandConfig;
 import org.fuwjin.gravitas.config.ContextConfig;
-import org.fuwjin.gravitas.config.InstructionConfig;
 import org.fuwjin.gravitas.config.GravitasConfig;
-import org.fuwjin.gravitas.gesture.Integration;
+import org.fuwjin.gravitas.config.InstructionConfig;
+import org.fuwjin.gravitas.config.Token;
+import org.fuwjin.gravitas.gesture.Context;
 
 import com.google.inject.Inject;
 
@@ -16,11 +16,11 @@ public class HelpOnCommand implements Runnable{
    @Inject
    private GravitasConfig parser;
    @Inject
-   private Integration source;
+   private Context source;
 
    @Override
    public void run(){
-      final ContextConfig context = parser.getContext(source);
+      final ContextConfig context = parser.configure(source);
       final StringBuilder builder = new StringBuilder();
       final Object commandSeparator = join("\n\n");
       for(final CommandConfig command: context.commands()){

@@ -5,11 +5,11 @@ import org.fuwjin.gravitas.engine.RepeatExecution;
 import com.google.inject.Inject;
 
 @RepeatExecution(repeatEvery = 20)
-public abstract class EventHandler<T> implements Runnable{
+public abstract class EventHandler implements Runnable{
    @Inject
-   private EventRouter<T> router;
+   private EventRouter router;
 
-   public abstract boolean handle(Integration source, T gesture) throws Exception;
+   public abstract boolean handle(Context source, Object gesture) throws Exception;
 
    @Override
    public void run(){

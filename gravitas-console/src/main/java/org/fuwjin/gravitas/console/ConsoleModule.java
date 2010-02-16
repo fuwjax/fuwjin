@@ -5,6 +5,6 @@ import com.google.inject.AbstractModule;
 public class ConsoleModule extends AbstractModule{
    @Override
    protected void configure(){
-      bind(ConsoleContext.class).asEagerSingleton();
+      bind(ConsoleIntegration.class).asEagerSingleton();
    }
 }

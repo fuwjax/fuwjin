@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 
 public class QueueCommand implements Runnable{
    @Inject
-   private EventRouter<?> router;
+   private EventRouter router;
    @Inject
    private Integration source;
 
@@ -19,8 +19,8 @@ public class QueueCommand implements Runnable{
       final StringBuilder builder = new StringBuilder();
       int index = 0;
       final Object separator = join("\n");
-      for(final Event<?> event: router.queue()){
-         builder.append(separator).append(++index).append(") [").append(event.source()).append("] ").append(
+      for(final Event event: router.queue()){
+         builder.append(separator).append(++index).append(") [").append(event.source().name()).append("] ").append(
                event.gesture());
       }
       if(index == 0){

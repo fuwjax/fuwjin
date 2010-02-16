@@ -9,7 +9,6 @@ import java.util.List;
 import org.fuwjin.gravitas.engine.ExecutionEngine;
 import org.fuwjin.gravitas.gesture.EventRouter;
 import org.fuwjin.gravitas.gesture.UserInstructionEventHandler;
-import org.fuwjin.gravitas.root.RootContext;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -39,10 +38,11 @@ public class Gravitas{
    @Inject
    private UserInstructionEventHandler eventHandler;
    @Inject
-   private EventRouter<String> router;
+   private EventRouter router;
 
    private void start(){
-      engine.execute("*Bootstrap*", eventHandler);
-      router.raise(new RootContext(), "run bootstrap.script");
+      BootIntegration source = new BootIntegration();
+      engine.execute(router.getContext(source),"*Bootstrap*", eventHandler);
+      router.raise(source, "run bootstrap.script");
    }
 }

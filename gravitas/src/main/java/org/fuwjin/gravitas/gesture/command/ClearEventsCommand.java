@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 
 public class ClearEventsCommand implements Runnable{
    @Inject
-   private EventRouter<?> router;
+   private EventRouter router;
    @Inject
    private Integration source;
 
