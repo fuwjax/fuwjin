@@ -22,7 +22,7 @@ public class ExecutionEngine{
       ExecutionContext context = source.adapt(ExecutionContext.class);
       LinkedBlockingDeque<Execution> executions = context.executions();
       if(executions == null){
-         executions = init(context.executions(), new LinkedBlockingDeque<Execution>());
+         executions = init(executions, new LinkedBlockingDeque<Execution>());
       }
       return executions;
    }

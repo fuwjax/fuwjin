@@ -21,21 +21,30 @@ public class EventRouter{
       return count;
    }
 
-   public synchronized void apply(final EventHandler handler){
+   public synchronized int apply(final EventHandler handler, int lastId){
       final Iterator<Event> iter = events.iterator();
+      int ret = lastId;
       while(iter.hasNext()){
          final Event event = iter.next();
+         if(event.id() <= lastId){
+            continue;
+         }
          try{
-            if(handler.handle(getContext(event.source()), event.gesture())){
+            if(handler.handle(event) && !event.isBroadcast()){
                iter.remove();
             }
          }catch(Exception e){
             // continue
          }
+         ret = event.id();
       }
+      return ret;
    }
 
    public Context getContext(Integration source){
+      if(source instanceof Context){
+         return (Context)source;
+      }
       Context context = contexts.get(source.name());
       if(context == null){
          context = new Context(source);
@@ -52,6 +61,10 @@ public class EventRouter{
    }
 
    public void raise(final Integration source, final Object gesture){
-      events.add(new Event(source, gesture));
+      events.add(new Event(getContext(source), gesture, false));
+   }
+
+   public void broadcast(final Integration source, final Object gesture){
+      events.add(new Event(getContext(source), gesture, true));
    }
 }
