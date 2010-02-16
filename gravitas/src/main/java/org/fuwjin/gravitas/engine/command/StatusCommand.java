@@ -1,6 +1,6 @@
 package org.fuwjin.gravitas.engine.command;
 
-import static org.fuwjin.gravitas.util.StringUtils.join;
+import static org.fuwjin.util.StringUtils.join;
 
 import org.fuwjin.gravitas.engine.Execution;
 import org.fuwjin.gravitas.engine.ExecutionEngine;
@@ -22,6 +22,6 @@ public class StatusCommand implements Runnable{
          builder.append(separator).append(execution.id()).append(") [").append(execution.status()).append("] ").append(
                execution.desc());
       }
-      source.notify(builder);
+      source.send(builder);
    }
 }

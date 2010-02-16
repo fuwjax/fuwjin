@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.lang.annotation.Retention;
 import java.util.Arrays;
 
-import org.fuwjin.gravitas.util.ClassUtils;
+import org.fuwjin.util.ClassUtils;
 import org.junit.Test;
 
 @DefaultAnnotationTest.TestAnnotation(val=0,types={})

@@ -1,10 +1,10 @@
 package org.fuwjin.test;
 
 import static org.fuwjin.gravitas.Gravitas.main;
-import static org.fuwjin.gravitas.util.SystemUtils.buffer;
-import static org.fuwjin.gravitas.util.SystemUtils.in;
-import static org.fuwjin.gravitas.util.SystemUtils.out;
-import static org.fuwjin.gravitas.util.SystemUtils.release;
+import static org.fuwjin.util.SystemUtils.buffer;
+import static org.fuwjin.util.SystemUtils.in;
+import static org.fuwjin.util.SystemUtils.out;
+import static org.fuwjin.util.SystemUtils.release;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.fuwjin.gravitas.util.matcher.PatternMatcher;
+import org.fuwjin.util.matcher.PatternMatcher;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

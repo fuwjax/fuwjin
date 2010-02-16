@@ -2,7 +2,7 @@ package org.fuwjin.gravitas.engine;
 
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.fuwjin.gravitas.util.ClassUtils.getAnnotation;
+import static org.fuwjin.util.ClassUtils.getAnnotation;
 
 import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingDeque;

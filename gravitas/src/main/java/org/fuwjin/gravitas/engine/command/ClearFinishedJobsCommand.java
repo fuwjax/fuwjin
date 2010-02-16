@@ -15,9 +15,9 @@ public class ClearFinishedJobsCommand implements Runnable{
    public void run(){
       final int removed = engine.clear();
       if(removed == 1){
-         source.notify("Removed 1 job");
+         source.send("Removed 1 job");
       }else{
-         source.notify(String.format("Removed %d jobs", removed));
+         source.send(String.format("Removed %d jobs", removed));
       }
    }
 }

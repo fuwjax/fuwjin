@@ -1,25 +1,25 @@
 #Blocks
-Grammar 	= org.fuwjin.gravitas.parser.Parser~new
+Grammar 	= org.fuwjin.gravitas.config.GravitasConfig~new
 	    	<- Space* EOL? Uses:resolver Context:addContext+ EOF
-Uses    	= org.fuwjin.gravitas.parser.ClassResolver~new
+Uses    	= org.fuwjin.gravitas.config.ClassResolver~new
 	    	<- Use:addPackage*
-Context 	= org.fuwjin.gravitas.parser.Context~new
+Context 	= org.fuwjin.gravitas.config.ContextConfig~new
 	    	<- From:type Command:addCommand+
-Command 	= org.fuwjin.gravitas.parser.Command~new
+Command 	= org.fuwjin.gravitas.config.CommandConfig~new
 	    	<- Comment:addHelp+ Instruction:addInstruction+
 
 #Lines
 Use     	<- USE Ident:return EOL
 From    	<- FROM Ident:return EOL	
 Comment 	<- HASH CommentLit:return EOL
-Instruction = org.fuwjin.gravitas.parser.Instruction~new
-	        <- Atom:addAtom+ ARROW Ident:type EOL
+Instruction = org.fuwjin.gravitas.config.InstructionConfig~new
+	        <- Atom:addToken+ ARROW Ident:type EOL
 
 #Semantic Tokens
 Atom 		<- Literal:return / Var:return
-Literal 	= org.fuwjin.gravitas.parser.Literal~new
+Literal 	= org.fuwjin.gravitas.config.LiteralToken~new
 			<- Ident:value
-Var 		= org.fuwjin.gravitas.parser.Var~new
+Var 		= org.fuwjin.gravitas.config.VariableToken~new
 			<- DOLLAR Ident:name
 Ident 		<- IdentLit:return Space*
 
