@@ -5,6 +5,8 @@ import static java.util.Collections.unmodifiableCollection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.fuwjin.gravitas.engine.Command;
+
 public class InstructionConfig{
    private final List<Token> atoms = new LinkedList<Token>();
    private Class<?> cls;
@@ -22,16 +24,18 @@ public class InstructionConfig{
       }
    }
 
-   public Runnable newInstance(final String... elements) throws InstantiationException, IllegalAccessException{
+   public Command newInstance(final String... elements) throws Exception{
       if(atoms.size() != elements.length){
          return null;
       }
       int index = 0;
-      final Runnable runner = (Runnable)cls.newInstance();
+      final Command runner = (Command)cls.newInstance();
       for(final Token atom: atoms){
-         if(!atom.apply(runner, elements[index++])){
+         int newIndex = atom.apply(runner, elements, index);
+         if(newIndex<0){
             return null;
          }
+         index = newIndex+1;
       }
       return runner;
    }
@@ -44,11 +48,11 @@ public class InstructionConfig{
       atoms.add(atom);
    }
 
-   void resolve(final ClassResolver resolver){
+   void resolve(final ContextConfig context, final ClassResolver resolver){
       cls = resolver.forName(type);
       assert Runnable.class.isAssignableFrom(cls);
       for(final Token atom: atoms){
-         atom.resolve(cls);
+         atom.resolve(context, cls);
       }
    }
 }

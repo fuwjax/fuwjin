@@ -5,6 +5,7 @@ import static java.util.Collections.unmodifiableCollection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.gesture.Integration;
 
 public class ContextConfig{
@@ -16,10 +17,10 @@ public class ContextConfig{
       return unmodifiableCollection(commands);
    }
 
-   public Runnable parse(final String input) throws InstantiationException, IllegalAccessException{
+   public Command parse(final String input) throws Exception{
       final String[] split = input.split(" ");
       for(final CommandConfig command: commands){
-         final Runnable task = command.newInstance(split);
+         final Command task = command.newInstance(split);
          if(task != null){
             return task;
          }
@@ -35,7 +36,7 @@ public class ContextConfig{
       cls = resolver.forName(type);
       assert Integration.class.isAssignableFrom(cls);
       for(final CommandConfig command: commands){
-         command.resolve(resolver);
+         command.resolve(this, resolver);
       }
    }
 

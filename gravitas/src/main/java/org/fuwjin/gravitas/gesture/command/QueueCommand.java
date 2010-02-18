@@ -2,30 +2,27 @@ package org.fuwjin.gravitas.gesture.command;
 
 import static org.fuwjin.util.StringUtils.join;
 
+import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.gesture.Event;
 import org.fuwjin.gravitas.gesture.EventRouter;
-import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
 
-public class QueueCommand implements Runnable{
+public class QueueCommand extends Command{
    @Inject
    private EventRouter router;
-   @Inject
-   private Integration source;
 
    @Override
-   public void run(){
+   public void doRun(){
       final StringBuilder builder = new StringBuilder();
-      int index = 0;
       final Object separator = join("\n");
       for(final Event event: router.queue()){
-         builder.append(separator).append(++index).append(") [").append(event.source().name()).append("] ").append(
+         builder.append(separator).append(event.id()).append(") [").append(event.source().name()).append("] ").append(
                event.gesture());
       }
-      if(index == 0){
+      if(builder.length() == 0){
          builder.append("The queue is empty");
       }
-      source.send(builder);
+      source().send(builder);
    }
 }

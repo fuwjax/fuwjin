@@ -1,15 +1,17 @@
 package org.fuwjin.gravitas.config;
 
+import org.fuwjin.gravitas.engine.Command;
+
 public class LiteralToken implements Token{
    private String value;
-
+   
    @Override
-   public boolean apply(final Runnable runner, final String arg){
-      return value.equals(arg);
+   public int apply(Command runner, String[] elements, int index){
+      return elements[index].equals(value) ? index : NOT_APPLIED;
    }
 
    @Override
-   public void resolve(final Class<?> type){
+   public void resolve(final ContextConfig context, final Class<?> type){
       // ignore
    }
 

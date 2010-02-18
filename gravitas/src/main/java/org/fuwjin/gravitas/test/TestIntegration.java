@@ -1,6 +1,7 @@
-package org.fuwjin.test;
+package org.fuwjin.gravitas.test;
 
 import static java.util.Arrays.asList;
+import static org.fuwjin.gravitas.Gravitas.startGravitas;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,8 +10,15 @@ import org.fuwjin.gravitas.gesture.EventRouter;
 import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 
 public class TestIntegration implements Integration{
+   public static TestIntegration newIntegration(Module... modules) throws Exception{
+      Injector injector = startGravitas(asList(modules));
+      return injector.getInstance(TestIntegration.class);
+   }
+   
    @Inject
    private EventRouter router;
    private BlockingQueue<String> queue = new LinkedBlockingQueue<String>();

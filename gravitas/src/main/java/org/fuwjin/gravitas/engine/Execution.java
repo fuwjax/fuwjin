@@ -12,12 +12,12 @@ import java.util.concurrent.ScheduledFuture;
 
 public class Execution{
    private final ScheduledFuture<?> future;
-   private final Object gesture;
+   private final Command command;
    private final int id;
-   public Execution(final int id, final Object gesture, final ScheduledFuture<?> future){
+   public Execution(final int id, final Command command, final ScheduledFuture<?> future){
       this.id = id;
       this.future = future;
-      this.gesture = gesture;
+      this.command = command;
    }
 
    public boolean cancel(){
@@ -25,7 +25,7 @@ public class Execution{
    }
 
    public String desc(){
-      return gesture.toString();
+      return command.gesture().toString();
    }
 
    public int id(){

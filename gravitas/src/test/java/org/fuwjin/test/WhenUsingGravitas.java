@@ -1,30 +1,27 @@
 package org.fuwjin.test;
 
-import static org.fuwjin.gravitas.Gravitas.startGravitas;
+import static org.fuwjin.gravitas.test.TestIntegration.newIntegration;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
-
+import org.fuwjin.gravitas.test.TestIntegration;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.inject.Injector;
-import com.google.inject.Module;
-
 public class WhenUsingGravitas{
    private static TestIntegration test;
    @BeforeClass
    public static void init() throws Exception{
-      Injector injector = startGravitas(Collections.<Module>emptySet());
-      test = injector.getInstance(TestIntegration.class);
+      test = newIntegration();
    }
 
    @AfterClass
    public static void close() throws Exception{
-      test.input("quit");
-      test.expect("Shutting down now");
+      if(test != null){
+         test.input("quit");
+         test.expect("Shutting down now");
+      }
    }
    
    @After
@@ -57,8 +54,8 @@ public class WhenUsingGravitas{
       test.input("jobs");
       test.matches("\\d+\\) \\[Finished] clear jobs");
       test.matches("\\d+\\) \\[Executing] jobs");
-      test.input("quit 30");
-      test.expect("Shutting down in 30 seconds");
+      test.input("in 30 SECONDS quit");
+      test.expect("Scheduled quit in 30 SECONDS");
       test.input("last job");
       String actual = test.matches("\\d+\\) \\[Pending] \\*delayed quit\\*");
       final int id = Integer.valueOf(actual.substring(0, actual.indexOf(')')));

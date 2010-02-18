@@ -17,13 +17,15 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.google.inject.Provider;
+
 public class ContextHandler implements InvocationHandler{
    private static ThreadLocal<Method> lastMethod = new ThreadLocal<Method>();
    private static ThreadLocal<ContextHandler> lastHandler = new ThreadLocal<ContextHandler>();
    
-   public static <T> T init(T proxyMethod, T value){
+   public static <T> T initIfNull(T proxyMethod, Provider<? extends T> provider){
       ContextHandler handler = lastHandler.get();
-      return (T)handler.init(lastMethod.get(), value);
+      return (T)handler.initBy(lastMethod.get(), provider);
    }
    
    private ConcurrentMap<String, Object> map = new ConcurrentHashMap<String, Object>();
@@ -48,11 +50,16 @@ public class ContextHandler implements InvocationHandler{
       return name(method.getDeclaringClass(),method.getName());
    }
    
-   Object init(Method method, Object value){
-      Object old = map.putIfAbsent(name(method), value);
-      if(old == null){
-         return value;
+   Object initBy(Method method, Provider<?> provider){
+      String name = name(method);
+      Object value = map.get(name);
+      if(value == null){
+         value = provider.get();
+         Object old = map.putIfAbsent(name, value);
+         if(old != null){
+            value = old;
+         }
       }
-      return old;
+      return value;
    }
 }

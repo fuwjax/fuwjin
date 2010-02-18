@@ -16,23 +16,27 @@ Instruction = org.fuwjin.gravitas.config.InstructionConfig~new
 	        <- Atom:addToken+ ARROW Ident:type EOL
 
 #Semantic Tokens
-Atom 		<- Literal:return / Var:return
+Atom 		<- Array:return / Var:return / Literal:return
 Literal 	= org.fuwjin.gravitas.config.LiteralToken~new
 			<- Ident:value
 Var 		= org.fuwjin.gravitas.config.VariableToken~new
 			<- DOLLAR Ident:name
+Array 		= org.fuwjin.gravitas.config.ArrayToken~new
+			<- DOLLAR SQUARE_LEFT IdentLit:name SQUARE_RIGHT
 Ident 		<- IdentLit:return Space*
 
 #Literals
-IdentLit	<- (![ \t\r\n=$] .)+
+IdentLit	<- (![ \t\r\n=$\]] .)+
 CommentLit	<- (![\r\n] .)*
 
 #Symbols
 USE 		<- 'use' Space+
 FROM 		<- 'from' Space+
-ARROW 		<- ('=>' / '->') Space*
+ARROW 		<- '=>' Space*
 DOLLAR 		<- '$'
 HASH 		<- '#'
+SQUARE_LEFT <- '['
+SQUARE_RIGHT<- ']' Space*
 
 #Whitespace
 EOL 		<- (EndOfLine Space*)+ / EOF

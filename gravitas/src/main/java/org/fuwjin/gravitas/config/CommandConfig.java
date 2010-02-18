@@ -5,6 +5,8 @@ import static java.util.Collections.unmodifiableCollection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.fuwjin.gravitas.engine.Command;
+
 public class CommandConfig{
    private final List<String> help = new LinkedList<String>();
    private final List<InstructionConfig> instructions = new LinkedList<InstructionConfig>();
@@ -17,19 +19,23 @@ public class CommandConfig{
       return unmodifiableCollection(instructions);
    }
 
-   public Runnable newInstance(final String[] elements) throws InstantiationException, IllegalAccessException{
+   public Command newInstance(final String[] elements) throws InstantiationException, IllegalAccessException{
       for(final InstructionConfig instruction: instructions){
-         final Runnable runner = instruction.newInstance(elements);
-         if(runner != null){
-            return runner;
+         try{
+            final Command runner = instruction.newInstance(elements);
+            if(runner != null){
+               return runner;
+            }
+         }catch(Exception e){
+            // continue
          }
       }
       return null;
    }
 
-   public void resolve(final ClassResolver resolver){
+   public void resolve(final ContextConfig context, final ClassResolver resolver){
       for(final InstructionConfig instruction: instructions){
-         instruction.resolve(resolver);
+         instruction.resolve(context, resolver);
       }
    }
 

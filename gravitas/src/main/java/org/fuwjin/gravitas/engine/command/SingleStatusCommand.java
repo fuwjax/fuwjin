@@ -1,37 +1,30 @@
 package org.fuwjin.gravitas.engine.command;
 
-import static org.fuwjin.gravitas.engine.ExecutionEngine.execution;
-import static org.fuwjin.gravitas.engine.ExecutionEngine.executions;
-
+import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.engine.Execution;
-import org.fuwjin.gravitas.gesture.Context;
+import org.fuwjin.gravitas.engine.ExecutionContextHelper;
 
 import com.google.inject.Inject;
 
-public class SingleStatusCommand implements Runnable{
+public class SingleStatusCommand extends Command{
    private int jobId;
    @Inject
-   private Context source;
+   private ExecutionContextHelper helper;
 
    @Override
-   public void run(){
+   public void doRun(){
       final StringBuilder builder = new StringBuilder();
       Execution execution = null;
       if(jobId == 0){
-         final Iterable<Execution> executions = executions(source);
-         Execution last = null;
-         for(final Execution current: executions){
-            execution = last;
-            last = current;
-         }
+         execution = helper.previousExecution(source());
       }else{
-         execution = execution(source,jobId);
+         execution = helper.execution(source(),jobId);
       }
       if(execution == null){
          builder.append("There is no job " + jobId);
       }else{
          builder.append(execution.id()).append(") [").append(execution.status()).append("] ").append(execution.desc());
       }
-      source.send(builder);
+      source().send(builder);
    }
 }
