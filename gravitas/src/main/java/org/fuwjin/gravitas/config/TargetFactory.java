@@ -6,11 +6,11 @@ import org.fuwjin.gravitas.engine.Command;
 
 public class TargetFactory{
    private ClassResolver resolver;
-   private ContextConfig context;
+   private ContextConfig config;
    
    public TargetFactory(ClassResolver resolver, ContextConfig context){
       this.resolver = resolver;
-      this.context = context;
+      this.config = context;
    }
 
    public Target newInstance(String type){
@@ -22,12 +22,12 @@ public class TargetFactory{
       }
    }
    
-   public Command parse(String gesture){
-      return context.parse(this, gesture);
+   public Command newCommand(String gesture){
+      return config.parse(this, gesture);
    }
    
    public ContextConfig config(){
-      return context;
+      return config;
    }
 
    public Target newMap(List<Token> targetTokens){

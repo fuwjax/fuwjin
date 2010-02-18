@@ -31,6 +31,6 @@ public class MapTarget implements Target{
       for(Token token: tokens){
          builder.append(sep).append(token.value(values));
       }
-      return factory.parse(builder.toString());
+      return factory.newCommand(builder.toString());
    }
 }
