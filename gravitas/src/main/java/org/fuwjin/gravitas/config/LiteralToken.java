@@ -2,16 +2,23 @@ package org.fuwjin.gravitas.config;
 
 import static org.fuwjin.util.StringUtils.word;
 
+import java.util.Map;
+
 public class LiteralToken implements Token{
    private String value;
    
    @Override
-   public int apply(Target target, String elements, int index){
-      String word = word(elements, index);
+   public String apply(Target target, String gesture){
+      String word = word(gesture);
       if(word.trim().equals(value)){
-         return index+word.length();
+         return gesture.substring(word.length());
       }
-      return NOT_APPLIED;
+      return null;
+   }
+   
+   @Override
+   public String value(Map<String, String> values){
+      return value;
    }
 
    @Override

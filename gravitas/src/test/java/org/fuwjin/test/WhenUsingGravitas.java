@@ -54,7 +54,7 @@ public class WhenUsingGravitas{
       test.input("jobs");
       test.matches("\\d+\\) \\[Finished] clear jobs");
       test.matches("\\d+\\) \\[Executing] jobs");
-      test.input("in 30 SECONDS quit");
+      test.input("quit 30");
       test.expect("Scheduling quit in 30 seconds");
       test.input("last job");
       String actual = test.matches("\\d+\\) \\[Pending] quit");

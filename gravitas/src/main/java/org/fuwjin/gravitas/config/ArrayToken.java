@@ -1,16 +1,23 @@
 package org.fuwjin.gravitas.config;
 
+import java.util.Map;
+
 
 public class ArrayToken implements Token{
    private String name;
    
    @Override
-   public int apply(Target target, String elements, int index) {
-      if(target.set(name, elements.substring(index))){
-         return elements.length();
+   public String apply(Target target, String gesture) {
+      if(target.set(name, gesture)){
+         return "";
       }
-      return NOT_APPLIED;
+      return null;
    }
+   
+   @Override
+   public String value(Map<String,String> values) {
+      return null;
+   };
 
    @Override
    public String toIdent(){

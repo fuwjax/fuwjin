@@ -10,14 +10,12 @@ import org.fuwjin.gravitas.engine.Command;
 public class ContextConfig{
    private final List<CommandConfig> commands = new LinkedList<CommandConfig>();
    private String type;
-   private ClassResolver resolver;
 
    public Iterable<CommandConfig> commands(){
       return unmodifiableCollection(commands);
    }
 
-   public Command parse(final String input) {
-      TargetFactory factory = new TargetFactory(resolver, this);
+   public Command parse(TargetFactory factory, final String input) {
       for(final CommandConfig command: commands){
          final Command task = command.newInstance(factory, input);
          if(task != null){
@@ -29,10 +27,6 @@ public class ContextConfig{
 
    void addCommand(final CommandConfig command){
       commands.add(command);
-   }
-
-   void setResolver(final ClassResolver resolver){
-      this.resolver = resolver;
    }
 
    String type(){

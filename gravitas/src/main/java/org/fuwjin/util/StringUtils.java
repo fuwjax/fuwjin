@@ -27,6 +27,9 @@ public final class StringUtils{
       };
    }
 
+   public static String word(String string){
+      return word(string, 0);
+   }
    public static String word(String string, int start){
       int index = start;
       while(index < string.length() && !isWhitespace(string.charAt(index))){

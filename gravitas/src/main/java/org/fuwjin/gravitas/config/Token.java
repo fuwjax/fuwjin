@@ -1,10 +1,12 @@
 package org.fuwjin.gravitas.config;
 
+import java.util.Map;
+
 
 public interface Token{
-   int NOT_APPLIED = -1;
-
    String toIdent();
 
-   int apply(Target target, String elements, int index);
+   String apply(Target target, String gesture);
+
+   String value(Map<String, String> values);
 }

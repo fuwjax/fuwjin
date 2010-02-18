@@ -18,7 +18,7 @@ public class HelpOnCommand extends Command{
 
    @Override
    public void doRun(){
-      final ContextConfig context = parser.configure(source());
+      final ContextConfig context = parser.factory(source()).config();
       final StringBuilder builder = new StringBuilder();
       final Object commandSeparator = join("\n\n");
       for(final CommandConfig command: context.commands()){

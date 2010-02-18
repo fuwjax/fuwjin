@@ -13,9 +13,14 @@ Use     	<- USE Ident:return EOL
 From    	<- FROM Ident:return EOL	
 Comment 	<- HASH CommentLit:return EOL
 Instruction = org.fuwjin.gravitas.config.InstructionConfig~new
-	        <- Atom:addToken+ ARROW Ident:type EOL
+	        <- Atom:addToken+ Strategy:strategy EOL
 
 #Semantic Tokens
+Strategy	<- TypeStrategy:return / AliasStrategy:return
+TypeStrategy = org.fuwjin.gravitas.config.TypeTargetStrategy~new
+			<- ARROW Ident:type
+AliasStrategy = org.fuwjin.gravitas.config.TokenTargetStrategy~new
+	        <- COLON Atom:addToken+
 Atom 		<- Array:return / Var:return / Literal:return
 Literal 	= org.fuwjin.gravitas.config.LiteralToken~new
 			<- Ident:value
@@ -26,13 +31,14 @@ Array 		= org.fuwjin.gravitas.config.ArrayToken~new
 Ident 		<- IdentLit:return Space*
 
 #Literals
-IdentLit	<- (![ \t\r\n=$\]] .)+
+IdentLit	<- (![ \t\r\n=$\]:] .)+
 CommentLit	<- (![\r\n] .)*
 
 #Symbols
 USE 		<- 'use' Space+
 FROM 		<- 'from' Space+
 ARROW 		<- '=>' Space*
+COLON		<- ':' Space*
 DOLLAR 		<- '$'
 HASH 		<- '#'
 SQUARE_LEFT <- '['
