@@ -1,5 +1,7 @@
 package org.fuwjin.gravitas.config;
 
+import java.util.List;
+
 import org.fuwjin.gravitas.engine.Command;
 
 public class TargetFactory{
@@ -14,9 +16,21 @@ public class TargetFactory{
    public Target newInstance(String type){
       Class<?> cls = resolver.forName(type);
       try{
-         return new CommandTarget((Command)cls.newInstance(), context);
+         return new CommandTarget((Command)cls.newInstance(), this);
       }catch(Exception e){
          return null;
       }
+   }
+   
+   public Command parse(String gesture){
+      return context.parse(this, gesture);
+   }
+   
+   public ContextConfig config(){
+      return context;
+   }
+
+   public Target newMap(List<Token> targetTokens){
+      return new MapTarget(targetTokens, this);
    }
 }

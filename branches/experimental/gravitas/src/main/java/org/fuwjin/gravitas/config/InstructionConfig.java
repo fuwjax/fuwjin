@@ -9,26 +9,26 @@ import org.fuwjin.gravitas.engine.Command;
 
 public class InstructionConfig{
    private final List<Token> atoms = new LinkedList<Token>();
-   private String type;
+   private TargetStrategy strategy;
 
    public Iterable<Token> atoms(){
       return unmodifiableCollection(atoms);
    }
 
-   public Command newInstance(TargetFactory factory, final String elements){
-      int index = 0;
-      final Target target = factory.newInstance(type);
+   public Command newInstance(TargetFactory factory, final String gesture){
+      String remaining = gesture;
+      final Target target = strategy.newTarget(factory);
       for(final Token atom: atoms){
-         index = atom.apply(target, elements, index);
-         if(index<0){
+         remaining = atom.apply(target, remaining);
+         if(remaining == null){
             return null;
          }
       }
-      if(index < elements.length()){
+      if(remaining.length() != 0){
          return null;
       }
       Command command = target.toCommand();
-      command.setGesture(elements);
+      command.setGesture(gesture);
       return command;
    }
 

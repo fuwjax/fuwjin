@@ -2,8 +2,8 @@ package org.fuwjin.gravitas.gesture.handler;
 
 import java.util.concurrent.ScheduledFuture;
 
-import org.fuwjin.gravitas.config.ContextConfig;
 import org.fuwjin.gravitas.config.GravitasConfig;
+import org.fuwjin.gravitas.config.TargetFactory;
 import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.engine.ExecutionContextHelper;
 import org.fuwjin.gravitas.engine.ExecutionEngine;
@@ -24,8 +24,8 @@ public class UserInstructionEventHandler extends AbstractEventHandler{
 
    @Override
    public boolean handle(final Event event) throws Exception{
-      final ContextConfig context = config.configure(event.source());
-      final Command command = context.parse((String)event.gesture());
+      final TargetFactory factory = config.factory(event.source());
+      final Command command = factory.parse((String)event.gesture());
       command.setSource(event.source());
       command.inject(injector);
       ScheduledFuture<?> future = engine.execute(command);

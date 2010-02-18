@@ -8,11 +8,11 @@ import org.fuwjin.pogo.reflect.invoke.Invoker;
 
 public class CommandTarget implements Target{
    private final Command command;
-   private final ContextConfig context;
+   private final TargetFactory factory;
 
-   public CommandTarget(Command command, ContextConfig context){
+   public CommandTarget(Command command, TargetFactory factory){
       this.command = command;
-      this.context = context;
+      this.factory = factory;
    }
 
    @Override
@@ -21,7 +21,7 @@ public class CommandTarget implements Target{
       final Class<?> expectedType = invoker.paramTypes(1)[0];
       final Object val;
       if(expectedType.equals(Command.class)){
-         val = context.parse(value);
+         val = factory.parse(value);
       }else{
          Invoker converter = new Invoker(getWrapper(expectedType), "valueOf");
          val = converter.invoke(null, value);
