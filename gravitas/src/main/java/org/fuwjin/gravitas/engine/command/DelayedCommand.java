@@ -26,9 +26,17 @@ public class DelayedCommand extends Command{
    public void doRun(){
       ScheduledFuture<?> future = engine.execute(command, delay, -1, -1, unit);
       helper.storeExecution(source(), command, future);
-      source().send(String.format("Scheduling %s in %d %s", command, delay, unit));
+      source().send(String.format("Scheduling %s in %d %s", command, delay, unit.toString().toLowerCase()));
    }
 
+   void unit(String name){
+      String upper = name.toUpperCase();
+      if(!upper.endsWith("S")){
+         upper = upper+"S";
+      }
+      unit = TimeUnit.valueOf(upper);
+   }
+   
    @Override
    public void setSource(Context source){
       super.setSource(source);

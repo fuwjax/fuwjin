@@ -19,20 +19,14 @@ public class CommandConfig{
       return unmodifiableCollection(instructions);
    }
 
-   public Command newInstance(final String gesture) {
+   public Command newInstance(TargetFactory factory, final String gesture) {
       for(final InstructionConfig instruction: instructions){
-         final Command runner = instruction.newInstance(gesture);
+         final Command runner = instruction.newInstance(factory, gesture);
          if(runner != null){
             return runner;
          }
       }
       return null;
-   }
-
-   public void resolve(final ContextConfig context, final ClassResolver resolver){
-      for(final InstructionConfig instruction: instructions){
-         instruction.resolve(context, resolver);
-      }
    }
 
    void addHelp(final String line){

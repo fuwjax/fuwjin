@@ -27,7 +27,15 @@ public class RepeatCommand extends Command{
    public void doRun(){
       ScheduledFuture<?> future = engine.execute(command, DO_NOT_DELAY, rate, -1, unit);
       helper.storeExecution(source(), command, future);
-      source().send(String.format("Scheduling %s every %d %s", command,rate,unit));
+      source().send(String.format("Scheduling %s every %d %s", command,rate,unit.toString().toLowerCase()));
+   }
+   
+   void unit(String name){
+      String upper = name.toUpperCase();
+      if(!upper.endsWith("S")){
+         upper = upper+"S";
+      }
+      unit = TimeUnit.valueOf(upper);
    }
    
    @Override
