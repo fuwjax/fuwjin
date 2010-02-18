@@ -7,19 +7,17 @@ import org.fuwjin.gravitas.config.ContextConfig;
 import org.fuwjin.gravitas.config.GravitasConfig;
 import org.fuwjin.gravitas.config.InstructionConfig;
 import org.fuwjin.gravitas.config.Token;
-import org.fuwjin.gravitas.gesture.Context;
+import org.fuwjin.gravitas.engine.Command;
 
 import com.google.inject.Inject;
 
-public class HelpCommand implements Runnable{
+public class HelpCommand extends Command{
    @Inject
    private GravitasConfig parser;
-   @Inject
-   private Context source;
 
    @Override
-   public void run(){
-      final ContextConfig context = parser.configure(source);
+   public void doRun(){
+      final ContextConfig context = parser.configure(source());
       final StringBuilder builder = new StringBuilder();
       final Object commandSeparator = join("\n");
       for(final CommandConfig command: context.commands()){
@@ -35,6 +33,6 @@ public class HelpCommand implements Runnable{
          }
          builder.append(" - ").append(command.helpLines().iterator().next());
       }
-      source.send(builder);
+      source().send(builder);
    }
 }

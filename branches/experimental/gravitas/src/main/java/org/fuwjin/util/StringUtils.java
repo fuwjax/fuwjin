@@ -5,6 +5,7 @@ public final class StringUtils{
    static{
       new StringUtils();
    }
+   
    public static Object join(final String separator){
       return join("", separator);
    }

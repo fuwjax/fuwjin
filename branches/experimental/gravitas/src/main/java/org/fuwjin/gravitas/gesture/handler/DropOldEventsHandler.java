@@ -1,22 +1,19 @@
-package org.fuwjin.gravitas.gesture.command;
+package org.fuwjin.gravitas.gesture.handler;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import org.fuwjin.gravitas.engine.RepeatExecution;
+import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.gesture.Event;
 import org.fuwjin.gravitas.gesture.EventHandler;
 import org.fuwjin.gravitas.gesture.EventRouter;
 
 import com.google.inject.Inject;
 
-@RepeatExecution(waitBetween=10,unit=SECONDS)
-public class DropOldEventsHandler implements Runnable, EventHandler{
+public class DropOldEventsHandler extends Command implements EventHandler{
    @Inject
    private EventRouter router;
    private int lastId;
 
    @Override
-   public void run(){
+   public void doRun(){
       lastId = router.apply(this, 0);
    }
 

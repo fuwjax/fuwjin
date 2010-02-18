@@ -1,9 +1,13 @@
 package org.fuwjin.gravitas.config;
 
-public interface Token{
-   boolean apply(Runnable runner, String value);
+import org.fuwjin.gravitas.engine.Command;
 
-   void resolve(Class<?> type);
+public interface Token{
+   int NOT_APPLIED = -1;
+
+   void resolve(ContextConfig context, Class<?> type);
 
    String toIdent();
+
+   int apply(Command runner, String[] elements, int index) throws Exception;
 }
