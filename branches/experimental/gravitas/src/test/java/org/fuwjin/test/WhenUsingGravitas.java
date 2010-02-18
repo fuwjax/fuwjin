@@ -55,14 +55,14 @@ public class WhenUsingGravitas{
       test.matches("\\d+\\) \\[Finished] clear jobs");
       test.matches("\\d+\\) \\[Executing] jobs");
       test.input("in 30 SECONDS quit");
-      test.expect("Scheduled quit in 30 SECONDS");
+      test.expect("Scheduling quit in 30 SECONDS");
       test.input("last job");
-      String actual = test.matches("\\d+\\) \\[Pending] \\*delayed quit\\*");
+      String actual = test.matches("\\d+\\) \\[Pending] quit");
       final int id = Integer.valueOf(actual.substring(0, actual.indexOf(')')));
       test.input("kill " + id);
       test.expect("Job " + id + " has been cancelled");
       test.input("jobs " + id);
-      test.matches("\\d+\\) \\[Interrupted] \\*delayed quit\\*");
+      test.matches("\\d+\\) \\[Interrupted] quit");
       test.input("kill " + id);
       test.expect("Could not cancel job " + id);
       test.input("clear jobs");
@@ -79,7 +79,7 @@ public class WhenUsingGravitas{
       test.expect("The queue is empty");
       test.input("silly command");
       test.input("queue");
-      test.expect("1) [test] silly command");
+      test.matches("\\d+\\) \\[test] silly command");
       test.input("clear queue");
       test.expect("Removed 1 event");
       test.input("clear queue");

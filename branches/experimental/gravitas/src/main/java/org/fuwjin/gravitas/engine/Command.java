@@ -2,6 +2,8 @@ package org.fuwjin.gravitas.engine;
 
 import org.fuwjin.gravitas.gesture.Context;
 
+import com.google.inject.Injector;
+
 public abstract class Command implements Runnable{
    private Object gesture;
    private Context source;
@@ -32,5 +34,13 @@ public abstract class Command implements Runnable{
 
    public void setSource(Context source){
       this.source = source;
+   }
+
+   public void setGesture(Object gesture){
+      this.gesture = gesture;
+   }
+
+   public void inject(Injector injector){
+      injector.injectMembers(this);
    }
 }

@@ -1,5 +1,7 @@
 package org.fuwjin.util;
 
+import static java.lang.Character.isWhitespace;
+
 public final class StringUtils{
    private StringUtils(){}
    static{
@@ -23,5 +25,16 @@ public final class StringUtils{
             return separator;
          }
       };
+   }
+
+   public static String word(String string, int start){
+      int index = start;
+      while(index < string.length() && !isWhitespace(string.charAt(index))){
+         index++;
+      }
+      while(index < string.length() && isWhitespace(string.charAt(index))){
+         index++;
+      }
+      return string.substring(start, index);
    }
 }

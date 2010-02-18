@@ -1,6 +1,7 @@
 package org.fuwjin.gravitas.engine.command;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.fuwjin.gravitas.engine.ExecutionEngine.DO_NOT_DELAY;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -13,8 +14,8 @@ import org.fuwjin.gravitas.gesture.Context;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class DelayedCommand extends Command{
-   private long delay;
+public class RepeatCommand extends Command{
+   private long rate;
    private TimeUnit unit = SECONDS;
    private Command command;
    @Inject
@@ -24,11 +25,11 @@ public class DelayedCommand extends Command{
 
    @Override
    public void doRun(){
-      ScheduledFuture<?> future = engine.execute(command, delay, -1, -1, unit);
+      ScheduledFuture<?> future = engine.execute(command, DO_NOT_DELAY, rate, -1, unit);
       helper.storeExecution(source(), command, future);
-      source().send(String.format("Scheduling %s in %d %s", command, delay, unit));
+      source().send(String.format("Scheduling %s every %d %s", command,rate,unit));
    }
-
+   
    @Override
    public void setSource(Context source){
       super.setSource(source);
@@ -40,4 +41,5 @@ public class DelayedCommand extends Command{
       super.inject(injector);
       command.inject(injector);
    }
+
 }

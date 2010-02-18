@@ -24,20 +24,28 @@ public class InstructionConfig{
       }
    }
 
-   public Command newInstance(final String... elements) throws Exception{
-      if(atoms.size() != elements.length){
-         return null;
-      }
+   public Command newInstance(final String elements){
       int index = 0;
-      final Command runner = (Command)cls.newInstance();
+      final Command runner = newInstance();
       for(final Token atom: atoms){
-         int newIndex = atom.apply(runner, elements, index);
-         if(newIndex<0){
+         index = atom.apply(runner, elements, index);
+         if(index<0){
             return null;
          }
-         index = newIndex+1;
       }
+      if(index < elements.length()){
+         return null;
+      }
+      runner.setGesture(elements);
       return runner;
+   }
+
+   private Command newInstance(){
+      try{
+         return (Command)cls.newInstance();
+      }catch(Exception e){
+         return null;
+      }
    }
 
    public Class<?> type(){

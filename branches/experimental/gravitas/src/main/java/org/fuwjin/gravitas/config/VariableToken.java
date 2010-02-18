@@ -1,6 +1,7 @@
 package org.fuwjin.gravitas.config;
 
 import static org.fuwjin.pogo.reflect.invoke.Invoker.isSuccess;
+import static org.fuwjin.util.StringUtils.word;
 
 import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.pogo.reflect.invoke.Invoker;
@@ -12,10 +13,11 @@ public class VariableToken implements Token{
    private String name;
    
    @Override
-   public int apply(Command runner, String[] elements, int index){
-      final Object val = converter.invoke(null, elements[index]);
+   public int apply(Command runner, String elements, int index){
+      String word = word(elements, index);
+      final Object val = converter.invoke(null, word.trim());
       final Object result = invoker.invoke(runner, val);
-      return isSuccess(result) ? index : NOT_APPLIED;
+      return isSuccess(result) ? index + word.length() : NOT_APPLIED;
    }
 
    @Override

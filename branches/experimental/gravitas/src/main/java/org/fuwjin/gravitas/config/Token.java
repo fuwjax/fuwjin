@@ -9,5 +9,5 @@ public interface Token{
 
    String toIdent();
 
-   int apply(Command runner, String[] elements, int index) throws Exception;
+   int apply(Command runner, String elements, int index);
 }

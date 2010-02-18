@@ -3,6 +3,7 @@ package org.fuwjin.gravitas.engine.command;
 import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.engine.Execution;
 import org.fuwjin.gravitas.engine.ExecutionContextHelper;
+import org.fuwjin.gravitas.engine.Execution.Status;
 
 import com.google.inject.Inject;
 
@@ -24,6 +25,9 @@ public class SingleStatusCommand extends Command{
          builder.append("There is no job " + jobId);
       }else{
          builder.append(execution.id()).append(") [").append(execution.status()).append("] ").append(execution.desc());
+         if(execution.status() == Status.Failed){
+            builder.append('\n').append(execution.failure());
+         }
       }
       source().send(builder);
    }
