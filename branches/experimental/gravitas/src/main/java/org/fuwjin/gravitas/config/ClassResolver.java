@@ -24,4 +24,8 @@ class ClassResolver{
          throw new RuntimeException("Could not locate " + type + ". Add a \"use\" statement to context.gravitas.");
       }
    }
+
+   public boolean contains(String name){
+      return packages.contains(name);
+   }
 }

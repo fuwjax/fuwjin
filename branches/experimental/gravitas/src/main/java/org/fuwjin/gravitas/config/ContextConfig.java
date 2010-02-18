@@ -6,20 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.fuwjin.gravitas.engine.Command;
-import org.fuwjin.gravitas.gesture.Integration;
 
 public class ContextConfig{
-   private Class<?> cls;
    private final List<CommandConfig> commands = new LinkedList<CommandConfig>();
    private String type;
+   private ClassResolver resolver;
 
    public Iterable<CommandConfig> commands(){
       return unmodifiableCollection(commands);
    }
 
    public Command parse(final String input) {
+      TargetFactory factory = new TargetFactory(resolver, this);
       for(final CommandConfig command: commands){
-         final Command task = command.newInstance(input);
+         final Command task = command.newInstance(factory, input);
          if(task != null){
             return task;
          }
@@ -31,15 +31,11 @@ public class ContextConfig{
       commands.add(command);
    }
 
-   void resolve(final ClassResolver resolver){
-      cls = resolver.forName(type);
-      assert Integration.class.isAssignableFrom(cls);
-      for(final CommandConfig command: commands){
-         command.resolve(this, resolver);
-      }
+   void setResolver(final ClassResolver resolver){
+      this.resolver = resolver;
    }
 
-   Class<?> type(){
-      return cls;
+   String type(){
+      return type;
    }
 }
