@@ -1,13 +1,16 @@
 package org.fuwjin.gravitas.config;
 
+import static org.fuwjin.util.StringUtils.word;
+
 import org.fuwjin.gravitas.engine.Command;
 
 public class LiteralToken implements Token{
    private String value;
    
    @Override
-   public int apply(Command runner, String[] elements, int index){
-      return elements[index].equals(value) ? index : NOT_APPLIED;
+   public int apply(Command runner, String elements, int index){
+      String word = word(elements, index);
+      return word.trim().equals(value) ? index+word.length() : NOT_APPLIED;
    }
 
    @Override

@@ -17,10 +17,9 @@ public class ContextConfig{
       return unmodifiableCollection(commands);
    }
 
-   public Command parse(final String input) throws Exception{
-      final String[] split = input.split(" ");
+   public Command parse(final String input) {
       for(final CommandConfig command: commands){
-         final Command task = command.newInstance(split);
+         final Command task = command.newInstance(input);
          if(task != null){
             return task;
          }

@@ -18,16 +18,16 @@ public class UserInstructionEventHandler extends AbstractEventHandler{
    @Inject
    private Injector injector;
    @Inject
-   private GravitasConfig parser;
+   private GravitasConfig config;
    @Inject
    private ExecutionContextHelper helper;
 
    @Override
    public boolean handle(final Event event) throws Exception{
-      final ContextConfig context = parser.configure(event.source());
+      final ContextConfig context = config.configure(event.source());
       final Command command = context.parse((String)event.gesture());
       command.setSource(event.source());
-      injector.injectMembers(command);
+      command.inject(injector);
       ScheduledFuture<?> future = engine.execute(command);
       helper.storeExecution(event.source(), command, future);
       return true;

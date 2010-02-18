@@ -19,15 +19,11 @@ public class CommandConfig{
       return unmodifiableCollection(instructions);
    }
 
-   public Command newInstance(final String[] elements) throws InstantiationException, IllegalAccessException{
+   public Command newInstance(final String gesture) {
       for(final InstructionConfig instruction: instructions){
-         try{
-            final Command runner = instruction.newInstance(elements);
-            if(runner != null){
-               return runner;
-            }
-         }catch(Exception e){
-            // continue
+         final Command runner = instruction.newInstance(gesture);
+         if(runner != null){
+            return runner;
          }
       }
       return null;

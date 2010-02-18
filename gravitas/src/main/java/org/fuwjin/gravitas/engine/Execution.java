@@ -56,4 +56,15 @@ public class Execution{
    public enum Status{
       Executing, Failed, Finished, Interrupted, Pending
    }
+
+   public Throwable failure(){
+      try{
+         future.get();
+         return null;
+      }catch(ExecutionException e){
+         return e.getCause();
+      }catch(Exception e){
+         return e;
+      }
+   }
 }
