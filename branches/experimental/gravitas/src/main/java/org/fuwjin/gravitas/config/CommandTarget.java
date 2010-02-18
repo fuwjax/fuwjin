@@ -21,7 +21,7 @@ public class CommandTarget implements Target{
       final Class<?> expectedType = invoker.paramTypes(1)[0];
       final Object val;
       if(expectedType.equals(Command.class)){
-         val = factory.parse(value);
+         val = factory.newCommand(value);
       }else{
          Invoker converter = new Invoker(getWrapper(expectedType), "valueOf");
          val = converter.invoke(null, value);

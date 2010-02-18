@@ -25,7 +25,7 @@ public class UserInstructionEventHandler extends AbstractEventHandler{
    @Override
    public boolean handle(final Event event) throws Exception{
       final TargetFactory factory = config.factory(event.source());
-      final Command command = factory.parse((String)event.gesture());
+      final Command command = factory.newCommand((String)event.gesture());
       command.setSource(event.source());
       command.inject(injector);
       ScheduledFuture<?> future = engine.execute(command);
