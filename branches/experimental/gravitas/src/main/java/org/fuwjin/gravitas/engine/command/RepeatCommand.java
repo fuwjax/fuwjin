@@ -1,7 +1,7 @@
 package org.fuwjin.gravitas.engine.command;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.fuwjin.gravitas.engine.ExecutionEngine.DO_NOT_DELAY;
+import static org.fuwjin.gravitas.engine.ExecutionEngine.EXEC_IMMEDIATELY;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +25,7 @@ public class RepeatCommand extends Command{
 
    @Override
    public void doRun(){
-      ScheduledFuture<?> future = engine.execute(command, DO_NOT_DELAY, rate, -1, unit);
+      ScheduledFuture<?> future = engine.execute(command, EXEC_IMMEDIATELY, rate, unit);
       helper.storeExecution(source(), command, future);
       source().send(String.format("Scheduling %s every %d %s", command,rate,unit.toString().toLowerCase()));
    }

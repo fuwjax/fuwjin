@@ -3,9 +3,7 @@ package org.fuwjin.gravitas;
 import static com.google.inject.Guice.createInjector;
 import static java.util.ServiceLoader.load;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.fuwjin.gravitas.engine.ExecutionEngine.DO_NOT_DELAY;
-import static org.fuwjin.gravitas.engine.ExecutionEngine.DO_NOT_WAIT_BETWEEN;
-import static org.fuwjin.gravitas.gesture.command.BatchCommand.execScript;
+import static org.fuwjin.gravitas.engine.ExecutionEngine.EXEC_IMMEDIATELY;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +45,7 @@ public class Gravitas{
    private BootIntegration source;
 
    private void start() throws Exception{
-      engine.execute(eventHandler,DO_NOT_DELAY,10,DO_NOT_WAIT_BETWEEN,MILLISECONDS);
-      execScript(router, source, "bootstrap.script");
+      engine.execute(eventHandler,EXEC_IMMEDIATELY,10,MILLISECONDS);
+      router.raise(source, "run bootstrap.script");
    }
 }

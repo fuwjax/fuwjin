@@ -3,9 +3,9 @@ package org.fuwjin.gravitas.console;
 import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.lang.Thread.interrupted;
+import static java.lang.Thread.sleep;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.fuwjin.gravitas.gesture.EventRouter;
@@ -26,7 +26,7 @@ public class ConsoleIntegration implements Integration{
    };
 
    public ConsoleIntegration(){
-      final Thread readThread = new Thread(runner);
+      final Thread readThread = new Thread(runner, "Console Reader");
       readThread.setDaemon(true);
       readThread.start();
    }
@@ -46,13 +46,16 @@ public class ConsoleIntegration implements Integration{
    protected void readFromIn(){
       try{
          while(!interrupted()){
+            while(!reader.ready()){
+               sleep(20);
+            }
             final String line = reader.readLine();
             if(line != null){
                router.raise(this, line);
             }
          }
-      }catch(final IOException e){
-         // continue
+      }catch(final Exception e){
+         // exit thread
       }
    }
 }

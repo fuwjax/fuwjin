@@ -11,23 +11,20 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class ExecutionEngine{
-   public static final int DO_NOT_DELAY = 0;
-   public static final int DO_NOT_REPEAT_EVERY = -1;
-   public static final int DO_NOT_WAIT_BETWEEN = -1;
+   public static final int EXEC_IMMEDIATELY = 0;
+   public static final int EXEC_ONCE = -1;
    @Inject
    private ScheduledExecutorService executor;
 
    public synchronized ScheduledFuture<?> execute(final Command command, final long delay, final long repeatEvery,
-         final long waitBetween, final TimeUnit unit){
+         final TimeUnit unit){
       ScheduledFuture<?> future;
-      if(repeatEvery != DO_NOT_REPEAT_EVERY){
+      if(repeatEvery != EXEC_ONCE){
          future = executor.scheduleAtFixedRate(command, delay, repeatEvery, unit);
-      }else if(waitBetween != DO_NOT_WAIT_BETWEEN){
-         future = executor.scheduleWithFixedDelay(command, delay, waitBetween, unit);
-      }else if(delay > DO_NOT_DELAY){
+      }else if(delay > EXEC_IMMEDIATELY){
          future = executor.schedule(command, delay, unit);
       }else{
-         future = executor.schedule(command, DO_NOT_DELAY, MILLISECONDS);
+         future = executor.schedule(command, EXEC_IMMEDIATELY, MILLISECONDS);
       }
       return future;
    }
@@ -37,6 +34,6 @@ public class ExecutionEngine{
    }
 
    public ScheduledFuture<?> execute(Command command){
-      return execute(command, DO_NOT_DELAY, DO_NOT_REPEAT_EVERY, DO_NOT_WAIT_BETWEEN, MILLISECONDS);
+      return execute(command, EXEC_IMMEDIATELY, EXEC_ONCE, MILLISECONDS);
    }
 }
