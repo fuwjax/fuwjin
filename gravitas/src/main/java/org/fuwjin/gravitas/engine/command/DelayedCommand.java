@@ -1,6 +1,7 @@
 package org.fuwjin.gravitas.engine.command;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.fuwjin.gravitas.engine.ExecutionEngine.EXEC_ONCE;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,7 @@ public class DelayedCommand extends Command{
 
    @Override
    public void doRun(){
-      ScheduledFuture<?> future = engine.execute(command, delay, -1, -1, unit);
+      ScheduledFuture<?> future = engine.execute(command, delay, EXEC_ONCE, unit);
       helper.storeExecution(source(), command, future);
       source().send(String.format("Scheduling %s in %d %s", command, delay, unit.toString().toLowerCase()));
    }

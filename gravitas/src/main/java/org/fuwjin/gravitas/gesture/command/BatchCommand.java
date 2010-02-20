@@ -3,39 +3,41 @@ package org.fuwjin.gravitas.gesture.command;
 import static org.fuwjin.util.LineIterable.lines;
 import static org.fuwjin.util.StreamUtils.open;
 
-import java.io.IOException;
 import java.io.InputStream;
 
+import org.fuwjin.gravitas.config.GravitasConfig;
+import org.fuwjin.gravitas.config.TargetFactory;
 import org.fuwjin.gravitas.engine.Command;
-import org.fuwjin.gravitas.gesture.EventRouter;
-import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 public class BatchCommand extends Command{
    @Inject
-   private EventRouter router;
+   private Injector injector;
+   @Inject
+   private GravitasConfig config;
    private String script;
 
    @Override
-   public void doRun(){
-      try{
-         execScript(router, source(), script);
-      }catch(IOException e){
-         throw new RuntimeException(e);
-      }
-   }
-
-   public static void execScript(EventRouter router, Integration source, String script) throws IOException{
+   public void doRun() throws Exception{
       InputStream stream = open(script);
+      final TargetFactory factory = config.factory(source());
       try{
          for(String line: lines(stream)){
             if(line.length() != 0){
-               router.raise(source, line);
+               final Command command = factory.newCommand(line);
+               command.setSource(source());
+               command.inject(injector);
+               command.run();
             }
          }
       }finally{
          stream.close();
       }
+   }
+
+   public void setScript(String script){
+      this.script = script;
    }
 }

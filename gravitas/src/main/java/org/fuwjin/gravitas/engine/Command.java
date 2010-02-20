@@ -26,11 +26,13 @@ public abstract class Command implements Runnable{
       try{
          doRun();
       }catch(Exception e){
+         System.err.println("ERROR: Could not handle "+gesture);
+         e.printStackTrace();
          throw new RuntimeException(e);
       }
    }
 
-   protected abstract void doRun();
+   protected abstract void doRun() throws Exception;
 
    public void setSource(Context source){
       this.source = source;

@@ -89,4 +89,11 @@ public class WhenUsingGravitas{
       test.input("clear queue");
       test.expect("Removed 2 events");
    }
+   
+   @Test
+   public void shouldManageScheduling() throws Throwable{
+      test.input("in 1 millisecond echo hi");
+      test.expect("Scheduling echo hi in 1 milliseconds");
+      test.expect("hi");
+   }
 }
