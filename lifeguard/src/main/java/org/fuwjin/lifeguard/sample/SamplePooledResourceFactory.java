@@ -15,13 +15,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-import org.fuwjin.lifeguard.PooledResource;
-import org.fuwjin.lifeguard.PooledResourceFactory;
+import org.fuwjin.lifeguard.Resource;
+import org.fuwjin.lifeguard.ResourceFactory;
+import org.fuwjin.lifeguard.ResourceTracker;
 
 /**
  * A factory for producing sample pooled objects.
  */
-public class SamplePooledResourceFactory implements PooledResourceFactory<Callable<?>>{
+public class SamplePooledResourceFactory implements ResourceFactory<Callable<?>>{
    private final List<SamplePooledResource> objects = new LinkedList<SamplePooledResource>();
    private final Random rand;
 
@@ -41,14 +42,14 @@ public class SamplePooledResourceFactory implements PooledResourceFactory<Callab
    public boolean isClosed(){
       boolean state = true;
       for(final SamplePooledResource obj: objects){
-         state &= obj.hasCalledClose() & obj.isClosed();
+         state &= obj.isClosed();
       }
       return state;
    }
 
    @Override
-   public PooledResource<Callable<?>> newResource() throws Exception{
-      final SamplePooledResource obj = new SamplePooledResource(rand);
+   public Resource<Callable<?>> newResource(ResourceTracker<Callable<?>> tracker) throws Exception{
+      final SamplePooledResource obj = new SamplePooledResource(tracker, rand);
       objects.add(obj);
       return obj;
    }
