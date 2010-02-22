@@ -10,48 +10,53 @@
  *******************************************************************************/
 package org.fuwjin.lifeguard.sample;
 
+import static java.lang.Thread.sleep;
+
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-import org.fuwjin.lifeguard.PooledResource;
+import org.fuwjin.lifeguard.Resource;
+import org.fuwjin.lifeguard.ResourceTracker;
 
 /**
  * A sample pooled object for testing.
  */
-class SamplePooledResource extends PooledResource<Callable<?>> implements Callable<Object>{
+class SamplePooledResource implements Resource<Callable<?>>, Callable<Object>{
    private static final int ABANDON_FRACTION = 3;
    private final Random rand;
    private boolean closed;
+   private final ResourceTracker<Callable<?>> tracker;
 
-   protected SamplePooledResource(final Random rand){
+   protected SamplePooledResource(final ResourceTracker<Callable<?>> tracker, final Random rand){
+      this.tracker = tracker;
       this.rand = rand;
    }
 
    @Override
    public Object call() throws Exception{
       final int number = rand.nextInt(100);
-      Thread.sleep(number);
+      sleep(number);
       if(number % ABANDON_FRACTION == 0){
-         abandon();
+         tracker.abandon();
       }else{
-         release();
+         tracker.release();
       }
       return null;
    }
 
    @Override
-   protected void close(){
+   public void close(){
       closed = true;
    }
 
    @Override
-   protected Callable<?> get() throws Exception{
+   public Callable<?> get() throws Exception{
       // throw an exception if rand is null
       rand.nextBoolean();
       return this;
    }
    
-   public boolean hasCalledClose(){
-      return closed;
+   public boolean isClosed(){
+      return closed && tracker.isClosed();
    }
 }

@@ -16,32 +16,23 @@ import java.util.concurrent.atomic.AtomicReference;
  * Monitors the state of a pooled object.
  * @param <T> the pooled object type
  */
-public abstract class PooledResource<T>{
+public final class ResourceTracker<T> {
    /**
     * Returns an already closed pooled object.
     * @param <T> the type for the null object
     * @return the new closed object
     */
-   public static <T>PooledResource<T> newClosedResource(){
-      return new PooledResource<T>(State.CLOSED){
-         @Override
-         protected void close(){
-            throw new UnsupportedOperationException();
-         }
-
-         @Override
-         protected T get(){
-            throw new UnsupportedOperationException();
-         }
-      };
+   public static <T>ResourceTracker<T> nullTracker(){
+      return new ResourceTracker<T>(State.CLOSED);
    }
 
    private final AtomicReference<State> state;
+   private Resource<T> resource;
 
    /**
     * Creates a new instance in the ready state.
     */
-   protected PooledResource(){
+   protected ResourceTracker(){
       this(State.READY);
    }
 
@@ -49,7 +40,7 @@ public abstract class PooledResource<T>{
     * Creates a new instance.
     * @param start the initial state
     */
-   private PooledResource(final State start){
+   private ResourceTracker(final State start){
       state = new AtomicReference<State>(start);
    }
 
@@ -58,7 +49,7 @@ public abstract class PooledResource<T>{
     */
    final void closeIfNotClosed(){
       if(changeState(State.READY, State.CLOSED) || changeState(State.ACTIVE, State.CLOSED)){
-         close();
+         resource.close();
       }
    }
 
@@ -76,7 +67,7 @@ public abstract class PooledResource<T>{
          return null;
       }
       try{
-         return get();
+         return resource.get();
       }catch(final Exception e){
          abandon();
          throw e;
@@ -95,9 +86,9 @@ public abstract class PooledResource<T>{
     * Abandons an active object. This method will move to the closed state, and
     * therefore close the underlying pooled object.
     */
-   protected final void abandon(){
+   public final void abandon(){
       if(changeState(State.ACTIVE, State.CLOSED)){
-         close();
+         resource.close();
       }
    }
 
@@ -109,32 +100,14 @@ public abstract class PooledResource<T>{
     */
    final void closeIfReady(){
       if(changeState(State.READY, State.CLOSED)){
-         close();
+         resource.close();
       }
    }
 
    /**
-    * Closes the underlying pooled object. This method should only throw a
-    * runtime exception if the underlying pooled object is still in a
-    * valid state after this method completes. 
-    * 
-    * This method should not be called directly outside of PooledResource. 
-    * Instead use abandon() or release().
-    */
-   protected abstract void close();
-
-   /**
-    * Returns the pooled object. This method should not be called directly 
-    * except from PooledResource. Instead use LifeGuard.get().
-    * @return the pooled object
-    * @throws Exception if the pooled object cannot be returned in a valid state
-    */
-   protected abstract T get() throws Exception;
-
-   /**
     * Returns an active object to the pool.
     */
-   protected final void release(){
+   public final void release(){
       changeState(State.ACTIVE, State.READY);
    }
 
@@ -157,6 +130,10 @@ public abstract class PooledResource<T>{
     */
    private boolean is(final State expected){
       return expected == state.get();
+   }
+
+   void setResource(Resource<T> resource){
+      this.resource = resource;
    }
 
    /**
