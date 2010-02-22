@@ -1,0 +1,57 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Michael Doberenz.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Michael Doberenz - initial implementation
+ *******************************************************************************/
+package org.fuwjin.lifeguard.sample;
+
+import java.util.Random;
+import java.util.concurrent.Callable;
+
+import org.fuwjin.lifeguard.PooledResource;
+
+/**
+ * A sample pooled object for testing.
+ */
+class SamplePooledResource extends PooledResource<Callable<?>> implements Callable<Object>{
+   private static final int ABANDON_FRACTION = 3;
+   private final Random rand;
+   private boolean closed;
+
+   protected SamplePooledResource(final Random rand){
+      this.rand = rand;
+   }
+
+   @Override
+   public Object call() throws Exception{
+      final int number = rand.nextInt(100);
+      Thread.sleep(number);
+      if(number % ABANDON_FRACTION == 0){
+         abandon();
+      }else{
+         release();
+      }
+      return null;
+   }
+
+   @Override
+   protected void close(){
+      closed = true;
+   }
+
+   @Override
+   protected Callable<?> get() throws Exception{
+      // throw an exception if rand is null
+      rand.nextBoolean();
+      return this;
+   }
+   
+   public boolean hasCalledClose(){
+      return closed;
+   }
+}
