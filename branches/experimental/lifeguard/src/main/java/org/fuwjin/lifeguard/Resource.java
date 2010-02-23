@@ -1,10 +1,10 @@
 package org.fuwjin.lifeguard;
 
+
 public interface Resource<T>{
    /**
-    * Closes the underlying object. This method should only throw a
-    * runtime exception if the underlying object is still in a
-    * valid state after this method completes. 
+    * Closes the underlying object. This method should only throw an exception
+    * if the underlying object remains in an open 
     */
    void close();
 

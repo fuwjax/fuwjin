@@ -21,13 +21,13 @@ import org.fuwjin.lifeguard.ResourceTracker;
 /**
  * A sample pooled object for testing.
  */
-class SamplePooledResource implements Resource<Callable<?>>, Callable<Object>{
+class SampleResource implements Resource<Callable<?>>, Callable<Object>{
    private static final int ABANDON_FRACTION = 3;
    private final Random rand;
    private boolean closed;
    private final ResourceTracker<Callable<?>> tracker;
 
-   protected SamplePooledResource(final ResourceTracker<Callable<?>> tracker, final Random rand){
+   protected SampleResource(final ResourceTracker<Callable<?>> tracker, final Random rand){
       this.tracker = tracker;
       this.rand = rand;
    }

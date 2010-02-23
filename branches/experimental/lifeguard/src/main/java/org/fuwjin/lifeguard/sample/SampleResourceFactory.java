@@ -22,15 +22,15 @@ import org.fuwjin.lifeguard.ResourceTracker;
 /**
  * A factory for producing sample pooled objects.
  */
-public class SamplePooledResourceFactory implements ResourceFactory<Callable<?>>{
-   private final List<SamplePooledResource> objects = new LinkedList<SamplePooledResource>();
+public class SampleResourceFactory implements ResourceFactory<Callable<?>>{
+   private final List<SampleResource> objects = new LinkedList<SampleResource>();
    private final Random rand;
 
    /**
     * Creates a new instance.
     * @param rand the random generator for producing durations for the callable.
     */
-   public SamplePooledResourceFactory(final Random rand){
+   public SampleResourceFactory(final Random rand){
       this.rand = rand;
    }
 
@@ -41,7 +41,7 @@ public class SamplePooledResourceFactory implements ResourceFactory<Callable<?>>
     */
    public boolean isClosed(){
       boolean state = true;
-      for(final SamplePooledResource obj: objects){
+      for(final SampleResource obj: objects){
          state &= obj.isClosed();
       }
       return state;
@@ -49,7 +49,7 @@ public class SamplePooledResourceFactory implements ResourceFactory<Callable<?>>
 
    @Override
    public Resource<Callable<?>> newResource(ResourceTracker<Callable<?>> tracker) throws Exception{
-      final SamplePooledResource obj = new SamplePooledResource(tracker, rand);
+      final SampleResource obj = new SampleResource(tracker, rand);
       objects.add(obj);
       return obj;
    }
