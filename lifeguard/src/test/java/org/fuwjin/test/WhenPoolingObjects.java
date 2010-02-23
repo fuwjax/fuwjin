@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 import org.fuwjin.lifeguard.LifeGuard;
-import org.fuwjin.lifeguard.sample.SamplePooledResourceFactory;
+import org.fuwjin.lifeguard.sample.SampleResourceFactory;
 import org.fuwjin.util.FailureAssertion;
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +35,7 @@ import org.junit.Test;
 public class WhenPoolingObjects{
    LifeGuard<Callable<?>> manager;
    private ExecutorService executor;
-   private SamplePooledResourceFactory factory;
+   private SampleResourceFactory factory;
 
    /**
     * Disposes the test system.
@@ -52,7 +52,7 @@ public class WhenPoolingObjects{
     */
    @Test
    public void shouldPassOnExceptionFromGetImpl(){
-      factory = new SamplePooledResourceFactory(null);
+      factory = new SampleResourceFactory(null);
       manager = new LifeGuard<Callable<?>>(factory, 5);
       new FailureAssertion(){
          @Override
@@ -136,7 +136,7 @@ public class WhenPoolingObjects{
    @Before
    public void someoneSetUpUsTheTest(){
       executor = Executors.newCachedThreadPool();
-      factory = new SamplePooledResourceFactory(new Random());
+      factory = new SampleResourceFactory(new Random());
       manager = new LifeGuard<Callable<?>>(factory, 5);
    }
 }
