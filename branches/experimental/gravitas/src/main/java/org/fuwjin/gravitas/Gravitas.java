@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.fuwjin.gravitas.engine.ExecutionEngine;
+import org.fuwjin.gravitas.gesture.Context;
 import org.fuwjin.gravitas.gesture.EventRouter;
 import org.fuwjin.gravitas.gesture.handler.UserInstructionEventHandler;
 
@@ -45,7 +46,8 @@ public class Gravitas{
    private BootIntegration source;
 
    private void start() throws Exception{
-      engine.execute(eventHandler,EXEC_IMMEDIATELY,10,MILLISECONDS);
+      Context context = router.getContext(source);
+      engine.execute(context, eventHandler,EXEC_IMMEDIATELY,10,MILLISECONDS);
       router.raise(source, "run bootstrap.script");
    }
 }

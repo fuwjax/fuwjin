@@ -1,5 +1,6 @@
 package org.fuwjin.gravitas.engine;
 
+import static java.lang.String.valueOf;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.fuwjin.gravitas.engine.Execution.Status.Executing;
 import static org.fuwjin.gravitas.engine.Execution.Status.Failed;
@@ -25,7 +26,7 @@ public class Execution{
    }
 
    public String desc(){
-      return command.gesture().toString();
+      return valueOf(command.gesture());
    }
 
    public int id(){
