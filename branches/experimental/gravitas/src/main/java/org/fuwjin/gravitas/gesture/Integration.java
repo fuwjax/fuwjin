@@ -1,7 +1,7 @@
 package org.fuwjin.gravitas.gesture;
 
 public interface Integration{
-   void send(Object... messages);
-   
    String name();
+
+   void send(Object... messages);
 }

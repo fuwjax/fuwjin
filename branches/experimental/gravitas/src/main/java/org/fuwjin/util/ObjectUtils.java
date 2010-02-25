@@ -3,10 +3,10 @@ package org.fuwjin.util;
 import java.util.Arrays;
 
 public final class ObjectUtils{
-   private ObjectUtils(){}
    static{
       new ObjectUtils();
    }
+
    public static boolean equals(final Object value, final Object oValue){
       if(value == null){
          return oValue == null;
@@ -110,5 +110,8 @@ public final class ObjectUtils{
          return Arrays.toString((boolean[])value);
       }
       return Arrays.toString((Object[])value);
+   }
+
+   private ObjectUtils(){
    }
 }

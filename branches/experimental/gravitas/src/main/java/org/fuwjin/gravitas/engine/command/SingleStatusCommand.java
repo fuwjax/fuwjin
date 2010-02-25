@@ -19,7 +19,7 @@ public class SingleStatusCommand extends Command{
       if(jobId == 0){
          execution = engine.previousExecution(source());
       }else{
-         execution = engine.execution(source(),jobId);
+         execution = engine.execution(source(), jobId);
       }
       if(execution == null){
          builder.append("There is no job " + jobId);

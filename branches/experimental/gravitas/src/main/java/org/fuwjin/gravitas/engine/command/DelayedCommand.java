@@ -23,10 +23,10 @@ public class DelayedCommand extends Command{
       source().send(String.format("Scheduling %s in %d %s", command, delay, unit.toString().toLowerCase()));
    }
 
-   void unit(String name){
+   void unit(final String name){
       String upper = name.toUpperCase();
       if(!upper.endsWith("S")){
-         upper = upper+"S";
+         upper = upper + "S";
       }
       unit = TimeUnit.valueOf(upper);
    }

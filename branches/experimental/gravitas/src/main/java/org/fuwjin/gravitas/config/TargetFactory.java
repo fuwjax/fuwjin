@@ -5,32 +5,32 @@ import java.util.List;
 import org.fuwjin.gravitas.engine.Command;
 
 public class TargetFactory{
-   private ClassResolver resolver;
-   private ContextConfig config;
-   
-   public TargetFactory(ClassResolver resolver, ContextConfig context){
+   private final ClassResolver resolver;
+   private final ContextConfig config;
+
+   public TargetFactory(final ClassResolver resolver, final ContextConfig context){
       this.resolver = resolver;
-      this.config = context;
+      config = context;
    }
 
-   public Target newInstance(String type){
-      Class<?> cls = resolver.forName(type);
-      try{
-         return new CommandTarget((Command)cls.newInstance(), this);
-      }catch(Exception e){
-         return null;
-      }
-   }
-   
-   public Command newCommand(String gesture){
-      return config.parse(this, gesture);
-   }
-   
    public ContextConfig config(){
       return config;
    }
 
-   public Target newMap(List<Token> targetTokens){
+   public Command newCommand(final String gesture){
+      return config.parse(this, gesture);
+   }
+
+   public Target newInstance(final String type){
+      final Class<?> cls = resolver.forName(type);
+      try{
+         return new CommandTarget((Command)cls.newInstance(), this);
+      }catch(final Exception e){
+         return null;
+      }
+   }
+
+   public Target newMap(final List<Token> targetTokens){
       return new MapTarget(targetTokens, this);
    }
 }

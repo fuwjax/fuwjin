@@ -15,7 +15,7 @@ public class ContextConfig{
       return unmodifiableCollection(commands);
    }
 
-   public Command parse(TargetFactory factory, final String input) {
+   public Command parse(final TargetFactory factory, final String input){
       for(final CommandConfig command: commands){
          final Command task = command.newInstance(factory, input);
          if(task != null){

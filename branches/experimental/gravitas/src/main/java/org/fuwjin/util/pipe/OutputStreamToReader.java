@@ -14,70 +14,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class OutputStreamToReader{
-   private final ByteBuffer bytes;
-
-   private CharBuffer chars;
-
-   private volatile boolean closed;
-   private final Charset conversion;
-   private final ReentrantLock lock = new ReentrantLock();
-   private final Condition hasBytes = lock.newCondition();
-   private PrintStream log;
-   private final InnerOutputStream outputStream = new InnerOutputStream();
-   private final InnerReader reader = new InnerReader();
-   public OutputStreamToReader(){
-      this(1000, "UTF-8");
-   }
-   public OutputStreamToReader(final int bufferSize, final String charset){
-      bytes = ByteBuffer.allocate(bufferSize);
-      conversion = Charset.forName(charset);
-   }
-
-   public void logTo(final PrintStream log){
-      this.log = log;
-   }
-
-   public OutputStream outputStream(){
-      return outputStream;
-   }
-
-   public Reader reader(){
-      return reader;
-   }
-
-   void assertOpen() throws EOFException{
-      if(closed){
-         throw new EOFException();
-      }
-   }
-
-   void closeImpl(){
-      closed = true;
-   }
-
-   boolean readyImpl(){
-      return chars != null && chars.hasRemaining();
-   }
-
-   void waitForChars() throws InterruptedIOException{
-      lock.lock();
-      try{
-         if(bytes.position() == 0){
-            hasBytes.await();
-         }
-         bytes.flip();
-         chars = conversion.decode(bytes);
-         if(log != null){
-            log.print(chars.toString());
-         }
-         bytes.compact();
-      }catch(final InterruptedException e){
-         throw new InterruptedIOException();
-      }finally{
-         lock.unlock();
-      }
-   }
-
    private class InnerOutputStream extends OutputStream{
       @Override
       public void close() throws IOException{
@@ -194,6 +130,70 @@ public class OutputStreamToReader{
          }
          chars.position(chars.position() + (int)n);
          return (int)n;
+      }
+   }
+
+   private final ByteBuffer bytes;
+   private CharBuffer chars;
+   private volatile boolean closed;
+   private final Charset conversion;
+   private final ReentrantLock lock = new ReentrantLock();
+   private final Condition hasBytes = lock.newCondition();
+   private PrintStream log;
+   private final InnerOutputStream outputStream = new InnerOutputStream();
+   private final InnerReader reader = new InnerReader();
+
+   public OutputStreamToReader(){
+      this(1000, "UTF-8");
+   }
+
+   public OutputStreamToReader(final int bufferSize, final String charset){
+      bytes = ByteBuffer.allocate(bufferSize);
+      conversion = Charset.forName(charset);
+   }
+
+   public void logTo(final PrintStream log){
+      this.log = log;
+   }
+
+   public OutputStream outputStream(){
+      return outputStream;
+   }
+
+   public Reader reader(){
+      return reader;
+   }
+
+   void assertOpen() throws EOFException{
+      if(closed){
+         throw new EOFException();
+      }
+   }
+
+   void closeImpl(){
+      closed = true;
+   }
+
+   boolean readyImpl(){
+      return chars != null && chars.hasRemaining();
+   }
+
+   void waitForChars() throws InterruptedIOException{
+      lock.lock();
+      try{
+         if(bytes.position() == 0){
+            hasBytes.await();
+         }
+         bytes.flip();
+         chars = conversion.decode(bytes);
+         if(log != null){
+            log.print(chars.toString());
+         }
+         bytes.compact();
+      }catch(final InterruptedException e){
+         throw new InterruptedIOException();
+      }finally{
+         lock.unlock();
       }
    }
 }

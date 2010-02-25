@@ -10,7 +10,7 @@ public class GravitasConfig{
    private ClassResolver resolver;
 
    public TargetFactory factory(final Context forObject){
-      Class<?> type = forObject.getType();
+      final Class<?> type = forObject.getType();
       if(!resolver.contains(type.getPackage().getName())){
          return null;
       }
@@ -18,6 +18,6 @@ public class GravitasConfig{
    }
 
    void addContext(final ContextConfig context){
-      contexts.put(context.type(), new TargetFactory(resolver,context));
+      contexts.put(context.type(), new TargetFactory(resolver, context));
    }
 }

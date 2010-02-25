@@ -12,9 +12,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 
 public class Execution{
+   public enum Status{
+      Executing, Failed, Finished, Interrupted, Pending
+   }
+
    private final ScheduledFuture<?> future;
    private final Command command;
    private final int id;
+
    public Execution(final int id, final Command command, final ScheduledFuture<?> future){
       this.id = id;
       this.future = future;
@@ -27,6 +32,17 @@ public class Execution{
 
    public String desc(){
       return valueOf(command.gesture());
+   }
+
+   public Throwable failure(){
+      try{
+         future.get();
+         return null;
+      }catch(final ExecutionException e){
+         return e.getCause();
+      }catch(final Exception e){
+         return e;
+      }
    }
 
    public int id(){
@@ -51,21 +67,6 @@ public class Execution{
          return Pending;
       }else{
          return Executing;
-      }
-   }
-
-   public enum Status{
-      Executing, Failed, Finished, Interrupted, Pending
-   }
-
-   public Throwable failure(){
-      try{
-         future.get();
-         return null;
-      }catch(ExecutionException e){
-         return e.getCause();
-      }catch(Exception e){
-         return e;
       }
    }
 }

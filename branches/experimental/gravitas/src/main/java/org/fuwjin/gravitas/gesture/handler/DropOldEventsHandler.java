@@ -18,7 +18,7 @@ public class DropOldEventsHandler extends Command implements EventHandler{
    }
 
    @Override
-   public boolean handle(Event event) throws Exception{
+   public boolean handle(final Event event) throws Exception{
       return event.id() <= lastId;
    }
 }

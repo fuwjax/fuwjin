@@ -9,26 +9,26 @@ import java.util.regex.Pattern;
 public class LiteralToken implements Token{
    private String value;
    private Pattern pattern;
-   
+
    @Override
-   public String apply(Target target, String gesture){
+   public String apply(final Target target, final String gesture){
       if(pattern == null){
-         pattern = compile("("+value+")\\s*(.*)");
+         pattern = compile("(" + value + ")\\s*(.*)");
       }
-      Matcher matcher = pattern.matcher(gesture);
+      final Matcher matcher = pattern.matcher(gesture);
       if(matcher.matches()){
          return matcher.group(2);
       }
       return null;
    }
-   
+
    @Override
-   public String value(Map<String, String> values){
+   public String toIdent(){
       return value;
    }
 
    @Override
-   public String toIdent(){
+   public String value(final Map<String, String> values){
       return value;
    }
 }

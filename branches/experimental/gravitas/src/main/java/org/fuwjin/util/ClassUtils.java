@@ -23,7 +23,7 @@ public final class ClassUtils{
    static{
       new ClassUtils();
    }
-   
+
    public static <A extends Annotation>A getAnnotation(Class<?> type, final Class<A> annotation){
       while(type != null){
          final A ann = type.getAnnotation(annotation);

@@ -14,67 +14,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class WriterToInputStream{
-   private ByteBuffer bytes;
-
-   private final CharBuffer chars;
-
-   private volatile boolean closed;
-   private final Charset conversion;
-   private final InnerInputStream inputStream = new InnerInputStream();
-   private PrintStream log;
-   private final ReentrantLock pipeLock = new ReentrantLock();
-   private final Condition hasChars = pipeLock.newCondition();
-   private final InnerWriter writer = new InnerWriter();
-   public WriterToInputStream(){
-      this(1000, "UTF-8");
-   }
-   public WriterToInputStream(final int bufferSize, final String charset){
-      chars = CharBuffer.allocate(bufferSize);
-      conversion = Charset.forName(charset);
-   }
-
-   public InputStream inputStream(){
-      return inputStream;
-   }
-
-   public void logTo(final PrintStream log){
-      this.log = log;
-   }
-
-   public Writer writer(){
-      return writer;
-   }
-
-   void assertOpen() throws EOFException{
-      if(closed){
-         throw new EOFException();
-      }
-   }
-
-   void closeImpl(){
-      closed = true;
-   }
-
-   boolean readyImpl(){
-      return bytes != null && bytes.hasRemaining();
-   }
-
-   void waitForBytes() throws InterruptedIOException{
-      pipeLock.lock();
-      try{
-         if(chars.position() == 0){
-            hasChars.await();
-         }
-         chars.flip();
-         bytes = conversion.encode(chars);
-         chars.compact();
-      }catch(final InterruptedException e){
-         throw new InterruptedIOException();
-      }finally{
-         pipeLock.unlock();
-      }
-   }
-
    private class InnerInputStream extends InputStream{
       @Override
       public void close() throws IOException{
@@ -223,6 +162,67 @@ public class WriterToInputStream{
          }finally{
             pipeLock.unlock();
          }
+      }
+   }
+
+   private ByteBuffer bytes;
+   private final CharBuffer chars;
+   private volatile boolean closed;
+   private final Charset conversion;
+   private final InnerInputStream inputStream = new InnerInputStream();
+   private PrintStream log;
+   private final ReentrantLock pipeLock = new ReentrantLock();
+   private final Condition hasChars = pipeLock.newCondition();
+   private final InnerWriter writer = new InnerWriter();
+
+   public WriterToInputStream(){
+      this(1000, "UTF-8");
+   }
+
+   public WriterToInputStream(final int bufferSize, final String charset){
+      chars = CharBuffer.allocate(bufferSize);
+      conversion = Charset.forName(charset);
+   }
+
+   public InputStream inputStream(){
+      return inputStream;
+   }
+
+   public void logTo(final PrintStream log){
+      this.log = log;
+   }
+
+   public Writer writer(){
+      return writer;
+   }
+
+   void assertOpen() throws EOFException{
+      if(closed){
+         throw new EOFException();
+      }
+   }
+
+   void closeImpl(){
+      closed = true;
+   }
+
+   boolean readyImpl(){
+      return bytes != null && bytes.hasRemaining();
+   }
+
+   void waitForBytes() throws InterruptedIOException{
+      pipeLock.lock();
+      try{
+         if(chars.position() == 0){
+            hasChars.await();
+         }
+         chars.flip();
+         bytes = conversion.encode(chars);
+         chars.compact();
+      }catch(final InterruptedException e){
+         throw new InterruptedIOException();
+      }finally{
+         pipeLock.unlock();
       }
    }
 }

@@ -20,13 +20,13 @@ public class RepeatCommand extends Command{
    @Override
    public void doRun(){
       engine.execute(source(), command, EXEC_IMMEDIATELY, rate, unit);
-      source().send(String.format("Scheduling %s every %d %s", command,rate,unit.toString().toLowerCase()));
+      source().send(String.format("Scheduling %s every %d %s", command, rate, unit.toString().toLowerCase()));
    }
-   
-   void unit(String name){
+
+   void unit(final String name){
       String upper = name.toUpperCase();
       if(!upper.endsWith("S")){
-         upper = upper+"S";
+         upper = upper + "S";
       }
       unit = TimeUnit.valueOf(upper);
    }

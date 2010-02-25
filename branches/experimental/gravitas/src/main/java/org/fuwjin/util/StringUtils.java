@@ -3,11 +3,10 @@ package org.fuwjin.util;
 import static java.lang.Character.isWhitespace;
 
 public final class StringUtils{
-   private StringUtils(){}
    static{
       new StringUtils();
    }
-   
+
    public static Object join(final String separator){
       return join("", separator);
    }
@@ -27,10 +26,11 @@ public final class StringUtils{
       };
    }
 
-   public static String word(String string){
+   public static String word(final String string){
       return word(string, 0);
    }
-   public static String word(String string, int start){
+
+   public static String word(final String string, final int start){
       int index = start;
       while(index < string.length() && !isWhitespace(string.charAt(index))){
          index++;
@@ -39,5 +39,8 @@ public final class StringUtils{
          index++;
       }
       return string.substring(start, index);
+   }
+
+   private StringUtils(){
    }
 }

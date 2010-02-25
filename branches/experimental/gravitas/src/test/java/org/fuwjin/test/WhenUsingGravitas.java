@@ -11,10 +11,6 @@ import org.junit.Test;
 
 public class WhenUsingGravitas{
    private static TestIntegration test;
-   @BeforeClass
-   public static void init() throws Exception{
-      test = newIntegration();
-   }
 
    @AfterClass
    public static void close() throws Exception{
@@ -23,10 +19,10 @@ public class WhenUsingGravitas{
          test.expect("Shutting down now");
       }
    }
-   
-   @After
-   public void teardown() throws Exception{
-      assertTrue(test.isClear());
+
+   @BeforeClass
+   public static void init() throws Exception{
+      test = newIntegration();
    }
 
    @Test
@@ -57,7 +53,7 @@ public class WhenUsingGravitas{
       test.input("quit 30");
       test.expect("Scheduling quit in 30 seconds");
       test.input("last job");
-      String actual = test.matches("\\d+\\) \\[Pending] quit");
+      final String actual = test.matches("\\d+\\) \\[Pending] quit");
       final int id = Integer.valueOf(actual.substring(0, actual.indexOf(')')));
       test.input("kill " + id);
       test.expect("Job " + id + " has been cancelled");
@@ -89,11 +85,16 @@ public class WhenUsingGravitas{
       test.input("clear queue");
       test.expect("Removed 2 events");
    }
-   
+
    @Test
    public void shouldManageScheduling() throws Throwable{
       test.input("in 1 millisecond echo hi");
       test.expect("Scheduling echo hi in 1 milliseconds");
       test.expect("hi");
+   }
+
+   @After
+   public void teardown() throws Exception{
+      assertTrue(test.isClear());
    }
 }

@@ -7,12 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public final class StreamUtils{
-   private StreamUtils(){
-      
-   }
    static{
       new StreamUtils();
    }
+
    public static InputStream load(final String path, final ClassLoader... loaders) throws FileNotFoundException{
       for(final ClassLoader loader: loaders){
          final InputStream stream = loader.getResourceAsStream(path);
@@ -31,5 +29,8 @@ public final class StreamUtils{
          loaders[i + 2] = classes[i].getClassLoader();
       }
       return load(path, loaders);
+   }
+
+   private StreamUtils(){
    }
 }

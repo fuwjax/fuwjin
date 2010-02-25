@@ -18,6 +18,9 @@ public final class SystemUtils{
    public static final BufferedReader err = new BufferedReader(errPipe.reader());
    public static final PrintWriter in = new PrintWriter(inPipe.writer());
    public static final BufferedReader out = new BufferedReader(outPipe.reader());
+   static{
+      new SystemUtils();
+   }
 
    public static synchronized void buffer(){
       if(System.in == origIn){
@@ -34,10 +37,7 @@ public final class SystemUtils{
          System.setOut(origOut);
       }
    }
+
    private SystemUtils(){
-      
-   }
-   static{
-      new SystemUtils();
    }
 }

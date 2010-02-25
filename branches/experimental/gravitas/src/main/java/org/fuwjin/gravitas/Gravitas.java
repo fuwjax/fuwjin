@@ -24,10 +24,10 @@ public class Gravitas{
       startGravitas(load(Module.class));
    }
 
-   public static Injector startGravitas(Iterable<Module> modules) throws Exception{
-      List<Module> list = new LinkedList<Module>();
+   public static Injector startGravitas(final Iterable<Module> modules) throws Exception{
+      final List<Module> list = new LinkedList<Module>();
       list.add(new GravitasModule());
-      for(Module module: modules){
+      for(final Module module: modules){
          list.add(module);
       }
       final Injector guice = createInjector(list);
@@ -46,8 +46,8 @@ public class Gravitas{
    private BootIntegration source;
 
    private void start() throws Exception{
-      Context context = router.getContext(source);
-      engine.execute(context, eventHandler,EXEC_IMMEDIATELY,10,MILLISECONDS);
+      final Context context = router.getContext(source);
+      engine.execute(context, eventHandler, EXEC_IMMEDIATELY, 10, MILLISECONDS);
       router.raise(source, "run bootstrap.script");
    }
 }
