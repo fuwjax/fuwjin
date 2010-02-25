@@ -1,4 +1,4 @@
-package org.fuwjin.gravitas.gesture.command;
+package org.fuwjin.gravitas.engine.command;
 
 import static org.fuwjin.util.LineIterable.lines;
 import static org.fuwjin.util.StreamUtils.open;
@@ -28,16 +28,12 @@ public class BatchCommand extends Command{
             if(line.length() != 0){
                final Command command = factory.newCommand(line);
                command.setSource(source());
-               command.inject(injector);
+               injector.injectMembers(command);
                command.run();
             }
          }
       }finally{
          stream.close();
       }
-   }
-
-   public void setScript(String script){
-      this.script = script;
    }
 }

@@ -2,18 +2,18 @@ package org.fuwjin.gravitas.engine.command;
 
 import org.fuwjin.gravitas.engine.Command;
 import org.fuwjin.gravitas.engine.Execution;
-import org.fuwjin.gravitas.engine.ExecutionContextHelper;
+import org.fuwjin.gravitas.engine.ExecutionEngine;
 
 import com.google.inject.Inject;
 
 public class CancelCommand extends Command{
    private int jobId;
    @Inject
-   private ExecutionContextHelper helper;
+   private ExecutionEngine engine;
 
    @Override
    public void doRun(){
-      final Execution execution = helper.execution(source(), jobId);
+      final Execution execution = engine.execution(source(), jobId);
       if(execution == null){
          source().send("There is no job " + jobId);
       }else{
