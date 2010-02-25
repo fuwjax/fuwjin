@@ -15,7 +15,7 @@ public class InstructionConfig{
       return unmodifiableCollection(atoms);
    }
 
-   public Command newInstance(TargetFactory factory, final String gesture){
+   public Command newInstance(final TargetFactory factory, final String gesture){
       String remaining = gesture;
       final Target target = strategy.newTarget(factory);
       for(final Token atom: atoms){
@@ -27,7 +27,7 @@ public class InstructionConfig{
       if(remaining.length() != 0){
          return null;
       }
-      Command command = target.toCommand();
+      final Command command = target.toCommand();
       command.setGesture(gesture);
       return command;
    }

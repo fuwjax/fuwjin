@@ -21,10 +21,10 @@ public class BatchCommand extends Command{
 
    @Override
    public void doRun() throws Exception{
-      InputStream stream = open(script);
+      final InputStream stream = open(script);
       final TargetFactory factory = config.factory(source());
       try{
-         for(String line: lines(stream)){
+         for(final String line: lines(stream)){
             if(line.length() != 0){
                final Command command = factory.newCommand(line);
                command.setSource(source());

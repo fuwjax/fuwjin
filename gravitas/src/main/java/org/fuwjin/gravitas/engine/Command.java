@@ -5,38 +5,38 @@ import org.fuwjin.gravitas.gesture.Context;
 public abstract class Command implements Runnable{
    private Object gesture;
    private Context source;
-   
-   protected Context source(){
-      return source;
-   }
-   
-   protected Object gesture(){
-      return gesture;
-   }
-   
-   @Override
-   public String toString(){
-      return gesture.toString();
-   }
 
    @Override
    public final void run(){
       try{
          doRun();
-      }catch(Exception e){
-         System.err.println("ERROR: Could not handle "+gesture);
+      }catch(final Exception e){
+         System.err.println("ERROR: Could not handle " + gesture);
          e.printStackTrace();
          throw new RuntimeException(e);
       }
    }
 
-   protected abstract void doRun() throws Exception;
+   public void setGesture(final Object gesture){
+      this.gesture = gesture;
+   }
 
-   public void setSource(Context source){
+   public void setSource(final Context source){
       this.source = source;
    }
 
-   public void setGesture(Object gesture){
-      this.gesture = gesture;
+   @Override
+   public String toString(){
+      return gesture.toString();
+   }
+
+   protected abstract void doRun() throws Exception;
+
+   protected Object gesture(){
+      return gesture;
+   }
+
+   protected Context source(){
+      return source;
    }
 }

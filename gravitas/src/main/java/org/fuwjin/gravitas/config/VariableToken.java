@@ -9,23 +9,23 @@ import java.util.regex.Pattern;
 public class VariableToken implements Token{
    private String name;
    private static Pattern pattern = compile("(\\S+)\\s*(.*)");
-   
+
    @Override
-   public String apply(Target target, String gesture){
-      Matcher matcher = pattern.matcher(gesture);
+   public String apply(final Target target, final String gesture){
+      final Matcher matcher = pattern.matcher(gesture);
       if(matcher.matches() && target.set(name, matcher.group(1))){
          return matcher.group(2);
       }
       return null;
    }
-   
-   @Override
-   public String value(Map<String, String> values){
-      return values.get(name);
-   }
 
    @Override
    public String toIdent(){
       return '$' + name;
+   }
+
+   @Override
+   public String value(final Map<String, String> values){
+      return values.get(name);
    }
 }

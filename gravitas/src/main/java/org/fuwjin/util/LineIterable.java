@@ -16,21 +16,21 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class LineIterable implements Iterable<String>{
-   public static Iterable<String> lines(InputStream stream){
+   public static Iterable<String> lines(final BufferedReader reader){
+      return new LineIterable(new BufferedReader(reader));
+   }
+
+   public static Iterable<String> lines(final InputStream stream){
       return lines(new InputStreamReader(stream));
    }
 
-   public static Iterable<String> lines(Reader reader){
+   public static Iterable<String> lines(final Reader reader){
       return lines(new BufferedReader(reader));
-   }
-
-   public static Iterable<String> lines(BufferedReader reader){
-      return new LineIterable(new BufferedReader(reader));
    }
 
    private final BufferedReader reader;
 
-   private LineIterable(BufferedReader reader){
+   private LineIterable(final BufferedReader reader){
       this.reader = reader;
    }
 
@@ -41,7 +41,7 @@ public class LineIterable implements Iterable<String>{
          public boolean hasNext(){
             try{
                return reader.ready();
-            }catch(IOException e){
+            }catch(final IOException e){
                return false;
             }
          }
@@ -50,8 +50,8 @@ public class LineIterable implements Iterable<String>{
          public String next(){
             try{
                return reader.readLine();
-            }catch(IOException e){
-               NoSuchElementException ex = new NoSuchElementException();
+            }catch(final IOException e){
+               final NoSuchElementException ex = new NoSuchElementException();
                ex.initCause(e);
                throw ex;
             }

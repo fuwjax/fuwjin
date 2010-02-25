@@ -19,7 +19,7 @@ public class CommandConfig{
       return unmodifiableCollection(instructions);
    }
 
-   public Command newInstance(TargetFactory factory, final String gesture) {
+   public Command newInstance(final TargetFactory factory, final String gesture){
       for(final InstructionConfig instruction: instructions){
          final Command runner = instruction.newInstance(factory, gesture);
          if(runner != null){

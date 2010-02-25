@@ -15,13 +15,7 @@ public class EventRouter{
    private final BlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
    private final ConcurrentMap<String, Context> contexts = new ConcurrentHashMap<String, Context>();
 
-   public synchronized int clear(){
-      final int count = events.size();
-      events.clear();
-      return count;
-   }
-
-   public synchronized int apply(final EventHandler handler, int lastId){
+   public synchronized int apply(final EventHandler handler, final int lastId){
       final Iterator<Event> iter = events.iterator();
       int ret = lastId;
       while(iter.hasNext()){
@@ -33,7 +27,7 @@ public class EventRouter{
             if(handler.handle(event) && !event.isBroadcast()){
                iter.remove();
             }
-         }catch(Exception e){
+         }catch(final Exception e){
             // continue
          }
          ret = event.id();
@@ -41,14 +35,24 @@ public class EventRouter{
       return ret;
    }
 
-   public Context getContext(Integration source){
+   public void broadcast(final Integration source, final Object gesture){
+      events.add(new Event(getContext(source), gesture, true));
+   }
+
+   public synchronized int clear(){
+      final int count = events.size();
+      events.clear();
+      return count;
+   }
+
+   public Context getContext(final Integration source){
       if(source instanceof Context){
          return (Context)source;
       }
       Context context = contexts.get(source.name());
       if(context == null){
          context = new Context(source);
-         Context old = contexts.putIfAbsent(source.name(), context);
+         final Context old = contexts.putIfAbsent(source.name(), context);
          if(old != null){
             context = old;
          }
@@ -62,9 +66,5 @@ public class EventRouter{
 
    public void raise(final Integration source, final Object gesture){
       events.add(new Event(getContext(source), gesture, false));
-   }
-
-   public void broadcast(final Integration source, final Object gesture){
-      events.add(new Event(getContext(source), gesture, true));
    }
 }

@@ -16,7 +16,7 @@ public class Event{
    private final int id;
    private final boolean broadcast;
 
-   public Event(final Context source, final Object gesture, boolean broadcast){
+   public Event(final Context source, final Object gesture, final boolean broadcast){
       this.source = source;
       this.gesture = gesture;
       this.broadcast = broadcast;
@@ -27,15 +27,15 @@ public class Event{
       return gesture;
    }
 
-   public Context source(){
-      return source;
-   }
-   
    public int id(){
       return id;
    }
-   
+
    public boolean isBroadcast(){
       return broadcast;
+   }
+
+   public Context source(){
+      return source;
    }
 }

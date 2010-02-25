@@ -6,6 +6,10 @@ import java.util.List;
 class ClassResolver{
    private final List<String> packages = new LinkedList<String>();
 
+   public boolean contains(final String name){
+      return packages.contains(name);
+   }
+
    void addPackage(final String packageName){
       packages.add(packageName);
    }
@@ -23,9 +27,5 @@ class ClassResolver{
       }catch(final ClassNotFoundException e){
          throw new RuntimeException("Could not locate " + type + ". Add a \"use\" statement to context.gravitas.");
       }
-   }
-
-   public boolean contains(String name){
-      return packages.contains(name);
    }
 }

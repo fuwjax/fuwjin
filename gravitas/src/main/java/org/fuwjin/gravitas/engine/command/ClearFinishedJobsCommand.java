@@ -11,7 +11,7 @@ import com.google.inject.Inject;
 public class ClearFinishedJobsCommand extends Command{
    @Inject
    private ExecutionEngine engine;
-   
+
    @Override
    public void doRun(){
       int removed = 0;

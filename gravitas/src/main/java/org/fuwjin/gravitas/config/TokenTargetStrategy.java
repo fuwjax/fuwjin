@@ -5,9 +5,9 @@ import java.util.List;
 
 public class TokenTargetStrategy implements TargetStrategy{
    private final List<Token> tokens = new LinkedList<Token>();
-   
+
    @Override
-   public Target newTarget(TargetFactory factory){
+   public Target newTarget(final TargetFactory factory){
       return factory.newMap(tokens);
    }
 

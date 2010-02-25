@@ -24,8 +24,7 @@ public class GravitasModule extends AbstractModule{
 
    @Provides
    @Singleton
-   protected GravitasConfig provideConfig() throws ParseException,
-         IOException{
+   protected GravitasConfig provideConfig() throws ParseException, IOException{
       final Grammar grammar = readGrammar("gravitas.pogo");
       final InputStreamReader reader = new InputStreamReader(open("gravitas.config"));
       return (GravitasConfig)grammar.parse(reader);

@@ -29,13 +29,21 @@ public class ExecutionEngine{
    @Inject
    private Injector injector;
    private static AtomicInteger id = new AtomicInteger();
-   
-   public BlockingDeque<Execution> executions(Context source){
-      ExecutionContext context = source.adapt(ExecutionContext.class);
-      return initIfNull(context.executions(), dequeProvider);
+
+   public void execute(final Context source, final Command command){
+      execute(source, command, EXEC_IMMEDIATELY, EXEC_ONCE, MILLISECONDS);
    }
-   
-   public Execution execution(Context source, int jobId){
+
+   public void execute(final Context source, final Command command, final long delay, final long repeatEvery,
+         final TimeUnit unit){
+      command.setSource(source);
+      injector.injectMembers(command);
+      final ScheduledFuture<?> future = execute(command, delay, repeatEvery, unit);
+      final BlockingDeque<Execution> executions = executions(source);
+      executions.add(new Execution(id.incrementAndGet(), command, future));
+   }
+
+   public Execution execution(final Context source, final int jobId){
       for(final Execution execution: executions(source)){
          if(execution.id() == jobId){
             return execution;
@@ -44,50 +52,29 @@ public class ExecutionEngine{
       return null;
    }
 
-   private void storeExecution(Context source, Command command, ScheduledFuture<?> future){
-      BlockingDeque<Execution> executions = executions(source);
-      executions.add(new Execution(id.incrementAndGet(), command, future));
+   public BlockingDeque<Execution> executions(final Context source){
+      final ExecutionContext context = source.adapt(ExecutionContext.class);
+      return initIfNull(context.executions(), dequeProvider);
    }
 
-   public Execution previousExecution(Context source){
+   public Execution previousExecution(final Context source){
       final BlockingDeque<Execution> executions = executions(source);
-      Iterator<Execution> iter = executions.descendingIterator();
+      final Iterator<Execution> iter = executions.descendingIterator();
       iter.next();
       return iter.next();
-   }
-   
-   private synchronized ScheduledFuture<?> execute(final Command command, final long delay, final long repeatEvery,
-         final TimeUnit unit){
-      ScheduledFuture<?> future;
-      if(repeatEvery != EXEC_ONCE){
-         future = executor.scheduleAtFixedRate(command, delay, repeatEvery, unit);
-      }else if(delay > EXEC_IMMEDIATELY){
-         future = executor.schedule(command, delay, unit);
-      }else{
-         future = executor.schedule(command, EXEC_IMMEDIATELY, MILLISECONDS);
-      }
-      return future;
    }
 
    public void shutdown(){
       executor.shutdown();
    }
 
-   private ScheduledFuture<?> execute(Command command){
-      return execute(command, EXEC_IMMEDIATELY, EXEC_ONCE, MILLISECONDS);
-   }
-
-   public void execute(Context source, Command command){
-      command.setSource(source);
-      injector.injectMembers(command);
-      ScheduledFuture<?> future = execute(command);
-      storeExecution(source, command, future);
-   }
-
-   public void execute(Context source, Command command, long delay, long repeatEvery, TimeUnit unit){
-      command.setSource(source);
-      injector.injectMembers(command);
-      ScheduledFuture<?> future = execute(command, delay, repeatEvery, unit);
-      storeExecution(source, command, future);
+   private synchronized ScheduledFuture<?> execute(final Command command, final long delay, final long repeatEvery,
+         final TimeUnit unit){
+      if(repeatEvery != EXEC_ONCE){
+         return executor.scheduleAtFixedRate(command, delay, repeatEvery, unit);
+      }else if(delay > EXEC_IMMEDIATELY){
+         return executor.schedule(command, delay, unit);
+      }
+      return executor.schedule(command, EXEC_IMMEDIATELY, MILLISECONDS);
    }
 }
