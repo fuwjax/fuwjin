@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.fuwjin.gravitas.gesture.Context;
 
@@ -25,10 +24,9 @@ public class ExecutionEngine{
    @Inject
    private ScheduledExecutorService executor;
    @Inject
-   private Provider<LinkedBlockingDeque<Execution>> dequeProvider;
+   private Provider<LinkedBlockingDeque<Command>> dequeProvider;
    @Inject
    private Injector injector;
-   private static AtomicInteger id = new AtomicInteger();
 
    public void execute(final Context source, final Command command){
       execute(source, command, EXEC_IMMEDIATELY, EXEC_ONCE, MILLISECONDS);
@@ -39,12 +37,13 @@ public class ExecutionEngine{
       command.setSource(source);
       injector.injectMembers(command);
       final ScheduledFuture<?> future = execute(command, delay, repeatEvery, unit);
-      final BlockingDeque<Execution> executions = executions(source);
-      executions.add(new Execution(id.incrementAndGet(), command, future));
+      command.setFuture(future);
+      final BlockingDeque<Command> executions = executions(source);
+      executions.add(command);
    }
 
-   public Execution execution(final Context source, final int jobId){
-      for(final Execution execution: executions(source)){
+   public Command execution(final Context source, final int jobId){
+      for(final Command execution: executions(source)){
          if(execution.id() == jobId){
             return execution;
          }
@@ -52,14 +51,14 @@ public class ExecutionEngine{
       return null;
    }
 
-   public BlockingDeque<Execution> executions(final Context source){
+   public BlockingDeque<Command> executions(final Context source){
       final ExecutionContext context = source.adapt(ExecutionContext.class);
       return initIfNull(context.executions(), dequeProvider);
    }
 
-   public Execution previousExecution(final Context source){
-      final BlockingDeque<Execution> executions = executions(source);
-      final Iterator<Execution> iter = executions.descendingIterator();
+   public Command previousExecution(final Context source){
+      final BlockingDeque<Command> executions = executions(source);
+      final Iterator<Command> iter = executions.descendingIterator();
       iter.next();
       return iter.next();
    }

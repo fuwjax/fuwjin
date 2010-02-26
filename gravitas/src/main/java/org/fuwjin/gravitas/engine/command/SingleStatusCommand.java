@@ -1,9 +1,7 @@
 package org.fuwjin.gravitas.engine.command;
 
 import org.fuwjin.gravitas.engine.Command;
-import org.fuwjin.gravitas.engine.Execution;
 import org.fuwjin.gravitas.engine.ExecutionEngine;
-import org.fuwjin.gravitas.engine.Execution.Status;
 
 import com.google.inject.Inject;
 
@@ -15,7 +13,7 @@ public class SingleStatusCommand extends Command{
    @Override
    public void doRun(){
       final StringBuilder builder = new StringBuilder();
-      Execution execution = null;
+      Command execution = null;
       if(jobId == 0){
          execution = engine.previousExecution(source());
       }else{
