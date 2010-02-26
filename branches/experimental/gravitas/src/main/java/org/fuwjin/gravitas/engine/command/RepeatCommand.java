@@ -22,6 +22,11 @@ public class RepeatCommand extends Command{
       engine.execute(source(), command, EXEC_IMMEDIATELY, rate, unit);
       source().send(String.format("Scheduling %s every %d %s", command, rate, unit.toString().toLowerCase()));
    }
+   
+   @Override
+   public boolean cancel(){
+      return super.cancel();
+   }
 
    void unit(final String name){
       String upper = name.toUpperCase();
