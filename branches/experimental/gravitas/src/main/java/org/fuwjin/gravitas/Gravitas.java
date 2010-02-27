@@ -2,7 +2,7 @@ package org.fuwjin.gravitas;
 
 import static com.google.inject.Guice.createInjector;
 import static java.util.ServiceLoader.load;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static org.fuwjin.gravitas.engine.ExecutionEngine.EXEC_IMMEDIATELY;
 
 import java.util.LinkedList;
@@ -47,7 +47,7 @@ public class Gravitas{
 
    private void start() throws Exception{
       final Context context = router.getContext(source);
-      engine.execute(context, eventHandler, EXEC_IMMEDIATELY, 10, MILLISECONDS);
+      engine.execute(context, eventHandler, EXEC_IMMEDIATELY, 1, NANOSECONDS);
       router.raise(source, "run bootstrap.script");
    }
 }

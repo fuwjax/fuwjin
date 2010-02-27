@@ -14,11 +14,11 @@ package org.fuwjin.lifeguard;
  * Creates new instances of pooled objects.
  * @param <T> the pooled object types
  */
-public interface ResourceFactory<T> {
+public interface ResourceFactory<T extends Resource> {
    /**
     * Creates a new pooled object instance.
     * @return the new pooled object instance
     * @throws Exception if there is any problem creating the new instance
     */
-   Resource<T> newResource(ResourceTracker<T> state) throws Exception;
+   T newResource() throws Exception;
 }

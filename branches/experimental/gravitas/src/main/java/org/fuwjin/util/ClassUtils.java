@@ -2,7 +2,6 @@ package org.fuwjin.util;
 
 import static java.lang.reflect.Proxy.newProxyInstance;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,17 +21,6 @@ public final class ClassUtils{
    }
    static{
       new ClassUtils();
-   }
-
-   public static <A extends Annotation>A getAnnotation(Class<?> type, final Class<A> annotation){
-      while(type != null){
-         final A ann = type.getAnnotation(annotation);
-         if(ann != null){
-            return ann;
-         }
-         type = type.getSuperclass();
-      }
-      return newProxy(annotation, new AnnotationHandler(annotation));
    }
 
    public static Class<?> getWrapper(final Class<?> type){

@@ -23,8 +23,10 @@ public class TestIntegration implements Integration{
    private EventRouter router;
    private final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
-   public void clearOutput(){
-      queue.clear();
+   public void expectLines(int count) throws InterruptedException{
+      for(int i =0;i<count;i++){
+         queue.take();
+      }
    }
 
    public void expect(final String expected) throws InterruptedException{
@@ -36,10 +38,6 @@ public class TestIntegration implements Integration{
 
    public void input(final String gesture){
       router.raise(this, gesture);
-   }
-
-   public boolean isClear(){
-      return queue.isEmpty();
    }
 
    public String matches(final String pattern) throws InterruptedException{

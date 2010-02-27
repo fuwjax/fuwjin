@@ -3,16 +3,16 @@ package org.fuwjin.gravitas.gesture;
 import static java.util.Collections.unmodifiableCollection;
 
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import com.google.inject.Singleton;
 
 @Singleton
 public class EventRouter{
-   private final BlockingQueue<Event> events = new LinkedBlockingQueue<Event>();
+   private final Queue<Event> events = new ConcurrentLinkedQueue<Event>();
    private final ConcurrentMap<String, Context> contexts = new ConcurrentHashMap<String, Context>();
 
    public synchronized int apply(final EventHandler handler, final int lastId){

@@ -17,12 +17,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 import org.fuwjin.lifeguard.LifeGuard;
+import org.fuwjin.lifeguard.sample.SampleWorker;
 import org.fuwjin.lifeguard.sample.SampleResourceFactory;
 import org.fuwjin.util.FailureAssertion;
 import org.junit.After;
@@ -33,8 +31,7 @@ import org.junit.Test;
  * Tests the object pool.
  */
 public class WhenPoolingObjects{
-   LifeGuard<Callable<?>> manager;
-   private ExecutorService executor;
+   private LifeGuard<SampleWorker> manager;
    private SampleResourceFactory factory;
 
    /**
@@ -51,15 +48,15 @@ public class WhenPoolingObjects{
     * The exception from getImpl should be propagated.
     */
    @Test
-   public void shouldPassOnExceptionFromGetImpl(){
+   public void shouldNotPassOnExceptionFromGetImpl(){
       factory = new SampleResourceFactory(null);
-      manager = new LifeGuard<Callable<?>>(factory, 5);
+      manager = new LifeGuard<SampleWorker>(factory, 5);
       new FailureAssertion(){
          @Override
          public void whenDoing() throws Throwable{
             manager.get(1, SECONDS);
          }
-      }.shouldThrow(NullPointerException.class);
+      }.shouldThrow(TimeoutException.class);
    }
 
    /**
@@ -69,7 +66,7 @@ public class WhenPoolingObjects{
    @Test
    public void shouldRunLotsOfTimes() throws Exception{
       for(int i = 0; i < 10; i++){
-         executor.submit(manager.get(1, SECONDS));
+         manager.get(1, SECONDS).startWork();
       }
    }
 
@@ -87,7 +84,7 @@ public class WhenPoolingObjects{
          }
       }, 10);
       for(int i = 0; i < 10; i++){
-         executor.submit(manager.get(1, SECONDS));
+         manager.get(1, SECONDS).startWork();
       }
    }
 
@@ -98,7 +95,7 @@ public class WhenPoolingObjects{
    @Test(expected = TimeoutException.class)
    public void shouldTimeoutIfNoObjectIsAvailable() throws Exception{
       for(int i = 0; i < 10; i++){
-         executor.submit(manager.get(1, MILLISECONDS));
+         manager.get(1, MILLISECONDS).startWork();
       }
    }
 
@@ -109,7 +106,7 @@ public class WhenPoolingObjects{
    @Test
    public void shouldTimeoutOnClose() throws Exception{
       for(int i = 0; i < 10; i++){
-         executor.submit(manager.get(1, SECONDS));
+         manager.get(1, SECONDS).startWork();
       }
       new FailureAssertion(){
          @Override
@@ -135,8 +132,7 @@ public class WhenPoolingObjects{
     */
    @Before
    public void someoneSetUpUsTheTest(){
-      executor = Executors.newCachedThreadPool();
       factory = new SampleResourceFactory(new Random());
-      manager = new LifeGuard<Callable<?>>(factory, 5);
+      manager = new LifeGuard<SampleWorker>(factory, 5);
    }
 }
