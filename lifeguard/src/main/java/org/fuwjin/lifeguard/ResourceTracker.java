@@ -16,31 +16,32 @@ import java.util.concurrent.atomic.AtomicReference;
  * Monitors the state of a pooled object.
  * @param <T> the pooled object type
  */
-public final class ResourceTracker<T> {
+public final class ResourceTracker<T extends Resource> {
    /**
     * Returns an already closed pooled object.
     * @param <T> the type for the null object
     * @return the new closed object
     */
-   public static <T>ResourceTracker<T> nullTracker(){
-      return new ResourceTracker<T>(State.CLOSED);
+   public static <T extends Resource>ResourceTracker<T> nullTracker(){
+      return new ResourceTracker<T>(null, State.CLOSED);
    }
 
    private final AtomicReference<State> state;
-   private Resource<T> resource;
+   private T resource;
 
    /**
     * Creates a new instance in the ready state.
     */
-   protected ResourceTracker(){
-      this(State.READY);
+   protected ResourceTracker(T resource){
+      this(resource, State.READY);
    }
 
    /**
     * Creates a new instance.
     * @param start the initial state
     */
-   private ResourceTracker(final State start){
+   private ResourceTracker(T resource, final State start){
+      this.resource = resource;
       state = new AtomicReference<State>(start);
    }
 
@@ -67,11 +68,14 @@ public final class ResourceTracker<T> {
          return null;
       }
       try{
-         return resource.get();
+         if(resource.isValid()){
+            return resource;
+         }
       }catch(final Exception e){
-         abandon();
-         throw e;
+         // ignore isValid exceptions
       }
+      abandon();
+      return null;
    }
 
    /**
@@ -130,10 +134,6 @@ public final class ResourceTracker<T> {
     */
    private boolean is(final State expected){
       return expected == state.get();
-   }
-
-   void setResource(Resource<T> resource){
-      this.resource = resource;
    }
 
    /**

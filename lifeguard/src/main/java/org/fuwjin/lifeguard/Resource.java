@@ -1,7 +1,7 @@
 package org.fuwjin.lifeguard;
 
 
-public interface Resource<T>{
+public interface Resource{
    /**
     * Closes the underlying object. This method should only throw an exception
     * if the underlying object remains in an open 
@@ -14,5 +14,7 @@ public interface Resource<T>{
     * @return the pooled object
     * @throws Exception if the pooled object cannot be returned in a valid state
     */
-   T get() throws Exception;
+   boolean isValid() throws Exception;
+   
+   void setTracker(ResourceTracker<?> tracker);
 }

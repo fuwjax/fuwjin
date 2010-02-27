@@ -23,11 +23,6 @@ public class RepeatCommand extends Command{
       source().send(String.format("Scheduling %s every %d %s", command, rate, unit.toString().toLowerCase()));
    }
    
-   @Override
-   public boolean cancel(){
-      return super.cancel();
-   }
-
    void unit(final String name){
       String upper = name.toUpperCase();
       if(!upper.endsWith("S")){

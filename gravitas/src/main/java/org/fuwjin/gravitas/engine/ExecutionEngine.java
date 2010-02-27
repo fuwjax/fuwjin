@@ -76,4 +76,10 @@ public class ExecutionEngine{
       }
       return executor.schedule(command, EXEC_IMMEDIATELY, MILLISECONDS);
    }
+
+   public void executeNow(Context source, Command command){
+      command.setSource(source);
+      injector.injectMembers(command);
+      command.run();
+   }
 }

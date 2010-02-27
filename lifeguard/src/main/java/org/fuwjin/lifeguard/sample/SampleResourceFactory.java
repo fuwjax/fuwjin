@@ -13,17 +13,14 @@ package org.fuwjin.lifeguard.sample;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 
-import org.fuwjin.lifeguard.Resource;
 import org.fuwjin.lifeguard.ResourceFactory;
-import org.fuwjin.lifeguard.ResourceTracker;
 
 /**
  * A factory for producing sample pooled objects.
  */
-public class SampleResourceFactory implements ResourceFactory<Callable<?>>{
-   private final List<SampleResource> objects = new LinkedList<SampleResource>();
+public class SampleResourceFactory implements ResourceFactory<SampleWorker>{
+   private final List<SampleWorker> objects = new LinkedList<SampleWorker>();
    private final Random rand;
 
    /**
@@ -41,15 +38,15 @@ public class SampleResourceFactory implements ResourceFactory<Callable<?>>{
     */
    public boolean isClosed(){
       boolean state = true;
-      for(final SampleResource obj: objects){
+      for(final SampleWorker obj: objects){
          state &= obj.isClosed();
       }
       return state;
    }
 
    @Override
-   public Resource<Callable<?>> newResource(ResourceTracker<Callable<?>> tracker) throws Exception{
-      final SampleResource obj = new SampleResource(tracker, rand);
+   public SampleWorker newResource() throws Exception{
+      final SampleWorker obj = new SampleWorker(rand);
       objects.add(obj);
       return obj;
    }

@@ -1,7 +1,8 @@
 package org.fuwjin.test;
 
 import static org.fuwjin.gravitas.test.TestIntegration.newIntegration;
-import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
 
 import org.fuwjin.gravitas.test.TestIntegration;
 import org.junit.After;
@@ -30,7 +31,7 @@ public class WhenUsingGravitas{
       test.input("help");
       test.expect("jobs, status - Displays the current status of all known jobs");
       test.expect("jobs $jobId, status $jobId - Displays the current status of a single job");
-      test.clearOutput();
+      test.expectLines(14);
       test.input("help jobs");
       test.expect("jobs - Displays the current status of all known jobs");
       test.expect("   Aliases: status");
@@ -38,7 +39,7 @@ public class WhenUsingGravitas{
       test.expect("jobs $jobId - Displays the current status of a single job");
       test.expect("   jobId: the id of the job to display");
       test.expect("   Aliases: status $jobId");
-      test.clearOutput();
+      test.expectLines(5);
    }
 
    @Test
@@ -53,9 +54,9 @@ public class WhenUsingGravitas{
       test.input("quit 30");
       test.expect("Scheduling quit in 30 seconds");
       test.input("last job");
-      final String actual = test.matches("\\d+\\) \\[Pending] quit");
+      final String actual = test.matches("\\d+\\) \\[Pending] "+"quit");
       final int id = Integer.valueOf(actual.substring(0, actual.indexOf(')')));
-      test.input("kill " + id);
+      test.input("kill "+id);
       test.expect("Job " + id + " has been cancelled");
       test.input("jobs " + id);
       test.matches("\\d+\\) \\[Interrupted] quit");
@@ -93,8 +94,22 @@ public class WhenUsingGravitas{
       test.expect("hi");
    }
 
+   @Test
+   public void shouldDropEvents() throws Throwable{
+      test.input("this is not a valid event");
+      test.input("queue");
+      test.matches("\\d+\\) \\[test] this is not a valid event");
+      test.input("every 1 millisecond repeat 2 times drop events");
+      test.expect("Scheduling repeat 2 times drop events every 1 milliseconds");
+      test.expect("Finished looping");
+      test.input("queue");
+      test.expect("The queue is empty");
+   }
+
    @After
-   public void teardown() throws Exception{
-      assertTrue(test.isClear());
+   public void assertIsClear() throws Exception{
+      int num = new Random().nextInt();
+      test.input("echo "+num);
+      test.expect(Integer.toString(num));
    }
 }
