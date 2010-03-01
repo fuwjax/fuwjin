@@ -1,11 +1,9 @@
 package org.fuwjin.gravitas.engine;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.fuwjin.gravitas.gesture.ContextHandler.initIfNull;
 
 import java.util.Iterator;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +12,6 @@ import org.fuwjin.gravitas.gesture.Context;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -23,8 +20,6 @@ public class ExecutionEngine{
    public static final int EXEC_ONCE = -1;
    @Inject
    private ScheduledExecutorService executor;
-   @Inject
-   private Provider<LinkedBlockingDeque<Command>> dequeProvider;
    @Inject
    private Injector injector;
 
@@ -52,8 +47,8 @@ public class ExecutionEngine{
    }
 
    public BlockingDeque<Command> executions(final Context source){
-      final ExecutionContext context = source.adapt(ExecutionContext.class);
-      return initIfNull(context.executions(), dequeProvider);
+      final ExecutionContext context = source.bean(ExecutionContext.class);
+      return context.executions();
    }
 
    public Command previousExecution(final Context source){

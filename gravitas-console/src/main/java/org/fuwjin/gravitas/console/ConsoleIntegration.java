@@ -8,14 +8,14 @@ import static java.lang.Thread.sleep;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import org.fuwjin.gravitas.gesture.Context;
 import org.fuwjin.gravitas.gesture.EventRouter;
-import org.fuwjin.gravitas.gesture.Integration;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ConsoleIntegration implements Integration{
+public class ConsoleIntegration extends Context{
    private final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
    @Inject
    private EventRouter router;

@@ -4,16 +4,13 @@ import static java.util.Collections.unmodifiableCollection;
 
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 
 import com.google.inject.Singleton;
 
 @Singleton
 public class EventRouter{
    private final Queue<Event> events = new ConcurrentLinkedQueue<Event>();
-   private final ConcurrentMap<String, Context> contexts = new ConcurrentHashMap<String, Context>();
 
    public synchronized int apply(final EventHandler handler, final int lastId){
       final Iterator<Event> iter = events.iterator();
@@ -35,8 +32,8 @@ public class EventRouter{
       return ret;
    }
 
-   public void broadcast(final Integration source, final Object gesture){
-      events.add(new Event(getContext(source), gesture, true));
+   public void broadcast(final Context source, final Object gesture){
+      events.add(new Event(source, gesture, true));
    }
 
    public synchronized int clear(){
@@ -45,26 +42,11 @@ public class EventRouter{
       return count;
    }
 
-   public Context getContext(final Integration source){
-      if(source instanceof Context){
-         return (Context)source;
-      }
-      Context context = contexts.get(source.name());
-      if(context == null){
-         context = new Context(source);
-         final Context old = contexts.putIfAbsent(source.name(), context);
-         if(old != null){
-            context = old;
-         }
-      }
-      return context;
-   }
-
    public synchronized Iterable<Event> queue(){
       return unmodifiableCollection(events);
    }
 
-   public void raise(final Integration source, final Object gesture){
-      events.add(new Event(getContext(source), gesture, false));
+   public void raise(final Context source, final Object gesture){
+      events.add(new Event(source, gesture, false));
    }
 }
