@@ -3,6 +3,8 @@ package org.fuwjin.util;
 import static java.lang.reflect.Proxy.newProxyInstance;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,8 +36,22 @@ public final class ClassUtils{
    public static <T>T newProxy(final Class<T> type, final InvocationHandler handler){
       return type.cast(newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler));
    }
+   
+   public static <T> T newBean(final Class<T> type){
+      return newProxy(type, new BeanHandler());
+   }
 
    private ClassUtils(){
       // singleton
+   }
+
+   public static void invoke(Object target, Method method, Object[] args){
+      try{
+         method.invoke(target, args);
+      }catch(InvocationTargetException e){
+         throw new RuntimeException(e.getCause());
+      }catch(Exception e){
+         throw new RuntimeException(e);
+      }
    }
 }

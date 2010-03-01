@@ -2,9 +2,9 @@ package org.fuwjin.gravitas;
 
 import static java.lang.System.err;
 
-import org.fuwjin.gravitas.gesture.Integration;
+import org.fuwjin.gravitas.gesture.Context;
 
-public class BootIntegration implements Integration{
+public class BootIntegration extends Context{
    @Override
    public String name(){
       return "boot";

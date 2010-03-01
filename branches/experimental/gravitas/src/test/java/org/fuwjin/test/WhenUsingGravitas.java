@@ -31,7 +31,7 @@ public class WhenUsingGravitas{
       test.input("help");
       test.expect("jobs, status - Displays the current status of all known jobs");
       test.expect("jobs $jobId, status $jobId - Displays the current status of a single job");
-      test.expectLines(14);
+      test.expectLines(16);
       test.input("help jobs");
       test.expect("jobs - Displays the current status of all known jobs");
       test.expect("   Aliases: status");
@@ -92,6 +92,12 @@ public class WhenUsingGravitas{
       test.input("in 1 millisecond echo hi");
       test.expect("Scheduling echo hi in 1 milliseconds");
       test.expect("hi");
+   }
+
+   @Test
+   public void shouldDumpStackTrace() throws Throwable{
+      test.input("threads");
+      test.expectLines(10);
    }
 
    @Test
