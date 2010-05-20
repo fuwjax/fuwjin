@@ -10,26 +10,26 @@
  *******************************************************************************/
 package org.fuwjin.bespect;
 
-import static org.ow2.util.asm.Opcodes.ACC_NATIVE;
-import static org.ow2.util.asm.Opcodes.ACC_PROTECTED;
-import static org.ow2.util.asm.Opcodes.ACC_PUBLIC;
-import static org.ow2.util.asm.Opcodes.ACC_STATIC;
-import static org.ow2.util.asm.Opcodes.ARETURN;
-import static org.ow2.util.asm.Opcodes.INVOKESTATIC;
-import static org.ow2.util.asm.Opcodes.INVOKEVIRTUAL;
-import static org.ow2.util.asm.Opcodes.LRETURN;
-import static org.ow2.util.asm.Type.LONG_TYPE;
-import static org.ow2.util.asm.Type.getMethodDescriptor;
-import static org.ow2.util.asm.Type.getReturnType;
+import static org.objectweb.asm.Opcodes.ACC_NATIVE;
+import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.LRETURN;
+import static org.objectweb.asm.Type.LONG_TYPE;
+import static org.objectweb.asm.Type.getMethodDescriptor;
+import static org.objectweb.asm.Type.getReturnType;
 
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.ow2.util.asm.ClassAdapter;
-import org.ow2.util.asm.ClassVisitor;
-import org.ow2.util.asm.MethodVisitor;
-import org.ow2.util.asm.Type;
+import org.objectweb.asm.ClassAdapter;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 
 public class RedirectAdapter extends ClassAdapter{
    private static int returnOp(Type returnType){
@@ -95,6 +95,8 @@ public class RedirectAdapter extends ClassAdapter{
          mv.visitMethodInsn(invokeOp(redirect.access), className, prefix+redirect.name, redirect.desc);
          mv.visitMethodInsn(invokeOp(redirect.access), advisor.getName().replace('.', '/'), redirect.name, redirect.advisorDesc);
          mv.visitInsn(returnOp(redirect.returnType));
+         mv.visitMaxs(1, 1);
+         mv.visitEnd();
       }
       super.visitEnd();
    }
