@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.fuwjin.bespect;
 
-import org.ow2.util.asm.Type;
+import org.objectweb.asm.Type;
 
 class MethodRedirect{
 

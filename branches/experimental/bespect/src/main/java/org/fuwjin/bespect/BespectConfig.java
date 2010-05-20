@@ -1,23 +1,28 @@
 package org.fuwjin.bespect;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.regex.Pattern;
 
 public class BespectConfig{
+   private String advice;
+   private String prefix;
+   private Pattern target;
 
-   public String getNativeMethodPrefix(){
-      return "$chrona_";
+   public BespectConfig(String line){
+      String[] split = line.split(" ");
+      advice = split[0];
+      prefix = split[1];
+      target = Pattern.compile(split[2]);
    }
 
-   public List<String> getRetransformClasses(){
-      return Collections.singletonList("java.lang.System");
+   public String getMethodPrefix(){
+      return prefix;
    }
-   
-   public List<String> getAdvisedClasses(){
-      return Collections.singletonList("java.lang.System");
-   }
-   
+
    public String getAdvisor(){
-      return "org.fuwjin.chrona.Chrona";
+      return advice;
+   }
+
+   public boolean isAdvised(String className){
+      return target.matcher(className).matches();
    }
 }
