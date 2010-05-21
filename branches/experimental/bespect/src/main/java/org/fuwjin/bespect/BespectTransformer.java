@@ -24,8 +24,8 @@ public class BespectTransformer implements ClassFileTransformer{
          try{
             final Class<?> advisor = getLoader(loader).loadClass(config.getAdvisor());
             ClassReader reader = new ClassReader(classfileBuffer);
-            ClassWriter writer = new ClassWriter(reader,COMPUTE_MAXS);
-            ClassVisitor adapter = new RedirectAdapter(writer, config.getMethodPrefix(), className, advisor);
+            ClassWriter writer = new ClassWriter(reader,COMPUTE_MAXS|COMPUTE_FRAMES);
+            ClassVisitor adapter = new BespectAdapter(writer, config.getMethodPrefix(), className, advisor);
             reader.accept(adapter, 0);
             return writer.toByteArray();
          }catch(ClassNotFoundException e){
