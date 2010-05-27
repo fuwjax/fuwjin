@@ -1,6 +1,8 @@
 package org.fuwjin.bespect;
 
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.commons.EmptyVisitor;
 
 public class MethodAdvice implements MethodDef{
    private final MethodDef target;
@@ -37,7 +39,10 @@ public class MethodAdvice implements MethodDef{
       return target.signature();
    }
 
-   public void build(MethodVisitor mv){
-      throw new UnsupportedOperationException();
+   public MethodVisitor build(ClassVisitor cv){
+      if(target == null){
+         return new EmptyVisitor();
+      }
+      return cv.visitMethod(access(), name(), desc(), signature(), exceptions());
    }
 }

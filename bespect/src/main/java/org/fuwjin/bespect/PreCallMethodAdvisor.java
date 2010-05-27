@@ -7,7 +7,7 @@ import org.objectweb.asm.Type;
 public class PreCallMethodAdvisor implements MethodAdvisor{
 
    @Override
-   public Refactoring advise(Class<?> advice, String prefix, MethodDef target){
+   public CompositeAdvice advise(Class<?> advice, String prefix, MethodDef target){
       Type[] args = Type.getArgumentTypes(target.desc());
       String methodDesc = getMethodDescriptor(Type.VOID_TYPE, args);
       MethodDef adviceMethod = MethodInfo.direct(advice, target.name(), methodDesc);
@@ -15,6 +15,6 @@ public class PreCallMethodAdvisor implements MethodAdvisor{
          return null;
       }
       RedirectAdvice redirect = new RedirectAdvice(target, prefix);
-      return new Refactoring(redirect, new PreCallAdvice(target, redirect, adviceMethod));
+      return new CompositeAdvice(redirect, new PreCallAdvice(target, redirect, adviceMethod));
    }
 }

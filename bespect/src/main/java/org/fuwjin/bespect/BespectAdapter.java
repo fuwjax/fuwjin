@@ -18,7 +18,7 @@ import org.objectweb.asm.MethodVisitor;
 
 public class BespectAdapter extends ClassAdapter{
    private final String className;
-   private final Class<?> advice;
+   private final Class<?> type;
    private final String prefix;
    private final ServiceLoader<MethodAdvisor> advisors;
    
@@ -26,29 +26,25 @@ public class BespectAdapter extends ClassAdapter{
       super(visitor);
       this.prefix = prefix;
       this.className = className;
-      this.advice = advice;
+      this.type = advice;
       advisors = ServiceLoader.load(MethodAdvisor.class);
    }
 
    @Override
    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions){
       MethodDef target = new MethodInfo(access, className, name, desc, signature, exceptions);
-      Refactoring newMethod = getRefactoring(target);
+      MethodAdvice newMethod = getAdvice(target);
       if(newMethod != null){
-         for(MethodAdvice m: newMethod.helpers()){
-            MethodVisitor mv = super.visitMethod(m.access(), m.name(), m.desc(), m.signature(), m.exceptions());
-            m.build(mv);
-         }
-         return super.visitMethod(newMethod.access(), newMethod.name(), newMethod.desc(), newMethod.signature(), newMethod.exceptions());
+         return newMethod.build(cv);
       }
       return super.visitMethod(access, name, desc, signature, exceptions);
    }
    
-   private Refactoring getRefactoring(MethodDef target){
+   private MethodAdvice getAdvice(MethodDef target){
       for(MethodAdvisor advisor: advisors){
-         Refactoring weaver = advisor.advise(advice, prefix, target);
-         if(weaver != null){
-            return weaver;
+         MethodAdvice advice = advisor.advise(type, prefix, target);
+         if(advice != null){
+            return advice;
          }
       }
       return null;

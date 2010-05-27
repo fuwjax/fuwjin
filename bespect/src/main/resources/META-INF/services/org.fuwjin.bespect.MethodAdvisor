@@ -1,2 +1,3 @@
 org.fuwjin.bespect.PostCallMethodAdvisor
 org.fuwjin.bespect.PreCallMethodAdvisor
+org.fuwjin.bespect.ReplaceCallMethodAdvisor
