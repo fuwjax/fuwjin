@@ -8,7 +8,7 @@ import org.objectweb.asm.Type;
 public class PostCallMethodAdvisor implements MethodAdvisor{
 
    @Override
-   public Refactoring advise(Class<?> advice, String prefix, MethodDef target){
+   public CompositeAdvice advise(Class<?> advice, String prefix, MethodDef target){
       Type returnType = getReturnType(target.desc());
       String methodDesc = getMethodDescriptor(returnType, new Type[]{returnType});
       MethodDef adviceMethod = MethodInfo.direct(advice, target.name(), methodDesc);
@@ -16,6 +16,6 @@ public class PostCallMethodAdvisor implements MethodAdvisor{
          return null;
       }
       RedirectAdvice redirect = new RedirectAdvice(target, prefix);
-      return new Refactoring(redirect, new PostCallAdvice(target, redirect, adviceMethod));
+      return new CompositeAdvice(redirect, new PostCallAdvice(target, redirect, adviceMethod));
    }
 }
