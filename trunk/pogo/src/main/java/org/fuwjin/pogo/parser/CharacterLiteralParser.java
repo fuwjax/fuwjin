@@ -1,16 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.PredefinedGrammar.PogoSerial;
 import static org.fuwjin.pogo.parser.PrintLevel.LITERAL_OPTION;
 import static org.fuwjin.pogo.parser.PrintLevel.LITERAL_SEQUENCE;
 import static org.fuwjin.util.ObjectUtils.eq;
@@ -21,6 +17,7 @@ import java.util.Map;
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Pogo;
+import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
@@ -65,17 +62,17 @@ public class CharacterLiteralParser implements Parser {
 
    /**
     * Creates a new instance.
-    * @param ch the literal
     */
-   public CharacterLiteralParser(final String ch) {
-      set(ch);
+   CharacterLiteralParser() {
+      // for reflection
    }
 
    /**
     * Creates a new instance.
+    * @param ch the literal
     */
-   CharacterLiteralParser() {
-      // for reflection
+   public CharacterLiteralParser(final String ch) {
+      set(ch);
    }
 
    @Override
@@ -86,6 +83,22 @@ public class CharacterLiteralParser implements Parser {
       } catch(final ClassCastException e) {
          return false;
       }
+   }
+
+   /**
+    * Returns the value for a character class.
+    * @return the value
+    */
+   protected String getClassChar() {
+      return LITERAL_OPTION.escape((char)ch);
+   }
+
+   /**
+    * Returns the value for a literal class.
+    * @return the value
+    */
+   protected String getLitChar() {
+      return LITERAL_SEQUENCE.escape((char)ch);
    }
 
    @Override
@@ -99,7 +112,7 @@ public class CharacterLiteralParser implements Parser {
    }
 
    @Override
-   public void resolve(final Map<String, Parser> grammar, final ReflectionType ruleType) {
+   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
       // do nothing
    }
 
@@ -122,24 +135,8 @@ public class CharacterLiteralParser implements Parser {
    @Override
    public String toString() {
       if(serial == null) {
-         serial = PogoSerial.grammar().get(SINGLE_LIT);
+         serial = PogoGrammar.pogoParseGrammar().get(SINGLE_LIT);
       }
       return serial.serial(this);
-   }
-
-   /**
-    * Returns the value for a character class.
-    * @return the value
-    */
-   protected String getClassChar() {
-      return LITERAL_OPTION.escape((char)ch);
-   }
-
-   /**
-    * Returns the value for a literal class.
-    * @return the value
-    */
-   protected String getLitChar() {
-      return LITERAL_SEQUENCE.escape((char)ch);
    }
 }

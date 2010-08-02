@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo;
 
@@ -19,6 +16,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 
+import org.fuwjin.io.PogoException;
 import org.fuwjin.pogo.parser.CharacterLiteralParser;
 import org.fuwjin.pogo.parser.CharacterParser;
 import org.fuwjin.pogo.parser.CharacterRangeParser;
@@ -282,7 +280,7 @@ public class PogoUtils { // NO_UCD
     * @return the new parser
     * @throws ParseException if the parser cannot be generated
     */
-   public static Grammar readGrammar(final Reader reader) throws ParseException {
+   public static Grammar readGrammar(final Reader reader) throws PogoException {
       return (Grammar)pogoParseGrammar().parse(reader);
    }
 
@@ -292,7 +290,7 @@ public class PogoUtils { // NO_UCD
     * @return the new parser
     * @throws ParseException if the parser cannot be generated
     */
-   public static Grammar readGrammar(final String file) throws ParseException {
+   public static Grammar readGrammar(final String file) throws PogoException {
       final Reader reader = open(file);
       return readGrammar(reader);
    }

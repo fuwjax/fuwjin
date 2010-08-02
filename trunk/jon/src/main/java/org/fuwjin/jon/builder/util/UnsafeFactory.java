@@ -1,19 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.jon.builder.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.fuwjin.pogo.reflect.invoke.InvokeHandler;
+import org.fuwjin.postage.Failure;
 
 /**
  * DIRTY POOL: creates a new object using the Unsafe class.
@@ -46,7 +43,7 @@ public final class UnsafeFactory {
       try {
          return UNSAFE_METHOD.invoke(UNSAFE, type);
       } catch(final Exception e) {
-         return InvokeHandler.FAILURE;
+         return new Failure(e, "Failed Unsafe creation");
       }
    }
 

@@ -1,16 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.reflect;
 
-import static org.fuwjin.pogo.reflect.invoke.Invoker.isSuccess;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
@@ -21,7 +17,6 @@ import org.fuwjin.io.PogoContext;
  */
 public class ReturnTask implements FinalizerTask {
    private static final String RETURN = "return"; //$NON-NLS-1$
-   private static final String FAILED_RETURN = "failed return"; //$NON-NLS-1$
 
    @Override
    public boolean equals(final Object obj) {
@@ -36,7 +31,7 @@ public class ReturnTask implements FinalizerTask {
    @Override
    public void finalize(final PogoContext container, final PogoContext child) {
       final Object obj = child.get();
-      container.set(obj, isSuccess(obj), FAILED_RETURN);
+      container.set(obj, container.postageException(obj));
    }
 
    @Override

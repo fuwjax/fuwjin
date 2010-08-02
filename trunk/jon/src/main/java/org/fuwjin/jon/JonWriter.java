@@ -1,19 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.jon;
 
 import static org.fuwjin.pogo.PogoUtils.readGrammar;
 
-import java.text.ParseException;
-
+import org.fuwjin.io.PogoException;
 import org.fuwjin.io.SerialContext;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.pogo.Grammar;
@@ -31,13 +27,11 @@ public class JonWriter {
    private final ReferenceStorage storage;
 
    public JonWriter() {
-      context = new SerialContext(null);
+      context = new SerialContext();
       storage = new ReferenceStorage();
    }
 
-   public String write(final Object obj) throws ParseException {
-      context.set(storage.get(obj, null), true, null);
-      JON.parse(context);
-      return context.match();
+   public String write(final Object obj) throws PogoException {
+      return JON.parse(context, storage.get(obj, null)).match();
    }
 }

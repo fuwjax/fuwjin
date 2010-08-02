@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.jon.builder;
 
@@ -15,7 +12,8 @@ import java.util.Map;
 
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
-import org.fuwjin.pogo.reflect.invoke.Invoker;
+import org.fuwjin.postage.ClassFunction;
+import org.fuwjin.postage.Function;
 
 public class PrimitiveBuilder extends LiteralBuilder {
    private static final Map<Class<?>, Class<?>> WRAPPERS;
@@ -36,12 +34,12 @@ public class PrimitiveBuilder extends LiteralBuilder {
    }
 
    private Object value;
-   private final Invoker invoker;
+   private final Function invoker;
 
    public PrimitiveBuilder(final Class<?> type) {
       super(type);
       final Class<?> target = WRAPPERS.get(type);
-      invoker = new Invoker(target == null ? type : target, "valueOf");
+      invoker = new ClassFunction(target == null ? type : target, "valueOf");
    }
 
    @Override
@@ -51,7 +49,7 @@ public class PrimitiveBuilder extends LiteralBuilder {
 
    @Override
    public void set(final String value) {
-      this.value = invoker.invoke(null, value);
+      this.value = invoker.invokeSafe(value);
    }
 
    @Override

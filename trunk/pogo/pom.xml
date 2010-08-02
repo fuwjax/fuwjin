@@ -18,7 +18,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<groupId>org.fuwjin.pogo</groupId>
+	<groupId>org.fuwjin</groupId>
 	<artifactId>pogo</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.1-SNAPSHOT</version>
@@ -32,6 +32,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+		  <groupId>org.fuwjin</groupId>
+		  <artifactId>postage</artifactId>
+		  <version>1.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

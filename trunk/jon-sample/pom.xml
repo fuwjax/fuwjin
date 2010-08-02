@@ -18,7 +18,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-	<groupId>org.fuwjin.jon</groupId>
+	<groupId>org.fuwjin</groupId>
 	<artifactId>jon-sample</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.2-SNAPSHOT</version>
@@ -28,7 +28,7 @@
 	</description>
 	<dependencies>
                 <dependency>
-                        <groupId>org.fuwjin.jon</groupId>
+                        <groupId>org.fuwjin</groupId>
                         <artifactId>jon</artifactId>
                         <version>1.0.2-SNAPSHOT</version>
                 </dependency>

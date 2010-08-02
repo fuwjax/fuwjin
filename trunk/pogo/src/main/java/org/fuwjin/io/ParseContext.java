@@ -1,17 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.io;
 
 import static java.lang.Character.isHighSurrogate;
+import static java.lang.Character.toChars;
 import static java.lang.Character.toCodePoint;
+import static java.lang.String.copyValueOf;
 
 /**
  * The standard PogoContext for parsing. The CharSequence input should implement
@@ -35,42 +34,64 @@ import static java.lang.Character.toCodePoint;
  * with a CharSequence is acceptable.
  */
 public class ParseContext extends RootContext {
-   private static final String UNEXPECTED_CHAR = "UC-"; //$NON-NLS-1$
-   private static final String ERROR_CODE = "UR-"; //$NON-NLS-1$
-   private static final String UNEXPECTED_END_OF_INPUT = "Unexpected end of input"; //$NON-NLS-1$
+   private static String toCharString(final int ch) {
+      return copyValueOf(toChars(ch));
+   }
+
+   private static String toRange(final int start, final int end) {
+      return "[" + toCharString(start) + "-" + toCharString(end) + "]";
+   }
+
+   private static String toString(final int ch) {
+      return ch == -1 ? "EOF" : "'" + toCharString(ch) + "'";
+   }
+
    private int position;
    private final CharSequence input;
+   private int line = 1;
+   private int column = 1;
 
    /**
     * Creates a new instance.
     * @param input the input stream
     * @param object the initial value of the result object, may be null
     */
-   public ParseContext(final CharSequence input, final Object object) {
-      super(object);
+   public ParseContext(final CharSequence input) {
       this.input = input;
    }
 
    @Override
-   public void accept() {
-      read();
+   public void accept(final PogoContext context) {
+      final int c = read();
+      PogoException ret = null;
+      if(c == -1) {
+         ret = context.failedCheck("EOF expecting any character");
+      }
+      success(ret);
    }
 
    @Override
-   public void accept(final int ch) {
-      final int mark = position();
-      if(!success(read() == ch, UNEXPECTED_CHAR + (char)ch)) {
+   public void accept(final PogoContext context, final int ch) {
+      final Position mark = position();
+      final int c = read();
+      PogoException ret = null;
+      if(c != ch) {
          seek(mark);
+         ret = context.failedCheck(toString(c) + " expecting " + toString(ch));
       }
+      success(ret);
    }
 
    @Override
-   public void accept(final int start, final int end) {
-      final int mark = position();
-      final int current = read();
-      if(!success(current >= start && current <= end, ERROR_CODE + (char)start + (char)end)) {
+   public void accept(final PogoContext context, final int start, final int end) {
+      final Position mark = position();
+      final int c = read();
+      PogoException ret = null;
+      if(c < start || c > end) {
          seek(mark);
+         ret = context.failedCheck(toString(c) + " expecting " + toRange(start, end));
       }
+      success(ret);
    }
 
    @Override
@@ -84,40 +105,47 @@ public class ParseContext extends RootContext {
    }
 
    @Override
-   public PogoContext newChild() {
-      return new ChildContext(this);
+   public PogoContext newChild(final String name) {
+      return new ChildContext(name, this);
    }
 
    @Override
-   public int position() {
-      return position;
-   }
-
-   @Override
-   public void seek(final int mark) {
-      position = mark;
-   }
-
-   @Override
-   public String substring(final int mark) {
-      return input.subSequence(mark, position).toString();
+   public Position position() {
+      return new Position(position, line, column);
    }
 
    private int read() {
       try {
          final char c1 = input.charAt(position);
-         ++position;
+         if(c1 == '\n') {
+            line++;
+            column = 1;
+         } else {
+            column++;
+         }
+         position++;
          if(isHighSurrogate(c1)) {
             final char c2 = input.charAt(position);
-            ++position;
-            success(true, null);
+            position++;
+            success(null);
             return toCodePoint(c1, c2);
          }
-         success(true, null);
+         success(null);
          return c1;
       } catch(final IndexOutOfBoundsException e) {
-         success(false, UNEXPECTED_END_OF_INPUT);
-         return 0;
+         return -1;
       }
+   }
+
+   @Override
+   public void seek(final Position mark) {
+      position = mark.position();
+      line = mark.line();
+      column = mark.column();
+   }
+
+   @Override
+   public String substring(final int mark) {
+      return input.subSequence(mark, position).toString();
    }
 }

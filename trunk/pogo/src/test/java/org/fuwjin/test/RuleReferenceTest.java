@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
@@ -27,8 +24,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.StringReader;
-import java.text.ParseException;
 
+import org.fuwjin.io.PogoException;
 import org.fuwjin.pogo.Grammar;
 import org.junit.Test;
 
@@ -40,10 +37,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests append finalization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testAddMethod() throws ParseException {
+   public void testAddMethod() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -57,10 +54,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests constructor initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testNewChild() throws ParseException {
+   public void testNewChild() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -74,10 +71,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests pass back finalization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testReturn() throws ParseException {
+   public void testReturn() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(), init(), result(), ref("Rule", ignore(), _return()))); //$NON-NLS-1$//$NON-NLS-2$
@@ -90,10 +87,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests pass through initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testThis() throws ParseException {
+   public void testThis() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(

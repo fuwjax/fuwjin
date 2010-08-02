@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.jon;
 
@@ -24,11 +21,12 @@ import org.fuwjin.jon.builder.ListBuilder;
 import org.fuwjin.jon.builder.MapBuilder;
 import org.fuwjin.jon.builder.PrimitiveBuilder;
 import org.fuwjin.jon.builder.StringInstanceBuilder;
-import org.fuwjin.pogo.reflect.invoke.Invoker;
+import org.fuwjin.postage.ClassFunction;
+import org.fuwjin.postage.Function;
 
 public class BuilderRegistry {
    abstract static class ClassFilter {
-      private Invoker invoker;
+      private Function invoker;
 
       public ClassFilter and(final ClassFilter filter) {
          final ClassFilter self = this;
@@ -41,12 +39,12 @@ public class BuilderRegistry {
       }
 
       public ClassFilter create(final Class<? extends Builder> builder) {
-         invoker = new Invoker(builder, "new");
+         invoker = new ClassFunction(builder, "new");
          return this;
       }
 
       public Builder newBuilder(final Class<?> type) {
-         return (Builder)invoker.invoke(null, type);
+         return (Builder)invoker.invokeSafe(type);
       }
 
       public abstract boolean pass(Class<?> test);

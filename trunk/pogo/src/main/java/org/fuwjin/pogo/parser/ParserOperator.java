@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
@@ -17,7 +14,7 @@ import java.util.Map;
 
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PredefinedGrammar;
+import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
@@ -62,14 +59,14 @@ public abstract class ParserOperator implements Parser {
    }
 
    @Override
-   public void resolve(final Map<String, Parser> grammar, final ReflectionType ruleType) {
+   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
       parser.resolve(grammar, ruleType);
    }
 
    @Override
    public String toString() {
       if(serial == null) {
-         serial = PredefinedGrammar.PogoSerial.grammar().get(PREFIX_CHAIN);
+         serial = PogoGrammar.pogoParseGrammar().get(PREFIX_CHAIN);
       }
       return serial.serial(this);
    }
