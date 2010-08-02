@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.reflect;
 
@@ -42,8 +39,8 @@ public class NullTask implements FinalizerTask, InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final PogoContext input) {
-      return input.newChild(null, true, null);
+   public PogoContext initialize(final String name, final PogoContext input) {
+      return input.newChild(name, null, null);
    }
 
    @Override

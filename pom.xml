@@ -13,6 +13,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>3</version>
+  </parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>fuwjin</artifactId>
 	<packaging>pom</packaging>
@@ -23,6 +28,7 @@
                 to several smaller utilities such as EnumBundle, Lifeguard, and dbConfig.
     </description>
 	<modules>
+	   <module>postage</module>
 		<module>jon</module>
 		<module>jon-sample</module>
 		<module>pogo</module>
@@ -42,14 +48,14 @@
 	</licenses>
 	<distributionManagement>
 		<repository>
-		    <id>fuwjin-releases</id>
-		    <name>Fuwjin Staging Repository</name>
+		    <id>sonatype-nexus-staging</id>
+		    <name>Sonatype Nexus Staging Repository</name>
 		    <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 		<snapshotRepository>
-		    <id>fuwjin-snapshots</id>
-		    <name>Fuwjin Snapshot Repository</name>
-		    <url>http://oss.sonatype.org/content/repositories/fuwjin-snapshots/</url>
+		    <id>sonatype-nexus-snapshots</id>
+		    <name>Sonatype Nexus Snapshot Repository</name>
+		    <url>http://oss.sonatype.org/content/repositories/snapshots/</url>
 		</snapshotRepository>
 		<site>
 			<id>fuwjin-site</id>

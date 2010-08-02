@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
@@ -20,8 +17,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.StringReader;
-import java.text.ParseException;
 
+import org.fuwjin.io.PogoException;
 import org.fuwjin.pogo.Grammar;
 import org.junit.Test;
 
@@ -33,10 +30,10 @@ public class RuleTest {
 
    /**
     * The stock parse.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testDefault() throws ParseException {
+   public void testDefault() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(), init(), result(), lit('a'))); //$NON-NLS-1$
@@ -48,10 +45,10 @@ public class RuleTest {
 
    /**
     * Tests field finaliation.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testInstanceFieldFinalizer() throws ParseException {
+   public void testInstanceFieldFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), _new(), result("builder"), lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
@@ -64,10 +61,10 @@ public class RuleTest {
 
    /**
     * Tests method finalization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testInstanceFinalizer() throws ParseException {
+   public void testInstanceFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), _new(), result("toResult"), lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
@@ -79,10 +76,10 @@ public class RuleTest {
 
    /**
     * Tests default constructor initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testNew() throws ParseException {
+   public void testNew() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), _new(), result(), lit('a'))); //$NON-NLS-1$
@@ -94,10 +91,10 @@ public class RuleTest {
 
    /**
     * Tests the static method finalizer.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testStaticConstantFinalizer() throws ParseException {
+   public void testStaticConstantFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -110,10 +107,10 @@ public class RuleTest {
 
    /**
     * Tests the static field finalizer.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testStaticFieldFinalizer() throws ParseException {
+   public void testStaticFieldFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), init(), result("NULL"), lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
@@ -125,10 +122,10 @@ public class RuleTest {
 
    /**
     * Tests static method finalizer.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testStaticFinalizer() throws ParseException {
+   public void testStaticFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule("Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), init(), result("valueOf"), lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
@@ -140,10 +137,10 @@ public class RuleTest {
 
    /**
     * Tests static initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testStaticInitializer() throws ParseException {
+   public void testStaticInitializer() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(

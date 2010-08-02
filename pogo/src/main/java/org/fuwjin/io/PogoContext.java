@@ -1,16 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.io;
-
-import java.text.ParseException;
 
 /**
  * The specification for a parse context during a Pogo transformation.
@@ -28,18 +23,14 @@ public interface PogoContext {
    void accept(int ch);
 
    /**
-    * Transforms the next code point if it is between {@code start} and {@code
-    * end} inclusive.
+    * Transforms the next code point if it is between {@code start} and
+    * {@code end} inclusive.
     * @param start the smallest allowed code point
     * @param end the largest allowed code point
     */
    void accept(int start, int end);
 
-   /**
-    * Throws a ParseException if the parse fails.
-    * @throws ParseException if the parse fails
-    */
-   void assertSuccess() throws ParseException;
+   PogoException failedCheck(String message);
 
    /**
     * Returns the context object. May be null if the transform produced a null
@@ -47,12 +38,6 @@ public interface PogoContext {
     * @return the context object
     */
    Object get();
-
-   /**
-    * Returns true if there is potentially more input remaining.
-    * @return true if there is more input, false otherwise
-    */
-   boolean hasRemaining();
 
    /**
     * Returns true if the current context indicates a successful transformation.
@@ -74,7 +59,7 @@ public interface PogoContext {
     *        state is false
     * @return the new child context
     */
-   PogoContext newChild(Object newObject, boolean newSuccess, String failureReason);
+   PogoContext newChild(String name, Object newObject, PogoException failure);
 
    /**
     * Returns the current position. Used primarily for seeking, the position
@@ -84,14 +69,16 @@ public interface PogoContext {
     * discouraged.
     * @return the current position.
     */
-   int position();
+   Position position();
+
+   PogoException postageException(Object obj);
 
    /**
     * Resets the context to an earlier position. The mark should come from an
     * unmodified result of a previous call to position().
     * @param mark the new position
     */
-   void seek(int mark);
+   void seek(Position mark);
 
    /**
     * Updates the current context object.
@@ -100,7 +87,7 @@ public interface PogoContext {
     * @param failureReason the reason for the failure if success is false
     * @return this context
     */
-   PogoContext set(Object newObject, boolean newSuccess, String failureReason);
+   PogoContext set(Object newObject, PogoException failure);
 
    /**
     * Updates the current success state of the context.
@@ -108,5 +95,5 @@ public interface PogoContext {
     * @param failureReason the reason for the failure if state is false
     * @return the new success state
     */
-   boolean success(boolean state, final String failureReason);
+   void success(PogoException failure);
 }

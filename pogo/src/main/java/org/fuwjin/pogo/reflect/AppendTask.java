@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.reflect;
 
@@ -14,7 +11,7 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.io.PogoContext;
-import org.fuwjin.pogo.reflect.invoke.Invoker;
+import org.fuwjin.postage.Function;
 
 /**
  * Appends a child context object to the parent context object through a message
@@ -22,7 +19,14 @@ import org.fuwjin.pogo.reflect.invoke.Invoker;
  */
 public class AppendTask implements FinalizerTask {
    private String name;
-   private transient Invoker invoker;
+   private transient Function invoker;
+
+   /**
+    * Creates a new instance.
+    */
+   AppendTask() {
+      // for reflection
+   }
 
    /**
     * Creates a new instance.
@@ -30,13 +34,6 @@ public class AppendTask implements FinalizerTask {
     */
    public AppendTask(final String name) {
       this.name = name;
-   }
-
-   /**
-    * Creates a new instance.
-    */
-   AppendTask() {
-      // for reflection
    }
 
    @Override
@@ -51,7 +48,7 @@ public class AppendTask implements FinalizerTask {
 
    @Override
    public void finalize(final PogoContext container, final PogoContext result) {
-      invoker.invoke(container.get(), result.get());
+      invoker.invokeSafe(container.get(), result.get());
    }
 
    @Override

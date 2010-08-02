@@ -1,29 +1,31 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.reflect;
 
-import static org.fuwjin.pogo.reflect.invoke.Invoker.isSuccess;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.io.PogoContext;
-import org.fuwjin.pogo.reflect.invoke.Invoker;
+import org.fuwjin.postage.Function;
 
 /**
  * Creates a new instance from a message.
  */
 public class FactoryTask implements InitializerTask {
-   private static final String FAILED_FACTORY_METHOD = "failed factory method"; //$NON-NLS-1$
    private String name;
-   private Invoker invoker;
+   private Function invoker;
+
+   /**
+    * Creates a new instance.
+    */
+   FactoryTask() {
+      // for reflection
+   }
 
    /**
     * Creates a new instance.
@@ -31,13 +33,6 @@ public class FactoryTask implements InitializerTask {
     */
    public FactoryTask(final String name) {
       this.name = name;
-   }
-
-   /**
-    * Creates a new instance.
-    */
-   FactoryTask() {
-      // for reflection
    }
 
    @Override
@@ -56,9 +51,9 @@ public class FactoryTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final PogoContext input) {
-      final Object result = invoker.invoke(input.get());
-      return input.newChild(result, isSuccess(result), FAILED_FACTORY_METHOD);
+   public PogoContext initialize(final String name, final PogoContext input) {
+      final Object result = invoker.invokeSafe(input.get());
+      return input.newChild(name, result, input.postageException(result));
    }
 
    @Override

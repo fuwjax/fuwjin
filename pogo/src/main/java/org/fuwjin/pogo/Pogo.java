@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo;
 
@@ -19,28 +16,30 @@ import java.text.ParseException;
 
 import org.fuwjin.io.ParseContext;
 import org.fuwjin.io.PogoContext;
-import org.fuwjin.io.RootContext;
+import org.fuwjin.io.PogoException;
+import org.fuwjin.io.PogoRootContext;
 import org.fuwjin.io.SerialContext;
+import org.fuwjin.pogo.parser.Rule;
 
 /**
  * The main parsing interface.
  */
 public class Pogo {
-   private Parser rule;
-
-   /**
-    * Creates a new instance.
-    * @param rule the rule to use as a start.
-    */
-   public Pogo(final Parser rule) {
-      this.rule = rule;
-   }
+   private Rule rule;
 
    /**
     * Creates a new instance.
     */
    protected Pogo() {
       // for subclasses
+   }
+
+   /**
+    * Creates a new instance.
+    * @param rule the rule to use as a start.
+    */
+   public Pogo(final Rule rule) {
+      this.rule = rule;
    }
 
    @Override
@@ -65,11 +64,13 @@ public class Pogo {
     * @return the filled object
     * @throws ParseException if the parse fails
     */
-   public Object parse(final CharSequence input, final Object object) throws ParseException {
-      final RootContext context = new ParseContext(input, object);
-      rule.parse(context);
+   public Object parse(final CharSequence input, final Object object) throws PogoException {
+      final PogoRootContext context = new ParseContext(input);
+      final PogoContext child = context.newChild(rule.name());
+      child.set(object, null);
+      rule.parse(child);
       context.assertSuccess();
-      return context.get();
+      return child.get();
    }
 
    /**
@@ -77,9 +78,17 @@ public class Pogo {
     * @param context the context
     * @throws ParseException if the parse fails
     */
-   public void parse(final PogoContext context) throws ParseException {
-      rule.parse(context);
+   public void parse(final PogoRootContext context) throws PogoException {
+      rule.parse(context.newChild(rule.name()));
       context.assertSuccess();
+   }
+
+   public PogoContext parse(final PogoRootContext context, final Object obj) throws PogoException {
+      final PogoContext child = context.newChild(rule.name());
+      child.set(obj, null);
+      rule.parse(child);
+      context.assertSuccess();
+      return child;
    }
 
    /**
@@ -88,7 +97,7 @@ public class Pogo {
     * @return the parsed object
     * @throws ParseException if the parse fails
     */
-   public Object parse(final Reader reader) throws ParseException {
+   public Object parse(final Reader reader) throws PogoException {
       return parse(reader, null);
    }
 
@@ -99,7 +108,7 @@ public class Pogo {
     * @return the filled object
     * @throws ParseException if the parse fails
     */
-   public Object parse(final Reader reader, final Object object) throws ParseException {
+   public Object parse(final Reader reader, final Object object) throws PogoException {
       return parse(buffer(reader), object);
    }
 
@@ -109,7 +118,7 @@ public class Pogo {
     * @return the parsed object
     * @throws ParseException if the parse fails
     */
-   public Object parse(final String input) throws ParseException {
+   public Object parse(final String input) throws PogoException {
       return parse(input, null);
    }
 
@@ -119,16 +128,18 @@ public class Pogo {
     * @return the serialized string
     */
    public String serial(final Object input) {
-      final PogoContext context = new SerialContext(input);
-      rule.parse(context);
-      return context.match();
+      final PogoRootContext context = new SerialContext();
+      final PogoContext child = context.newChild(rule.name());
+      child.set(input, null);
+      rule.parse(child);
+      return child.match();
    }
 
    /**
     * Sets the rule underlying this parser.
     * @param rule the parser
     */
-   protected void setRule(final Parser rule) {
+   protected void setRule(final Rule rule) {
       this.rule = rule;
    }
 }

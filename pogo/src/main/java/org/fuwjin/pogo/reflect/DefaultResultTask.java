@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.reflect;
 
@@ -20,7 +17,6 @@ import org.fuwjin.io.PogoContext;
  */
 public class DefaultResultTask implements FinalizerTask {
    private static final String DEFAULT = "default"; //$NON-NLS-1$
-   private static final String FAILED_RETURN = "failed return"; //$NON-NLS-1$
    /**
     * Indicates that the container should be replaced with the match from the
     * child.
@@ -41,9 +37,9 @@ public class DefaultResultTask implements FinalizerTask {
    public void finalize(final PogoContext container, final PogoContext child) {
       final Object obj = child.get();
       if(obj == MATCH) {
-         container.set(child.match(), true, null);
+         container.set(child.match(), null);
       } else {
-         container.set(obj, true, FAILED_RETURN);
+         container.set(obj, null);
       }
    }
 

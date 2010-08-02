@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
@@ -18,7 +15,7 @@ import java.util.Map;
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PredefinedGrammar;
+import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.DefaultResultTask;
 import org.fuwjin.pogo.reflect.FinalizerTask;
 import org.fuwjin.pogo.reflect.InitializerTask;
@@ -40,6 +37,13 @@ public class Rule implements Parser {
 
    /**
     * Creates a new instance.
+    */
+   Rule() {
+      // for reflection
+   }
+
+   /**
+    * Creates a new instance.
     * @param name the name
     * @param type the bound type
     * @param initializer the rule initializer
@@ -53,13 +57,6 @@ public class Rule implements Parser {
       this.initializer = initializer;
       this.finalizer = finalizer;
       this.parser = parser;
-   }
-
-   /**
-    * Creates a new instance.
-    */
-   Rule() {
-      // for reflection
    }
 
    @Override
@@ -88,7 +85,7 @@ public class Rule implements Parser {
 
    @Override
    public void parse(final PogoContext context) {
-      final PogoContext child = initializer.initialize(context);
+      final PogoContext child = initializer.initialize(name, context);
       if(child.isSuccess()) {
          parser.parse(child);
          if(child.isSuccess()) {
@@ -101,7 +98,8 @@ public class Rule implements Parser {
     * Resolves this rule and the inner expression.
     * @param grammar the grammar to resolve rule references
     */
-   public void resolve(final Map<String, Parser> grammar, final ReflectionType ignore) {
+   @Override
+   public void resolve(final Map<String, Rule> grammar, final ReflectionType ignore) {
       initializer.setType(type);
       finalizer.setType(type);
       parser.resolve(grammar, type);
@@ -110,7 +108,7 @@ public class Rule implements Parser {
    @Override
    public String toString() {
       if(serial == null) {
-         serial = PredefinedGrammar.PogoSerial.grammar().get(DEFINITION);
+         serial = PogoGrammar.pogoParseGrammar().get(DEFINITION);
       }
       return serial.serial(this);
    }
