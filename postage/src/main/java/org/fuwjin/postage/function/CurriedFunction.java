@@ -1,8 +1,10 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import static java.lang.System.arraycopy;
 
 import java.util.Arrays;
+
+import org.fuwjin.postage.Function;
 
 public class CurriedFunction extends AbstractFunction {
    private final Function function;

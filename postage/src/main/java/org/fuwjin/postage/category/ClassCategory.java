@@ -1,4 +1,8 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.category;
+
+import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.function.InstanceOfFunction;
 
 public class ClassCategory extends AbstractCategory {
    private final Class<?> type;

@@ -3,6 +3,11 @@ package org.fuwjin.postage;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.fuwjin.postage.category.ClassCategory;
+import org.fuwjin.postage.category.DuckCategory;
+import org.fuwjin.postage.category.NullCategory;
+import org.fuwjin.postage.category.VoidCategory;
+
 public class Postage {
    public static boolean isSuccess(final Object result) {
       return !(result instanceof Failure);

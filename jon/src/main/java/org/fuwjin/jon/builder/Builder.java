@@ -13,8 +13,8 @@ import static org.fuwjin.postage.Postage.isSuccess;
 import org.fuwjin.jon.builder.util.UnsafeFactory;
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
-import org.fuwjin.postage.ClassFunction;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
 
 public abstract class Builder {
    private final Class<?> type;

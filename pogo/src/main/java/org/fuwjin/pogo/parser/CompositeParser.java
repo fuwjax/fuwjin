@@ -16,17 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
  * A base class for composite parsers.
  */
 public abstract class CompositeParser implements Parser, Iterable<Parser> {
-   private static final String EXPRESSION = "Expression"; //$NON-NLS-1$
    private final List<Parser> parsers = new LinkedList<Parser>();
-   private static Pogo serial;
 
    /**
     * Adds a parser to this composite.
@@ -100,13 +96,5 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
       for(final Parser parser: parsers) {
          parser.resolve(grammar, ruleType);
       }
-   }
-
-   @Override
-   public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(EXPRESSION);
-      }
-      return serial.serial(this);
    }
 }

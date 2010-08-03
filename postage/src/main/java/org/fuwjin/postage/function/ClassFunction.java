@@ -1,9 +1,10 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
 
 public class ClassFunction extends CompositeFunction {
    public ClassFunction(final Class<?> type, final String name) {

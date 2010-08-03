@@ -13,8 +13,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import java.util.Iterator;
 
 import org.fuwjin.io.PogoContext;
-import org.fuwjin.postage.ClassFunction;
-import org.fuwjin.postage.CompositeFunction;
+import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.function.CompositeFunction;
 
 /**
  * Creates a new context for the next element of an iterator.

@@ -14,7 +14,7 @@ import java.io.Reader;
 /**
  * Maps a Reader to a CharSequence.
  */
-public abstract class BufferedInput implements CharSequence {
+public abstract class FixedSizeBufferedInput implements CharSequence {
    private static final int EOF = -1;
 
    /**
@@ -22,8 +22,8 @@ public abstract class BufferedInput implements CharSequence {
     * @param input the input stream
     * @return the buffered char sequence.
     */
-   public static CharSequence buffer(final InputStream input) {
-      return new BufferedInput() {
+   public static CharSequence buffer(final int size, final InputStream input) {
+      return new FixedSizeBufferedInput(size) {
          @Override
          protected int readImpl() throws IOException {
             return input.read();
@@ -36,8 +36,8 @@ public abstract class BufferedInput implements CharSequence {
     * @param input the reader
     * @return the buffered char sequence.
     */
-   public static CharSequence buffer(final Reader input) {
-      return new BufferedInput() {
+   public static CharSequence buffer(final int size, final Reader input) {
+      return new FixedSizeBufferedInput(size) {
          @Override
          protected int readImpl() throws IOException {
             return input.read();
@@ -45,23 +45,31 @@ public abstract class BufferedInput implements CharSequence {
       };
    }
 
-   private final StringBuilder buffer = new StringBuilder();
+   private final char[] buffer;
+   private int len;
+
+   public FixedSizeBufferedInput(final int size) {
+      buffer = new char[size];
+   }
 
    @Override
    public char charAt(final int index) {
-      while(index >= buffer.length()) {
+      if(index < len - buffer.length) {
+         throw new IndexOutOfBoundsException();
+      }
+      while(index >= len) {
          final int ch = read();
          if(ch == EOF) {
             throw new IndexOutOfBoundsException();
          }
-         buffer.append((char)ch);
+         buffer[len++ % buffer.length] = (char)ch;
       }
-      return buffer.charAt(index);
+      return buffer[index % buffer.length];
    }
 
    @Override
    public int length() {
-      return buffer.length();
+      return len;
    }
 
    private int read() {
@@ -81,6 +89,18 @@ public abstract class BufferedInput implements CharSequence {
 
    @Override
    public CharSequence subSequence(final int start, final int end) {
-      return buffer.subSequence(start, end);
+      final int count = end - start;
+      if(start < 0 || start < len - buffer.length || end > len || start > end) {
+         throw new IndexOutOfBoundsException();
+      }
+      final int offset = start % buffer.length;
+      final int rem = buffer.length - offset;
+      if(count < rem) {
+         return new String(buffer, offset, count);
+      }
+      final char[] buf = new char[count];
+      System.arraycopy(buffer, offset, buf, 0, rem);
+      System.arraycopy(buffer, 0, buf, rem, count - rem);
+      return new String(buf);
    }
 }

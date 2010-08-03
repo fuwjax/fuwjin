@@ -14,8 +14,6 @@ import java.util.Map;
 
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
@@ -23,10 +21,8 @@ import org.fuwjin.pogo.reflect.ReflectionType;
  * inclusive.
  */
 public class CharacterRangeParser implements Parser {
-   private static final String SINGLE_OPT = "SingleOpt"; //$NON-NLS-1$
    private int start;
    private int end;
-   private static Pogo serial;
 
    @Override
    public boolean equals(final Object obj) {
@@ -103,9 +99,6 @@ public class CharacterRangeParser implements Parser {
 
    @Override
    public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(SINGLE_OPT);
-      }
-      return serial.serial(this);
+      return '[' + new String(Character.toChars(start)) + '-' + new String(Character.toChars(end)) + ']';
    }
 }

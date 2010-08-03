@@ -1,4 +1,10 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.category;
+
+import org.fuwjin.postage.Category;
+import org.fuwjin.postage.Function;
+import org.fuwjin.postage.UnknownSignature;
+import org.fuwjin.postage.function.AbstractFunction;
+import org.fuwjin.postage.function.ClassFunction;
 
 public class DuckCategory implements Category {
    private static final String ARG_COUNT = "Can't duck type without a target";

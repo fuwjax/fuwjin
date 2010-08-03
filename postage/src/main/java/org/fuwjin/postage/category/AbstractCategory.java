@@ -1,7 +1,10 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.category;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.fuwjin.postage.Category;
+import org.fuwjin.postage.Function;
 
 public abstract class AbstractCategory implements Category {
    private final String name;

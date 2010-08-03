@@ -10,8 +10,8 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.postage.ClassCategory;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.category.ClassCategory;
 
 /**
  * The standard class based reflection type.

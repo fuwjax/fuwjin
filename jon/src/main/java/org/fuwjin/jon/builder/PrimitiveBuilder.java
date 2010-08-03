@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
-import org.fuwjin.postage.ClassFunction;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
 
 public class PrimitiveBuilder extends LiteralBuilder {
    private static final Map<Class<?>, Class<?>> WRAPPERS;

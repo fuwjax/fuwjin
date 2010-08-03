@@ -31,4 +31,16 @@ public class SequenceParser extends CompositeParser {
          }
       }
    }
+
+   @Override
+   public String toString() {
+      final StringBuilder builder = new StringBuilder();
+      for(final Parser parser: this) {
+         if(builder.length() > 0) {
+            builder.append(' ');
+         }
+         builder.append(parser);
+      }
+      return builder.toString();
+   }
 }

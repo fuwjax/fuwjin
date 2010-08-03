@@ -22,7 +22,7 @@
 	<artifactId>postage</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>Postage - Pogo Message Dispatch</name>
+	<name>Postage - Function </name>
 	<description>
 	</description>
 	<dependencies>

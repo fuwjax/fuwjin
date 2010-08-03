@@ -1,4 +1,8 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.category;
+
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ConstantFunction;
 
 public class VoidCategory extends AbstractCategory {
    public VoidCategory() {

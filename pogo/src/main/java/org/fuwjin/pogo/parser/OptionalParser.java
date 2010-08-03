@@ -34,4 +34,9 @@ public class OptionalParser extends ParserOperator {
       parser.parse(context);
       context.success(null);
    }
+
+   @Override
+   public String toString() {
+      return parser.toString() + "?";
+   }
 }

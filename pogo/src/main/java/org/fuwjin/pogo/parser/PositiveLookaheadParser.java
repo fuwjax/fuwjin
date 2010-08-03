@@ -38,4 +38,9 @@ public class PositiveLookaheadParser extends ParserOperator {
          context.seek(mark);
       }
    }
+
+   @Override
+   public String toString() {
+      return '&' + parser.toString();
+   }
 }
