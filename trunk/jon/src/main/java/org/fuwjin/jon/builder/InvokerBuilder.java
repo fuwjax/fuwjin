@@ -9,8 +9,8 @@ package org.fuwjin.jon.builder;
 
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
-import org.fuwjin.postage.ClassFunction;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
 
 public class InvokerBuilder extends LiteralBuilder {
    private Function value;

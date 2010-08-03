@@ -21,8 +21,8 @@ import org.fuwjin.jon.builder.ListBuilder;
 import org.fuwjin.jon.builder.MapBuilder;
 import org.fuwjin.jon.builder.PrimitiveBuilder;
 import org.fuwjin.jon.builder.StringInstanceBuilder;
-import org.fuwjin.postage.ClassFunction;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
 
 public class BuilderRegistry {
    abstract static class ClassFilter {

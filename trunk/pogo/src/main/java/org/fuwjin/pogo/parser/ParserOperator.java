@@ -13,20 +13,16 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import java.util.Map;
 
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
  * The standard base class for parse operators.
  */
 public abstract class ParserOperator implements Parser {
-   private static final String PREFIX_CHAIN = "PrefixChain"; //$NON-NLS-1$
    /**
     * The target parser for this operaton.
     */
    protected Parser parser;
-   private static Pogo serial;
 
    /**
     * Creates a new instance.
@@ -61,13 +57,5 @@ public abstract class ParserOperator implements Parser {
    @Override
    public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
       parser.resolve(grammar, ruleType);
-   }
-
-   @Override
-   public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(PREFIX_CHAIN);
-      }
-      return serial.serial(this);
    }
 }

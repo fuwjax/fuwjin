@@ -1,7 +1,12 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.fuwjin.postage.CompositeFailure;
+import org.fuwjin.postage.CompositeSignature;
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Function;
 
 public class CompositeFunction extends AbstractFunction {
    private final List<Function> functions = new ArrayList<Function>();

@@ -15,8 +15,6 @@ import java.util.NoSuchElementException;
 
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.FinalizerTask;
 import org.fuwjin.pogo.reflect.InitializerTask;
 import org.fuwjin.pogo.reflect.NullTask;
@@ -27,12 +25,10 @@ import org.fuwjin.pogo.reflect.ReflectionType;
  */
 public class RuleReferenceParser implements Parser {
    private static final String UNKNOWN_RULE = "No rule named %s in grammar"; //$NON-NLS-1$ 
-   private static final String REFERENCE = "Reference"; //$NON-NLS-1$
    private String ruleName;
    private Parser rule;
    private InitializerTask constructor = new NullTask();
    private FinalizerTask converter = new NullTask();
-   private static Pogo serial;
 
    /**
     * Creates a new instance.
@@ -92,9 +88,6 @@ public class RuleReferenceParser implements Parser {
 
    @Override
    public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(REFERENCE);
-      }
-      return serial.serial(this);
+      return ruleName;
    }
 }

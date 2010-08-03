@@ -1,6 +1,7 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.lang.reflect.Constructor;
+
 
 public class ConstructorFunction extends AbstractFunction {
    private static final String ARG_COUNT = "Could not create %s with %d args: %s";

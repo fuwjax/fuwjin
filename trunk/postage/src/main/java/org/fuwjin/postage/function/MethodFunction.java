@@ -1,7 +1,8 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+
 
 public class MethodFunction extends AbstractFunction {
    private static final String ARG_COUNT = "Method %s could not process %d args: %s";

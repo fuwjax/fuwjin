@@ -14,8 +14,6 @@ import java.util.Map;
 
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.DefaultResultTask;
 import org.fuwjin.pogo.reflect.FinalizerTask;
 import org.fuwjin.pogo.reflect.InitializerTask;
@@ -27,8 +25,6 @@ import org.fuwjin.pogo.reflect.ReflectionType;
  * A grammar rule.
  */
 public class Rule implements Parser {
-   private static final String DEFINITION = "Definition"; //$NON-NLS-1$
-   private static Pogo serial;
    private String name;
    private Parser parser;
    private FinalizerTask finalizer = new DefaultResultTask();
@@ -107,9 +103,6 @@ public class Rule implements Parser {
 
    @Override
    public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(DEFINITION);
-      }
-      return serial.serial(this);
+      return name + " <- " + parser;
    }
 }

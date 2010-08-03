@@ -7,8 +7,6 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.parser.PrintLevel.LITERAL_OPTION;
-import static org.fuwjin.pogo.parser.PrintLevel.LITERAL_SEQUENCE;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
@@ -16,15 +14,19 @@ import java.util.Map;
 
 import org.fuwjin.io.PogoContext;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Pogo;
-import org.fuwjin.pogo.PogoGrammar;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
  * Matches a single specified character from the input.
  */
 public class CharacterLiteralParser implements Parser {
-   private static final String SINGLE_LIT = "SingleLit"; //$NON-NLS-1$
+   private static String getCh(final int ch, final String dirty, final String escaped) {
+      final int index = dirty.indexOf(ch);
+      if(index >= 0) {
+         return new String(new char[]{'\\', escaped.charAt(index)});
+      }
+      return new String(Character.toChars(ch));
+   }
 
    /**
     * Creates a unicode code point from an octal literal.
@@ -34,18 +36,6 @@ public class CharacterLiteralParser implements Parser {
    protected static int octal(final String ch) {
       return Integer.valueOf(ch, 8);
    }
-
-   /**
-    * Creates a unicode code point from a hex literal.
-    * @param ch the hex code
-    * @return the unicode code point
-    */
-   protected static int unicode(final String ch) {
-      return Integer.valueOf(ch, 16);
-   }
-
-   private int ch;
-   private static Pogo serial;
 
    /**
     * Creates a unicode code point from a control character.
@@ -59,6 +49,17 @@ public class CharacterLiteralParser implements Parser {
       }
       return ch.charAt(0);
    }
+
+   /**
+    * Creates a unicode code point from a hex literal.
+    * @param ch the hex code
+    * @return the unicode code point
+    */
+   protected static int unicode(final String ch) {
+      return Integer.valueOf(ch, 16);
+   }
+
+   private int ch;
 
    /**
     * Creates a new instance.
@@ -90,7 +91,7 @@ public class CharacterLiteralParser implements Parser {
     * @return the value
     */
    protected String getClassChar() {
-      return LITERAL_OPTION.escape((char)ch);
+      return getCh(ch, "\n\r\t\\[]", "nrt\\[]");
    }
 
    /**
@@ -98,7 +99,7 @@ public class CharacterLiteralParser implements Parser {
     * @return the value
     */
    protected String getLitChar() {
-      return LITERAL_SEQUENCE.escape((char)ch);
+      return getCh(ch, "\n\r\t\\'", "nrt\\'");
    }
 
    @Override
@@ -134,9 +135,6 @@ public class CharacterLiteralParser implements Parser {
 
    @Override
    public String toString() {
-      if(serial == null) {
-         serial = PogoGrammar.pogoParseGrammar().get(SINGLE_LIT);
-      }
-      return serial.serial(this);
+      return '"' + new String(Character.toChars(ch)) + '"';
    }
 }

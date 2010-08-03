@@ -39,4 +39,9 @@ public class NegativeLookaheadParser extends ParserOperator {
       }
       context.success(context.isSuccess() ? context.failedCheck("unexpected match") : null);
    }
+
+   @Override
+   public String toString() {
+      return '!' + parser.toString();
+   }
 }

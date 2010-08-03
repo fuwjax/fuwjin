@@ -24,8 +24,4 @@ public class CompositeFailure extends Failure {
          return false;
       }
    }
-
-   public boolean hasFailures() {
-      return !failures.isEmpty();
-   }
 }

@@ -1,4 +1,9 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.category;
+
+import org.fuwjin.postage.Function;
+import org.fuwjin.postage.UnknownSignature;
+import org.fuwjin.postage.function.AbstractFunction;
+import org.fuwjin.postage.function.ConstantFunction;
 
 public class NullCategory extends AbstractCategory {
    private static final String ARG_COUNT = "Could not test null with %d args: %s";

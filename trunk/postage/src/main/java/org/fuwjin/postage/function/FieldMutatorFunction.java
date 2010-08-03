@@ -1,6 +1,8 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.lang.reflect.Field;
+
+import org.fuwjin.postage.Function;
 
 public class FieldMutatorFunction extends AbstractFunction implements Function {
    private static final String ARG_COUNT = "Field %s could not process %d args: %s";

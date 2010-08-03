@@ -1,6 +1,10 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
 
 import java.lang.reflect.AccessibleObject;
+
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Signature;
 
 public abstract class AbstractFunction implements Function {
    protected static <T extends AccessibleObject> T access(final T obj) {

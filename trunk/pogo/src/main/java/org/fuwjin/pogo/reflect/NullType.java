@@ -11,7 +11,7 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.NullCategory;
+import org.fuwjin.postage.category.NullCategory;
 
 /**
  * A reflection type that produces empty dispatches.

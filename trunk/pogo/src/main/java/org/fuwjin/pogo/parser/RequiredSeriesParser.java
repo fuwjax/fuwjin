@@ -40,4 +40,9 @@ public class RequiredSeriesParser extends ParserOperator {
          context.success(null);
       }
    }
+
+   @Override
+   public String toString() {
+      return parser.toString() + '+';
+   }
 }

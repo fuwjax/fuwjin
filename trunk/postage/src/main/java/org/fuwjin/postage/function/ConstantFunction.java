@@ -1,4 +1,6 @@
-package org.fuwjin.postage;
+package org.fuwjin.postage.function;
+
+import org.fuwjin.postage.UnknownSignature;
 
 public class ConstantFunction extends AbstractFunction {
    private final Object value;

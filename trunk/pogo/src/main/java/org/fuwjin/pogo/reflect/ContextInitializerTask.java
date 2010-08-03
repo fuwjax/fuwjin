@@ -11,8 +11,8 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.io.PogoContext;
-import org.fuwjin.postage.ClassFunction;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.function.ClassFunction;
 
 /**
  * Creates a child context if the parent context is of the expected type.

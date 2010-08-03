@@ -36,4 +36,9 @@ public class OptionalSeriesParser extends ParserOperator {
       } while(context.isSuccess());
       context.success(null);
    }
+
+   @Override
+   public String toString() {
+      return parser.toString() + "*";
+   }
 }
