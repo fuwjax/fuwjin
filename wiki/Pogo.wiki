@@ -8,13 +8,13 @@ Pogo is an attributed PEG (Parsing Expression Grammar) style parser and transfor
 = Why Parsing Expression Grammars? =
 
 Parsing Expression Grammars^1^ provide some unique features desirable to parsing when compared to Context-Free Grammars
-* Composable -- A non-terminal may be replaced by its definition everywhere in the grammar without changing the grammar.
-* Deterministic -- Every input has a unique unambiguous parse tree.
-* Linear -- The parse can be constructed in O(n) where n is the length of the input.
+ * Composable -- A non-terminal may be replaced by its definition everywhere in the grammar without changing the grammar.
+ * Deterministic -- Every input has a unique unambiguous parse tree.
+ * Linear -- The parse can be constructed in O(n) where n is the length of the input.
 
 There are key features which PEG's lack compared to their CFG(Context Free Grammar) counterparts
-* Transparency -- Portions of a rule definition may be completely or partially masked by an earlier portion of the rule.
-* Back-tracking -- A repeated parse may rewind its match if it aids subsequent rules in matching the input.
+ * Transparency -- Portions of a rule definition may be completely or partially masked by an earlier portion of the rule.
+ * Back-tracking -- A repeated parse may rewind its match if it aids subsequent rules in matching the input.
 
 So, if you're willing to trade transparency for composability and back-tracking for determinism, PEG's are more useful than CFG's. In a dynamic environment, composability allows for easier refactoring and testing can take away the sting of masking.
 
@@ -26,9 +26,9 @@ There are various PEG implementations in many languages. Pogo seeks to take adva
 
 The end goal of Pogo is to be a general framework for transformation services. So object hierarchy transformations, data languages, test languages, domain languages, static analysis, code generation, log scraping and data migration are all well within the scope of Pogo's use cases. In addition, as a general purpose parser, we hope to make parsing accessible and usable to people who don't have the privilege of being trained language experts.
 
-* [ParsingExpressionGrammar The Parsing Expression Grammar]
-* [PogoAttributes What are Attributes?]
-* [PogoApi The Pogo API]
-* [CsvExample The example project]
+ * [ParsingExpressionGrammar The Parsing Expression Grammar]
+ * [PogoAttributes What are Attributes?]
+ * [PogoApi The Pogo API]
+ * [CsvExample The example project]
 
 1. [http://pdos.csail.mit.edu/~baford/packrat/popl04/]
