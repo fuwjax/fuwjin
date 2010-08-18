@@ -1,0 +1,130 @@
+#summary Specification for Pogo Attributes
+
+= Pogo Attributes =
+
+Attributes allow a grammar to specify actions during the parse. Each action will only be attempted if the parse has not failed. This allows an external object graph to monitor and react to the parse as each rule is processed.
+
+= Type Binding =
+
+Every rule can have a bound type. Types are bound to a rule by inserting an equals and the type in between the rule name and the left arrow. Types can either be fully qualified type names or some special types which will be discussed later.
+
+{{{ SomeRule = java.lang.String <- 'an expression' }}}
+
+= Initializer =
+
+Every rule can have an initializer. The initializer requires a bound type and follows the type bound. An Initializer is specified by a tilde followed by an identifier. The identifier may be a method or field on the bound type, or a special keyword such as "new" or "instanceof" which will be discussed later.
+
+{{{ SomeRule = java.lang.String~new <- 'an expression' }}}
+
+= Finalizer =
+
+Every rule can have a finalizer. A finalizer requires a bound type and follows the type bound and, if present, the initializer attribute. A finalizer is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type.
+
+{{{ SomeRule = java.lang.String~new:toString <- 'an expression' }}}
+
+{{{ AnotherRule = some.pkg.SomeClass:toString <- 'another expression' }}}
+
+= Constructor =
+
+Every rule reference can have a constructor. A constructor does not require a type bound and follows the rule reference. A constructor is specified by a tilde followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "this" which will be discussed later.
+
+{{{ SomeRule <- SomeRuleReference~this }}}
+
+= Converter =
+
+Every rule reference can have a converter. A converter does not require a type bound and follows the rule reference and, if present, the constructor attribute. A converter is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
+
+{{{ SomeRule <- SomeRuleReference:return }}}
+
+= Postage =
+
+Strictly speaking, the attributes and the bound type are all managed by the [Postage] library. The bound types are "categories" in Postage-lingo, while the attributes are "functions". This means that the Pogo attribute functionality can be extended by extending the underlying Postage instance in a Grammar. The remainder of this page will document the default Postage behavior in Pogo.
+
+= Rule Object =
+
+Every rule has an object associated with it. The lifecycle of this object is as follows.
+
+ # When the Rule is referenced, it is referenced from a rule referred to here as the Parent. The reference's Constructor is applied in the context of the Parent and the result is associated with the Rule. The Parent's associated object is available to the Constructor. If no such Constructor exists, no object is associated with the Rule. If the Constructor fails, the Parent fails.
+ # When the Rule begins its parse, the Initializer is applied. If a context object is associated with the parse, then it is available to the Initializer. If an object is already associated with the rule, it is available to the Initializer. If no such Initializer exists, the object already associated with the Rule is not changed. If the Initializer fails, the Rule fails.
+  * If the Initializer result type is void, the object already associated with the Rule is not changed.
+  * If the Initializer result type is boolean, and
+    * If the result is true, then the object already associated with the Rule is not changed.
+    * If the result is false, then the Rule fails
+  * Otherwise, the result object is associated with the Rule.
+ # When the Rule references a SubRule, it follows the same Constructor flow the Parent followed with the Rule when it was referenced.
+ # When the Rule references a SubRule and the SubRule successfully matches, the reference's Converter is applied in the context of the Rule. If an object is already associated with the rule, it is available to the Converter. The object associated with the SubRule is also available to the Converter. If the Converter fails, the Rule fails. If the Converter is the keyword "return" then the object associated with the SubRule is associated with the Rule. Otherwise, the object already associated with the Rule is not changed.
+# When the Rule completes successfully, the Finalizer is applied. If a context object is associated with the parse, then it is available to the Finalizer. If an object is already associated with the rule, it is available to the Finalizer. The consumed portion of the stream during this Rule is available to the Finalizer. If the Finalizer result type is void, then the object associated with the Rule is not changed. Otherwise the result of the Finalizer is associated with the Rule. If no such Finalizer exists, the associated object already associated with the Rule is not changed. If no Finalizer exists and no object has been associated with the Rule, then the consumed portion of the stream during this Rule is associated with the Rule. If the Finalizer fails, the Rule fails. 
+# When the Rule completes successfully, the Parent follows the same Converter flow that the Rule followed with a referenced SubRule.
+
+Expressed differently, here is the summary for each of the attributes.
+
+== Initializer attribute ==
+
+The initializer is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
+
+ * void f()
+ * void f(O object)
+ * void f(C context, O object)
+ * boolean f()
+ * boolean f(O object)
+ * boolean f(C context, O object)
+ * T f()
+ * T f(O object)
+ * T f(C context, O object)
+
+Where C is the type of the context associated with this parse, O is the type of the object previously associated with the Rule, and T is the type of the now associated object. Note that there is no requirement that O and T are equal or related, and neither O nor T need to be equal or related to the bound type. The bound type only provides the function f.
+
+== Finalizer attribute ==
+
+The finalizer is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
+
+ * void f()
+ * void f(String match)
+ * void f(O object)
+ * void f(O object, String match)
+ * void f(C context)
+ * void f(C context, String match)
+ * void f(C context, O object)
+ * void f(C context, O object, String match)
+ * T f()
+ * T f(String match)
+ * T f(O object)
+ * T f(O object, String match)
+ * T f(C context)
+ * T f(C context, String match)
+ * T f(C context, O object)
+ * T f(C context, O object, String match)
+ 
+Where C is the type of the context associated with this parse, O is the type of the object previously associated with the Rule, and T is the type of the now associated object. Note that there is no requirement that O and T are equal or related, and neither O nor T need to be equal or related to the bound type. The bound type only provides the function f.
+
+== Constructor attribute ==
+
+The constructor is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
+
+ * void f()
+ * void f(O object)
+ * T f()
+ * T f(O object)
+
+Where O is the type of the object associated with the Rule, and T is the type of the object associated with the referenced rule. 
+
+== Converter attribute ==
+
+The converter is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
+
+ * void f()
+ * void f(O object)
+ * void f(P parent)
+ * void f(P parent, O object)
+ * T f()
+ * T f(O object)
+ * T f(P parent)
+ * T f(P parent, O object)
+
+Where O is the type of the object associated with the Rule, P is the type of the object associated with the Parent rule, and T is ignored. 
+
+= Bound Type Options =
+
+Any fully qualified Java type may be used as a type bound. When a real type is used as the bound type, the initializer and finalizer as well as any constructors or converters appearing as attributes in that rule must be methods or fields on that type, or "new", "instanceof", "this", or "return".
+
+The bound type may be "*". This is in effect a duck-typed class. The only attributes allowed are instance methods or fields on the current object
