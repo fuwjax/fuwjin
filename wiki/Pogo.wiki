@@ -1,29 +1,34 @@
-#summary Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java.
+#summary Pogo is an attributed PEG (Parsing Expression Grammar) style parser and transformation engine for Java.
 #labels Featured
 
 = Introduction =
 
-Pogo is a PEG(Parsing Expression Grammar) style parser and transformation engine for Java. It is designed to meet the needs of software developers interested in adding custom language support to their applications.
+Pogo is an attributed PEG (Parsing Expression Grammar) style parser and transformation engine for Java. It is designed to meet the needs of software developers interested in adding custom language support, source code generation, or file scraping to their applications.
 
 = Why Parsing Expression Grammars? =
 
-Parsing Expression Grammars^1^ provide some unique features desirable to parsing
+Parsing Expression Grammars^1^ provide some unique features desirable to parsing when compared to Context-Free Grammars
 * Composable -- A non-terminal may be replaced by its definition everywhere in the grammar without changing the grammar.
-* Deterministic -- A single valid input has a unique unambiguous parse.
+* Deterministic -- Every input has a unique unambiguous parse tree.
 * Linear -- The parse can be constructed in O(n) where n is the length of the input.
 
 There are key features which PEG's lack compared to their CFG(Context Free Grammar) counterparts
-* Transparent -- Portions of a rule definition may be completely or partially masked by an earlier portion of the rule.
+* Transparency -- Portions of a rule definition may be completely or partially masked by an earlier portion of the rule.
+* Back-tracking -- A repeated parse may rewind its match if it aids subsequent rules in matching the input.
 
-So, if you're willing to trade transparency for composability, PEG's are probably more usable than CFG's. In particular, in a dynamic, changing environment, composability allows for easier refactoring and testing can take away the sting of masking.
+So, if you're willing to trade transparency for composability and back-tracking for determinism, PEG's are more useful than CFG's. In a dynamic environment, composability allows for easier refactoring and testing can take away the sting of masking.
 
 = Does the world need another Parser Parser? =
 
-There are various PEG implementations in many languages. Pogo seeks to take advantage of the particular advantages of PEG parsing to define a transformation language. In other words, by using Pogo to define an input grammar and an output grammar, it is possible to transform instead of just a simple parse. In addition, by using a PEG definition to perform input and output on both object graphs and character streams, it is possible to build the desired object hierarchy straight from the character stream and vice versa simply by declaring two grammars.
+There are various PEG implementations in many languages. Pogo seeks to take advantage of the particular advantages of PEG parsing to define a transformation language. In other words, Pogo uses the same extended PEG grammar to build both stream-to-object and object-to-stream transforms. Pogo is just as suitable for source code generation as it is for parsing domain languages.
 
 = What can you do with Pogo? =
 
-The end goal of Pogo is to be a general framework for transformation services. So object hierarchy transformations, test languages, domain languages, static analysis, code generation and data migration are all well within the scope of Pogo's use cases. In addition, as a general purpose parser, we hope to make parsing accessible and usable to people who don't have the privilege of being trained language experts.
+The end goal of Pogo is to be a general framework for transformation services. So object hierarchy transformations, data languages, test languages, domain languages, static analysis, code generation, log scraping and data migration are all well within the scope of Pogo's use cases. In addition, as a general purpose parser, we hope to make parsing accessible and usable to people who don't have the privilege of being trained language experts.
 
+* [ParsingExpressionGrammar The Parsing Expression Grammar]
+* [PogoAttributes What are Attributes?]
+* [PogoApi The Pogo API]
+* [CsvExample The example project]
 
 1. [http://pdos.csail.mit.edu/~baford/packrat/popl04/]
