@@ -1,0 +1,105 @@
+#summary Specification for Parsing Expression Grammars
+
+= Parsing Expression Grammar =
+
+The PEG syntax bears some similarities to EBNF or regular expressions. However, there are two very important differences between PEGs and other grammars. PEGs do not back-track repeated elements, nor do they process subsequent alternatives once an alternative matches.
+
+Below is the syntax for the set of Parsing Expressions.
+
+= Literal =
+
+A Literal is a sequence of required characters. The characters in the Literal must appear in order consecutively in the stream. A Literal is enclosed in single or double quotes:
+
+{{{ 'this is a literal' }}} 
+
+{{{ "so is this" }}}
+
+There is no distinction between single and double quotes, but they can't be mixed in the same literal. This means that single quoted strings can contain double quotes and vice versa.
+
+{{{ "I said, 'they will not mix'" }}}
+
+If it is necessary to include double quotes in a double quoted string, use a backslash to escape the character. This also works for line feeds, new lines, and horizontal tabs.
+
+{{{ "use a backslash (\\) to escape quotes (\"), new lines (\n), line feeds (\r), or tabs (\t)." }}}
+
+In addition, there are escapes for unprintable or unicode characters.
+
+{{{ "you can backslash an octal such as \14 or a hex \x1234." }}}
+
+= Character Class =
+
+A Character Class is a set of optional characters. One of the characters in the Character Class must appear next in the stream. A Character Class is enclosed in square brackets:
+
+{{{ [abcd] }}}
+
+A Character Class may contain a range of characters.
+
+{{{ [a-zA-Z] }}}
+
+If a Character Class needs to contain a square bracket or a hyphen, escape them with a backslash.
+
+{{{ [\[\-\]] }}}
+
+= Character Wildcard =
+
+A Character Wildcard consumes the next character from the stream. The Character Wildcard is a single period.
+
+{{{ . }}}
+
+= Sequence =
+
+A Sequence is a required set of Parsing Expressions. Each expression in the Sequence must appear in order consecutively on the stream. Whitespace is not required.
+
+{{{ [Xx] [Mm] [Ll] }}}
+
+= Option =
+
+An Option is a set of alternative Parsing Expressions. One of the expressions in the Option must appear next in the stream. The expressions are tested in order, as soon as one expression matches, the remaining expressions will not be attempted, even if the parse later fails.
+
+{{{ 'one' / 'two' / 'three' }}}
+
+= Optional =
+
+An Optional expression will match zero or one times. If the expression matches the stream it will be consumed. Any expression may be made Optional by adding a question mark as a suffix.
+
+{{{ 'optional'? }}}
+
+= Optional Series =
+
+An Optional Series expression will match zero or more times. As long as the expression matches the stream it will be consumed. Any expression may be made an Optional Series by adding an asterisk as a suffix.
+
+{{{ [a-z]* }}}
+
+= Required Series =
+
+A Required Series expression will match one or more times. The expression must appear next on the stream and as long as the expression matches the stream it will be consumed. Any expression may be made a Required Series by adding a plus as a suffix.
+
+{{{ [0-9]+ }}}
+
+= Positive Lookahead =
+
+A Positive Lookahead expression asserts that it would match the stream, but without consuming anything. Any expression may be made a Positive Lookahead by adding an ampersand as a prefix.
+
+{{{ &'ing' }}}
+
+= Negative Lookahead =
+
+A Negative Lookahead expression asserts that it would not match the stream. Any expression may be made a Negative Lookahead by adding an exclamation point as a prefix.
+
+{{{ !'next' }}}
+
+= Rule Reference =
+
+A Rule Reference is the name of a Rule. This allows Rules to nest or even recurse.
+
+{{{ SomeRule }}}
+
+= Rule =
+
+A Rule is a named parse expression. The name and the expression are separated by a left arrow.
+
+{{{ SomeRule <- 'an expression' }}}
+
+Strictly speaking, Rules are not Parsing Expressions. They name a Parsing Expression to allow for nesting and recursion. 
+
+Grammars are composed of sets of Rules. The order of the Rules does not matter, however it is customary for the first Rule in the Grammar to be the starting Rule for a parse. Pogo allows a parse to begin with any Rule.
