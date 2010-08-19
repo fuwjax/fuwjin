@@ -11,7 +11,7 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.Map;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
@@ -30,12 +30,12 @@ public class CharacterParser implements Parser {
    }
 
    @Override
-   public void parse(final PogoContext context) {
-      context.accept();
+   public Position parse(final Position position) {
+      return position.advance(0, Integer.MAX_VALUE);
    }
 
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
       // do nothing
    }
 

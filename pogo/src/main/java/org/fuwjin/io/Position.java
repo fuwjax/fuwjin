@@ -1,35 +1,29 @@
 package org.fuwjin.io;
 
-public class Position {
-   private final int position;
-   private final int column;
-   private final int line;
+public interface Position {
+   Position advance(int low, int high);
 
-   public Position(final int position, final int line, final int column) {
-      this.position = position;
-      this.line = line;
-      this.column = column;
-   }
+   void assertSuccess() throws PogoException;
 
-   public int column() {
-      return column;
-   }
+   BufferedPosition buffered();
 
-   @Override
-   public boolean equals(final Object obj) {
-      try {
-         final Position o = (Position)obj;
-         return o.position == position;
-      } catch(final RuntimeException e) {
-         return false;
-      }
-   }
+   void fail(Position position);
 
-   public int line() {
-      return line;
-   }
+   void fail(String reason, Throwable cause);
 
-   public int position() {
-      return position;
-   }
+   Object fetch(String name);
+
+   boolean isSuccess();
+
+   void neutral();
+
+   Object release(String name);
+
+   void reserve(String name, Object object);
+
+   void store(String name, Object object);
+
+   void success();
+
+   BufferedPosition unbuffered();
 }

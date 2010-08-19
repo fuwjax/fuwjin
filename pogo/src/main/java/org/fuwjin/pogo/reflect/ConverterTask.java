@@ -8,16 +8,15 @@
 package org.fuwjin.pogo.reflect;
 
 /**
- * A task run before a rule is started.
+ * A task run after a rule has completed.
  */
-public interface InitializerTask {
+public interface ConverterTask {
    /**
-    * Creates a child context.
-    * @param input the parent context
-    * @param element
-    * @return the child context
+    * Migrates the child context object to the container context object.
+    * @param container the parent context
+    * @param child the child context
     */
-   Object initialize(Object root, Object obj);
+   Object finalize(Object container, Object child);
 
    /**
     * Sets the message dispatch type.

@@ -63,6 +63,9 @@ public class ClassType implements ReflectionType {
 
    @Override
    public String toString() {
+      if(type == null) {
+         return "null";
+      }
       return type.getName();
    }
 }

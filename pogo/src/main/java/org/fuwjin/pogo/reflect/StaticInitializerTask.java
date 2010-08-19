@@ -10,7 +10,7 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Postage;
 
@@ -52,19 +52,16 @@ public class StaticInitializerTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      final Object obj = input.get();
-      // if(obj != null && !type.isInstance(obj)) {
-      // final Object result = invoker.invokeSafe(obj);
-      // return input.newChild(result, Postage.isSuccess(result), ERROR_CODE +
-      // type);
-      // }
+   public Object initialize(final Object root, final Object obj) {
       Object result = invoker.invokeSafe(obj);
       result = Postage.isSuccess(result) ? result : invoker.invokeSafe();
       if(result instanceof Boolean) {
-         return input.newChild(name, obj, (Boolean)result ? null : input.failedCheck("boolean result from " + invoker));
+         if((Boolean)result) {
+            return obj;
+         }
+         return new Failure("returned false from " + name);
       }
-      return input.newChild(name, result, input.postageException(result));
+      return result;
    }
 
    @Override

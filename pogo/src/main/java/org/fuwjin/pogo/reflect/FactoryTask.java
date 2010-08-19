@@ -10,13 +10,12 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.Function;
 
 /**
  * Creates a new instance from a message.
  */
-public class FactoryTask implements InitializerTask {
+public class FactoryTask implements ConstructTask {
    private String name;
    private Function invoker;
 
@@ -51,9 +50,8 @@ public class FactoryTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      final Object result = invoker.invokeSafe(input.get());
-      return input.newChild(name, result, input.postageException(result));
+   public Object initialize(final Object input) {
+      return invoker.invokeSafe(input);
    }
 
    @Override

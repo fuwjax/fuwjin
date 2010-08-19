@@ -32,9 +32,11 @@ import org.fuwjin.pogo.parser.SequenceParser;
 import org.fuwjin.pogo.reflect.AllType;
 import org.fuwjin.pogo.reflect.AppendTask;
 import org.fuwjin.pogo.reflect.ClassType;
+import org.fuwjin.pogo.reflect.ConstructTask;
 import org.fuwjin.pogo.reflect.ConstructorTask;
 import org.fuwjin.pogo.reflect.ContextFinalizerTask;
 import org.fuwjin.pogo.reflect.ContextInitializerTask;
+import org.fuwjin.pogo.reflect.ConverterTask;
 import org.fuwjin.pogo.reflect.DefaultResultTask;
 import org.fuwjin.pogo.reflect.FactoryTask;
 import org.fuwjin.pogo.reflect.FinalizerTask;
@@ -302,7 +304,7 @@ public class PogoUtils { // NO_UCD
     * @param finalizer the finalizer after the rule is parsed
     * @return the parser
     */
-   public static Parser ref(final String name, final InitializerTask initializer, final FinalizerTask finalizer) {
+   public static Parser ref(final String name, final ConstructTask initializer, final ConverterTask finalizer) {
       return new RuleReferenceParser(name, initializer, finalizer);
    }
 
@@ -380,8 +382,11 @@ public class PogoUtils { // NO_UCD
     * Serializes the input grammar to a string.
     * @param grammar the grammar to serialize
     * @return the serialized grammar
+    * @throws PogoException
     */
-   public static String writeGrammar(final Grammar grammar) {
-      return PogoSerial.get().serial(grammar);
+   public static String writeGrammar(final Grammar grammar) throws PogoException {
+      final StringBuilder builder = new StringBuilder();
+      PogoSerial.get().serial(grammar, builder);
+      return builder.toString();
    }
 }

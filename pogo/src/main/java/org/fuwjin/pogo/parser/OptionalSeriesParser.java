@@ -7,7 +7,7 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 
 /**
@@ -30,11 +30,13 @@ public class OptionalSeriesParser extends ParserOperator {
    }
 
    @Override
-   public void parse(final PogoContext context) {
+   public Position parse(final Position position) {
+      Position next = position;
       do {
-         parser.parse(context);
-      } while(context.isSuccess());
-      context.success(null);
+         next = parseBuffered(next);
+      } while(next.isSuccess());
+      next.success();
+      return next;
    }
 
    @Override

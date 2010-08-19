@@ -157,7 +157,7 @@ public class WhenPostingToClassMethods {
    public void shouldPostCastMessages() throws Failure {
       final SampleObject object = new SampleObject();
       final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "instanceof");
-      assertThat((SampleObject)func.invoke(object), is(object));
+      assertThat((Boolean)func.invoke(object), is(true));
    }
 
    @Test

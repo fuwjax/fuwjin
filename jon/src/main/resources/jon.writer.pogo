@@ -11,7 +11,7 @@ Cast            =org.fuwjin.jon.ref.BaseReference~isCast
 Value           <- Literal~this / String~this / List~this / Map~this / Instance~this / Base~this
 Literal         =org.fuwjin.jon.ref.LiteralReference
                 <- Identifier~get
-String          =org.fuwjin.jon.ref.StringReference
+String          =org.fuwjin.jon.ref.StringReference~instanceof
                 <- '"' Content~get '"'
 List            =org.fuwjin.jon.ref.BaseReference$ListReference~iterator
                 <- '[' (Element~next (',' Element~next)*)? ']'

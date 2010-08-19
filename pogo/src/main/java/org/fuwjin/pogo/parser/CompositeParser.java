@@ -92,9 +92,9 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
    }
 
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
       for(final Parser parser: parsers) {
-         parser.resolve(grammar, ruleType);
+         parser.resolve(parent, grammar, ruleType);
       }
    }
 }

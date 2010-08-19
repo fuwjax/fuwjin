@@ -8,11 +8,12 @@
 package org.fuwjax.sample;
 
 import static java.lang.ClassLoader.getSystemResourceAsStream;
-import static org.fuwjin.io.BufferedInput.buffer;
+import static org.fuwjin.io.AbstractCodePointStream.stream;
 
 import java.text.ParseException;
 import java.util.List;
 
+import org.fuwjin.io.CodePointStream;
 import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonReader;
 import org.fuwjin.jon.JonWriter;
@@ -52,7 +53,7 @@ public final class SampleUsage {
       final List<Model> models = fetchData("data.jon"); //$NON-NLS-1$
       final Object output = service.transform(models);
       final String result = saveOutput(output);
-      assert result.equals(EXPECTED_RESULT);
+      assert result.equals(EXPECTED_RESULT): result;
    }
 
    /*
@@ -60,8 +61,8 @@ public final class SampleUsage {
     * CharSequence. This method simply reads all the lines in a file and smashes
     * them together for the JON parser.
     */
-   private static CharSequence readFile(final String filename) {
-      return buffer(getSystemResourceAsStream(filename));
+   private static CodePointStream readFile(final String filename) {
+      return stream(getSystemResourceAsStream(filename));
    }
 
    /*

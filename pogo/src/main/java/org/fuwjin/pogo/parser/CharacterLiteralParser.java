@@ -12,7 +12,7 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.Map;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
@@ -91,7 +91,7 @@ public class CharacterLiteralParser implements Parser {
     * @return the value
     */
    protected String getClassChar() {
-      return getCh(ch, "\n\r\t\\[]", "nrt\\[]");
+      return getCh(ch, "\n\r\t\\[]-", "nrt\\[]-");
    }
 
    /**
@@ -108,12 +108,12 @@ public class CharacterLiteralParser implements Parser {
    }
 
    @Override
-   public void parse(final PogoContext context) {
-      context.accept(ch);
+   public Position parse(final Position position) {
+      return position.advance(ch, ch);
    }
 
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
       // do nothing
    }
 

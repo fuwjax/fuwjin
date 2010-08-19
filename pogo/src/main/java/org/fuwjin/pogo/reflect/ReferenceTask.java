@@ -11,8 +11,6 @@ import static org.fuwjin.pogo.reflect.DefaultResultTask.MATCH;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
-
 /**
  * Creates a new context that expects to be filled with the matched parse.
  */
@@ -35,11 +33,8 @@ public class ReferenceTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      final Object obj = input.get();
-      // return input.newChild(type.isInstance(obj) ? obj : MATCH, obj == null
-      // || type.isInstance(obj), null);
-      return input.newChild(name, type.isInstance(obj) ? obj : MATCH, null);
+   public Object initialize(final Object root, final Object obj) {
+      return type.isInstance(obj) ? obj : MATCH;
    }
 
    @Override

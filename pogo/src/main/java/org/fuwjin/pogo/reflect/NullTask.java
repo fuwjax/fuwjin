@@ -10,12 +10,10 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
-
 /**
  * A task that does as little as possible.
  */
-public class NullTask implements FinalizerTask, InitializerTask {
+public class NullTask implements ConverterTask, ConstructTask {
    private static final String NULL = "null"; //$NON-NLS-1$
 
    @Override
@@ -29,8 +27,8 @@ public class NullTask implements FinalizerTask, InitializerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext child) {
-      // ignore
+   public Object finalize(final Object container, final Object child) {
+      return container;
    }
 
    @Override
@@ -39,8 +37,8 @@ public class NullTask implements FinalizerTask, InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      return input.newChild(name, null, null);
+   public Object initialize(final Object input) {
+      return null;
    }
 
    @Override

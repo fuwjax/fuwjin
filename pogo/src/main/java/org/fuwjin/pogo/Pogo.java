@@ -7,18 +7,19 @@
  *******************************************************************************/
 package org.fuwjin.pogo;
 
-import static org.fuwjin.io.BufferedInput.buffer;
+import static org.fuwjin.io.AbstractCodePointStream.stream;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.text.ParseException;
 
-import org.fuwjin.io.ParseContext;
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.CodePointStream;
 import org.fuwjin.io.PogoException;
-import org.fuwjin.io.PogoRootContext;
-import org.fuwjin.io.SerialContext;
+import org.fuwjin.io.Position;
+import org.fuwjin.io.SerialStreamPosition;
+import org.fuwjin.io.StreamPosition;
 import org.fuwjin.pogo.parser.Rule;
 
 /**
@@ -64,13 +65,8 @@ public class Pogo {
     * @return the filled object
     * @throws ParseException if the parse fails
     */
-   public Object parse(final CharSequence input, final Object object) throws PogoException {
-      final PogoRootContext context = new ParseContext(input);
-      final PogoContext child = context.newChild(rule.name());
-      child.set(object, null);
-      rule.parse(child);
-      context.assertSuccess();
-      return child.get();
+   public Object parse(final CodePointStream input, final Object object) throws PogoException {
+      return parse(new StreamPosition(input), object);
    }
 
    /**
@@ -78,17 +74,16 @@ public class Pogo {
     * @param context the context
     * @throws ParseException if the parse fails
     */
-   public void parse(final PogoRootContext context) throws PogoException {
-      rule.parse(context.newChild(rule.name()));
+   public void parse(final Position context) throws PogoException {
+      rule.parse(context);
       context.assertSuccess();
    }
 
-   public PogoContext parse(final PogoRootContext context, final Object obj) throws PogoException {
-      final PogoContext child = context.newChild(rule.name());
-      child.set(obj, null);
-      rule.parse(child);
-      context.assertSuccess();
-      return child;
+   public Object parse(final Position position, final Object object) throws PogoException {
+      position.reserve(rule.name(), object);
+      final Position next = rule.parse(position);
+      next.assertSuccess();
+      return next.release(rule.name());
    }
 
    /**
@@ -109,7 +104,7 @@ public class Pogo {
     * @throws ParseException if the parse fails
     */
    public Object parse(final Reader reader, final Object object) throws PogoException {
-      return parse(buffer(reader), object);
+      return parse(stream(reader), object);
    }
 
    /**
@@ -119,7 +114,7 @@ public class Pogo {
     * @throws ParseException if the parse fails
     */
    public Object parse(final String input) throws PogoException {
-      return parse(input, null);
+      return parse(new StringReader(input), null);
    }
 
    /**
@@ -127,12 +122,12 @@ public class Pogo {
     * @param input the input to serialize
     * @return the serialized string
     */
-   public String serial(final Object input) {
-      final PogoRootContext context = new SerialContext();
-      final PogoContext child = context.newChild(rule.name());
-      child.set(input, null);
-      rule.parse(child);
-      return child.match();
+   public void serial(final Object input, final Appendable appender) throws PogoException {
+      final Position pos = new SerialStreamPosition(appender);
+      pos.reserve(rule.name(), input);
+      final Position last = rule.parse(pos);
+      last.assertSuccess();
+      pos.release(rule.name());
    }
 
    /**

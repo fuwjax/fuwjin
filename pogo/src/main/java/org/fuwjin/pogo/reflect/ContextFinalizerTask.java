@@ -10,7 +10,6 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.function.ClassFunction;
 
@@ -38,6 +37,11 @@ public class ContextFinalizerTask implements FinalizerTask {
    }
 
    @Override
+   public boolean canMatch(final Object initial) {
+      return false;
+   }
+
+   @Override
    public boolean equals(final Object obj) {
       try {
          final ContextFinalizerTask o = (ContextFinalizerTask)obj;
@@ -48,12 +52,11 @@ public class ContextFinalizerTask implements FinalizerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext child) {
+   public Object finalize(final Object root, final Object object, final Object match) {
       if(invoker == null) {
-         invoker = new ClassFunction(container.getClass(), name);
+         invoker = new ClassFunction(root.getClass(), name);
       }
-      final Object obj = invoker.invokeSafe(container, child.get());
-      container.set(obj, container.postageException(obj));
+      return invoker.invokeSafe(root, object);
    }
 
    @Override

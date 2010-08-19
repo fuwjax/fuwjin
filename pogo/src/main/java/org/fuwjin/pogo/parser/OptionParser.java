@@ -7,7 +7,8 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.BufferedPosition;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 
 /**
@@ -21,14 +22,18 @@ public class OptionParser extends CompositeParser {
    }
 
    @Override
-   public void parse(final PogoContext context) {
+   public Position parse(final Position position) {
+      final BufferedPosition buffer = position.buffered();
       for(final Parser parser: this) {
-         parser.parse(context);
-         if(context.isSuccess()) {
-            break;
+         buffer.neutral();
+         final Position next = parser.parse(buffer);
+         if(next.isSuccess()) {
+            buffer.success();
+            return buffer.flush(next);
          }
+         buffer.fail(next);
       }
-      // context is failure if loop never broke
+      return buffer.flush(buffer);
    }
 
    @Override

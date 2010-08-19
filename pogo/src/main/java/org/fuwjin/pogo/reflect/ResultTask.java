@@ -11,7 +11,6 @@ import static org.fuwjin.postage.Postage.isSuccess;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.Function;
 
 /**
@@ -37,6 +36,11 @@ public class ResultTask implements FinalizerTask {
    }
 
    @Override
+   public boolean canMatch(final Object initial) {
+      return true;
+   }
+
+   @Override
    public boolean equals(final Object obj) {
       try {
          final ResultTask o = (ResultTask)obj;
@@ -47,12 +51,12 @@ public class ResultTask implements FinalizerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext child) {
-      Object result = invoker.invokeSafe(child.get());
-      result = isSuccess(result) ? result : invoker.invokeSafe(child.get(), child.match());
+   public Object finalize(final Object root, final Object object, final Object match) {
+      Object result = invoker.invokeSafe(object);
+      result = isSuccess(result) ? result : invoker.invokeSafe(object, match.toString());
       result = isSuccess(result) ? result : invoker.invokeSafe();
-      result = isSuccess(result) ? result : invoker.invokeSafe(child.match());
-      container.set(result, container.postageException(result));
+      result = isSuccess(result) ? result : invoker.invokeSafe(match.toString());
+      return result;
    }
 
    @Override
