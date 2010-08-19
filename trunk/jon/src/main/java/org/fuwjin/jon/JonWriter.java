@@ -10,7 +10,7 @@ package org.fuwjin.jon;
 import static org.fuwjin.pogo.PogoUtils.readGrammar;
 
 import org.fuwjin.io.PogoException;
-import org.fuwjin.io.SerialContext;
+import org.fuwjin.io.SerialStreamPosition;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.pogo.Grammar;
 
@@ -23,15 +23,16 @@ public class JonWriter {
          throw new RuntimeException(e);
       }
    }
-   private final SerialContext context;
    private final ReferenceStorage storage;
 
    public JonWriter() {
-      context = new SerialContext();
       storage = new ReferenceStorage();
    }
 
    public String write(final Object obj) throws PogoException {
-      return JON.parse(context, storage.get(obj, null)).match();
+      final StringBuilder builder = new StringBuilder();
+      final SerialStreamPosition context = new SerialStreamPosition(builder);
+      JON.parse(context, storage.get(obj, null));
+      return builder.toString();
    }
 }

@@ -10,8 +10,8 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.function.ClassFunction;
 
 /**
@@ -53,12 +53,15 @@ public class ContextInitializerTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
+   public Object initialize(final Object root, final Object obj) {
       if(invoker == null) {
-         invoker = new ClassFunction(input.getClass(), this.name);
+         invoker = new ClassFunction(root.getClass(), name);
       }
-      final Object obj = invoker.invokeSafe(input);
-      return input.newChild(name, obj, input.postageException(obj));
+      Object result = invoker.invokeSafe(root);
+      if(!Postage.isSuccess(result)) {
+         result = invoker.invokeSafe(root, obj);
+      }
+      return result;
    }
 
    @Override

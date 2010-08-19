@@ -10,8 +10,6 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
-
 /**
  * Sets the parent container to the matched parse result.
  */
@@ -24,6 +22,11 @@ public class DefaultResultTask implements FinalizerTask {
    public static final Object MATCH = new Object();
 
    @Override
+   public boolean canMatch(final Object initial) {
+      return initial == MATCH;
+   }
+
+   @Override
    public boolean equals(final Object obj) {
       try {
          final DefaultResultTask o = (DefaultResultTask)obj;
@@ -34,13 +37,11 @@ public class DefaultResultTask implements FinalizerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext child) {
-      final Object obj = child.get();
-      if(obj == MATCH) {
-         container.set(child.match(), null);
-      } else {
-         container.set(obj, null);
+   public Object finalize(final Object root, final Object object, final Object match) {
+      if(object == MATCH) {
+         return match.toString();
       }
+      return object;
    }
 
    @Override

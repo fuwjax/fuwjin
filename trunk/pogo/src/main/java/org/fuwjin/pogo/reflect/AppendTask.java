@@ -10,14 +10,13 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.Function;
 
 /**
  * Appends a child context object to the parent context object through a message
  * dispatch.
  */
-public class AppendTask implements FinalizerTask {
+public class AppendTask implements ConverterTask {
    private String name;
    private transient Function invoker;
 
@@ -47,8 +46,9 @@ public class AppendTask implements FinalizerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext result) {
-      invoker.invokeSafe(container.get(), result.get());
+   public Object finalize(final Object container, final Object result) {
+      invoker.invokeSafe(container, result);
+      return container;
    }
 
    @Override

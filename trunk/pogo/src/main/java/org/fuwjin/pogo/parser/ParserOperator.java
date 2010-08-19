@@ -12,6 +12,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.Map;
 
+import org.fuwjin.io.BufferedPosition;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
@@ -54,8 +56,14 @@ public abstract class ParserOperator implements Parser {
       return hash(getClass(), parser);
    }
 
+   protected Position parseBuffered(final Position position) {
+      final BufferedPosition buffer = position.buffered();
+      final Position next = parser.parse(buffer);
+      return buffer.flush(next);
+   }
+
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
-      parser.resolve(grammar, ruleType);
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
+      parser.resolve(parent, grammar, ruleType);
    }
 }

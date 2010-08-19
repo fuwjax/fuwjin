@@ -10,12 +10,10 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
-
 /**
  * Migrates the child context object to the container context.
  */
-public class ReturnTask implements FinalizerTask {
+public class ReturnTask implements ConverterTask {
    private static final String RETURN = "return"; //$NON-NLS-1$
 
    @Override
@@ -29,9 +27,8 @@ public class ReturnTask implements FinalizerTask {
    }
 
    @Override
-   public void finalize(final PogoContext container, final PogoContext child) {
-      final Object obj = child.get();
-      container.set(obj, container.postageException(obj));
+   public Object finalize(final Object parent, final Object object) {
+      return object;
    }
 
    @Override

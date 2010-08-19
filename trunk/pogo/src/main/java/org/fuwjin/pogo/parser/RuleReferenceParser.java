@@ -13,10 +13,10 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.reflect.FinalizerTask;
-import org.fuwjin.pogo.reflect.InitializerTask;
+import org.fuwjin.pogo.reflect.ConstructTask;
+import org.fuwjin.pogo.reflect.ConverterTask;
 import org.fuwjin.pogo.reflect.NullTask;
 import org.fuwjin.pogo.reflect.ReflectionType;
 
@@ -25,10 +25,11 @@ import org.fuwjin.pogo.reflect.ReflectionType;
  */
 public class RuleReferenceParser implements Parser {
    private static final String UNKNOWN_RULE = "No rule named %s in grammar"; //$NON-NLS-1$ 
+   private String parentName;
    private String ruleName;
    private Parser rule;
-   private InitializerTask constructor = new NullTask();
-   private FinalizerTask converter = new NullTask();
+   private ConstructTask constructor = new NullTask();
+   private ConverterTask converter = new NullTask();
 
    /**
     * Creates a new instance.
@@ -43,7 +44,7 @@ public class RuleReferenceParser implements Parser {
     * @param initializer the initializer for the reference
     * @param finalizer the finalizer for the reference
     */
-   public RuleReferenceParser(final String ruleName, final InitializerTask initializer, final FinalizerTask finalizer) {
+   public RuleReferenceParser(final String ruleName, final ConstructTask initializer, final ConverterTask finalizer) {
       this.ruleName = ruleName;
       constructor = initializer;
       converter = finalizer;
@@ -66,18 +67,33 @@ public class RuleReferenceParser implements Parser {
    }
 
    @Override
-   public void parse(final PogoContext context) {
-      final PogoContext child = constructor.initialize(ruleName, context);
-      if(child.isSuccess()) {
-         rule.parse(child);
-         if(child.isSuccess()) {
-            converter.finalize(context, child);
+   public Position parse(final Position position) {
+      final Object parent = position.fetch(parentName);
+      final Object newElement = constructor.initialize(parent);
+      if(newElement instanceof Throwable) {
+         position.fail("could not initialize rule reference " + ruleName, (Throwable)newElement);
+      } else {
+         position.reserve(ruleName, newElement);
+         final Position next = rule.parse(position);
+         final Object finishedElement = next.release(ruleName);
+         if(next.isSuccess()) {
+            final Object finalElement = converter.finalize(parent, finishedElement);
+            if(finalElement instanceof Throwable) {
+               position.fail("could not finalize rule " + ruleName, (Throwable)finalElement);
+            } else {
+               next.store(parentName, finalElement);
+               return next;
+            }
+         } else {
+            position.fail(next);
          }
       }
+      return position;
    }
 
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
+      parentName = parent;
       rule = grammar.get(ruleName);
       if(rule == null) {
          throw new NoSuchElementException(String.format(UNKNOWN_RULE, ruleName));

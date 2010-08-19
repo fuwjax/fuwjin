@@ -10,14 +10,14 @@ ClassType       =org.fuwjin.pogo.reflect.ClassType
                 <- ClassObj~type
 ClassObj        =java.lang.Class
                 <- Identifier~getName
-Initializer     <- NEW~this / INSTANCEOF~this / ContextInit~this / InitMethod~this
-ContextInit     =org.fuwjin.pogo.reflect.ContextInitializerTask
-                <- Identifier~name
+Initializer     <- NEW~this / INSTANCEOF~this / InitMethod~this / ContextInit~this
+ContextInit     =org.fuwjin.pogo.reflect.ContextInitializerTask~instanceof
+                <- 'context.' Identifier~name
 InitMethod      =org.fuwjin.pogo.reflect.StaticInitializerTask
                 <- Identifier~name
-Finalizer       <- ContextResult~this / ResultMethod~this
-ContextResult   =org.fuwjin.pogo.reflect.ContextFinalizerTask
-                <- Identifier~name
+Finalizer       <- ResultMethod~this / ContextResult~this
+ContextResult   =org.fuwjin.pogo.reflect.ContextFinalizerTask~instanceof
+                <- 'context.' Identifier~name
 ResultMethod    =org.fuwjin.pogo.reflect.ResultTask
                 <- Identifier~name
 Expression      <- LitOpt~this / Option~this / SequenceChain~this

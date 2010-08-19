@@ -7,7 +7,6 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 
@@ -20,16 +19,18 @@ public class SequenceParser extends CompositeParser {
       return parser instanceof CharacterLiteralParser;
    }
 
+   // intentionally unbuffered
    @Override
-   public void parse(final PogoContext context) {
-      final Position mark = context.position();
+   public Position parse(final Position position) {
+      Position next = position;
       for(final Parser parser: this) {
-         parser.parse(context);
-         if(!context.isSuccess()) {
-            context.seek(mark);
-            break;
+         next = parser.parse(next);
+         if(!next.isSuccess()) {
+            position.fail(next);
+            return position;
          }
       }
+      return next;
    }
 
    @Override

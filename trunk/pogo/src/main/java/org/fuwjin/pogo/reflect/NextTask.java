@@ -12,14 +12,13 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.Iterator;
 
-import org.fuwjin.io.PogoContext;
 import org.fuwjin.postage.function.ClassFunction;
 import org.fuwjin.postage.function.CompositeFunction;
 
 /**
  * Creates a new context for the next element of an iterator.
  */
-public class NextTask implements InitializerTask {
+public class NextTask implements ConstructTask {
    private static final String NEXT = "next"; //$NON-NLS-1$
    private CompositeFunction invoker;
 
@@ -39,9 +38,8 @@ public class NextTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      final Object result = invoker.invokeSafe(input.get());
-      return input.newChild(name, result, input.postageException(result));
+   public Object initialize(final Object input) {
+      return invoker.invokeSafe(input);
    }
 
    @Override

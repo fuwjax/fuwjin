@@ -7,7 +7,7 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.BufferedPosition;
 import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 
@@ -31,13 +31,15 @@ public class NegativeLookaheadParser extends ParserOperator {
    }
 
    @Override
-   public void parse(final PogoContext context) {
-      final Position mark = context.position();
-      parser.parse(context);
-      if(context.isSuccess()) {
-         context.seek(mark);
+   public Position parse(final Position position) {
+      final BufferedPosition buffer = position.buffered();
+      final Position next = parser.parse(buffer);
+      if(next.isSuccess()) {
+         buffer.fail("unexpected match", null);
+      } else {
+         next.success();
       }
-      context.success(context.isSuccess() ? context.failedCheck("unexpected match") : null);
+      return buffer.flush(buffer);
    }
 
    @Override

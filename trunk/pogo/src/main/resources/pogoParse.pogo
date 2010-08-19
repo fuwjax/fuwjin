@@ -43,7 +43,7 @@ Range           =org.fuwjin.pogo.parser.CharacterRangeParser~new
 LitChar         =org.fuwjin.pogo.parser.CharacterLiteralParser~new
                 <- Char:set
 Char            <- '\\' EscapeChar:return / !'\\' .
-EscapeChar      <- ['"\[\]\\] / ControlChar:return / OctalChar:return / 'x' UnicodeChar:return
+EscapeChar      <- [-'"\[\]\\] / ControlChar:return / OctalChar:return / 'x' UnicodeChar:return
 ClassIdent      =java.lang.Class:forName
                 <- Ident ([.$] Ident)*
 Ident           <- IdentStart IdentCont*

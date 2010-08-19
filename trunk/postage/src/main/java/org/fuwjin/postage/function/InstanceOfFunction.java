@@ -1,6 +1,5 @@
 package org.fuwjin.postage.function;
 
-
 public class InstanceOfFunction extends AbstractFunction {
    private static final String ARG_COUNT = "Could not cast to %s with %d args: %s";
    private static final String EXCEPTION = "Could not cast to %s from %s";
@@ -27,7 +26,7 @@ public class InstanceOfFunction extends AbstractFunction {
          return failure(ARG_COUNT, type, args.length, args);
       }
       if(type.isInstance(args[0])) {
-         return args[0];
+         return true;
       }
       return failure(EXCEPTION, type, args[0]);
    }

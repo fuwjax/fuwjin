@@ -10,14 +10,13 @@ package org.fuwjin.pogo.reflect;
 /**
  * A task run before a rule is started.
  */
-public interface InitializerTask {
+public interface ConstructTask {
    /**
     * Creates a child context.
     * @param input the parent context
-    * @param element
     * @return the child context
     */
-   Object initialize(Object root, Object obj);
+   Object initialize(Object input);
 
    /**
     * Sets the message dispatch type.

@@ -12,7 +12,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.Map;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.io.BufferedPosition;
+import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.reflect.DefaultResultTask;
 import org.fuwjin.pogo.reflect.FinalizerTask;
@@ -71,6 +72,21 @@ public class Rule implements Parser {
       return hash(getClass(), name, type, initializer, finalizer, parser);
    }
 
+   private BufferedPosition initialize(final Position position) {
+      final Object root = position.fetch(null);
+      final Object element = position.fetch(name);
+      final Object newElement = initializer.initialize(root, element);
+      if(newElement instanceof Throwable) {
+         position.fail("could not initialize rule " + name, (Throwable)newElement);
+      } else {
+         position.store(name, newElement);
+         if(finalizer.canMatch(newElement)) {
+            return position.buffered();
+         }
+      }
+      return position.unbuffered();
+   }
+
    /**
     * Returns the name.
     * @return the name
@@ -80,14 +96,25 @@ public class Rule implements Parser {
    }
 
    @Override
-   public void parse(final PogoContext context) {
-      final PogoContext child = initializer.initialize(name, context);
-      if(child.isSuccess()) {
-         parser.parse(child);
-         if(child.isSuccess()) {
-            finalizer.finalize(context, child);
+   public Position parse(final Position position) {
+      final BufferedPosition pos = initialize(position);
+      if(pos.isSuccess()) {
+         final Position next = parser.parse(pos);
+         if(next.isSuccess()) {
+            final Object root = next.fetch(null);
+            final Object finishedElement = next.fetch(name);
+            final Object finalElement = finalizer.finalize(root, finishedElement, pos.match(next));
+            if(finalElement instanceof Throwable) {
+               pos.fail("could not finalize rule " + name, (Throwable)finalElement);
+            } else {
+               next.store(name, finalElement);
+               return pos.flush(next);
+            }
+         } else {
+            pos.fail(next);
          }
       }
+      return pos.flush(pos);
    }
 
    /**
@@ -95,10 +122,10 @@ public class Rule implements Parser {
     * @param grammar the grammar to resolve rule references
     */
    @Override
-   public void resolve(final Map<String, Rule> grammar, final ReflectionType ignore) {
+   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ignore) {
       initializer.setType(type);
       finalizer.setType(type);
-      parser.resolve(grammar, type);
+      parser.resolve(name, grammar, type);
    }
 
    @Override

@@ -104,7 +104,7 @@ public final class PogoGrammar extends Grammar {
       add(rule("Char", type(), init(), result(), option(seq(lit('\\'), ref("EscapeChar", ignore(), _return())), seq(
             not(lit('\\')), dot()))));
       add(rule("EscapeChar", type(), init(), result(), option(
-            option(lit('\''), lit('"'), lit('['), lit(']'), lit('\\')), ref("ControlChar", ignore(), _return()), ref(
+            option(lit('-'), lit('\''), lit('"'), lit('['), lit(']'), lit('\\')), ref("ControlChar", ignore(), _return()), ref(
                   "OctalChar", ignore(), _return()), seq(lit('x'), ref("UnicodeChar", ignore(), _return())))));
       add(rule("ClassIdent", type(java.lang.Class.class), init(), result("forName"), seq(ref("Ident", ignore(),
             ignore()), star(seq(option(lit('.'), lit('$')), ref("Ident", ignore(), ignore()))))));

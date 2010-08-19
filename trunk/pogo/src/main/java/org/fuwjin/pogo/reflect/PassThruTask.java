@@ -10,12 +10,10 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
-
 /**
  * Creates a new context from the parent context.
  */
-public class PassThruTask implements InitializerTask {
+public class PassThruTask implements ConstructTask {
    private static final String THIS = "this"; //$NON-NLS-1$
 
    @Override
@@ -34,8 +32,8 @@ public class PassThruTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      return input.newChild(name, input.get(), null);
+   public Object initialize(final Object input) {
+      return input;
    }
 
    @Override

@@ -20,8 +20,14 @@ public class PogoClassLoader {
       try {
          return loader.loadClass(name);
       } catch(final ClassNotFoundException e) {
-         loader.compile(name, grammar.serial(generator));
-         return loader.loadClass(name);
+         try {
+            final StringBuilder builder = new StringBuilder();
+            grammar.serial(generator, builder);
+            loader.compile(name, builder.toString());
+            return loader.loadClass(name);
+         } catch(final PogoException e1) {
+            throw new ClassNotFoundException("Could not build class", e1);
+         }
       }
    }
 }

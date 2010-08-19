@@ -10,7 +10,7 @@ package org.fuwjin.pogo.reflect;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.io.PogoContext;
+import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
 /**
@@ -36,10 +36,15 @@ public class InstanceOfTask implements InitializerTask {
    }
 
    @Override
-   public PogoContext initialize(final String name, final PogoContext input) {
-      final Object obj = input.get();
+   public Object initialize(final Object root, final Object obj) {
       final Object result = function.invokeSafe(obj);
-      return input.newChild(name, obj, input.postageException(result));
+      if(result instanceof Boolean) {
+         if((Boolean)result) {
+            return obj;
+         }
+         return new Failure("not an instance of " + function);
+      }
+      return result;
    }
 
    @Override
