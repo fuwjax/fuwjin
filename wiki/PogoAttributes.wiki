@@ -16,9 +16,15 @@ Every rule can have an initializer. The initializer requires a bound type and fo
 
 {{{ SomeRule = java.lang.String~new <- 'an expression' }}}
 
+= Serializer =
+
+Every rule can have a serilizer. The serializer requires a bound type and follows the type bound and, if present, the initializer attribute. A serializer is specified by a greater than followed by an identifier. The identifier may be a method or field on the bound type, or a special keyword such as "return" which will be discussed later.
+
+{{{ SomeRule = java.lang.String>valueOf <- 'an expression' }}}
+
 = Finalizer =
 
-Every rule can have a finalizer. A finalizer requires a bound type and follows the type bound and, if present, the initializer attribute. A finalizer is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type.
+Every rule can have a finalizer. A finalizer requires a bound type and follows the type bound and, if present, the initializer and/or serializer attributes. A finalizer is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type.
 
 {{{ SomeRule = java.lang.String~new:toString <- 'an expression' }}}
 
@@ -30,9 +36,15 @@ Every rule reference can have a constructor. A constructor does not require a ty
 
 {{{ SomeRule <- SomeRuleReference~this }}}
 
+= Matcher =
+
+Every rule reference can have a matcher. A matcher does not require a type bound and follows the rule reference and, if present, the constructor attribute. A matcher is specified by a greater than followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
+
+{{{ SomeRule <- SomeRuleReference>return }}}
+
 = Converter =
 
-Every rule reference can have a converter. A converter does not require a type bound and follows the rule reference and, if present, the constructor attribute. A converter is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
+Every rule reference can have a converter. A converter does not require a type bound and follows the rule reference and, if present, the constructor and/or matcher attributes. A converter is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
 
 {{{ SomeRule <- SomeRuleReference:return }}}
 
@@ -40,9 +52,27 @@ Every rule reference can have a converter. A converter does not require a type b
 
 Strictly speaking, the attributes and the bound type are all managed by the [Postage] library. The bound types are "categories" in Postage-lingo, while the attributes are "functions". This means that the Pogo attribute functionality can be extended by extending the underlying Postage instance in a Grammar. The remainder of this page will document the default Postage behavior in Pogo.
 
-= Rule Object =
+= Rule Object Lifecycle =
 
-Every rule has an object associated with it. The lifecycle of this object is as follows.
+Every rule has an object associated with it. Let's define a few rules to give some context. 
+
+{{{ Parent = sample.SomeContainer <- Rule~factory>match:result
+ Rule = sample.SomeClass~create>text:reduce <- Child~newChild>output:resolve
+Child <- ...}}}
+
+In this example, the first stage of the Rule object lifecycle is the Constructor attribute on the Rule reference in the Parent rule definition, here named "factory", which could match any of the following signatures:
+ * R sample.SomeContainer.factory()
+ * R sample.SomeContainer.factor
+ * static R sample.SomeContainer.factory(sample.SomeContainer c)
+ * static R sample.SomeContainer.factory()
+ * static R sample.SomeContainer.factory
+
+Note that the first three signatures will only be attempted if there is a Parent object. The return type R is either Void, Failure, Boolean or Somthing Else. If void or true, the Rule will still be unassigned after the constructor attribute is processed. If Failure or false, the Rule will abort processing and return a failure. if something else, then it is simply returned.
+
+
+
+
+
 
  # When the Rule is referenced, it is referenced from a rule referred to here as the Parent. The reference's Constructor is applied in the context of the Parent and the result is associated with the Rule. The Parent's associated object is available to the Constructor. If no such Constructor exists, no object is associated with the Rule. If the Constructor fails, the Parent fails.
  # When the Rule begins its parse, the Initializer is applied. If a context object is associated with the parse, then it is available to the Initializer. If an object is already associated with the rule, it is available to the Initializer. If no such Initializer exists, the object already associated with the Rule is not changed. If the Initializer fails, the Rule fails.
