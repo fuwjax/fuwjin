@@ -1,12 +1,10 @@
 package org.fuwjin.postage.function;
 
 public class InstanceOfFunction extends AbstractFunction {
-   private static final String ARG_COUNT = "Could not cast to %s with %d args: %s";
-   private static final String EXCEPTION = "Could not cast to %s from %s";
    private final Class<?> type;
 
    public InstanceOfFunction(final Class<?> type) {
-      super("instanceof", type);
+      super("instanceof", boolean.class, false, Object.class);
       this.type = type;
    }
 
@@ -21,18 +19,12 @@ public class InstanceOfFunction extends AbstractFunction {
    }
 
    @Override
-   public Object invokeSafe(final Object... args) {
-      if(args.length != 1) {
-         return failure(ARG_COUNT, type, args.length, args);
-      }
-      if(type.isInstance(args[0])) {
-         return true;
-      }
-      return failure(EXCEPTION, type, args[0]);
+   public String toString() {
+      return type.getCanonicalName();
    }
 
    @Override
-   public String toString() {
-      return type.getCanonicalName();
+   public Object tryInvoke(final Object... args) {
+      return type.isInstance(args[0]);
    }
 }

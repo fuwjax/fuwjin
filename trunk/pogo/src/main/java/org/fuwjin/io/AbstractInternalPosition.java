@@ -1,5 +1,15 @@
 package org.fuwjin.io;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Memo;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.Position;
+import org.fuwjin.postage.Adaptable;
+import org.fuwjin.postage.StandardAdaptable;
+
 public abstract class AbstractInternalPosition implements InternalPosition, BufferedPosition {
    public static final Object NO_MATCH = new Object() {
       @Override
@@ -9,26 +19,26 @@ public abstract class AbstractInternalPosition implements InternalPosition, Buff
    };
    private int line;
    private int column;
-   private final PogoFailure failure = new PogoFailure(this);
-   private final ParseStack stack;
+   private final PogoState state;
+   private final List<Memo> memos = new LinkedList<Memo>();
 
    protected AbstractInternalPosition() {
       line = 1;
       column = 0;
-      stack = new ParseStack();
+      state = new PogoState(this);
    }
 
    protected AbstractInternalPosition(final AbstractInternalPosition prev) {
-      stack = prev.stack;
       line = prev.line;
       column = prev.column;
+      state = prev.state;
    }
 
    protected void accept(final int ch) {
       if(ch == '\n') {
          line++;
-         column = 1;
-      } else if(ch != -1) {
+         column = 0;
+      } else {
          column++;
       }
    }
@@ -56,33 +66,29 @@ public abstract class AbstractInternalPosition implements InternalPosition, Buff
 
    @Override
    public void assertSuccess() throws PogoException {
-      if(!failure.isSuccess()) {
-         throw failure.exception();
+      if(!state.isSuccess()) {
+         throw state.exception();
       }
    }
 
-   protected void fail(final int low, final int high) {
-      failure.addFailure(low, high);
+   @Override
+   public Memo createMemo(final String name, final Object value) {
+      for(final Memo memo: memos) {
+         if(name.equals(memo.name())) {
+            return memo;
+         }
+      }
+      state.newMemo(this, name, value);
+      return null;
    }
 
-   @Override
-   public void fail(final Position child) {
-      failure.addFailure(((InternalPosition)child).failure());
+   protected void fail(final int low, final int high) {
+      state.addFailure(this, low, high);
    }
 
    @Override
    public void fail(final String reason, final Throwable cause) {
-      failure.addFailure(reason, cause);
-   }
-
-   @Override
-   public PogoFailure failure() {
-      return failure;
-   }
-
-   @Override
-   public Object fetch(final String name) {
-      return stack.lookup(name);
+      state.addFailure(this, reason, cause);
    }
 
    @Override
@@ -96,34 +102,38 @@ public abstract class AbstractInternalPosition implements InternalPosition, Buff
    }
 
    @Override
-   public boolean isAfter(final InternalPosition position) {
-      final AbstractInternalPosition ip = (AbstractInternalPosition)position.root();
+   public boolean isAfter(final Position position) {
+      final AbstractInternalPosition ip = (AbstractInternalPosition)((InternalPosition)position).root();
       return line > ip.line || line == ip.line && column > ip.column;
    }
 
    @Override
    public boolean isSuccess() {
-      return failure.isSuccess();
+      return state.isSuccess();
    }
 
    @Override
-   public Object match(final Position next) {
-      return NO_MATCH;
+   public Adaptable match(final Position next) {
+      return StandardAdaptable.UNSET;
    }
 
    @Override
-   public void neutral() {
-      failure.neutral();
+   public Memo memo() {
+      return state.memo();
    }
 
    @Override
-   public Object release(final String name) {
-      return stack.release(name, isSuccess());
+   public void record(final Memo memo) {
+      memos.add(memo);
    }
 
    @Override
-   public void reserve(final String name, final Object state) {
-      stack.reserve(name, state);
+   public Memo releaseMemo(final Memo newMemo) {
+      final Memo memo = state.releaseMemo(newMemo);
+      if(isSuccess()) {
+         ((InternalPosition)memo.getStart()).record(memo);
+      }
+      return memo;
    }
 
    @Override
@@ -132,24 +142,19 @@ public abstract class AbstractInternalPosition implements InternalPosition, Buff
    }
 
    @Override
-   public void store(final String name, final Object state) {
-      stack.store(name, state);
-   }
-
-   @Override
    public void success() {
-      failure.clear();
+      state.success();
    }
 
    @Override
    public String toMessage() {
-      return stack.toMessage() + "[" + line + "," + column + "]";
+      return "[" + line + "," + column + "]";
    }
 
    @Override
    public String toString() {
       final StringBuilder builder = new StringBuilder();
-      if(failure.isSuccess()) {
+      if(state.isSuccess()) {
          builder.append('+');
       } else {
          builder.append('-');

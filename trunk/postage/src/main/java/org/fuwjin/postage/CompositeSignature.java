@@ -7,7 +7,7 @@ public class CompositeSignature extends Signature {
    private final List<Signature> signatures;
 
    public CompositeSignature(final String name) {
-      super(name);
+      super(name, Object.class, true, Object[].class);
       signatures = new LinkedList<Signature>();
    }
 

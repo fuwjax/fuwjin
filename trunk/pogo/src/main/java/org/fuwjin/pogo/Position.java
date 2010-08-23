@@ -1,4 +1,5 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo;
+
 
 public interface Position {
    Position advance(int low, int high);
@@ -7,21 +8,17 @@ public interface Position {
 
    BufferedPosition buffered();
 
-   void fail(Position position);
+   Memo createMemo(String name, Object value);
 
    void fail(String reason, Throwable cause);
 
-   Object fetch(String name);
+   boolean isAfter(Position position);
 
    boolean isSuccess();
 
-   void neutral();
+   Memo memo();
 
-   Object release(String name);
-
-   void reserve(String name, Object object);
-
-   void store(String name, Object object);
+   Memo releaseMemo(Memo newMemo);
 
    void success();
 

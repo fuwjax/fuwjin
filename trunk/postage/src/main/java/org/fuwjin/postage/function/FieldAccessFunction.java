@@ -5,14 +5,11 @@ import java.lang.reflect.Field;
 import org.fuwjin.postage.Function;
 
 public class FieldAccessFunction extends AbstractFunction implements Function {
-   private static final String ARG_COUNT = "Field %s could not process %d args: %s";
-   private static final String GET_EXCEPTION = "Field %s on %s could not be retrieved";
-   private static final String TYPE = "Field %s could not cast %s to %s";
    private final Field field;
    private final Class<?> firstParam;
 
    public FieldAccessFunction(final Field field, final Class<?> firstParam) {
-      super(field.getName(), firstParam);
+      super(field.getName(), field.getType(), false, firstParam);
       this.field = field;
       this.firstParam = firstParam;
    }
@@ -28,22 +25,12 @@ public class FieldAccessFunction extends AbstractFunction implements Function {
    }
 
    @Override
-   public Object invokeSafe(final Object... args) {
-      if(args.length != 1) {
-         return failure(ARG_COUNT, this, args.length, args);
-      }
-      if(!firstParam.isInstance(args[0])) {
-         return failure(TYPE, this, args[0], firstParam);
-      }
-      try {
-         return access(field).get(args[0]);
-      } catch(final Exception e) {
-         return failure(e, GET_EXCEPTION, this, args[0]);
-      }
+   public String toString() {
+      return field.toString();
    }
 
    @Override
-   public String toString() {
-      return field.toString();
+   public Object tryInvoke(final Object... args) throws Exception {
+      return access(field).get(args[0]);
    }
 }

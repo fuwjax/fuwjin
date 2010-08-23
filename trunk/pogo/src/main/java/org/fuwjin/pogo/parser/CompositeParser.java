@@ -13,10 +13,9 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
+import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.reflect.ReflectionType;
 
 /**
  * A base class for composite parsers.
@@ -92,9 +91,9 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
    }
 
    @Override
-   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
       for(final Parser parser: parsers) {
-         parser.resolve(parent, grammar, ruleType);
+         parser.resolve(grammar, parent);
       }
    }
 }

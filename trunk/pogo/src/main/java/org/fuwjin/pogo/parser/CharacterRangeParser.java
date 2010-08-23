@@ -10,11 +10,9 @@ package org.fuwjin.pogo.parser;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import java.util.Map;
-
-import org.fuwjin.io.Position;
+import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.reflect.ReflectionType;
+import org.fuwjin.pogo.Position;
 
 /**
  * Matches a single character against a range. The range is from start to end,
@@ -61,7 +59,7 @@ public class CharacterRangeParser implements Parser {
    }
 
    @Override
-   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
+   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
       // do nothing
    }
 

@@ -2,9 +2,13 @@ package org.fuwjin.io;
 
 import java.io.IOException;
 
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.CodePointStream;
+
 public class StreamPosition extends AbstractInternalPosition {
    private final CodePointStream stream;
    private final int ch;
+   private boolean hasNext;
 
    public StreamPosition(final CodePointStream stream) {
       this.stream = stream;
@@ -50,6 +54,8 @@ public class StreamPosition extends AbstractInternalPosition {
 
    @Override
    public StreamPosition next() {
+      assert !hasNext: this;
+      hasNext = true;
       return new StreamPosition(this);
    }
 }

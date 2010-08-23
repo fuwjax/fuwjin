@@ -2,6 +2,11 @@ package org.fuwjin.io;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Position;
+import org.fuwjin.postage.Adaptable;
+import org.fuwjin.postage.StandardHandler;
+
 public class InternalChainedPosition extends PositionDecorator {
    private final AtomicInteger buffering;
    private InternalChainedPosition next;
@@ -33,7 +38,7 @@ public class InternalChainedPosition extends PositionDecorator {
    @Override
    public Position flush(final Position last) {
       assert isBuffered();
-      if(buffering.decrementAndGet() == 0) {
+      if(buffering.decrementAndGet() == 0 && next == null) {
          return ((InternalPosition)last).root();
       }
       return last;
@@ -44,16 +49,19 @@ public class InternalChainedPosition extends PositionDecorator {
    }
 
    @Override
-   public Object match(final Position last) {
-      return new Object() {
+   public Adaptable match(final Position last) {
+      return new Adaptable() {
          private String str;
 
          @Override
-         public String toString() {
+         public Object as(final Class<?> type) {
             if(str == null) {
                str = substring(last);
             }
-            return str;
+            if(Object.class.equals(type)) {
+               return str;
+            }
+            return StandardHandler.getHandler(type).toObject(str);
          }
       };
    }

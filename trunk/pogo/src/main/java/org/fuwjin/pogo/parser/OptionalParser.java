@@ -7,8 +7,8 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.Position;
 
 /**
  * Matches the inner parser zero or one times.

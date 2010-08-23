@@ -5,12 +5,10 @@ import java.lang.reflect.Field;
 import org.fuwjin.postage.Function;
 
 public class StaticFieldMutatorFunction extends AbstractFunction implements Function {
-   private static final String ARG_COUNT = "Field %s could not process %d args: %s";
-   private static final String SET_EXCEPTION = "Static field %s could not be set to %s";
    private final Field field;
 
    public StaticFieldMutatorFunction(final Field field) {
-      super(field.getName(), field.getType());
+      super(field.getName(), Void.class, false, field.getType());
       this.field = field;
    }
 
@@ -25,21 +23,13 @@ public class StaticFieldMutatorFunction extends AbstractFunction implements Func
    }
 
    @Override
-   public Object invokeSafe(final Object... args) {
-      if(args.length != 1) {
-         return failure(ARG_COUNT, this, args.length, args);
-      }
-      final Object value = args[0];
-      try {
-         access(field).set(null, value);
-         return null;
-      } catch(final Exception e) {
-         return failure(e, SET_EXCEPTION, this, value);
-      }
+   public String toString() {
+      return field.toString();
    }
 
    @Override
-   public String toString() {
-      return field.toString();
+   public Object tryInvoke(final Object... args) throws Exception {
+      access(field).set(null, args[0]);
+      return null;
    }
 }

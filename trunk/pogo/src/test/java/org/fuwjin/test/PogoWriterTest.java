@@ -1,25 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.pogo.PogoGrammar.pogoParseGrammar;
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
-import static org.fuwjin.pogo.PogoUtils.writeGrammar;
+import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
+import static org.fuwjin.pogo.PogoGrammar.staticPogoGrammar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import java.io.StringReader;
-
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.PogoCodeGenerator;
 import org.fuwjin.pogo.PredefinedGrammar;
 import org.junit.Test;
 
@@ -39,10 +33,10 @@ public class PogoWriterTest {
    public void outputGrammars() throws Exception {
       for(final PredefinedGrammar grammar: PredefinedGrammar.values()) {
          System.out.println(COMMENT + grammar + GRAMMAR);
-         System.out.println(writeGrammar(grammar.grammar()));
+         System.out.println(grammar.grammar().toPogo());
       }
       for(final PredefinedGrammar grammar: PredefinedGrammar.values()) {
-         System.out.println(new PogoCodeGenerator(PACKAGE + grammar.toString(), grammar.grammar()).toCode());
+         System.out.println(grammar.grammar().toCode(PACKAGE + grammar.toString()));
       }
    }
 
@@ -53,9 +47,9 @@ public class PogoWriterTest {
     */
    @Test
    public void testWriter() throws Exception {
-      final String grammar = writeGrammar(pogoParseGrammar());
-      final Grammar peg = readGrammar(new StringReader(grammar));
-      final String written = writeGrammar(peg);
+      final String grammar = staticPogoGrammar().toPogo();
+      final Grammar peg = readGrammar(streamOf(grammar));
+      final String written = peg.toPogo();
       assertThat(written, is(grammar));
    }
 }

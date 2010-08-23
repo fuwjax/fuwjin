@@ -1,19 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.pogo;
 
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
 /**
  * The set of predefined grammars from the pogo package.
@@ -31,29 +26,48 @@ public enum PredefinedGrammar {
     * the default pogo code serializer.
     */
    PogoCodeSerial("pogoCodeSerial.pogo"); //$NON-NLS-1$
-   private static final String SRC_MAIN_RESOURCES = "src/main/resources/"; //$NON-NLS-1$
+   private static class PogoCodeGenerator {
+      private final String packageName;
+      private final String name;
+      private final Grammar grammar;
+
+      /**
+       * Creates a new instance.
+       * @param qualifiedName the qualified class name of the generated source
+       * @param grammar the grammar to encode
+       */
+      public PogoCodeGenerator(final String qualifiedName, final Grammar grammar) {
+         this.grammar = grammar;
+         final int index = qualifiedName.lastIndexOf('.');
+         packageName = qualifiedName.substring(0, index);
+         name = qualifiedName.substring(index + 1);
+      }
+
+      @Override
+      public String toString() {
+         return packageName + '.' + name + '=' + grammar;
+      }
+   }
+
+   public static String grammarToJava(final String qualifiedName, final Grammar grammar) throws PogoException {
+      return PogoCodeSerial.grammar().toString(new PogoCodeGenerator(qualifiedName, grammar));
+   }
+
+   /**
+    * Serializes the input grammar to a string.
+    * @param grammar the grammar to serialize
+    * @return the serialized grammar
+    * @throws PogoException
+    */
+   public static String grammarToPogo(final Grammar grammar) throws PogoException {
+      return PogoSerial.grammar().toString(grammar);
+   }
+
    private final String file;
    private Grammar grammar;
 
    private PredefinedGrammar(final String file) {
       this.file = file;
-   }
-
-   /**
-    * Returns the default root parser.
-    * @return the root parser
-    */
-   public Pogo get() {
-      return grammar();
-   }
-
-   /**
-    * Returns the named root parser.
-    * @param name the name of the root parser
-    * @return the root parser
-    */
-   public Pogo get(final String name) {
-      return grammar().get(name);
    }
 
    /**
@@ -63,15 +77,10 @@ public enum PredefinedGrammar {
    public Grammar grammar() {
       if(grammar == null) {
          try {
-            try {
-               grammar = readGrammar(new FileReader(file));
-            } catch(final FileNotFoundException e) {
-               grammar = readGrammar(new FileReader(SRC_MAIN_RESOURCES + file));
-            }
+            grammar = readGrammar(stream(file));
          } catch(final Exception e) {
             throw new RuntimeException(e);
          }
-         grammar.resolve();
       }
       return grammar;
    }

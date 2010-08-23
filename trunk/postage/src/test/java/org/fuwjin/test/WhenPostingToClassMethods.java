@@ -3,6 +3,7 @@ package org.fuwjin.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Observable;
@@ -57,12 +58,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldFailPostInvalidArgsCastMessages() throws Failure {
       final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "instanceof");
-      try {
-         func.invoke(7);
-         fail("should fail");
-      } catch(final Failure e) {
-         // pass();
-      }
+      assertTrue(!(Boolean)func.invoke(7));
    }
 
    @Test

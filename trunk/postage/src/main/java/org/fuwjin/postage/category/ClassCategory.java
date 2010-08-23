@@ -1,14 +1,14 @@
 package org.fuwjin.postage.category;
 
-import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.function.ClassFunction;
 import org.fuwjin.postage.function.InstanceOfFunction;
 
 public class ClassCategory extends AbstractCategory {
    private final Class<?> type;
 
-   public ClassCategory(final Class<?> type) {
-      super(type.getCanonicalName());
+   public ClassCategory(final Class<?> type, final Postage postage) {
+      super(type.getCanonicalName(), postage);
       this.type = type;
       addFunction(new InstanceOfFunction(type));
    }
@@ -24,7 +24,7 @@ public class ClassCategory extends AbstractCategory {
    }
 
    @Override
-   protected Function newFunction(final String name) {
-      return new ClassFunction(type, name);
+   protected ClassFunction newFunction(final String name) {
+      return new ClassFunction(this, type, name);
    }
 }

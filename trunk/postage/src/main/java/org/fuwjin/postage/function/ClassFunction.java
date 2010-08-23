@@ -5,10 +5,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.fuwjin.postage.Category;
 
 public class ClassFunction extends CompositeFunction {
-   public ClassFunction(final Class<?> type, final String name) {
-      super(name);
+   public ClassFunction(final Category category, final Class<?> type, final String name) {
+      super(name, category);
       if("new".equals(name)) {
          for(final Constructor<?> c: type.getDeclaredConstructors()) {
             addFunction(new ConstructorFunction(c));

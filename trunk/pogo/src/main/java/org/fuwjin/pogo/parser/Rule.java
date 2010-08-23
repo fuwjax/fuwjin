@@ -7,36 +7,41 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
+import static org.fuwjin.pogo.postage.PostageUtils.buffer;
+import static org.fuwjin.pogo.postage.PostageUtils.invoke;
+import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import java.util.Map;
-
-import org.fuwjin.io.BufferedPosition;
-import org.fuwjin.io.Position;
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Grammar;
+import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.reflect.DefaultResultTask;
-import org.fuwjin.pogo.reflect.FinalizerTask;
-import org.fuwjin.pogo.reflect.InitializerTask;
-import org.fuwjin.pogo.reflect.ObjectType;
-import org.fuwjin.pogo.reflect.ReferenceTask;
-import org.fuwjin.pogo.reflect.ReflectionType;
+import org.fuwjin.pogo.Position;
+import org.fuwjin.postage.Category;
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Function;
 
 /**
  * A grammar rule.
  */
-public class Rule implements Parser {
+public class Rule implements org.fuwjin.pogo.Rule {
    private String name;
    private Parser parser;
-   private FinalizerTask finalizer = new DefaultResultTask();
-   private ReflectionType type = new ObjectType();
-   private InitializerTask initializer = new ReferenceTask();
+   private Function finalizer;
+   private Category type;
+   private Function initializer;
+   private Function serializer;
+   private boolean simple = true;
 
    /**
     * Creates a new instance.
     */
    Rule() {
-      // for reflection
+      type("default");
+      initializer("default");
+      serializer("default");
+      finalizer("default");
    }
 
    /**
@@ -47,12 +52,13 @@ public class Rule implements Parser {
     * @param finalizer the rule finalizer
     * @param parser the expression
     */
-   public Rule(final String name, final ReflectionType type, final InitializerTask initializer,
-         final FinalizerTask finalizer, final Parser parser) {
+   public Rule(final String name, final String type, final String initializer, final String serializer,
+         final String finalizer, final Parser parser) {
       this.name = name;
-      this.type = type;
-      this.initializer = initializer;
-      this.finalizer = finalizer;
+      type(type);
+      initializer(initializer);
+      serializer(serializer);
+      finalizer(finalizer);
       this.parser = parser;
    }
 
@@ -60,11 +66,21 @@ public class Rule implements Parser {
    public boolean equals(final Object obj) {
       try {
          final Rule o = (Rule)obj;
-         return eq(getClass(), o.getClass()) && eq(name, o.name) && eq(type, o.type) && eq(initializer, o.initializer)
-               && eq(finalizer, o.finalizer) && eq(parser, o.parser);
+         return eq(getClass(), o.getClass()) && eq(name, o.name) && eq(type.name(), o.type.name())
+               && eq(initializer.name(), o.initializer.name()) && eq(serializer.name(), o.serializer.name())
+               && eq(finalizer.name(), o.finalizer.name()) && eq(parser, o.parser);
       } catch(final ClassCastException e) {
          return false;
       }
+   }
+
+   private void finalizer(final String finalizer) {
+      this.finalizer = new Partial(finalizer).as(Function.class);
+   }
+
+   @Override
+   public Function getFunction(final String name) {
+      return type.getFunction(name);
    }
 
    @Override
@@ -72,46 +88,45 @@ public class Rule implements Parser {
       return hash(getClass(), name, type, initializer, finalizer, parser);
    }
 
-   private BufferedPosition initialize(final Position position) {
-      final Object root = position.fetch(null);
-      final Object element = position.fetch(name);
-      final Object newElement = initializer.initialize(root, element);
-      if(newElement instanceof Throwable) {
-         position.fail("could not initialize rule " + name, (Throwable)newElement);
-      } else {
-         position.store(name, newElement);
-         if(finalizer.canMatch(newElement)) {
-            return position.buffered();
-         }
-      }
-      return position.unbuffered();
+   private void initializer(final String initializer) {
+      this.initializer = new Partial(initializer).as(Function.class);
    }
 
    /**
     * Returns the name.
     * @return the name
     */
+   @Override
    public String name() {
       return name;
    }
 
    @Override
    public Position parse(final Position position) {
-      final BufferedPosition pos = initialize(position);
-      if(pos.isSuccess()) {
+      if(simple) {
+         return parser.parse(position);
+      }
+      final BufferedPosition pos = buffer(position, serializer);
+      final Memo memo = pos.memo();
+      Object result = invoke(initializer, memo.getValue());
+      if(result instanceof Failure) {
+         pos.fail("could not initialize rule " + name, (Failure)result);
+      } else {
+         memo.setValue(result);
          final Position next = parser.parse(pos);
          if(next.isSuccess()) {
-            final Object root = next.fetch(null);
-            final Object finishedElement = next.fetch(name);
-            final Object finalElement = finalizer.finalize(root, finishedElement, pos.match(next));
-            if(finalElement instanceof Throwable) {
-               pos.fail("could not finalize rule " + name, (Throwable)finalElement);
+            result = invoke(serializer, memo.getValue(), pos.match(next));
+            if(result instanceof Failure) {
+               next.fail("could not handle rule match" + name, (Failure)result);
             } else {
-               next.store(name, finalElement);
-               return pos.flush(next);
+               result = invoke(finalizer, result);
+               if(result instanceof Failure) {
+                  next.fail("could not finalize rule " + name, (Failure)result);
+               } else {
+                  memo.setValue(result);
+                  return pos.flush(next);
+               }
             }
-         } else {
-            pos.fail(next);
          }
       }
       return pos.flush(pos);
@@ -122,14 +137,25 @@ public class Rule implements Parser {
     * @param grammar the grammar to resolve rule references
     */
    @Override
-   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ignore) {
-      initializer.setType(type);
-      finalizer.setType(type);
-      parser.resolve(name, grammar, type);
+   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
+      type = grammar.resolve(Partial.<String> content(type));
+      initializer = type.getFunction(Partial.<String> content(initializer));
+      serializer = type.getFunction(Partial.<String> content(serializer));
+      finalizer = type.getFunction(Partial.<String> content(finalizer));
+      simple = !isCustomFunction(initializer) && !isCustomFunction(serializer) && !isCustomFunction(finalizer);
+      parser.resolve(grammar, this);
+   }
+
+   private void serializer(final String serializer) {
+      this.serializer = new Partial(serializer).as(Function.class);
    }
 
    @Override
    public String toString() {
       return name + " <- " + parser;
+   }
+
+   private void type(final String type) {
+      this.type = new Partial(type).as(Category.class);
    }
 }

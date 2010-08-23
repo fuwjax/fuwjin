@@ -7,9 +7,9 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.BufferedPosition;
-import org.fuwjin.io.Position;
+import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.Position;
 
 /**
  * Matches a set of parsers in order against the input. As soon as any inner
@@ -25,13 +25,11 @@ public class OptionParser extends CompositeParser {
    public Position parse(final Position position) {
       final BufferedPosition buffer = position.buffered();
       for(final Parser parser: this) {
-         buffer.neutral();
+         buffer.success();
          final Position next = parser.parse(buffer);
          if(next.isSuccess()) {
-            buffer.success();
             return buffer.flush(next);
          }
-         buffer.fail(next);
       }
       return buffer.flush(buffer);
    }

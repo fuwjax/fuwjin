@@ -7,9 +7,9 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.BufferedPosition;
-import org.fuwjin.io.Position;
+import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.Position;
 
 /**
  * A Zero-match parser that fails if the inner match succeeds.

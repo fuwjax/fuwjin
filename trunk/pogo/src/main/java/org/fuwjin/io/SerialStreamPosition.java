@@ -3,8 +3,10 @@ package org.fuwjin.io;
 import java.io.IOException;
 import java.util.Stack;
 
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Position;
+
 public class SerialStreamPosition extends AbstractInternalPosition {
-   private String obj;
    private int ch = -1;
    private final Stack<Appendable> appenders;
 
@@ -32,7 +34,7 @@ public class SerialStreamPosition extends AbstractInternalPosition {
    public void append(final Appendable appender) {
       try {
          if(ch == -1) {
-            appender.append(obj);
+            appender.append(String.valueOf(memo().getValue()));
          } else {
             appender.append(new String(Character.toChars(ch)));
          }
@@ -75,17 +77,11 @@ public class SerialStreamPosition extends AbstractInternalPosition {
    public InternalPosition next() {
       final SerialStreamPosition next = new SerialStreamPosition(this, appenders);
       if(ch == -1) {
-         next.accept(obj);
+         next.accept(String.valueOf(memo().getValue()));
       } else {
          next.accept(ch);
       }
       return next;
-   }
-
-   @Override
-   public void store(final String name, final Object state) {
-      super.store(name, state);
-      obj = String.valueOf(state);
    }
 
    @Override

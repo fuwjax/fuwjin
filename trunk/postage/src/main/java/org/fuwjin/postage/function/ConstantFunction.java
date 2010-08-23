@@ -1,17 +1,15 @@
 package org.fuwjin.postage.function;
 
-import org.fuwjin.postage.UnknownSignature;
-
 public class ConstantFunction extends AbstractFunction {
    private final Object value;
 
    public ConstantFunction(final String name, final Object value) {
-      super(new UnknownSignature(name, 0));
+      super(name, value.getClass(), true, Object[].class);
       this.value = value;
    }
 
    @Override
-   public Object invokeSafe(final Object... args) {
+   protected Object tryInvoke(final Object... args) {
       return value;
    }
 }

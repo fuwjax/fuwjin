@@ -4,18 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.fuwjin.postage.Category;
+import org.fuwjin.postage.CompositeFailure;
+import org.fuwjin.postage.CompositeSignature;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.function.CompositeFunction;
 
 public abstract class AbstractCategory implements Category {
    private final String name;
-   private final Map<String, Function> functions = new HashMap<String, Function>();
+   private final Map<String, CompositeFunction> functions = new HashMap<String, CompositeFunction>();
+   private final Postage postage;
 
-   public AbstractCategory(final String name) {
+   public AbstractCategory(final String name, final Postage postage) {
       this.name = name;
+      this.postage = postage;
    }
 
+   @Override
    public final void addFunction(final Function function) {
-      functions.put(function.signature().name(), function);
+      getFunction(function.name()).addFunction(function);
    }
 
    @Override
@@ -29,13 +36,19 @@ public abstract class AbstractCategory implements Category {
    }
 
    @Override
-   public final Function getFunction(final String name) {
-      Function function = functions.get(name);
+   public final CompositeFunction getFunction(final String name) {
+      CompositeFunction function = functions.get(name);
       if(function == null) {
          function = newFunction(name);
-         addFunction(function);
+         functions.put(function.name(), function);
       }
       return function;
+   }
+
+   @Override
+   public Object invokeFallThrough(final CompositeSignature signature, final CompositeFailure current,
+         final Object... args) {
+      return postage.invokeGlobal(signature, current, args);
    }
 
    @Override
@@ -43,7 +56,7 @@ public abstract class AbstractCategory implements Category {
       return name;
    }
 
-   protected abstract Function newFunction(String name);
+   protected abstract CompositeFunction newFunction(String name);
 
    @Override
    public String toString() {
