@@ -1,0 +1,580 @@
+#summary Java Pogo Grammar
+
+# 3.3
+UnicodeInputCharacter <- UnicodeEscape / RawInputCharacter
+UnicodeEscape <- '\' UnicodeMarker HexDigit HexDigit HexDigit HexDigit
+UnicodeMarker <- 'u'+
+RawInputCharacter <- .
+HexDigit <- [0-9a-fA-F]
+
+# 3.4
+LineTerminator <- '\r\n' / [\r\n]
+InputCharacter <- ![\r\n] UnicodeInputCharacter
+
+# 3.5
+Input <- InputElements? Sub?
+InputElements <- InputElement*
+InputElement <- WhiteSpace / Comment / Token
+Token <- Identifier / Keyword / Literal / Separator / Operator
+Sub <- '\032'
+
+# 3.6
+WhiteSpace <- [ \t\014] / LineTerminator
+
+# 3.7
+Comment <- TraditionalComment / EndOfLineComment
+TraditionalComment <- '/*' CommentTail
+EndOfLineComment <- '//' CharactersInLine? 
+CommentTail <- '*' CommentTailStar / NotStar CommentTail
+CommentTailStar <- '/' / '*' CommentTailStar / NotStarNotSlash CommentTail
+NotStar <- !'*' InputCharacter / LineTerminator
+NotStarNotSlash <- ![*/] InputCharacter / LineTerminator
+CharactersInLine <- InputCharacter+
+
+#3.8
+Identifier <- !(Keyword / BooleanLiteral / NullLiteral) IdentifierChars
+IdentifierChars <- JavaLetter JavaLetterOrDigit*
+JavaLetter =java.lang.Character>isJavaIdentifierStart <- InputCharacter
+JavaLetterOrDigit =java.lang.Character>isJavaIdentifierPart <- InputCharacter
+
+#3.9
+Keyword: <- abstract /continue    /for           /new          /switch
+        /assert      /default     /if            /package      /synchronized
+        /boolean     /double      /goto          /private      /this
+        /break       /do          /implements    /protected    /throws
+        /byte        /else        /import        /public       /throw
+        /case        /enum        /instanceof    /return       /transient
+        /catch       /extends     /interface     /short        /try
+        /char        /finally     /int           /static       /void 
+        /class       /final       /long          /strictfp     /volatile
+        /const       /float       /native        /super        /while
+          
+#3.10
+Literal <-IntegerLiteral/FloatingPointLiteral/BooleanLiteral/CharacterLiteral/StringLiteral/NullLiteral
+
+#3.10.1
+IntegerLiteral<-HexIntegerLiteral/OctalIntegerLiteral/DecimalIntegerLiteral
+DecimalIntegerLiteral<- DecimalNumeral IntegerTypeSuffix?
+HexIntegerLiteral<- HexNumeral IntegerTypeSuffix?
+OctalIntegerLiteral<- OctalNumeral IntegerTypeSuffix?
+IntegerTypeSuffix <- [lL]
+DecimalNumeral <- '0' / NonZeroDigit Digits?
+Digits <- Digit+
+Digit <- '0' / NonZeroDigit
+NonZeroDigit <- [1-9]
+HexNumeral<-'0' [xX] HexDigits
+HexDigits <- HexDigit+
+OctalNumeral <- '0' OctalDigits
+OctalDigits <- OctalDigit+
+OctalDigit <- [0-7]
+
+#3.10.2
+FloatingPointLiteral <- DecimalFloatingPointLiteral / HexadecimalFloatingPointLiteral
+DecimalFloatingPointLiteral <- 
+        Digits '.' Digits? ExponentPart? FloatTypeSuffix?
+      /'.' Digits ExponentPart? FloatTypeSuffix?
+      /Digits ExponentPart FloatTypeSuffix?
+      /Digits FloatTypeSuffix
+ExponentPart <-ExponentIndicator SignedInteger
+ExponentIndicator <- [eE]
+SignedInteger <- Sign? Digits
+Sign <- [+-]
+FloatTypeSuffix <- [fFdD]
+HexadecimalFloatingPointLiteral <- HexSignificand BinaryExponent FloatTypeSuffix?
+HexSignificand <- HexNumeral '.'? / '0' [xX] HexDigits? '.' HexDigits
+BinaryExponent <- BinaryExponentIndicator SignedInteger
+BinaryExponentIndicator <- [pP]
+
+#3.10.3
+BooleanLiteral <- true false
+
+#3.10.4
+CharacterLiteral <- "'" SingleCharacter / EscapeSequence "'"
+SingleCharacter <- !['\\] InputCharacter
+
+#3.10.5
+StringLiteral <- '"' StringCharacters? '"'
+StringCharacters <- StringCharacter+
+StringCharacter <- !["\\] InputCharacter / EscapeSequence
+
+#3.10.6
+EscapeSequence <- '\\' [btnfr"'\\] / OctalEscape
+OctalEscape<- '\\' ZeroToThree OctalDigit OctalDigit / '\\' OctalDigit OctalDigit?
+ZeroToThree <- [0-3]
+
+#3.10.7
+NullLiteral<- null
+
+#3.11
+Separator <- [(){}\[\];,.]
+
+#3.12
+Operator <- [=><!+-*/&|^%] '='? / [~?:] / '&&' / '||' / '++' / '--' / ('<<' / '>>>' / '>>') '='?
+
+#4.1
+Type <- PrimitiveType / ReferenceType
+
+#4.2
+PrimitiveType <- NumericType / boolean
+NumericType <- IntegralType / FloatingPointType
+IntegralType <- byte/ short /int /long /char
+FloatingPointType <- float /double
+
+#4.3
+ReferenceType <- ClassOrInterfaceType/TypeVariable/ArrayType
+ClassOrInterfaceType<-ClassType/InterfaceType
+ClassType<-TypeDeclSpecifier TypeArguments?
+InterfaceType<-TypeDeclSpecifier TypeArguments?
+TypeDeclSpecifier<-TypeName / ClassOrInterfaceType DOT Identifier
+TypeName<-Identifier (DOT Identifier)*
+TypeVariable <- Identifier
+ArrayType <- Type ARRAY
+
+#4.4
+TypeParameter <- TypeVariable TypeBound?
+TypeBound<- extends ClassOrInterfaceType AdditionalBoundList?
+AdditionalBoundList <- AdditionalBound+
+AdditionalBound<- AND InterfaceType
+
+#4.5.1
+TypeArguments<- O_ANGLE ActualTypeArgumentList C_ANGLE
+ActualTypeArgumentList <- ActualTypeArgument (COMMA ActualTypeArgument)*
+ActualTypeArgument <- ReferenceType / Wildcard
+Wildcard <- QUESTION WildcardBounds?
+WildcardBounds<- extends ReferenceType / super ReferenceType
+            
+#6.5
+PackageName <- PackageOrTypeName DOT Identifier / Identifier
+TypeName <- PackageOrTypeName DOT Identifier / Identifier
+ExpressionName <- AmbiguousName DOT Identifier / Identifier
+MethodName <- AmbiguousName DOT Identifier / Identifier
+PackageOrTypeName <- Identifier (DOT Identifier)* !(DOT Identifier)
+AmbiguousName <- Identifier (DOT Identifier)* !(DOT Identifier)
+
+#7.3
+CompilationUnit <- PackageDeclaration? ImportDeclaration* TypeDeclaration*
+ImportDeclarations <- ImportDeclaration+
+TypeDeclarations <- TypeDeclaration+
+
+#7.4.1
+PackageDeclaration <- Annotations? package PackageName SEMI
+
+#7.5
+ImportDeclaration<-
+        SingleTypeImportDeclaration
+        /TypeImportOnDemandDeclaration   
+        /SingleStaticImportDeclaration   
+        /StaticImportOnDemandDeclaration
+
+#7.5.1
+SingleTypeImportDeclaration<-   import TypeName SEMI
+
+#7.5.2
+TypeImportOnDemandDeclaration<-import PackageOrTypeName DOT STAR SEMI
+
+#7.5.3
+SingleStaticImportDeclaration<- import static TypeName DOT Identifier SEMI
+
+#7.5.4
+StaticImportOnDemandDeclaration<- import static TypeName DOT STAR SEMI
+
+#7.6
+TypeDeclaration<-ClassDeclaration/InterfaceDeclaration/SEMI
+
+#8.1
+ClassDeclaration<-NormalClassDeclaration/EnumDeclaration
+NormalClassDeclaration<-ClassModifiers? class Identifier TypeParameters? Super? Interfaces? ClassBody
+
+#8.1.1
+ClassModifiers<- ClassModifier+
+ClassModifier<-Annotation /public /protected /private /abstract /static /final /strictfp 
+
+#8.1.2
+TypeParameters <- O_ANGLE TypeParameterList C_ANGLE
+TypeParameterList <- TypeParameter (COMMA TypeParameter)*
+
+#8.1.4
+Super <- extends ClassType
+
+#8.1.5
+Interfaces<-implements InterfaceTypeList
+InterfaceTypeList<-InterfaceType (COMMA InterfaceType)*
+
+#8.1.6
+ClassBody<- O_BRACE ClassBodyDeclarations? C_BRACE
+ClassBodyDeclarations<-ClassBodyDeclaration+
+ClassBodyDeclaration<-ClassMemberDeclaration/InstanceInitializer/StaticInitializer/ConstructorDeclaration
+ClassMemberDeclaration<-FieldDeclaration/MethodDeclaration/ClassDeclaration/InterfaceDeclaration/SEMI        
+
+#8.3
+FieldDeclaration<-FieldModifiers? Type VariableDeclarators SEMI
+VariableDeclarators<-VariableDeclarator (COMMA VariableDeclarator)*
+VariableDeclarator<-VariableDeclaratorId (EQUALS VariableInitializer)?
+VariableDeclaratorId<-Identifier ARRAY*
+VariableInitializer<-Expression / ArrayInitializer
+
+#8.3.1
+FieldModifiers<-FieldModifier+
+FieldModifier<-Annotation /public /protected /private /static /final /transient /volatile
+
+#8.4
+MethodDeclaration<-MethodHeader MethodBody
+MethodHeader<-MethodModifiers? TypeParameters? ResultType MethodDeclarator Throws?
+ResultType<-Type/void
+MethodDeclarator<-Identifier O_PAREN FormalParameterList? C_PAREN ARRAY*
+
+#8.4.1
+FormalParameterList<- FormalParameters (COMMA LastFormalParameter)?
+FormalParameters <- FormalParameter (COMMA FormalParameter)*
+FormalParameter <- VariableModifiers? Type VariableDeclaratorId
+VariableModifiers<-VariableModifier+
+VariableModifier<- final /Annotation
+LastFormalParameter<- VariableModifiers? Type ELIPSIS? VariableDeclaratorId
+
+#8.4.3
+MethodModifiers <- MethodModifier+
+MethodModifier<-Annotation /public /protected /private /abstract /static /final /synchronized /native /strictfp
+
+#8.4.6
+Throws<-throws ExceptionTypeList
+ExceptionTypeList <- ExceptionType (COMMA ExceptionType)*
+ExceptionType <- ClassType / TypeVariable
+
+#8.4.7
+MethodBody<-Block/SEMI 
+
+#8.6
+InstanceInitializer <- Block
+
+#8.7
+StaticInitializer<-static Block
+
+#8.8
+ConstructorDeclaration<-ConstructorModifiers? ConstructorDeclarator Throws? ConstructorBody
+ConstructorDeclarator<-TypeParameters? SimpleTypeName O_PAREN FormalParameterList? C_PAREN
+
+#8.8.3
+ConstructorModifiers<-ConstructorModifier+
+ConstructorModifier <-Annotation /public /protected /private
+
+#8.8.7
+ConstructorBody<-O_BRACE ExplicitConstructorInvocation? BlockStatements? C_BRACE
+
+#8.8.7.1
+ExplicitConstructorInvocation<-NonWildTypeArguments? this O_PAREN ArgumentList? C_PAREN SEMI
+        /NonWildTypeArguments? super O_PAREN ArgumentList? C_PAREN SEMI
+        /Primary DOT NonWildTypeArguments? super O_PAREN ArgumentList? C_PAREN SEMI
+NonWildTypeArguments<-O_ANGLE ReferenceTypeList C_ANGLE
+ReferenceTypeList<- ReferenceType (COMMA ReferenceType)*
+
+#8.9
+EnumDeclaration<-ClassModifiers? enum Identifier Interfaces? EnumBody
+EnumBody<-O_BRACE EnumConstants? COMMA? EnumBodyDeclarations? C_BRACE
+EnumConstants<-EnumConstant (COMMA EnumConstant)*
+EnumConstant <- Annotations? Identifier Arguments? ClassBody?
+Arguments <- O_PAREN ArgumentList? C_PAREN
+EnumBodyDeclarations <- SEMI ClassBodyDeclarations?
+
+#9.1
+NormalInterfaceDeclaration <- InterfaceModifiers? interface Identifier TypeParameters? ExtendsInterfaces? InterfaceBody
+
+#9.1.1
+InterfaceModifiers<-InterfaceModifier+
+InterfaceModifier <- Annotation /public /protected /private /abstract /static /strictfp
+
+#9.1.3
+ExtendsInterfaces <- extends InterfaceType (COMMA InterfaceType)*
+
+#9.1.4
+InterfaceBody<-O_BRACE InterfaceMemberDeclarations? C_BRACE
+InterfaceMemberDeclarations <- InterfaceMemberDeclaration+
+InterfaceMemberDeclaration <- ConstantDeclaration /AbstractMethodDeclaration /ClassDeclaration /InterfaceDeclaration/SEMI                   
+
+#9.3
+ConstantDeclaration<-ConstantModifiers? Type VariableDeclarators SEMI
+ConstantModifiers <- ConstantModifier+
+ConstantModifier <- Annotation /public /static /final 
+
+#9.4
+AbstractMethodDeclaration<-AbstractMethodModifiers? TypeParameters? ResultType MethodDeclarator Throws? SEMI
+AbstractMethodModifiers <- AbstractMethodModifier+
+AbstractMethodModifier <- Annotation /public /abstract 
+
+#9.6
+AnnotationTypeDeclaration <- InterfaceModifiers? AT interface Identifier AnnotationTypeBody
+AnnotationTypeBody<-O_BRACE AnnotationTypeElementDeclarations? C_BRACE
+AnnotationTypeElementDeclarations <- AnnotationTypeElementDeclaration+
+AnnotationTypeElementDeclaration<- AbstractMethodModifiers? Type Identifier O_PAREN C_PAREN DefaultValue? SEMI
+        /ConstantDeclaration/ClassDeclaration/InterfaceDeclaration/EnumDeclaration/AnnotationTypeDeclaration/SEMI
+DefaultValue<- default ElementValue
+
+#9.7
+Annotations <- Annotation+
+Annotation<-NormalAnnotation/SingleElementAnnotation/MarkerAnnotation
+NormalAnnotation<-AT TypeName O_PAREN ElementValuePairs? C_PAREN
+ElementValuePairs<-ElementValuePair (COMMA ElementValuePair)*
+ElementValuePair<-Identifier EQUALS ElementValue
+ElementValue<-ConditionalExpression/Annotation/ElementValueArrayInitializer
+ElementValueArrayInitializer<-O_BRACE ElementValues? COMMA? C_BRACE
+ElementValues<-ElementValue (COMMA ElementValue)*
+MarkerAnnotation<-AT TypeName
+SingleElementAnnotation<-AT TypeName O_PAREN ElementValue C_PAREN
+
+#10.6
+ArrayInitializer<-O_BRACE VariableInitializers? COMMA? C_BRACE
+VariableInitializers<-VariableInitializer (COMMA VariableInitializer)*
+
+#14.2
+Block<-O_BRACE BlockStatements? C_BRACE
+BlockStatements<-BlockStatement+
+BlockStatement<-LocalVariableDeclarationStatement/ClassDeclaration/Statement
+
+#14.4
+LocalVariableDeclarationStatement<-LocalVariableDeclaration SEMI
+LocalVariableDeclaration<-VariableModifiers? Type VariableDeclarators
+
+#14.5
+Statement<-
+        StatementWithoutTrailingSubstatement
+        /LabeledStatement
+        /IfThenElseStatement
+        /IfThenStatement
+        /WhileStatement
+        /ForStatement
+StatementWithoutTrailingSubstatement<-
+        Block
+        /EmptyStatement
+        /ExpressionStatement
+        /AssertStatement
+        /SwitchStatement
+        /DoStatement
+        /BreakStatement
+        /ContinueStatement
+        /ReturnStatement
+       / SynchronizedStatement
+       / ThrowStatement
+       / TryStatement
+StatementNoShortIf<-
+        StatementWithoutTrailingSubstatement
+        /LabeledStatementNoShortIf
+        /IfThenElseStatementNoShortIf
+        /WhileStatementNoShortIf
+        /ForStatementNoShortIf
+
+#14.6
+EmptyStatement<-SEMI
+
+#14.7
+LabeledStatement<-Identifier COLON Statement
+LabeledStatementNoShortIf<-Identifier COLON StatementNoShortIf
+
+#14.8
+ExpressionStatement<-StatementExpression SEMI
+StatementExpression<-Assignment
+        /PreIncrementExpression
+        /PreDecrementExpression
+        /PostIncrementExpression
+        /PostDecrementExpression
+        /MethodInvocation
+        /ClassInstanceCreationExpression
+        
+#14.9
+IfThenStatement<-if O_PAREN Expression C_PAREN Statement
+IfThenElseStatement<-if O_PAREN Expression C_PAREN StatementNoShortIf else Statement
+IfThenElseStatementNoShortIf<-if O_PAREN Expression C_PAREN StatementNoShortIf else StatementNoShortIf
+
+#14.10
+AssertStatement<-assert Expression1 (COLON Expression2)? SEMI
+
+#14.11
+SwitchStatement<-switch O_PAREN Expression C_PAREN SwitchBlock
+SwitchBlock<-O_BRACE SwitchBlockStatementGroups? SwitchLabels? C_BRACE
+SwitchBlockStatementGroups<- SwitchBlockStatementGroup+
+SwitchBlockStatementGroup<-SwitchLabels BlockStatements
+SwitchLabels<-SwitchLabel+
+SwitchLabel<-case ConstantExpression COLON/ case EnumConstantName COLON/ default COLON
+EnumConstantName<-Identifier
+
+#14.12
+WhileStatement<-while O_PAREN Expression C_PAREN Statement
+WhileStatementNoShortIf<-while O_PAREN Expression C_PAREN StatementNoShortIf
+
+#14.13
+DoStatement<-do Statement while O_PAREN Expression C_PAREN SEMI
+
+#14.14
+ForStatement<-BasicForStatement/EnhancedForStatement
+
+#14.14.1
+BasicForStatement<-for O_PAREN ForInit? SEMI Expression? SEMI ForUpdate? C_PAREN Statement
+ForStatementNoShortIf <- for O_PAREN ForInit? SEMI Expression? SEMI ForUpdate? C_PAREN StatementNoShortIf
+ForInit<-StatementExpressionList/LocalVariableDeclaration
+ForUpdate<-StatementExpressionList
+StatementExpressionList<-StatementExpression (COMMA StatementExpression)*
+
+#14.14.2
+EnhancedForStatement<-for O_PAREN VariableModifiers? Type Identifier COLON Expression C_PAREN Statement
+
+#14.15
+BreakStatement<-break Identifier? SEMI
+
+#14.16
+ContinueStatement <- continue Identifier? SEMI
+
+#14.17
+ReturnStatement<-return Expression? SEMI
+
+#14.18
+ThrowStatement <- throw Expression SEMI
+
+#14.19
+SynchronizedStatement <- synchronized O_PAREN Expression C_PAREN Block
+
+#14.20
+TryStatement <- try Block Catches Finally? / try Block Finally
+Catches <- CatchClause+
+CatchClause<- catch O_PAREN FormalParameter C_PAREN Block
+Finally<-finally Block
+
+#15.8
+Primary<-PrimaryNoNewArray/ArrayCreationExpression
+PrimaryNoNewArray<-Literal
+        /Type DOT class
+        /void DOT class
+        /this
+        /ClassName DOT this
+        /O_PAREN Expression C_PAREN
+        /ClassInstanceCreationExpression
+        /FieldAccess
+        /MethodInvocation
+        /ArrayAccess
+
+#15.9
+ClassInstanceCreationExpression<-
+   new TypeArguments? ClassOrInterfaceType O_PAREN ArgumentList? C_PAREN ClassBody?
+   /Primary DOT new TypeArguments? Identifier TypeArguments? O_PAREN ArgumentList? C_PAREN ClassBody?
+ArgumentList <- Expression (COMMA Expression)*
+
+#15.10
+ArrayCreationExpression<-new PrimitiveType DimExprs Dims?
+            /new ClassOrInterfaceType DimExprs Dims?
+            /new PrimitiveType Dims ArrayInitializer
+            /new ClassOrInterfaceType Dims ArrayInitializer
+DimExprs<-DimExpr+
+DimExpr<- O_SQUARE Expression C_SQUARE
+Dims<- ARRAY+
+
+#15.11
+FieldAccess<-Primary DOT Identifier/ super DOT Identifier / ClassName DOT super DOT Identifier
+
+#15.12
+MethodInvocation<-
+        MethodName O_PAREN ArgumentList? C_PAREN
+        /Primary DOT NonWildTypeArguments? Identifier O_PAREN ArgumentList? C_PAREN
+        /super DOT NonWildTypeArguments? Identifier O_PAREN ArgumentList? C_PAREN
+        /ClassName DOT super DOT NonWildTypeArguments? Identifier O_PAREN ArgumentList? C_PAREN
+        /TypeName DOT NonWildTypeArguments Identifier O_PAREN ArgumentList? C_PAREN
+
+#15.13
+ArrayAccess<- ExpressionName O_SQUARE Expression C_SQUARE /PrimaryNoNewArray O_SQUARE Expression C_SQUARE
+
+#15.14
+PostfixExpression<-Primary/ExpressionName/PostIncrementExpression/PostDecrementExpression
+
+#15.14.2
+PostIncrementExpression<-PostfixExpression '++'
+
+#15.14.3
+PostDecrementExpression<-PostfixExpression '--'
+
+#15.15
+UnaryExpression<-
+        PreIncrementExpression
+        /PreDecrementExpression
+        /[+-] UnaryExpression
+        /UnaryExpressionNotPlusMinus
+PreIncrementExpression<-'++' UnaryExpression
+PreDecrementExpression<-'--' UnaryExpression
+UnaryExpressionNotPlusMinus<-PostfixExpression/[~!] UnaryExpression/CastExpression
+
+#15.16
+CastExpression<-
+        O_PAREN PrimitiveType Dims? C_PAREN UnaryExpression
+        /O_PAREN ReferenceType C_PAREN UnaryExpressionNotPlusMinus
+
+#15.17
+MultiplicativeExpression<-MultiplicativeExpression [*/%] UnaryExpression / UnaryExpression
+
+
+
+ARRAY <- O_SQUARE C_SQUARE
+O_SQUARE <- '['
+C_SQUARE <- ']'
+O_PAREN <- '('
+C_PAREN <- ')'
+O_BRACE <- '{'
+C_BRACE <- '}'
+O_ANGLE <- '<'
+C_ANGLE <- '>'
+DOT <- '.'
+AND <- '&'
+COMMA <- ','
+QUESTION <- '?'
+SEMI <- ';'
+STAR <- '*'
+EQUALS <- '='
+ELIPSIS <- '...'
+AT <- '@'
+COLON <- ':'
+
+new <- 'new'
+try <- 'try'
+catch <- 'catch'
+finally <- 'finally'
+throw <- 'throw'
+continue <- 'continue'
+return <- 'return'
+break <- 'break'
+for <- 'for'
+this <- 'this'
+public <- 'public'
+protected <- 'protected'
+private <- 'private'
+abstract <- 'abstract'
+static <- 'static'
+final <- 'final'
+synchronized <- 'synchronized'
+native <- 'native'
+strictfp <- 'strictfp'
+transient <- 'transient'
+volatile <- 'volatile'
+assert <- 'assert'
+while <- 'while'
+switch <- 'switch'
+do <- 'do'
+case <- 'case'
+if <- 'if'
+else <- 'else'
+enum <- 'enum'
+class <- 'class'
+interface <- 'interface'
+default <- 'default'
+static <- 'static'
+import <- 'import'
+package <- 'package'
+throws <- 'throws'
+super <- 'super'
+extends <- 'extends'
+implements <- 'implements'
+true <- 'true'
+false <- 'false'
+null <- 'null'
+boolean <- 'boolean'
+byte <- 'byte'
+short <- 'short'
+int <- 'int'
+long <- 'long'
+char <- 'char'
+float <- 'float'
+double <- 'double'
+void <- 'void'
