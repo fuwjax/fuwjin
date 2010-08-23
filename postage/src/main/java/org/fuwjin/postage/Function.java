@@ -7,5 +7,9 @@ public interface Function {
 
    Object invokeSafe(Object... args);
 
+   String name();
+
+   Function optional(Object arg);
+
    Signature signature();
 }

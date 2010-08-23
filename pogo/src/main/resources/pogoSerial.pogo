@@ -4,22 +4,15 @@ Grammar         =org.fuwjin.pogo.Grammar~iterator
 Definition      =org.fuwjin.pogo.parser.Rule
                 <- Identifier~name '\t' TypeInfo~this? '<- ' Expression~parser '\n'
 TypeInfo        =org.fuwjin.pogo.parser.Rule
-                <- '=' Type~type ('~' Initializer~initializer)? (':' Finalizer~finalizer)? '\n\t\t'
-Type            <- TRUE~this / NULL~this / ClassType~this
-ClassType       =org.fuwjin.pogo.reflect.ClassType
-                <- ClassObj~type
-ClassObj        =java.lang.Class
-                <- Identifier~getName
-Initializer     <- NEW~this / INSTANCEOF~this / InitMethod~this / ContextInit~this
-ContextInit     =org.fuwjin.pogo.reflect.ContextInitializerTask~instanceof
-                <- 'context.' Identifier~name
-InitMethod      =org.fuwjin.pogo.reflect.StaticInitializerTask
+                <- '=' Category~type ('~' Function~initializer)? ('>' Function~serializer)? (':' Function~finalizer)? '\n\t\t'
+Category        =org.fuwjin.pogo.postage.PostageUtils~isCustomCategory
+                <- CategoryName~this
+CategoryName    =org.fuwjin.postage.Category                
                 <- Identifier~name
-Finalizer       <- ResultMethod~this / ContextResult~this
-ContextResult   =org.fuwjin.pogo.reflect.ContextFinalizerTask~instanceof
-                <- 'context.' Identifier~name
-ResultMethod    =org.fuwjin.pogo.reflect.ResultTask
-                <- Identifier~name
+Function        =org.fuwjin.pogo.postage.PostageUtils~isCustomFunction
+                <- FunctionName~this
+FunctionName    =org.fuwjin.postage.Function
+                <- Identifier~name                
 Expression      <- LitOpt~this / Option~this / SequenceChain~this
 Option          =org.fuwjin.pogo.parser.OptionParser~iterator
                 <- SequenceChain~next (' / ' SequenceChain~next)*
@@ -35,13 +28,7 @@ SuffixChain     <- Suffix~this / Primary~this
 Primary         <- Reference~this / DOT~this / Literal~this / CharClass~this / SubEx~this
 SubEx           <- '(' Expression~this ')'
 Reference       =org.fuwjin.pogo.parser.RuleReferenceParser
-                <- Identifier~ruleName ('~' Constructor~constructor)? (':' Converter~converter)?
-Constructor     <- THIS~this / NEXT~this / ConstMethod~this
-ConstMethod     =org.fuwjin.pogo.reflect.FactoryTask
-                <- Identifier~name
-Converter       <- RETURN~this / ConvMethod~this
-ConvMethod      =org.fuwjin.pogo.reflect.AppendTask
-                <- Identifier~name
+                <- Identifier~ruleName ('~' Function~constructor)? ('>' Function~matcher)? (':' Function~converter)?
 Literal         <- LitSeq~this / SingleLit~this
 LitSeq          =org.fuwjin.pogo.parser.SequenceParser~isLiteral
                 <- '\'' LitChars~this '\''
@@ -63,20 +50,6 @@ LitChar         =org.fuwjin.pogo.parser.CharacterLiteralParser
 LitClassChar    =org.fuwjin.pogo.parser.CharacterLiteralParser
                 <- Char~getClassChar
 Char            <- .
-NULL            =org.fuwjin.pogo.reflect.NullType~instanceof
-                <- 'null'
-TRUE            =org.fuwjin.pogo.reflect.AllType~instanceof
-                <- 'true'
-NEW             =org.fuwjin.pogo.reflect.ConstructorTask~instanceof
-                <- 'new'
-NEXT            =org.fuwjin.pogo.reflect.NextTask~instanceof
-                <- 'next'
-THIS            =org.fuwjin.pogo.reflect.PassThruTask~instanceof
-                <- 'this'
-RETURN          =org.fuwjin.pogo.reflect.ReturnTask~instanceof
-                <- 'return'
-INSTANCEOF      =org.fuwjin.pogo.reflect.InstanceOfTask~instanceof
-                <- 'instanceof'
 AND             =org.fuwjin.pogo.parser.PositiveLookaheadParser~instanceof
                 <- '&'
 NOT             =org.fuwjin.pogo.parser.NegativeLookaheadParser~instanceof

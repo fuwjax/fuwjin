@@ -1,32 +1,33 @@
 package org.fuwjin.postage.category;
 
-import org.fuwjin.postage.Function;
-import org.fuwjin.postage.UnknownSignature;
+import org.fuwjin.postage.CompositeFailure;
+import org.fuwjin.postage.CompositeSignature;
+import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.function.AbstractFunction;
-import org.fuwjin.postage.function.ConstantFunction;
+import org.fuwjin.postage.function.CompositeFunction;
 
 public class NullCategory extends AbstractCategory {
-   private static final String ARG_COUNT = "Could not test null with %d args: %s";
-   private static final String EXCEPTION = "Could not cast %s to null";
-
-   public NullCategory() {
-      super("null");
-      addFunction(new AbstractFunction(new UnknownSignature("instanceof", 1, 1)) {
+   public NullCategory(final Postage postage) {
+      super("null", postage);
+      addFunction(new AbstractFunction("instanceof", boolean.class, false, Object.class) {
          @Override
-         public Object invokeSafe(final Object... args) {
-            if(args.length != 1) {
-               return failure(ARG_COUNT, args.length, args);
-            }
-            if(args[0] != null) {
-               return failure(EXCEPTION, args[0]);
-            }
-            return null;
+         public Object tryInvoke(final Object... args) {
+            return args[0] == null;
          }
       });
    }
 
    @Override
-   protected Function newFunction(final String name) {
-      return new ConstantFunction(name, null);
+   public Object invokeFallThrough(final CompositeSignature signature, final CompositeFailure current,
+         final Object... args) {
+      if(current.isEmpty()) {
+         return null;
+      }
+      return super.invokeFallThrough(signature, current, args);
+   }
+
+   @Override
+   protected CompositeFunction newFunction(final String name) {
+      return new CompositeFunction(name, this);
    }
 }

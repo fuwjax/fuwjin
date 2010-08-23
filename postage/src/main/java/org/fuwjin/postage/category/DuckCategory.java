@@ -1,27 +1,30 @@
 package org.fuwjin.postage.category;
 
-import org.fuwjin.postage.Category;
-import org.fuwjin.postage.Function;
-import org.fuwjin.postage.UnknownSignature;
-import org.fuwjin.postage.function.AbstractFunction;
-import org.fuwjin.postage.function.ClassFunction;
+import java.util.HashSet;
+import java.util.Set;
 
-public class DuckCategory implements Category {
+import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.function.CompositeFunction;
+
+public class DuckCategory extends AbstractCategory {
    private static final String ARG_COUNT = "Can't duck type without a target";
    private static final String EXCEPTION = "Can't duck type with a null target";
+
+   public DuckCategory(final Postage postage) {
+      super("true", postage);
+   }
 
    @Override
    public boolean equals(final Object obj) {
       return getClass().equals(obj.getClass());
    }
 
-   protected Function getFunction(final Class<?> type, final String name) {
-      return new ClassFunction(type, name);
-   }
-
    @Override
-   public Function getFunction(final String name) {
-      return new AbstractFunction(new UnknownSignature(name, 1)) {
+   protected CompositeFunction newFunction(final String name) {
+      return new CompositeFunction(name, this) {
+         private final Set<Class<?>> classes = new HashSet<Class<?>>();
+
          @Override
          public Object invokeSafe(final Object... args) {
             if(args.length == 0) {
@@ -30,13 +33,11 @@ public class DuckCategory implements Category {
             if(args[0] == null) {
                return failure(EXCEPTION);
             }
-            return getFunction(args[0].getClass(), name).invokeSafe(args);
+            if(classes.add(args[0].getClass())) {
+               addFunction(new ClassFunction(DuckCategory.this, args[0].getClass(), name));
+            }
+            return super.invokeSafe(args);
          }
       };
-   }
-
-   @Override
-   public String name() {
-      return "true";
    }
 }

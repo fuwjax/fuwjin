@@ -1,24 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.pogo.PogoGrammar.pogoParseGrammar;
-import static org.fuwjin.pogo.PogoUtils.open;
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
-import static org.fuwjin.pogo.PogoUtils.writeGrammar;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
+import static org.fuwjin.pogo.PogoGrammar.staticPogoGrammar;
 import static org.fuwjin.pogo.PredefinedGrammar.PogoParse;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import java.io.StringReader;
 
 import org.fuwjin.pogo.Grammar;
 import org.junit.Test;
@@ -36,8 +31,8 @@ public class PogoTest {
     */
    @Test
    public void testParsedParser() throws Exception {
-      final Grammar parsed = (Grammar)PogoParse.get().parse(open(POGO_GRAMMAR));
-      final Grammar orig = readGrammar(POGO_GRAMMAR);
+      final Grammar parsed = (Grammar)PogoParse.grammar().parse(stream(POGO_GRAMMAR));
+      final Grammar orig = readGrammar(stream(POGO_GRAMMAR));
       assertThat(orig, is(parsed));
    }
 
@@ -48,9 +43,9 @@ public class PogoTest {
     */
    @Test
    public void testParser() throws Exception {
-      final String grammar = writeGrammar(pogoParseGrammar());
-      final Grammar peg = readGrammar(new StringReader(grammar));
-      final Grammar peg2 = (Grammar)peg.parse(new StringReader(grammar));
+      final String grammar = staticPogoGrammar().toPogo();
+      final Grammar peg = readGrammar(streamOf(grammar));
+      final Grammar peg2 = (Grammar)peg.parse(streamOf(grammar));
       assertThat(peg, is(peg2));
    }
 }

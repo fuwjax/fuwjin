@@ -1,6 +1,6 @@
 package org.fuwjin.io;
 
-public class IntSet {
+public class IntRangeSet {
    private int[] values = new int[10];
    private int size;
 
@@ -12,7 +12,7 @@ public class IntSet {
       return new String(Character.toChars(values[index]));
    }
 
-   private String range(final int index) {
+   private String toString(final int index) {
       if(values[index] == values[index + 1]) {
          return of(index);
       }
@@ -26,7 +26,7 @@ public class IntSet {
       }
       final StringBuilder builder = new StringBuilder();
       for(int i = 0; i < size; i += 2) {
-         builder.append(range(i));
+         builder.append(toString(i));
       }
       return builder.toString();
    }

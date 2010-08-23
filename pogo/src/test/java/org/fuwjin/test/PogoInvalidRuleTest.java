@@ -1,22 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.pogo.PogoUtils._new;
-import static org.fuwjin.pogo.PogoUtils.append;
-import static org.fuwjin.pogo.PogoUtils.ignore;
-import static org.fuwjin.pogo.PogoUtils.ref;
-import static org.fuwjin.pogo.PogoUtils.result;
-import static org.fuwjin.pogo.PogoUtils.rule;
-import static org.fuwjin.pogo.PogoUtils.type;
+import static org.fuwjin.pogo.LiteratePogo.ref;
+import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.junit.Assert.fail;
 
 import org.fuwjin.pogo.Grammar;
@@ -34,7 +26,7 @@ public class PogoInvalidRuleTest {
       new Grammar() {
          {
             add(rule(
-                  "Grammar", type(org.fuwjin.test.SampleBuilderPattern.class), _new(), result(), ref("Rule", ignore(), append("addChild")))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", ref("Rule", "default", "default", "addChild"))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
             try {
                resolve();
                fail("Should throw an exception"); //$NON-NLS-1$

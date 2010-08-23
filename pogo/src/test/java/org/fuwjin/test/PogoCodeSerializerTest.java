@@ -1,23 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.fuwjin.complier.RuntimeClassLoader;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.PogoCodeGenerator;
 import org.junit.Test;
 
 /**
@@ -33,11 +30,11 @@ public class PogoCodeSerializerTest {
     */
    @Test
    public void testCodeGeneration() throws Exception {
-      final Grammar pogo = readGrammar(TEST_POGO);
-      final String code = new PogoCodeGenerator(QUALIFIED_NAME, pogo).toCode();
+      final Grammar pogo = readGrammar(stream(TEST_POGO));
+      final String code = pogo.toCode(QUALIFIED_NAME);
       final RuntimeClassLoader loader = new RuntimeClassLoader();
       assertTrue(loader.compile(QUALIFIED_NAME, code));
       final Grammar compiled = (Grammar)loader.loadClass(QUALIFIED_NAME).newInstance();
-      assertThat(new PogoCodeGenerator(QUALIFIED_NAME, compiled).toCode(), is(code));
+      assertThat(compiled.toCode(QUALIFIED_NAME), is(code));
    }
 }

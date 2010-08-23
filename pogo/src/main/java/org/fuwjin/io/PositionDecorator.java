@@ -1,5 +1,12 @@
 package org.fuwjin.io;
 
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Memo;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.Position;
+import org.fuwjin.postage.Adaptable;
+import org.fuwjin.postage.StandardAdaptable;
+
 public abstract class PositionDecorator implements BufferedPosition, InternalPosition {
    private final InternalPosition position;
 
@@ -28,23 +35,13 @@ public abstract class PositionDecorator implements BufferedPosition, InternalPos
    }
 
    @Override
-   public void fail(final Position position) {
-      this.position.fail(position);
+   public Memo createMemo(final String name, final Object value) {
+      return position.createMemo(name, value);
    }
 
    @Override
    public void fail(final String reason, final Throwable cause) {
       position.fail(reason, cause);
-   }
-
-   @Override
-   public PogoFailure failure() {
-      return position.failure();
-   }
-
-   @Override
-   public Object fetch(final String name) {
-      return position.fetch(name);
    }
 
    @Override
@@ -58,7 +55,7 @@ public abstract class PositionDecorator implements BufferedPosition, InternalPos
    }
 
    @Override
-   public boolean isAfter(final InternalPosition test) {
+   public boolean isAfter(final Position test) {
       return position.isAfter(test);
    }
 
@@ -68,13 +65,13 @@ public abstract class PositionDecorator implements BufferedPosition, InternalPos
    }
 
    @Override
-   public Object match(final Position next) {
-      return AbstractInternalPosition.NO_MATCH;
+   public Adaptable match(final Position next) {
+      return StandardAdaptable.UNSET;
    }
 
    @Override
-   public void neutral() {
-      position.neutral();
+   public Memo memo() {
+      return position.memo();
    }
 
    @Override
@@ -83,23 +80,18 @@ public abstract class PositionDecorator implements BufferedPosition, InternalPos
    }
 
    @Override
-   public Object release(final String name) {
-      return position.release(name);
+   public void record(final Memo memo) {
+      position.record(memo);
    }
 
    @Override
-   public void reserve(final String name, final Object object) {
-      position.reserve(name, object);
+   public Memo releaseMemo(final Memo newMemo) {
+      return position.releaseMemo(newMemo);
    }
 
    @Override
    public InternalPosition root() {
       return position.root();
-   }
-
-   @Override
-   public void store(final String name, final Object object) {
-      position.store(name, object);
    }
 
    @Override

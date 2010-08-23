@@ -33,4 +33,9 @@ public class CurriedFunction extends AbstractFunction {
       arraycopy(args, 0, combined, curried.length, args.length);
       return function.invokeSafe(combined);
    }
+
+   @Override
+   protected Object tryInvoke(final Object... args) throws Exception {
+      throw new UnsupportedOperationException();
+   }
 }

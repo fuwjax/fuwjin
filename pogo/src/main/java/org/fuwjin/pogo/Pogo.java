@@ -7,20 +7,14 @@
  *******************************************************************************/
 package org.fuwjin.pogo;
 
-import static org.fuwjin.io.AbstractCodePointStream.stream;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.text.ParseException;
 
-import org.fuwjin.io.CodePointStream;
-import org.fuwjin.io.PogoException;
-import org.fuwjin.io.Position;
 import org.fuwjin.io.SerialStreamPosition;
 import org.fuwjin.io.StreamPosition;
-import org.fuwjin.pogo.parser.Rule;
+import org.fuwjin.postage.StandardAdaptable;
 
 /**
  * The main parsing interface.
@@ -58,6 +52,10 @@ public class Pogo {
       return hash(getClass(), rule);
    }
 
+   public Object parse(final CodePointStream input) throws PogoException {
+      return parse(new StreamPosition(input), StandardAdaptable.UNSET);
+   }
+
    /**
     * Parses the input into the object.
     * @param input the input stream
@@ -80,41 +78,10 @@ public class Pogo {
    }
 
    public Object parse(final Position position, final Object object) throws PogoException {
-      position.reserve(rule.name(), object);
+      position.createMemo(rule.name(), object);
       final Position next = rule.parse(position);
       next.assertSuccess();
-      return next.release(rule.name());
-   }
-
-   /**
-    * Parses the input into an object.
-    * @param reader the input reader
-    * @return the parsed object
-    * @throws ParseException if the parse fails
-    */
-   public Object parse(final Reader reader) throws PogoException {
-      return parse(reader, null);
-   }
-
-   /**
-    * Parses the input into an object.
-    * @param reader the input reader
-    * @param object the object to fill
-    * @return the filled object
-    * @throws ParseException if the parse fails
-    */
-   public Object parse(final Reader reader, final Object object) throws PogoException {
-      return parse(stream(reader), object);
-   }
-
-   /**
-    * Parses the input into the object.
-    * @param input the input stream
-    * @return the parsed object
-    * @throws ParseException if the parse fails
-    */
-   public Object parse(final String input) throws PogoException {
-      return parse(new StringReader(input), null);
+      return next.releaseMemo(null).getValue();
    }
 
    /**
@@ -124,10 +91,10 @@ public class Pogo {
     */
    public void serial(final Object input, final Appendable appender) throws PogoException {
       final Position pos = new SerialStreamPosition(appender);
-      pos.reserve(rule.name(), input);
+      pos.createMemo(rule.name(), input);
       final Position last = rule.parse(pos);
       last.assertSuccess();
-      pos.release(rule.name());
+      pos.releaseMemo(null);
    }
 
    /**
@@ -136,5 +103,11 @@ public class Pogo {
     */
    protected void setRule(final Rule rule) {
       this.rule = rule;
+   }
+
+   public String toString(final Object object) throws PogoException {
+      final StringBuilder builder = new StringBuilder();
+      serial(object, builder);
+      return builder.toString();
    }
 }

@@ -7,8 +7,8 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.io.Position;
 import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.Position;
 
 /**
  * Matches a sequence of various parsers.
@@ -26,7 +26,6 @@ public class SequenceParser extends CompositeParser {
       for(final Parser parser: this) {
          next = parser.parse(next);
          if(!next.isSuccess()) {
-            position.fail(next);
             return position;
          }
       }

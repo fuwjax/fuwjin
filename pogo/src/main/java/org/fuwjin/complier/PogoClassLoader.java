@@ -1,8 +1,11 @@
 package org.fuwjin.complier;
 
-import org.fuwjin.io.PogoException;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.PogoUtils;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.PogoGrammar;
+import org.fuwjin.pogo.LiteratePogo;
 
 public class PogoClassLoader {
    private final Grammar grammar;
@@ -10,8 +13,8 @@ public class PogoClassLoader {
 
    public PogoClassLoader(final String pogoFile) {
       try {
-         grammar = PogoUtils.readGrammar(pogoFile);
-      } catch(final PogoException e) {
+         grammar = PogoGrammar.readGrammar(stream(pogoFile));
+      } catch(final Exception e) {
          throw new RuntimeException(e);
       }
    }

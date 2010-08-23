@@ -10,12 +10,10 @@ package org.fuwjin.pogo.parser;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import java.util.Map;
-
-import org.fuwjin.io.BufferedPosition;
-import org.fuwjin.io.Position;
+import org.fuwjin.pogo.BufferedPosition;
+import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.reflect.ReflectionType;
+import org.fuwjin.pogo.Position;
 
 /**
  * The standard base class for parse operators.
@@ -63,7 +61,7 @@ public abstract class ParserOperator implements Parser {
    }
 
    @Override
-   public void resolve(final String parent, final Map<String, Rule> grammar, final ReflectionType ruleType) {
-      parser.resolve(parent, grammar, ruleType);
+   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
+      parser.resolve(grammar, parent);
    }
 }

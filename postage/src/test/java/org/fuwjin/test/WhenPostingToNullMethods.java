@@ -1,6 +1,7 @@
 package org.fuwjin.test;
 
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.fuwjin.postage.Failure;
@@ -29,14 +30,9 @@ public class WhenPostingToNullMethods {
    }
 
    @Test
-   public void shouldFailOnNonNull() {
+   public void shouldFailOnNonNull() throws Failure {
       final Function func = postage.getFunction("null", "instanceof");
-      try {
-         func.invoke("test");
-         fail("should fail");
-      } catch(final Failure e) {
-         // pass
-      }
+      assertTrue(!(Boolean)func.invoke("test"));
    }
 
    @Test
@@ -49,6 +45,6 @@ public class WhenPostingToNullMethods {
    @Test
    public void shouldReturnNullInstanceOf() throws Failure {
       final Function func = postage.getFunction("null", "instanceof");
-      assertNull(func.invoke((Object)null));
+      assertTrue((Boolean)func.invoke((Object)null));
    }
 }
