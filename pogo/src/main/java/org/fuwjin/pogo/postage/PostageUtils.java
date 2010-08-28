@@ -31,10 +31,13 @@ public class PostageUtils {
          func = func.optional(arg);
       }
       final Object result = func.invokeSafe();
-      if(result == null) {
+      if(result instanceof Failure) {
+         return result;
+      }
+      if(func.returnType().equals(void.class)) {
          return args[0];
       }
-      if(result instanceof Boolean) {
+      if(func.returnType().equals(boolean.class)) {
          if((Boolean)result) {
             return args[0];
          }

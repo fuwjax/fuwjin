@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonWriter;
+import org.fuwjin.pogo.PogoException;
 import org.junit.Test;
 
 public class WhenWritingUnknownTypes {

@@ -126,12 +126,12 @@ public class LiteratePogo { // NO_UCD
     */
    public static Rule rule(final String name, final Class<?> type, final String initializer, final String serializer,
          final String finalizer, final Parser parser) {
-      return new org.fuwjin.pogo.parser.Rule(name, type.getCanonicalName(), initializer, serializer, finalizer, parser);
+      return new org.fuwjin.pogo.parser.RuleParser(name, type.getCanonicalName(), initializer, serializer, finalizer, parser);
    }
 
    public static Rule rule(final String name, final String type, final String initializer, final String serializer,
          final String finalizer, final Parser parser) {
-      return new org.fuwjin.pogo.parser.Rule(name, type, initializer, serializer, finalizer, parser);
+      return new org.fuwjin.pogo.parser.RuleParser(name, type, initializer, serializer, finalizer, parser);
    }
 
    /**

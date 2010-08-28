@@ -22,6 +22,8 @@ import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.Rule;
+import org.fuwjin.pogo.postage.Doppleganger;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
@@ -41,9 +43,9 @@ public class RuleReferenceParser implements Parser {
     * Creates a new instance.
     */
    RuleReferenceParser() {
-      constructor("default");
-      matcher("default");
-      converter("default");
+      constructor = Doppleganger.create("default", Function.class);
+      matcher = Doppleganger.create("default", Function.class);
+      converter = Doppleganger.create("default", Function.class);
    }
 
    /**
@@ -55,17 +57,9 @@ public class RuleReferenceParser implements Parser {
    public RuleReferenceParser(final String ruleName, final String initializer, final String serializer,
          final String finalizer) {
       this.ruleName = ruleName;
-      constructor(initializer);
-      matcher(serializer);
-      converter(finalizer);
-   }
-
-   private void constructor(final String name) {
-      constructor = new Partial(name).as(Function.class);
-   }
-
-   private void converter(final String name) {
-      converter = new Partial(name).as(Function.class);
+      constructor = Doppleganger.create(initializer, Function.class);
+      matcher = Doppleganger.create(serializer, Function.class);
+      converter = Doppleganger.create(finalizer, Function.class);
    }
 
    @Override
@@ -83,10 +77,6 @@ public class RuleReferenceParser implements Parser {
    @Override
    public int hashCode() {
       return hash(getClass(), ruleName, constructor, converter);
-   }
-
-   private void matcher(final String name) {
-      matcher = new Partial(name).as(Function.class);
    }
 
    @Override
@@ -128,14 +118,14 @@ public class RuleReferenceParser implements Parser {
    }
 
    @Override
-   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
+   public void resolve(final Grammar grammar, final Rule parent) {
       rule = grammar.getRule(ruleName);
       if(rule == null) {
          throw new NoSuchElementException(String.format(UNKNOWN_RULE, ruleName));
       }
-      constructor = parent.getFunction(Partial.<String> content(constructor));
-      matcher = parent.getFunction(Partial.<String> content(matcher));
-      converter = parent.getFunction(Partial.<String> content(converter));
+      constructor = parent.category().getFunction(Doppleganger.<String> content(constructor));
+      matcher = parent.category().getFunction(Doppleganger.<String> content(matcher));
+      converter = parent.category().getFunction(Doppleganger.<String> content(converter));
       simple = !isCustomFunction(constructor) && !isCustomFunction(matcher) && !isCustomFunction(converter);
    }
 

@@ -7,53 +7,43 @@
  *******************************************************************************/
 package org.fuwjin.jon;
 
-import static org.fuwjin.io.AbstractCodePointStream.stream;
 import static org.fuwjin.jon.BuilderRegistry.getBuilder;
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.fuwjin.io.CodePointStream;
-import org.fuwjin.io.PogoException;
-import org.fuwjin.io.StreamPosition;
 import org.fuwjin.jon.container.JonContainer;
+import org.fuwjin.pogo.CodePointStream;
 import org.fuwjin.pogo.Grammar;
+import org.fuwjin.pogo.Memo;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.position.StreamPosition;
+import org.fuwjin.pogo.postage.PogoCategory;
+import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.category.InstanceCategory;
+import org.fuwjin.postage.category.VoidCategory;
 
 public class JonReader {
-   class JonContext {
-      public Object addReference(final Reference ref) {
-         container().store(ref.name(), ref.value());
-         return ref.value();
-      }
-
-      public Object getReference(final String key) {
-         return container().get(key);
-      }
-
-      public Reference newReference(final Object value) {
-         return new Reference(value);
-      }
-   }
-
    private static final Grammar JON;
+   private static final JonContainer container = new JonContainer();;
    static {
       try {
-         JON = readGrammar("jon.reader.pogo");
+         final Postage postage = new Postage(new PogoCategory(), new VoidCategory("default"), new InstanceCategory(
+               "context", container));
+         JON = readGrammar(stream("jon.reader.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }
    }
-   private final JonContext context;
-   private final JonContainer container;
    private final CodePointStream stream;
 
    public JonReader(final CodePointStream stream) {
       this.stream = stream;
-      context = new JonContext();
-      container = new JonContainer();
    }
 
    public JonReader(final Reader reader) {
@@ -61,17 +51,15 @@ public class JonReader {
    }
 
    public JonReader(final String content) {
-      this(new StringReader(content));
-   }
-
-   public JonContainer container() {
-      return container;
+      this(streamOf(content));
    }
 
    public <T> T fill(final T obj) throws PogoException {
-      final StreamPosition pos = new StreamPosition(stream);
-      pos.reserve(null, context);
-      return (T)JON.parse(pos, obj);
+      container.clear();
+      if(obj == null) {
+         return (T)JON.parse(stream);
+      }
+      return (T)JON.parse(stream, obj);
    }
 
    public Object read() throws PogoException {
@@ -87,12 +75,14 @@ public class JonReader {
    }
 
    public <T> List<T> readAll(final Class<T> type) throws PogoException {
+      container.clear();
       final List<T> list = new LinkedList<T>();
       try {
-         final StreamPosition pos = new StreamPosition(stream);
-         pos.reserve(null, context);
+         Position pos = new StreamPosition(stream);
          while(true) {
-            list.add((T)JON.parse(pos, getBuilder(type)));
+            final Memo memo = JON.parse(pos, getBuilder(type));
+            list.add((T)memo.getValue());
+            pos = memo.getEnd();
          }
       } catch(final PogoException e) {
          // continue;

@@ -12,8 +12,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.text.ParseException;
 
-import org.fuwjin.io.SerialStreamPosition;
-import org.fuwjin.io.StreamPosition;
+import org.fuwjin.pogo.position.SerialStreamPosition;
+import org.fuwjin.pogo.position.StreamPosition;
 import org.fuwjin.postage.StandardAdaptable;
 
 /**
@@ -53,7 +53,7 @@ public class Pogo {
    }
 
    public Object parse(final CodePointStream input) throws PogoException {
-      return parse(new StreamPosition(input), StandardAdaptable.UNSET);
+      return parse(input, StandardAdaptable.UNSET);
    }
 
    /**
@@ -64,7 +64,7 @@ public class Pogo {
     * @throws ParseException if the parse fails
     */
    public Object parse(final CodePointStream input, final Object object) throws PogoException {
-      return parse(new StreamPosition(input), object);
+      return parse(new StreamPosition(input), object).getValue();
    }
 
    /**
@@ -77,11 +77,13 @@ public class Pogo {
       context.assertSuccess();
    }
 
-   public Object parse(final Position position, final Object object) throws PogoException {
+   public Memo parse(final Position position, final Object object) throws PogoException {
       position.createMemo(rule.name(), object);
       final Position next = rule.parse(position);
       next.assertSuccess();
-      return next.releaseMemo(null).getValue();
+      final Memo memo = next.releaseMemo(null);
+      memo.setEnd(next);
+      return memo;
    }
 
    /**

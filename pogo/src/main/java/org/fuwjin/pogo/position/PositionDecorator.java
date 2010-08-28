@@ -1,10 +1,11 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo.position;
 
 import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.Position;
 import org.fuwjin.postage.Adaptable;
+import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.StandardAdaptable;
 
 public abstract class PositionDecorator implements BufferedPosition, InternalPosition {
@@ -40,7 +41,7 @@ public abstract class PositionDecorator implements BufferedPosition, InternalPos
    }
 
    @Override
-   public void fail(final String reason, final Throwable cause) {
+   public void fail(final String reason, final Failure cause) {
       position.fail(reason, cause);
    }
 

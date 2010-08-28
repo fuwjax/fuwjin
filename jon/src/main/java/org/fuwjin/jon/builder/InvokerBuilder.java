@@ -10,7 +10,7 @@ package org.fuwjin.jon.builder;
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.category.ClassCategory;
 
 public class InvokerBuilder extends LiteralBuilder {
    private Function value;
@@ -31,7 +31,7 @@ public class InvokerBuilder extends LiteralBuilder {
 
    @Override
    public void set(final String value) {
-      this.value = new ClassFunction(type(), value);
+      this.value = new ClassCategory(type()).getFunction(value);
    }
 
    @Override

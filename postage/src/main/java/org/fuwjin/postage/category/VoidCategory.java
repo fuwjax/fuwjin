@@ -1,19 +1,21 @@
 package org.fuwjin.postage.category;
 
-import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.Function;
 import org.fuwjin.postage.function.CompositeFunction;
 
 public class VoidCategory extends AbstractCategory {
-   public VoidCategory(final Postage postage) {
-      super("void", postage);
+   public VoidCategory() {
+      super("void");
    }
 
-   public VoidCategory(final String name, final Postage postage) {
-      super(name, postage);
+   public VoidCategory(final String name, final Function... functions) {
+      super(name);
+      for(final Function function: functions) {
+         addFunction(function);
+      }
    }
 
    @Override
-   protected CompositeFunction newFunction(final String name) {
-      return new CompositeFunction(name, this);
+   public void fillFunction(final CompositeFunction function) {
    }
 }

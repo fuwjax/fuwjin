@@ -4,7 +4,11 @@ public class ConstantFunction extends AbstractFunction {
    private final Object value;
 
    public ConstantFunction(final String name, final Object value) {
-      super(name, value.getClass(), true, Object[].class);
+      this(name, value, value == null ? Object.class : value.getClass());
+   }
+
+   public ConstantFunction(final String name, final Object value, final Class<?> type) {
+      super(name, type, true, Object[].class);
       this.value = value;
    }
 

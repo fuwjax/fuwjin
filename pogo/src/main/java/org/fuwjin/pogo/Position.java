@@ -1,5 +1,6 @@
 package org.fuwjin.pogo;
 
+import org.fuwjin.postage.Failure;
 
 public interface Position {
    Position advance(int low, int high);
@@ -10,7 +11,7 @@ public interface Position {
 
    Memo createMemo(String name, Object value);
 
-   void fail(String reason, Throwable cause);
+   void fail(String reason, Failure cause);
 
    boolean isAfter(Position position);
 

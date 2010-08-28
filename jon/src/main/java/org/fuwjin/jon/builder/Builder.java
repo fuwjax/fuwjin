@@ -14,7 +14,7 @@ import org.fuwjin.jon.builder.util.UnsafeFactory;
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.category.ClassCategory;
 
 public abstract class Builder {
    private final Class<?> type;
@@ -47,7 +47,7 @@ public abstract class Builder {
 
    protected Object newInstance(final Object... args) {
       if(invoker == null) {
-         invoker = new ClassFunction(type, "new");
+         invoker = new ClassCategory(type).getFunction("new");
       }
       final Object ret = invoker.invokeSafe(args);
       if(!isSuccess(ret) && args.length == 0) {

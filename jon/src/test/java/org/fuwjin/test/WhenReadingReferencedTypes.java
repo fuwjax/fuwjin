@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonReader;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.test.object.ClassRef;
 import org.fuwjin.test.object.ComplexChild;
 import org.fuwjin.test.object.InnerChild;

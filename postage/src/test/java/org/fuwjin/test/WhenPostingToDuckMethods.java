@@ -4,9 +4,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Failure.FailureException;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.category.DuckCategory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +16,11 @@ public class WhenPostingToDuckMethods {
 
    @Before
    public void setup() {
-      postage = new Postage();
+      postage = new Postage(new DuckCategory());
    }
 
    @Test
-   public void shouldDuckTypeAppropriately() throws Failure {
+   public void shouldDuckTypeAppropriately() throws FailureException {
       final String str = "test";
       final Function func = postage.getFunction("true", "length");
       assertThat((Integer)func.invoke(str), is(str.length()));
@@ -31,7 +32,7 @@ public class WhenPostingToDuckMethods {
       try {
          func.invoke();
          fail("should fail");
-      } catch(final Failure e) {
+      } catch(final FailureException e) {
          // pass
       }
    }
@@ -42,7 +43,7 @@ public class WhenPostingToDuckMethods {
       try {
          func.invoke((Object)null);
          fail("should fail");
-      } catch(final Failure e) {
+      } catch(final FailureException e) {
          // pass
       }
    }

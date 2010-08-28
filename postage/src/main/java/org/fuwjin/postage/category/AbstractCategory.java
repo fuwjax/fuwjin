@@ -4,24 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.fuwjin.postage.Category;
-import org.fuwjin.postage.CompositeFailure;
-import org.fuwjin.postage.CompositeSignature;
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.function.CompositeFunction;
 
 public abstract class AbstractCategory implements Category {
    private final String name;
    private final Map<String, CompositeFunction> functions = new HashMap<String, CompositeFunction>();
-   private final Postage postage;
 
-   public AbstractCategory(final String name, final Postage postage) {
+   public AbstractCategory(final String name) {
       this.name = name;
-      this.postage = postage;
    }
 
-   @Override
-   public final void addFunction(final Function function) {
+   protected final void addFunction(final Function function) {
       getFunction(function.name()).addFunction(function);
    }
 
@@ -35,28 +29,23 @@ public abstract class AbstractCategory implements Category {
       }
    }
 
+   protected abstract void fillFunction(CompositeFunction function);
+
    @Override
    public final CompositeFunction getFunction(final String name) {
       CompositeFunction function = functions.get(name);
       if(function == null) {
-         function = newFunction(name);
+         function = new CompositeFunction(name);
+         fillFunction(function);
          functions.put(function.name(), function);
       }
       return function;
    }
 
    @Override
-   public Object invokeFallThrough(final CompositeSignature signature, final CompositeFailure current,
-         final Object... args) {
-      return postage.invokeGlobal(signature, current, args);
-   }
-
-   @Override
    public final String name() {
       return name;
    }
-
-   protected abstract CompositeFunction newFunction(String name);
 
    @Override
    public String toString() {

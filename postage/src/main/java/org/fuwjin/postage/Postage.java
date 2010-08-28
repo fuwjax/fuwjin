@@ -1,13 +1,12 @@
 package org.fuwjin.postage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.fuwjin.postage.category.ClassCategory;
-import org.fuwjin.postage.category.DuckCategory;
-import org.fuwjin.postage.category.GlobalCategory;
-import org.fuwjin.postage.category.NullCategory;
-import org.fuwjin.postage.category.VoidCategory;
+import org.fuwjin.postage.category.CompositeCategory;
 
 public class Postage {
    public static boolean isSuccess(final Object result) {
@@ -15,27 +14,32 @@ public class Postage {
    }
 
    private final Map<String, Category> categories = new HashMap<String, Category>();
-   private final Category global;
+   private final List<Category> nullCategories = new ArrayList<Category>();
 
-   public Postage(final Function... globals) {
-      global = new GlobalCategory(this);
-      addCategory(new NullCategory(this));
-      addCategory(new VoidCategory(this));
-      addCategory(new DuckCategory(this));
-      for(final Function function: globals) {
-         global.addFunction(function);
+   public Postage(final Category... extras) {
+      for(final Category category: extras) {
+         if(category.name() == null) {
+            nullCategories.add(category);
+         }
+      }
+      for(final Category category: extras) {
+         if(category.name() != null) {
+            addCategory(category);
+         }
       }
    }
 
-   public void addCategory(final Category category) {
-      categories.put(category.name(), category);
+   private CompositeCategory addCategory(final Category category) {
+      final CompositeCategory cat = new CompositeCategory(category, nullCategories);
+      categories.put(cat.name(), cat);
+      return cat;
    }
 
    public Category getCategory(final String category) {
       Category cat = categories.get(category);
       if(cat == null) {
          cat = newCategory(category);
-         addCategory(cat);
+         cat = addCategory(cat);
       }
       return cat;
    }
@@ -52,17 +56,8 @@ public class Postage {
       return getCategory(category).getFunction(name);
    }
 
-   public Object invokeGlobal(final CompositeSignature signature, final CompositeFailure current, final Object... args) {
-      final Object result = global.getFunction(signature.name()).invokeSafe(args);
-      if(result instanceof Failure) {
-         current.addFailure((Failure)result);
-         return current;
-      }
-      return result;
-   }
-
    protected Category newCategory(final Class<?> type) {
-      return new ClassCategory(type, this);
+      return new ClassCategory(type);
    }
 
    protected Category newCategory(final String category) {

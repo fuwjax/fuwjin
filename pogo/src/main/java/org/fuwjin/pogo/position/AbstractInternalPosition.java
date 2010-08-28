@@ -1,4 +1,4 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo.position;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +8,7 @@ import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.Position;
 import org.fuwjin.postage.Adaptable;
+import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.StandardAdaptable;
 
 public abstract class AbstractInternalPosition implements InternalPosition, BufferedPosition {
@@ -87,7 +88,11 @@ public abstract class AbstractInternalPosition implements InternalPosition, Buff
    }
 
    @Override
-   public void fail(final String reason, final Throwable cause) {
+   public void fail(final String reason, final Failure cause) {
+      state.addFailure(this, reason, cause);
+   }
+
+   protected void fail(final String reason, final Throwable cause) {
       state.addFailure(this, reason, cause);
    }
 

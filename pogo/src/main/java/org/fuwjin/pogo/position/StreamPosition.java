@@ -1,4 +1,4 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo.position;
 
 import java.io.IOException;
 

@@ -13,6 +13,7 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.Rule;
 
 /**
  * Matches a single specified character from the input.
@@ -111,7 +112,7 @@ public class CharacterLiteralParser implements Parser {
    }
 
    @Override
-   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
+   public void resolve(final Grammar grammar, final Rule parent) {
       // do nothing
    }
 

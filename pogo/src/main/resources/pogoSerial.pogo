@@ -1,9 +1,9 @@
 # POGO serializer grammar
 Grammar         =org.fuwjin.pogo.Grammar~iterator
                 <- Definition~next+
-Definition      =org.fuwjin.pogo.parser.Rule
+Definition      =org.fuwjin.pogo.parser.RuleParser
                 <- Identifier~name '\t' TypeInfo~this? '<- ' Expression~parser '\n'
-TypeInfo        =org.fuwjin.pogo.parser.Rule
+TypeInfo        =org.fuwjin.pogo.parser.RuleParser
                 <- '=' Category~type ('~' Function~initializer)? ('>' Function~serializer)? (':' Function~finalizer)? '\n\t\t'
 Category        =org.fuwjin.pogo.postage.PostageUtils~isCustomCategory
                 <- CategoryName~this

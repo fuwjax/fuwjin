@@ -17,6 +17,12 @@ public class AdaptableUtils {
    }
 
    public static Object adapt(final Class<?> type, final Object value) {
+      if(value == null) {
+         return null;
+      }
+      if(value.getClass().equals(type)) {
+         return value;
+      }
       if(value instanceof Adaptable) {
          return ((Adaptable)value).as(type);
       }

@@ -11,8 +11,8 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Map;
 
-import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonReader;
+import org.fuwjin.pogo.PogoException;
 import org.junit.Test;
 
 public class WhenReadingIncompleteJonValues {
