@@ -13,7 +13,7 @@ import java.util.Map;
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.category.ClassCategory;
 
 public class PrimitiveBuilder extends LiteralBuilder {
    private static final Map<Class<?>, Class<?>> WRAPPERS;
@@ -39,7 +39,8 @@ public class PrimitiveBuilder extends LiteralBuilder {
    public PrimitiveBuilder(final Class<?> type) {
       super(type);
       final Class<?> target = WRAPPERS.get(type);
-      invoker = new ClassFunction(target == null ? type : target, "valueOf");
+      final Class<?> cls = target == null ? type : target;
+      invoker = new ClassCategory(cls).getFunction("valueOf");
    }
 
    @Override

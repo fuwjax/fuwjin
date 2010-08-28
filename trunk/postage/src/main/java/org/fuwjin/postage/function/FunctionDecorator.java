@@ -1,6 +1,8 @@
 package org.fuwjin.postage.function;
 
-import org.fuwjin.postage.Failure;
+import static org.fuwjin.postage.Failure.assertResult;
+
+import org.fuwjin.postage.Failure.FailureException;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Signature;
 
@@ -17,12 +19,8 @@ public class FunctionDecorator implements Function {
    }
 
    @Override
-   public Object invoke(final Object... args) throws Failure {
-      final Object result = invokeSafe(args);
-      if(result instanceof Failure) {
-         throw (Failure)result;
-      }
-      return result;
+   public Object invoke(final Object... args) throws FailureException {
+      return assertResult(invokeSafe(args));
    }
 
    @Override
@@ -38,6 +36,11 @@ public class FunctionDecorator implements Function {
    @Override
    public Function optional(final Object arg) {
       return function.optional(arg);
+   }
+
+   @Override
+   public Class<?> returnType() {
+      return function.returnType();
    }
 
    @Override

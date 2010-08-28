@@ -16,7 +16,7 @@ public class ReturnFunction extends AbstractFunction {
    }
 
    public ReturnFunction() {
-      super("return", Object.class, true, Object.class, Object[].class);
+      super("return", ReturnValue.class, true, Object.class, Object[].class);
    }
 
    @Override

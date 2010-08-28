@@ -19,6 +19,9 @@ import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.fuwjin.pogo.LiteratePogo.seq;
 import static org.fuwjin.pogo.LiteratePogo.star;
 
+import org.fuwjin.pogo.postage.Doppleganger;
+import org.fuwjin.postage.Postage;
+
 /**
  * The Pogo grammar for parsing pogo grammars.
  */
@@ -35,7 +38,7 @@ public final class PogoGrammar extends Grammar {
                   ref("EndOfFile", "default", "default", "default"))));
       add(rule(
             "Definition",
-            org.fuwjin.pogo.parser.Rule.class,
+            org.fuwjin.pogo.parser.RuleParser.class,
             "new",
             "default",
             "default",
@@ -44,7 +47,7 @@ public final class PogoGrammar extends Grammar {
                   ref("LEFTARROW", "default", "default", "default"), ref("Expression", "default", "default", "parser"))));
       add(rule(
             "TypeInfo",
-            org.fuwjin.pogo.parser.Rule.class,
+            org.fuwjin.pogo.parser.RuleParser.class,
             "default",
             "default",
             "default",
@@ -56,9 +59,9 @@ public final class PogoGrammar extends Grammar {
                         ref("Function", "default", "default", "serializer"))),
                   optional(seq(ref("COLON", "default", "default", "default"),
                         ref("Function", "default", "default", "finalizer"))))));
-      add(rule("Category", "default", "default", "default", "default",
+      add(rule("Category", Doppleganger.class, "default", "default", "new",
             ref("ClassIdentifier", "default", "default", "return")));
-      add(rule("Function", "default", "default", "default", "default",
+      add(rule("Function", Doppleganger.class, "default", "default", "new",
             ref("Identifier", "default", "default", "return")));
       add(rule(
             "Expression",
@@ -282,6 +285,10 @@ public final class PogoGrammar extends Grammar {
     */
    public static Grammar readGrammar(final CodePointStream stream) throws PogoException {
       return (Grammar)grammar.parse(stream);
+   }
+
+   public static Grammar readGrammar(final CodePointStream stream, final Postage postage) throws PogoException {
+      return (Grammar)grammar.parse(stream, postage);
    }
 
    /**

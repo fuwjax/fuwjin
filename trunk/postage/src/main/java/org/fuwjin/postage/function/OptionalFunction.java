@@ -44,6 +44,11 @@ public class OptionalFunction extends AbstractFunction implements Function {
    }
 
    @Override
+   public Class<?> returnType() {
+      return function.returnType();
+   }
+
+   @Override
    protected Object tryInvoke(final Object... args) throws Exception {
       throw new UnsupportedOperationException();
    }

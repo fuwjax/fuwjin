@@ -1,4 +1,4 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo.position;
 
 public class IntRangeSet {
    private int[] values = new int[10];

@@ -7,18 +7,23 @@
  *******************************************************************************/
 package org.fuwjin.jon;
 
-import static org.fuwjin.pogo.PogoUtils.readGrammar;
+import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
-import org.fuwjin.io.PogoException;
-import org.fuwjin.io.SerialStreamPosition;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.pogo.Grammar;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.postage.PogoCategory;
+import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.category.ConstantCategory;
+import org.fuwjin.postage.category.VoidCategory;
 
 public class JonWriter {
    private static final Grammar JON;
    static {
       try {
-         JON = readGrammar("jon.writer.pogo");
+         final Postage postage = new Postage(new PogoCategory(), new VoidCategory("default"), new ConstantCategory());
+         JON = readGrammar(stream("jon.writer.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }
@@ -30,9 +35,10 @@ public class JonWriter {
    }
 
    public String write(final Object obj) throws PogoException {
-      final StringBuilder builder = new StringBuilder();
-      final SerialStreamPosition context = new SerialStreamPosition(builder);
-      JON.parse(context, storage.get(obj, null));
-      return builder.toString();
+      return JON.toString(storage.get(obj, null));
+   }
+
+   public void write(final Object obj, final Appendable appender) throws PogoException {
+      JON.serial(storage.get(obj, null), appender);
    }
 }

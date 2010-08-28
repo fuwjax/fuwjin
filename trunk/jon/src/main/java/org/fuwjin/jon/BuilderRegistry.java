@@ -22,7 +22,7 @@ import org.fuwjin.jon.builder.MapBuilder;
 import org.fuwjin.jon.builder.PrimitiveBuilder;
 import org.fuwjin.jon.builder.StringInstanceBuilder;
 import org.fuwjin.postage.Function;
-import org.fuwjin.postage.function.ClassFunction;
+import org.fuwjin.postage.category.ClassCategory;
 
 public class BuilderRegistry {
    abstract static class ClassFilter {
@@ -39,7 +39,7 @@ public class BuilderRegistry {
       }
 
       public ClassFilter create(final Class<? extends Builder> builder) {
-         invoker = new ClassFunction(builder, "new");
+         invoker = new ClassCategory(builder).getFunction("new");
          return this;
       }
 

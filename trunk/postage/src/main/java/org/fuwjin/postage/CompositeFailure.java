@@ -12,9 +12,6 @@ public class CompositeFailure extends Failure {
    }
 
    public void addFailure(final Failure failure) {
-      if(isEmpty()) {
-         initCause(failure);
-      }
       failures.add(failure);
    }
 
@@ -26,6 +23,15 @@ public class CompositeFailure extends Failure {
       } catch(final RuntimeException e) {
          return false;
       }
+   }
+
+   @Override
+   public FailureException exception() {
+      final FailureException e = super.exception();
+      if(!failures.isEmpty()) {
+         e.initCause(failures.get(0).exception());
+      }
+      return e;
    }
 
    public boolean isEmpty() {

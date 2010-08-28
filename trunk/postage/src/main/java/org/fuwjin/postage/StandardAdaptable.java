@@ -4,7 +4,7 @@ public enum StandardAdaptable implements Adaptable {
    TRUE {
       @Override
       public Object as(final Class<?> type) {
-         if(boolean.class.equals(type) || Boolean.class.equals(type)) {
+         if(boolean.class.equals(type) || type.isAssignableFrom(Boolean.class)) {
             return true;
          }
          return fail(type);
@@ -13,7 +13,7 @@ public enum StandardAdaptable implements Adaptable {
    FALSE {
       @Override
       public Object as(final Class<?> type) {
-         if(boolean.class.equals(type) || Boolean.class.equals(type)) {
+         if(boolean.class.equals(type) || type.isAssignableFrom(Boolean.class)) {
             return false;
          }
          return fail(type);

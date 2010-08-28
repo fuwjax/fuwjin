@@ -1,12 +1,14 @@
 # POGO parser grammar
 Grammar         =org.fuwjin.pogo.Grammar~new:resolve
                 <- Spacing Definition:add+ EndOfFile
-Definition      =org.fuwjin.pogo.parser.Rule~new
+Definition      =org.fuwjin.pogo.parser.RuleParser~new
                 <- Identifier:name TypeInfo~this? LEFTARROW Expression:parser
-TypeInfo        =org.fuwjin.pogo.parser.Rule
+TypeInfo        =org.fuwjin.pogo.parser.RuleParser
                 <- EQUALS Category:type (HASH Function:initializer)? (OUT Function:serializer)? (COLON Function:finalizer)?
-Category        <- ClassIdentifier:return
-Function        <- Identifier:return
+Category        =org.fuwjin.pogo.postage.Doppleganger:new
+                <- ClassIdentifier:return
+Function        =org.fuwjin.pogo.postage.Doppleganger:new
+                <- Identifier:return
 Expression      =org.fuwjin.pogo.parser.OptionParser~new:reduce
                 <- Sequence:add (SLASH Sequence:add)*
 Sequence        =org.fuwjin.pogo.parser.SequenceParser~new:reduce

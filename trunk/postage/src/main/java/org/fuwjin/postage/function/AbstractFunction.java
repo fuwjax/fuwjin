@@ -1,8 +1,11 @@
 package org.fuwjin.postage.function;
 
+import static org.fuwjin.postage.Failure.assertResult;
+
 import java.lang.reflect.AccessibleObject;
 
 import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.Failure.FailureException;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Signature;
 import org.fuwjin.postage.StandardAdaptable;
@@ -50,12 +53,8 @@ public abstract class AbstractFunction implements Function {
    }
 
    @Override
-   public final Object invoke(final Object... args) throws Failure {
-      final Object result = invokeSafe(args);
-      if(result instanceof Failure) {
-         throw (Failure)result;
-      }
-      return result;
+   public final Object invoke(final Object... args) throws FailureException {
+      return assertResult(invokeSafe(args));
    }
 
    @Override
@@ -83,6 +82,11 @@ public abstract class AbstractFunction implements Function {
          return this;
       }
       return new OptionalFunction(this, arg);
+   }
+
+   @Override
+   public Class<?> returnType() {
+      return signature.returnType();
    }
 
    @Override

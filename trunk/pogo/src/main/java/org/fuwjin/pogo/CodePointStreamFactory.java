@@ -35,7 +35,7 @@ public class CodePointStreamFactory {
       protected abstract int readChar() throws IOException;
    }
 
-   private static InputStream open(final String file) throws FileNotFoundException {
+   public static InputStream open(final String file) throws FileNotFoundException {
       InputStream s = currentThread().getContextClassLoader().getResourceAsStream(file);
       if(s == null) {
          s = ClassLoader.getSystemResourceAsStream(file);

@@ -3,7 +3,6 @@ package org.fuwjin.postage.function;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fuwjin.postage.Category;
 import org.fuwjin.postage.CompositeFailure;
 import org.fuwjin.postage.CompositeSignature;
 import org.fuwjin.postage.Failure;
@@ -11,11 +10,10 @@ import org.fuwjin.postage.Function;
 
 public class CompositeFunction extends AbstractFunction {
    private final List<Function> functions = new ArrayList<Function>();
-   private final Category category;
+   private Class<?> returnType;
 
-   public CompositeFunction(final String name, final Category category) {
+   public CompositeFunction(final String name) {
       super(new CompositeSignature(name));
-      this.category = category;
    }
 
    public void addFunction(final Function function) {
@@ -41,14 +39,20 @@ public class CompositeFunction extends AbstractFunction {
          if(result instanceof Failure) {
             failure.addFailure((Failure)result);
          } else {
+            returnType = function.returnType();
             return result;
          }
       }
-      return category.invokeFallThrough(signature(), failure, args);
+      return failure;
    }
 
    protected boolean isEmpty() {
       return functions.isEmpty();
+   }
+
+   @Override
+   public Class<?> returnType() {
+      return returnType;
    }
 
    @Override
@@ -62,7 +66,7 @@ public class CompositeFunction extends AbstractFunction {
    }
 
    @Override
-   public Object tryInvoke(final Object... args) {
+   public final Object tryInvoke(final Object... args) {
       throw new UnsupportedOperationException();
    }
 }

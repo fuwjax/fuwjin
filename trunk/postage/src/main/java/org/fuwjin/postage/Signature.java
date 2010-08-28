@@ -23,9 +23,9 @@ public class Signature {
             return new Object[]{new Failure("expected at least %d args, received %d", params.length - 1, args.length)};
          }
          len--;
-         if(args.length == params.length) {
-            realArgs[len] = adapt(params[len], args[len]);
-         }
+         // if(args.length == params.length) {
+         // realArgs[len] = adapt(params[len], args[len]);
+         // }
          if(realArgs[len] == null || realArgs[len] instanceof Failure) {
             final Class<?> varType = params[len].getComponentType();
             final Object[] varArgs = new Object[args.length - len];
@@ -83,6 +83,10 @@ public class Signature {
          return params;
       }
       return null;
+   }
+
+   public Class<?> returnType() {
+      return returnType;
    }
 
    @Override

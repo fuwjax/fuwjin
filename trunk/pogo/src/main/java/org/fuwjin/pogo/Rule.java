@@ -1,9 +1,9 @@
 package org.fuwjin.pogo;
 
-import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Category;
 
 public interface Rule extends Parser {
-   Function getFunction(String name);
+   Category category();
 
    String name();
 }

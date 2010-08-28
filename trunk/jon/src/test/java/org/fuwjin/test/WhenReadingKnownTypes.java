@@ -15,8 +15,8 @@ import java.lang.annotation.ElementType;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
-import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonReader;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.test.object.ComplexChild;
 import org.fuwjin.test.object.IntegerObject;
 import org.fuwjin.test.object.PrimitiveContainer;

@@ -1,12 +1,16 @@
-Element         <- Spacing (Null:return / SetReference~this:return / Dereference:return / Value~this:return) Spacing
-Dereference     = java.lang.Object:context.getReference
+Element         <- Spacing (Null:return / UseReference~this:return / SetReference:return / Dereference:return / Fill~this:return / Value:return) Spacing
+Dereference     = context:getReference
                 <- Reference:return
-SetReference    = org.fuwjin.jon.Reference~context.newReference:context.addReference
-                <- Reference:name EQUALS Value~value:value
-Reference       <- '&' ReferenceId:return Spacing
+UseReference    = context~newReference:addReference
+                <- SetRefImpl~this
+SetReference    = context~newReference:addReference
+                <- SetRefImpl~this
+SetRefImpl      = org.fuwjin.jon.Reference
+                <- Reference:name EQUALS (Fill~value:value / Value:value)
+Reference       <- '&' ReferenceId>return Spacing
 ReferenceId     <- [-_.$0-9a-zA-Z]+
-Value           <- Fill~this:return / Explicit:return / Unknown:return
-Null            =org.fuwjin.jon.JonLiteral:nullValue 
+Value           <- Explicit:return / Unknown:return
+Null            = context:null
                 <- 'null'
 
 Fill            =org.fuwjin.jon.builder.Builder~instanceof:toObject
@@ -28,12 +32,14 @@ KnownEntry      =org.fuwjin.jon.builder.EntriesBuilder$EntryBuilder~instanceof
 KnownString     =org.fuwjin.jon.builder.LiteralBuilder~instanceof
                 <- String:set
 KnownLiteral    =org.fuwjin.jon.builder.LiteralBuilder~instanceof
-                <- ArbitraryLit:set
+                <- ArbitraryLit>set
 ArbitraryLit    <- (![(){}\[\],:&=|\" \r\n\t] .)+ '[]'*
 
 ClassCast       <- SetRefClass:return / Dereference:return / Class:return
-SetRefClass     =org.fuwjin.jon.Reference~context.newReference:context.addReference
-                <- Reference:name '=' Class:value
+SetRefClass     =context~newReference:addReference
+                <- SetRefClassImpl~this
+SetRefClassImpl =org.fuwjin.jon.Reference
+                <- Reference:name EQUALS Class:value
 
 Unknown         <- Map:return / List:return / String:return / Literal:return
 Map             =org.fuwjin.jon.builder.MapBuilder~new:toObject
@@ -41,27 +47,31 @@ Map             =org.fuwjin.jon.builder.MapBuilder~new:toObject
 List            =java.util.ArrayList~new:toArray 
                 <- OPEN_LIST (Element:add (ELM_SEP Element:add)*)? CLOSE_LIST
 Literal         <- Boolean:return / Class:return / Float:return / Double:return / Long:return / Integer:return
-Boolean         =java.lang.Boolean:valueOf 
-                <- 'true' / 'false'
-Class           =org.fuwjin.jon.JonLiteral:forName 
+Boolean         <- True:return / False:return
+True            =context:true
+                <- 'true'
+False           =context:false 
+                <- 'false'
+Class           =org.fuwjin.jon.JonLiteral>forName 
                 <- Identifier ([.$] Identifier)* '[]'*
 Identifier      <- [a-zA-Z_] [a-zA-Z0-9_]*
-Double          =java.lang.Double:valueOf 
+Double          =java.lang.Double>valueOf 
                 <- Decimal [dD]? / Digits [dD]
-Float           =java.lang.Float:valueOf 
+Float           =java.lang.Float>valueOf 
                 <- Decimal [fF] / Digits [fF]
 Long            <- LongDigits:return [lL]
-LongDigits      =java.lang.Long:valueOf 
+LongDigits      =java.lang.Long>valueOf 
                 <- Digits
-Integer         =java.lang.Integer:valueOf 
+Integer         =java.lang.Integer>valueOf 
                 <- Digits
 Decimal         <- Digits '.' [0-9]* ([eE] Digits)? / Digits [eE] Digits
 Digits          <- '-'? [1-9][0-9]* / '0'
 String          <- '"' Chars:return '"'
 Chars           =java.lang.StringBuilder~new:toString 
                 <- Char:append*
-Char            <- '\\' EscapeChar:return / !'"' .
-EscapeChar      <- NewLine:return / Tab:return / .
+Char            <- '\\' EscapeChar:return / !'"' PlainChar>return
+EscapeChar      <- NewLine:return / Tab:return / PlainChar>return
+PlainChar       <- .
 NewLine         =org.fuwjin.jon.JonLiteral:newLine 
                 <- 'n'
 Tab             =org.fuwjin.jon.JonLiteral:tab 

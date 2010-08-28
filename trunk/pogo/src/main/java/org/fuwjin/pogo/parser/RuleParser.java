@@ -18,6 +18,8 @@ import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.Rule;
+import org.fuwjin.pogo.postage.Doppleganger;
 import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
@@ -25,7 +27,7 @@ import org.fuwjin.postage.Function;
 /**
  * A grammar rule.
  */
-public class Rule implements org.fuwjin.pogo.Rule {
+public class RuleParser implements Rule {
    private String name;
    private Parser parser;
    private Function finalizer;
@@ -37,11 +39,11 @@ public class Rule implements org.fuwjin.pogo.Rule {
    /**
     * Creates a new instance.
     */
-   Rule() {
-      type("default");
-      initializer("default");
-      serializer("default");
-      finalizer("default");
+   RuleParser() {
+      type = Doppleganger.create("default", Category.class);
+      initializer = Doppleganger.create("default", Function.class);
+      serializer = Doppleganger.create("default", Function.class);
+      finalizer = Doppleganger.create("default", Function.class);
    }
 
    /**
@@ -52,20 +54,25 @@ public class Rule implements org.fuwjin.pogo.Rule {
     * @param finalizer the rule finalizer
     * @param parser the expression
     */
-   public Rule(final String name, final String type, final String initializer, final String serializer,
+   public RuleParser(final String name, final String type, final String initializer, final String serializer,
          final String finalizer, final Parser parser) {
       this.name = name;
-      type(type);
-      initializer(initializer);
-      serializer(serializer);
-      finalizer(finalizer);
+      this.type = Doppleganger.create(type, Category.class);
+      this.initializer = Doppleganger.create(initializer, Function.class);
+      this.serializer = Doppleganger.create(serializer, Function.class);
+      this.finalizer = Doppleganger.create(finalizer, Function.class);
       this.parser = parser;
+   }
+
+   @Override
+   public Category category() {
+      return type;
    }
 
    @Override
    public boolean equals(final Object obj) {
       try {
-         final Rule o = (Rule)obj;
+         final RuleParser o = (RuleParser)obj;
          return eq(getClass(), o.getClass()) && eq(name, o.name) && eq(type.name(), o.type.name())
                && eq(initializer.name(), o.initializer.name()) && eq(serializer.name(), o.serializer.name())
                && eq(finalizer.name(), o.finalizer.name()) && eq(parser, o.parser);
@@ -74,22 +81,9 @@ public class Rule implements org.fuwjin.pogo.Rule {
       }
    }
 
-   private void finalizer(final String finalizer) {
-      this.finalizer = new Partial(finalizer).as(Function.class);
-   }
-
-   @Override
-   public Function getFunction(final String name) {
-      return type.getFunction(name);
-   }
-
    @Override
    public int hashCode() {
       return hash(getClass(), name, type, initializer, finalizer, parser);
-   }
-
-   private void initializer(final String initializer) {
-      this.initializer = new Partial(initializer).as(Function.class);
    }
 
    /**
@@ -137,25 +131,17 @@ public class Rule implements org.fuwjin.pogo.Rule {
     * @param grammar the grammar to resolve rule references
     */
    @Override
-   public void resolve(final Grammar grammar, final org.fuwjin.pogo.Rule parent) {
-      type = grammar.resolve(Partial.<String> content(type));
-      initializer = type.getFunction(Partial.<String> content(initializer));
-      serializer = type.getFunction(Partial.<String> content(serializer));
-      finalizer = type.getFunction(Partial.<String> content(finalizer));
+   public void resolve(final Grammar grammar, final Rule parent) {
+      type = grammar.getCategory(Doppleganger.<String> content(type));
+      initializer = type.getFunction(Doppleganger.<String> content(initializer));
+      serializer = type.getFunction(Doppleganger.<String> content(serializer));
+      finalizer = type.getFunction(Doppleganger.<String> content(finalizer));
       simple = !isCustomFunction(initializer) && !isCustomFunction(serializer) && !isCustomFunction(finalizer);
       parser.resolve(grammar, this);
-   }
-
-   private void serializer(final String serializer) {
-      this.serializer = new Partial(serializer).as(Function.class);
    }
 
    @Override
    public String toString() {
       return name + " <- " + parser;
-   }
-
-   private void type(final String type) {
-      this.type = new Partial(type).as(Category.class);
    }
 }

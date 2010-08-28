@@ -20,7 +20,7 @@ public final class ' Identifier~name ' extends Grammar{
 '
 Grammar         =org.fuwjin.pogo.Grammar~iterator
                 <- Definition~next+
-Definition      =org.fuwjin.pogo.parser.Rule
+Definition      =org.fuwjin.pogo.parser.RuleParser
                 <- '    add(rule(' QuotedIdent~name
                    ', ' Category~type
                    ', ' Function~initializer

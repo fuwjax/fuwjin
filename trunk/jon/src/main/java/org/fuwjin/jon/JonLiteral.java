@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2010 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    Michael Doberenz - initial implementation
+ * Copyright (c) 2010 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial implementation
  *******************************************************************************/
 package org.fuwjin.jon;
 
@@ -26,49 +23,16 @@ public class JonLiteral {
       primitives.put("short", "S");
    }
 
-   public static String escape(final Object value) {
-      return value.toString().replace("\\", "\\\\").replace("\n", "\\n").replace("\"", "\\\"").replace("\t", "\\t");
-   }
-
-   public static Class<?> forName(final String value) {
-      try {
-         if(value.charAt(value.length() - 1) == ']') {
-            return forArray(value);
-         }
-         return Class.forName(value);
-      } catch(final ClassNotFoundException e) {
-         throw new IllegalArgumentException(e);
-      }
-   }
-
-   public static String getName(final Class<?> cls) {
-      if(cls.isArray()) {
-         return getArrayName(cls.getComponentType()) + "[]";
-      }
-      return cls.getName();
-   }
-
-   public static char newLine(final String value) {
-      assert "n".equals(value);
-      return '\n';
-   }
-
-   public static Object nullValue(final String value) {
-      assert "null".equals(value);
-      return null;
-   }
-
-   public static char tab(final String value) {
-      assert "t".equals(value);
-      return '\t';
-   }
-
    private static String binaryName(final String componentName) {
       final String name = primitives.get(componentName);
       if(name != null) {
          return name.toString();
       }
       return 'L' + componentName + ';';
+   }
+
+   public static String escape(final Object value) {
+      return value.toString().replace("\\", "\\\\").replace("\n", "\\n").replace("\"", "\\\"").replace("\t", "\\t");
    }
 
    private static Class<?> forArray(final String className) throws ClassNotFoundException {
@@ -83,10 +47,36 @@ public class JonLiteral {
       return Class.forName(builder.append(binaryName).toString());
    }
 
+   public static Class<?> forName(final String value) {
+      try {
+         if(value.charAt(value.length() - 1) == ']') {
+            return forArray(value);
+         }
+         return Class.forName(value);
+      } catch(final ClassNotFoundException e) {
+         throw new IllegalArgumentException(e);
+      }
+   }
+
    private static String getArrayName(final Class<?> cls) {
       if(cls.isArray()) {
          return getArrayName(cls.getComponentType()) + "[]";
       }
       return cls.getName();
+   }
+
+   public static String getName(final Class<?> cls) {
+      if(cls.isArray()) {
+         return getArrayName(cls.getComponentType()) + "[]";
+      }
+      return cls.getName();
+   }
+
+   public static char newLine() {
+      return '\n';
+   }
+
+   public static char tab() {
+      return '\t';
    }
 }

@@ -21,8 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.fuwjin.io.PogoException;
 import org.fuwjin.jon.JonWriter;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.test.object.ClassRef;
 import org.fuwjin.test.object.ComplexChild;
 import org.fuwjin.test.object.InnerChild;

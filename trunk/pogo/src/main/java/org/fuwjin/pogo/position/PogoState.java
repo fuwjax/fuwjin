@@ -1,18 +1,34 @@
-package org.fuwjin.io;
+package org.fuwjin.pogo.position;
 
 import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.PogoException;
+import org.fuwjin.postage.Failure;
 
 public class PogoState {
    private static class Reason {
       private final Reason next;
       private final String reason;
-      private final Throwable cause;
+      private final Failure cause;
+      private Throwable ex;
+
+      private Reason(final Reason next, final String reason, final Failure cause) {
+         this.next = next;
+         this.reason = reason;
+         this.cause = cause;
+      }
 
       private Reason(final Reason next, final String reason, final Throwable cause) {
          this.next = next;
          this.reason = reason;
-         this.cause = cause;
+         this.cause = null;
+         ex = cause;
+      }
+
+      public Throwable cause() {
+         if(ex == null) {
+            ex = cause.exception();
+         }
+         return ex;
       }
 
       @Override
@@ -37,6 +53,12 @@ public class PogoState {
       }
    }
 
+   public void addFailure(final InternalPosition failPos, final String reason, final Failure cause) {
+      if(fail(failPos)) {
+         reasons = new Reason(reasons, reason, cause);
+      }
+   }
+
    public void addFailure(final InternalPosition failPos, final String reason, final Throwable cause) {
       if(fail(failPos)) {
          reasons = new Reason(reasons, reason, cause);
@@ -45,7 +67,7 @@ public class PogoState {
 
    public PogoException exception() {
       if(reasons != null) {
-         return new PogoException(toMessage(), reasons.cause);
+         return new PogoException(toMessage(), reasons.cause());
       }
       return new PogoException(toMessage());
    }

@@ -1,11 +1,9 @@
 package org.fuwjin.postage;
 
+import org.fuwjin.postage.function.CompositeFunction;
+
 public interface Category {
-   void addFunction(Function function);
-
-   Function getFunction(String name);
-
-   Object invokeFallThrough(CompositeSignature signature, CompositeFailure current, Object... args);
+   CompositeFunction getFunction(String name);
 
    String name();
 }
