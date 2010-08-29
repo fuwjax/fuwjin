@@ -4,11 +4,15 @@
 
 Imagine the following rule
 
-{{{ LowerCaseName <- [a-z]+ }}}
+{{{
+LowerCaseName <- [a-z]+ 
+}}}
 
 This rule says that the next few characters in the input stream are one or more lowercase letters. But which letters are they? Pogo, by default, will simply throw an exception if the stream doesn't match, and do nothing if the stream does. To communicate this intent, we use attributes:
 
-{{{ LowerCaseName =java.lang.String>return <- [a-z]+ }}}
+{{{ 
+LowerCaseName =java.lang.String>return <- [a-z]+ 
+}}}
 
 Here we have two attributes, a class association (=java.lang.String) and a rule match attribute (>return). Most rule level attributes require a class association. In general, the class association is the location for looking up the rest of the attributes in the rule. The rule match attribute declares what should be done with the characters matched from the stream by the rule. In this case, ">return" means to use the matched characters as the result of this rule.
 
@@ -16,28 +20,36 @@ So now, when this new rule is used to build a Pogo Grammar Parser, the parser wi
 
 Perhaps you'd rather have an integer?
 
-{{{ Integer =java.lang.Integer>valueOf <- [0-9]+ }}}
+{{{ 
+Integer =java.lang.Integer>valueOf <- [0-9]+ 
+}}}
 
 Here the rule has a class association with "java.lang.Integer" and a rule match attribute of "valueOf". This means that after the Integer rule has matched, the characters from the input stream consumed by the rule will be passed to the java.lang.Integer.valueOf(String) method, and the result of that static method call will be returned as the result of the parse. Note that the class association is the source for "valueOf" in this case, while in the previous example, "return" was a keyword that is available with any class association.
 
 Returning the match string certainly useful, but only to a point. If you're only looking to match simple literals like integers and lowercase names, you'll probably use regular expressions over Pogo. We generally want to parse more interesting things. Let's look at a slightly more complicated grammar.
 
-{{{ Options <- Name (',' Name)*
-Name <- [a-zA-Z0-9_]+ }}}
+{{{
+Options <- Name (',' Name)*
+Name <- [a-zA-Z0-9_]+ 
+}}}
 
 This grammar will parse a set of literals called "Name" separated by commas. What if we'd like to capture a List of the matched Names? We just change the Option rule to the following:
 
-{{{ Options =java.util.ArrayList~new <- Name>add (',' Name>add)* }}}
+{{{ 
+Options =java.util.ArrayList~new <- Name>add (',' Name>add)* 
+}}}
 
 Here we have a class association with java's ArrayList, a rule initializer attribute of "new", and a reference match attribute of "add". The rule initializer is applied before the rule begins a parse, and the attribute "new" is an alias for the constructor for ArrayList. So when the rule Options begins to parse, it is associated with a new instance of an ArrayList.
 
- The reference match attribute works much like the rule match attribute; it is applied to the characters consumed from the input. Unlike the rule match, it can also use the object associated with the rule. The attribute "add" uses the ArrayList.add(Object) method to add the consumed characters from the reference "Name" as a String to the newly created ArrayList from the rule initializer.
+The reference match attribute works much like the rule match attribute; it is applied to the characters consumed from the input. Unlike the rule match, it can also use the object associated with the rule. The attribute "add" uses the ArrayList.add(Object) method to add the consumed characters from the reference "Name" as a String to the newly created ArrayList from the rule initializer.
 
 Let's look at one more example before we investigate attributes a little deeper. Instead of names, what if we wanted a list of Integers?
 
-{{{ Integers =java.util.ArrayList~new <- Integer:add (S+ Integer:add)*
+{{{ 
+Integers =java.util.ArrayList~new <- Integer:add (S+ Integer:add)*
 Integer =java.lang.Integer>valueOf <- [0-9]+
-S <- [ \t\n\r] }}}
+S <- [ \t\n\r] 
+}}}
 
 Integers matches a list of Integers separated by whitespace. We've seen the class association, rule initializer and rule match attributes; the only new attribute is ":add" which replaces the previous example's ">add". This is a reference finalizer attribute, which indicates how the result of the reference should be applied to this rule. In this case, the ArrayList.add(Object) method is called again, but instead of using the consumed characters matched by the reference, it uses the object associated with the reference, i.e. the result of the Integer.valueOf(String) method.
 
@@ -53,9 +65,11 @@ This covers most of the attributes, but let's identify them all before we discus
 
 To illustrate the lifecycle of an object as it moves through a parse, let's use the following ridiculous grammar:
 
-{{{ Parent =foo.Fuw~new <- Rule~newRule>setText:setRule
+{{{ 
+Parent =foo.Fuw~new <- Rule~newRule>setText:setRule
 Rule =foo.Jin~init>count:resolve <- Child~newChild>addLiteral:addChild 
-Child =java.lang.Integer:MAX_VALUE <- . }}}
+Child =java.lang.Integer:MAX_VALUE <- . 
+}}}
 
 So, to start off, before any characters are even inspected by the Parent rule, a new foo.Fuw instance is created and associated with the Parent rule. Now let's walk through the Rule object lifecycle line by line:
 
