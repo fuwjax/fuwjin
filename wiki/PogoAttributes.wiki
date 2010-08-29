@@ -74,7 +74,7 @@ Child =java.lang.Integer:MAX_VALUE <- .
 So, to start off, before any characters are even inspected by the Parent rule, a new foo.Fuw instance is created and associated with the Parent rule. Now let's walk through the Rule object lifecycle line by line:
 
  * First the foo.Fuw.newRule attribute is applied. This may be a field or method, static or otherwise (we'll discuss attribute resolution in a little while) but the only object available to this attribute is the Parent rule's foo.Fuw instance. The result of this attribute is associated with the Rule rule.
-* Next the foo.Jin.init attribute is applied, this time the only object available is the result from the previous step's foo.Fuw.newRule attribute. Note that the result of the foo.Fuw.newRule attribute need not be an instance of foo.Jin.
+ * Next the foo.Jin.init attribute is applied, this time the only object available is the result from the previous step's foo.Fuw.newRule attribute. Note that the result of the foo.Fuw.newRule attribute need not be an instance of foo.Jin.
  * The parse for the Rule rule now begins, and before starting to parse the Child rule, the foo.Jin.newChild attribute is applied. This attribute may use the result of the foo.Jin.init attribute. The result of the foo.Jin.newChild attribute is associated with the Child rule.
  * The Child rule is parsed, it's match contains the consumed character, and it's result object is Integer.MAX_VALUE.
  * The foo.Jin.addLiteral attribute is applied, and this time, it can use both the object associated with Rule (the result of the foo.Jin.init attribute) as well as the match from Child. The result from this attribute can, in very special cases, replace the object associated with the Rule rule.
