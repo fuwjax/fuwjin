@@ -1,5 +1,78 @@
 #summary Specification for Pogo Attributes
 
+= Why should I care about attributes? =
+
+Imagine the following rule
+
+{{{ LowerCaseName <- [a-z]+ }}}
+
+This rule says that the next few characters in the input stream are one or more lowercase letters. But which letters are they? Pogo, by default, will simply throw an exception if the stream doesn't match, and do nothing if the stream does. To communicate this intent, we use attributes:
+
+{{{ LowerCaseName =java.lang.String>return <- [a-z]+ }}}
+
+Here we have two attributes, a class association (=java.lang.String) and a rule match attribute (>return). Most rule level attributes require a class association. In general, the class association is the location for looking up the rest of the attributes in the rule. The rule match attribute declares what should be done with the characters matched from the stream by the rule. In this case, ">return" means to use the matched characters as the result of this rule.
+
+So now, when this new rule is used to build a Pogo Grammar Parser, the parser will match lower case strings and return them.
+
+Perhaps you'd rather have an integer?
+
+{{{ Integer =java.lang.Integer>valueOf <- [0-9]+ }}}
+
+Here the rule has a class association with "java.lang.Integer" and a rule match attribute of "valueOf". This means that after the Integer rule has matched, the characters from the input stream consumed by the rule will be passed to the java.lang.Integer.valueOf(String) method, and the result of that static method call will be returned as the result of the parse. Note that the class association is the source for "valueOf" in this case, while in the previous example, "return" was a keyword that is available with any class association.
+
+Returning the match string certainly useful, but only to a point. If you're only looking to match simple literals like integers and lowercase names, you'll probably use regular expressions over Pogo. We generally want to parse more interesting things. Let's look at a slightly more complicated grammar.
+
+{{{ Options <- Name (',' Name)*
+Name <- [a-zA-Z0-9_]+ }}}
+
+This grammar will parse a set of literals called "Name" separated by commas. What if we'd like to capture a List of the matched Names? We just change the Option rule to the following:
+
+{{{ Options =java.util.ArrayList~new <- Name>add (',' Name>add)* }}}
+
+Here we have a class association with java's ArrayList, a rule initializer attribute of "new", and a reference match attribute of "add". The rule initializer is applied before the rule begins a parse, and the attribute "new" is an alias for the constructor for ArrayList. So when the rule Options begins to parse, it is associated with a new instance of an ArrayList.
+
+ The reference match attribute works much like the rule match attribute; it is applied to the characters consumed from the input. Unlike the rule match, it can also use the object associated with the rule. The attribute "add" uses the ArrayList.add(Object) method to add the consumed characters from the reference "Name" as a String to the newly created ArrayList from the rule initializer.
+
+Let's look at one more example before we investigate attributes a little deeper. Instead of names, what if we wanted a list of Integers?
+
+{{{ Integers =java.util.ArrayList~new <- Integer:add (S+ Integer:add)*
+Integer =java.lang.Integer>valueOf <- [0-9]+
+S <- [ \t\n\r] }}}
+
+Integers matches a list of Integers separated by whitespace. We've seen the class association, rule initializer and rule match attributes; the only new attribute is ":add" which replaces the previous example's ">add". This is a reference finalizer attribute, which indicates how the result of the reference should be applied to this rule. In this case, the ArrayList.add(Object) method is called again, but instead of using the consumed characters matched by the reference, it uses the object associated with the reference, i.e. the result of the Integer.valueOf(String) method.
+
+This covers most of the attributes, but let's identify them all before we discuss them in depth.
+
+ * Class Association: associates a class or category with the rule. Delimited by an '='. for example: {{{ Rule =ClassAssociation <- OtherRule }}}
+ * Rule Initializer: initializes an object for the rule. Invoked before a rule parses. Delimited by a '~'. for example: {{{ Rule=ClassAssociation~RuleInitializer <- OtherRule }}}
+ * Rule Match: applies the matched input to the rule. Invoked after a rule parses. Delimited by a '>'. For example: {{{ Rule=ClassAssociation>RuleMatch <- OtherRule }}}
+ * Rule Finalizer: finalizes the rule object. Invoked after a rule parses. Delimited by a ':'. For example: {{{ Rule=ClassAssociation:RuleFinalizer <- OtherRule }}}
+ * Reference Initializer: initializes an object for the reference. Invoked before a reference parses. Delimited by a '~'. for example: {{{ Rule <- OtherRule~ReferenceInitializer }}}
+ * Reference Match: applies the matched input from the reference to the rule. Invoked after a reference parses. Delimited by a '>'. for example {{{ Rule <- OtherRule>ReferenceMatch }}}
+ * Reference Finalizer: applies the result from the reference to the rule. Invoked after a reference parses. Delimited by a ':'. for example {{{ Rule <- OtherRule:ReferenceFinalizer }}}
+
+To illustrate the lifecycle of an object as it moves through a parse, let's use the following ridiculous grammar:
+
+{{{ Parent =foo.Fuw~new <- Rule~newRule>setText:setRule
+Rule =foo.Jin~init>count:resolve <- Child~newChild>addLiteral:addChild 
+Child =java.lang.Integer:MAX_VALUE <- . }}}
+
+So, to start off, before any characters are even inspected by the Parent rule, a new foo.Fuw instance is created and associated with the Parent rule. Now let's walk through the Rule object lifecycle line by line:
+
+ * First the foo.Fuw.newRule attribute is applied. This may be a field or method, static or otherwise (we'll discuss attribute resolution in a little while) but the only object available to this attribute is the Parent rule's foo.Fuw instance. The result of this attribute is associated with the Rule rule.
+* Next the foo.Jin.init attribute is applied, this time the only object available is the result from the previous step's foo.Fuw.newRule attribute. Note that the result of the foo.Fuw.newRule attribute need not be an instance of foo.Jin.
+ * The parse for the Rule rule now begins, and before starting to parse the Child rule, the foo.Jin.newChild attribute is applied. This attribute may use the result of the foo.Jin.init attribute. The result of the foo.Jin.newChild attribute is associated with the Child rule.
+ * The Child rule is parsed, it's match contains the consumed character, and it's result object is Integer.MAX_VALUE.
+ * The foo.Jin.addLiteral attribute is applied, and this time, it can use both the object associated with Rule (the result of the foo.Jin.init attribute) as well as the match from Child. The result from this attribute can, in very special cases, replace the object associated with the Rule rule.
+ * Next the foo.Jin.addChild attribute is applied to the object associated with the Rule rule and the result from the Child rule. Again, in very special cases, the result of this attribute may replace the object associated with the Rule rule.
+ * The Rule rule has finished parsing, and now the foo.Jin.count attribute is applied to the object associated with Rule and the consumed characters during the parse. The result of this attribute replaces the Rule rule's associated object.
+ * Immediately afterwards, the foo.Jin.resolve attribute is applied to the object associated with the Rule rule. The result of this attribute is associated with the Rule rule in a special way. See Memoing for more information.
+ * Control returns to the Parent rule, and now the foo.Fuw.setText attribute is applied to the consumed match from the Rule rule, and then the foo.Fuw.setRule is applied to the Rule rule's associated object. In both cases, these attributes may use the object associated with the Parent rule, in the same way that the foo.Jin.addLiteral and foo.Jin.addChild attributes could use the object associated with the Rule rule.
+
+
+
+
+
 = Pogo Attributes =
 
 Attributes allow a grammar to specify actions during the parse. Each action will only be attempted if the parse has not failed. This allows an external object graph to monitor and react to the parse as each rule is processed.
