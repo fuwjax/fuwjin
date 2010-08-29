@@ -1,6 +1,8 @@
 #summary Specification for Pogo Attributes
 
-= Why should I care about attributes? =
+= Intro to Attributes =
+
+=== Why should I care about attributes? ===
 
 Imagine the following rule
 
@@ -8,7 +10,11 @@ Imagine the following rule
 LowerCaseName <- [a-z]+ 
 }}}
 
-This rule says that the next few characters in the input stream are one or more lowercase letters. But which letters are they? Pogo, by default, will simply throw an exception if the stream doesn't match, and do nothing if the stream does. To communicate this intent, we use attributes:
+This rule says that the next few characters in the input stream are one or more lowercase letters. But which letters are they? Pogo, by default, will simply throw an exception if the stream doesn't match, and do nothing if the stream does.
+
+=== Attributes influence what Pogo returns ===
+
+To communicate the desire for Pogo to create, modify and return objects, we use attributes:
 
 {{{ 
 LowerCaseName =java.lang.String>return <- [a-z]+ 
@@ -16,7 +22,7 @@ LowerCaseName =java.lang.String>return <- [a-z]+
 
 Here we have two attributes, a class association (=java.lang.String) and a rule match attribute (>return). Most rule level attributes require a class association. In general, the class association is the location for looking up the rest of the attributes in the rule. The rule match attribute declares what should be done with the characters matched from the stream by the rule. In this case, ">return" means to use the matched characters as the result of this rule.
 
-So now, when this new rule is used to build a Pogo Grammar Parser, the parser will match lower case strings and return them.
+So now, when the LowerCaseName rule is used to build a Pogo Grammar Parser, the parser will match lower case strings and return them.
 
 Perhaps you'd rather have an integer?
 
@@ -24,7 +30,7 @@ Perhaps you'd rather have an integer?
 Integer =java.lang.Integer>valueOf <- [0-9]+ 
 }}}
 
-Here the rule has a class association with "java.lang.Integer" and a rule match attribute of "valueOf". This means that after the Integer rule has matched, the characters from the input stream consumed by the rule will be passed to the java.lang.Integer.valueOf(String) method, and the result of that static method call will be returned as the result of the parse. Note that the class association is the source for "valueOf" in this case, while in the previous example, "return" was a keyword that is available with any class association.
+Here the rule has a class association with "java.lang.Integer" and a rule match attribute of "valueOf". This means that after the Integer rule has matched, the characters from the input stream consumed by the rule will be passed to the java.lang.Integer.valueOf(String) method, and the result of that static method call will be returned as the result of the parse. Note that the class association is the source for "valueOf" in this case, while in the previous example, "return" is a keyword that is available with any class association.
 
 Returning the match string certainly useful, but only to a point. If you're only looking to match simple literals like integers and lowercase names, you'll probably use regular expressions over Pogo. We generally want to parse more interesting things. Let's look at a slightly more complicated grammar.
 
@@ -33,15 +39,15 @@ Options <- Name (',' Name)*
 Name <- [a-zA-Z0-9_]+ 
 }}}
 
-This grammar will parse a set of literals called "Name" separated by commas. What if we'd like to capture a List of the matched Names? We just change the Option rule to the following:
+This grammar will parse a set of alphanumeric literals separated by commas. What if we'd like to capture a List of the matched Names? We just change the Options rule to the following:
 
 {{{ 
 Options =java.util.ArrayList~new <- Name>add (',' Name>add)* 
 }}}
 
-Here we have a class association with java's ArrayList, a rule initializer attribute of "new", and a reference match attribute of "add". The rule initializer is applied before the rule begins a parse, and the attribute "new" is an alias for the constructor for ArrayList. So when the rule Options begins to parse, it is associated with a new instance of an ArrayList.
+Here we have a class association with Java's ArrayList, a rule initializer attribute of "new", and a reference match attribute of "add". The rule initializer is applied before the rule begins a parse, and the attribute "new" is an alias for the constructor for ArrayList. So when the rule Options begins to parse, it is associated with a new instance of an ArrayList.
 
-The reference match attribute works much like the rule match attribute; it is applied to the characters consumed from the input. Unlike the rule match, it can also use the object associated with the rule. The attribute "add" uses the ArrayList.add(Object) method to add the consumed characters from the reference "Name" as a String to the newly created ArrayList from the rule initializer.
+The reference match attribute works much like the rule match attribute; it is applied to the characters consumed from the input during the parse of the reference. And like the rule match, it can also use the object associated with the rule. The attribute "add" uses the ArrayList.add(Object) method to add the consumed characters from the reference "Name" as a String to the newly created ArrayList from the rule initializer.
 
 Let's look at one more example before we investigate attributes a little deeper. Instead of names, what if we wanted a list of Integers?
 
@@ -53,7 +59,9 @@ S <- [ \t\n\r]
 
 Integers matches a list of Integers separated by whitespace. We've seen the class association, rule initializer and rule match attributes; the only new attribute is ":add" which replaces the previous example's ">add". This is a reference finalizer attribute, which indicates how the result of the reference should be applied to this rule. In this case, the ArrayList.add(Object) method is called again, but instead of using the consumed characters matched by the reference, it uses the object associated with the reference, i.e. the result of the Integer.valueOf(String) method.
 
-This covers most of the attributes, but let's identify them all before we discuss them in depth.
+= Attribute Summary =
+
+There are only 7 attributes Pogo can respond to, all of which are simple identifiers. Pogo attributes are not another language unto themselves, but instead a way of binding Java to the parse flow.
 
  * Class Association: associates a class or category with the rule. Delimited by an '='. for example: {{{ Rule =ClassAssociation <- OtherRule }}}
  * Rule Initializer: initializes an object for the rule. Invoked before a rule parses. Delimited by a '~'. for example: {{{ Rule=ClassAssociation~RuleInitializer <- OtherRule }}}
@@ -62,6 +70,8 @@ This covers most of the attributes, but let's identify them all before we discus
  * Reference Initializer: initializes an object for the reference. Invoked before a reference parses. Delimited by a '~'. for example: {{{ Rule <- OtherRule~ReferenceInitializer }}}
  * Reference Match: applies the matched input from the reference to the rule. Invoked after a reference parses. Delimited by a '>'. for example {{{ Rule <- OtherRule>ReferenceMatch }}}
  * Reference Finalizer: applies the result from the reference to the rule. Invoked after a reference parses. Delimited by a ':'. for example {{{ Rule <- OtherRule:ReferenceFinalizer }}}
+
+= Attribute Lifecycle =
 
 To illustrate the lifecycle of an object as it moves through a parse, let's use the following ridiculous grammar:
 
@@ -83,165 +93,41 @@ So, to start off, before any characters are even inspected by the Parent rule, a
  * Immediately afterwards, the foo.Jin.resolve attribute is applied to the object associated with the Rule rule. The result of this attribute is associated with the Rule rule in a special way. See Memoing for more information.
  * Control returns to the Parent rule, and now the foo.Fuw.setText attribute is applied to the consumed match from the Rule rule, and then the foo.Fuw.setRule is applied to the Rule rule's associated object. In both cases, these attributes may use the object associated with the Parent rule, in the same way that the foo.Jin.addLiteral and foo.Jin.addChild attributes could use the object associated with the Rule rule.
 
+= Postage bindings =
 
+We keep using words like "available" and "optional" when talking about about how the attributes can use associated objects. Let's talk a little bit more about what this actually means. 
 
+Postage is a reflection library in the Fuwjin Suite that normalizes invocation. You can learn more about it here. But for Pogo's needs, the following pattern is always used.
 
+{{{
+attribute = postage.getCategory(ClassAssociation).getFunction(Attribute).optional(arg).invoke();
+}}}
 
-= Pogo Attributes =
+for instance, in the Lifecycle discussion, we had the following rule:
 
-Attributes allow a grammar to specify actions during the parse. Each action will only be attempted if the parse has not failed. This allows an external object graph to monitor and react to the parse as each rule is processed.
+{{{
+Rule =foo.Jin~init>count:resolve <- Child~newChild>addLiteral:addChild 
+}}}
 
-= Type Binding =
+The postage bindings for each of the attributes are as follows:
 
-Every rule can have a bound type. Types are bound to a rule by inserting an equals and the type in between the rule name and the left arrow. Types can either be fully qualified type names or some special types which will be discussed later.
+ * classAssociation = postage.getCategory("foo.Jin")
+ * ruleInitializer = classAssociation.getFunction("init").optional(Rule.value).invoke()
+ * ruleMatch = classAssociation.getFunction("count").optional(Rule.value).optional(Rule.match).invoke()
+ * ruleFinalizer = classAssociation.getFunction("resolve").optional(Rule.value).invoke()
+ * referenceInitializer = classAssociation.getFunction("newChild").optional(Rule.value).invoke()
+ * referenceMatch = classAssociation.getFunction("addLiteral").optional(Rule.value).optional(Reference.match).invoke()
+ * referenceFinalizer = classAssociation.getFunction("addChild").optional(Rule.value).optional(Reference.value).invoke()
 
-{{{ SomeRule = java.lang.String <- 'an expression' }}}
+Postage can bind to lots of things. Let's look at the Rule Match attribute "count" and see a few possible things Postage might bind to that attribute.
 
-= Initializer =
+{{{
+public void count();
+protected Jin count(String match);
+private static int count;
+int count;
+private static Object count(Jin target, Character match);
+protected static Jin count(Jin target);
+}}}
 
-Every rule can have an initializer. The initializer requires a bound type and follows the type bound. An Initializer is specified by a tilde followed by an identifier. The identifier may be a method or field on the bound type, or a special keyword such as "new" or "instanceof" which will be discussed later.
-
-{{{ SomeRule = java.lang.String~new <- 'an expression' }}}
-
-= Serializer =
-
-Every rule can have a serilizer. The serializer requires a bound type and follows the type bound and, if present, the initializer attribute. A serializer is specified by a greater than followed by an identifier. The identifier may be a method or field on the bound type, or a special keyword such as "return" which will be discussed later.
-
-{{{ SomeRule = java.lang.String>valueOf <- 'an expression' }}}
-
-= Finalizer =
-
-Every rule can have a finalizer. A finalizer requires a bound type and follows the type bound and, if present, the initializer and/or serializer attributes. A finalizer is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type.
-
-{{{ SomeRule = java.lang.String~new:toString <- 'an expression' }}}
-
-{{{ AnotherRule = some.pkg.SomeClass:toString <- 'another expression' }}}
-
-= Constructor =
-
-Every rule reference can have a constructor. A constructor does not require a type bound and follows the rule reference. A constructor is specified by a tilde followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "this" which will be discussed later.
-
-{{{ SomeRule <- SomeRuleReference~this }}}
-
-= Matcher =
-
-Every rule reference can have a matcher. A matcher does not require a type bound and follows the rule reference and, if present, the constructor attribute. A matcher is specified by a greater than followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
-
-{{{ SomeRule <- SomeRuleReference>return }}}
-
-= Converter =
-
-Every rule reference can have a converter. A converter does not require a type bound and follows the rule reference and, if present, the constructor and/or matcher attributes. A converter is specified by a colon followed by an identifier. The identifier may be a method or field on the bound type, or a keyword such as "return" which will be discussed later.
-
-{{{ SomeRule <- SomeRuleReference:return }}}
-
-= Postage =
-
-Strictly speaking, the attributes and the bound type are all managed by the [Postage] library. The bound types are "categories" in Postage-lingo, while the attributes are "functions". This means that the Pogo attribute functionality can be extended by extending the underlying Postage instance in a Grammar. The remainder of this page will document the default Postage behavior in Pogo.
-
-= Rule Object Lifecycle =
-
-Every rule has an object associated with it. Let's define a few rules to give some context. 
-
-{{{ Parent = sample.SomeContainer <- Rule~factory>match:result
- Rule = sample.SomeClass~create>text:reduce <- Child~newChild>output:resolve
-Child <- ...}}}
-
-In this example, the first stage of the Rule object lifecycle is the Constructor attribute on the Rule reference in the Parent rule definition, here named "factory", which could match any of the following signatures:
- * R sample.SomeContainer.factory()
- * R sample.SomeContainer.factor
- * static R sample.SomeContainer.factory(sample.SomeContainer c)
- * static R sample.SomeContainer.factory()
- * static R sample.SomeContainer.factory
-
-Note that the first three signatures will only be attempted if there is a Parent object. The return type R is either Void, Failure, Boolean or Somthing Else. If void or true, the Rule will still be unassigned after the constructor attribute is processed. If Failure or false, the Rule will abort processing and return a failure. if something else, then it is simply returned.
-
-
-
-
-
-
- # When the Rule is referenced, it is referenced from a rule referred to here as the Parent. The reference's Constructor is applied in the context of the Parent and the result is associated with the Rule. The Parent's associated object is available to the Constructor. If no such Constructor exists, no object is associated with the Rule. If the Constructor fails, the Parent fails.
- # When the Rule begins its parse, the Initializer is applied. If a context object is associated with the parse, then it is available to the Initializer. If an object is already associated with the rule, it is available to the Initializer. If no such Initializer exists, the object already associated with the Rule is not changed. If the Initializer fails, the Rule fails.
-  * If the Initializer result type is void, the object already associated with the Rule is not changed.
-  * If the Initializer result type is boolean, and
-    * If the result is true, then the object already associated with the Rule is not changed.
-    * If the result is false, then the Rule fails
-  * Otherwise, the result object is associated with the Rule.
- # When the Rule references a SubRule, it follows the same Constructor flow the Parent followed with the Rule when it was referenced.
- # When the Rule references a SubRule and the SubRule successfully matches, the reference's Converter is applied in the context of the Rule. If an object is already associated with the rule, it is available to the Converter. The object associated with the SubRule is also available to the Converter. If the Converter fails, the Rule fails. If the Converter is the keyword "return" then the object associated with the SubRule is associated with the Rule. Otherwise, the object already associated with the Rule is not changed.
-# When the Rule completes successfully, the Finalizer is applied. If a context object is associated with the parse, then it is available to the Finalizer. If an object is already associated with the rule, it is available to the Finalizer. The consumed portion of the stream during this Rule is available to the Finalizer. If the Finalizer result type is void, then the object associated with the Rule is not changed. Otherwise the result of the Finalizer is associated with the Rule. If no such Finalizer exists, the associated object already associated with the Rule is not changed. If no Finalizer exists and no object has been associated with the Rule, then the consumed portion of the stream during this Rule is associated with the Rule. If the Finalizer fails, the Rule fails. 
-# When the Rule completes successfully, the Parent follows the same Converter flow that the Rule followed with a referenced SubRule.
-
-Expressed differently, here is the summary for each of the attributes.
-
-== Initializer attribute ==
-
-The initializer is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
-
- * void f()
- * void f(O object)
- * void f(C context, O object)
- * boolean f()
- * boolean f(O object)
- * boolean f(C context, O object)
- * T f()
- * T f(O object)
- * T f(C context, O object)
-
-Where C is the type of the context associated with this parse, O is the type of the object previously associated with the Rule, and T is the type of the now associated object. Note that there is no requirement that O and T are equal or related, and neither O nor T need to be equal or related to the bound type. The bound type only provides the function f.
-
-== Finalizer attribute ==
-
-The finalizer is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
-
- * void f()
- * void f(String match)
- * void f(O object)
- * void f(O object, String match)
- * void f(C context)
- * void f(C context, String match)
- * void f(C context, O object)
- * void f(C context, O object, String match)
- * T f()
- * T f(String match)
- * T f(O object)
- * T f(O object, String match)
- * T f(C context)
- * T f(C context, String match)
- * T f(C context, O object)
- * T f(C context, O object, String match)
- 
-Where C is the type of the context associated with this parse, O is the type of the object previously associated with the Rule, and T is the type of the now associated object. Note that there is no requirement that O and T are equal or related, and neither O nor T need to be equal or related to the bound type. The bound type only provides the function f.
-
-== Constructor attribute ==
-
-The constructor is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
-
- * void f()
- * void f(O object)
- * T f()
- * T f(O object)
-
-Where O is the type of the object associated with the Rule, and T is the type of the object associated with the referenced rule. 
-
-== Converter attribute ==
-
-The converter is a Postage function provided by the category identified by the Rule's bound type. This Postage function must have one of the following signatures:
-
- * void f()
- * void f(O object)
- * void f(P parent)
- * void f(P parent, O object)
- * T f()
- * T f(O object)
- * T f(P parent)
- * T f(P parent, O object)
-
-Where O is the type of the object associated with the Rule, P is the type of the object associated with the Parent rule, and T is ignored. 
-
-= Bound Type Options =
-
-Any fully qualified Java type may be used as a type bound. When a real type is used as the bound type, the initializer and finalizer as well as any constructors or converters appearing as attributes in that rule must be methods or fields on that type, or "new", "instanceof", "this", or "return".
-
-The bound type may be "*". This is in effect a duck-typed class. The only attributes allowed are instance methods or fields on the current object
+Postage effectively turns every method, constructor, and field into public static methods of the same name which do the exact same thing. Postage can be extended to do even more than this, such as providing methods against a particular target instance, or completely new tasks that don't exist as methods at all. Look into the Postage project for further information.
