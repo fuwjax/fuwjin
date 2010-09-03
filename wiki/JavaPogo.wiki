@@ -1,4 +1,5 @@
 #summary Java Pogo Grammar
+{{{
 
 # 3.3
 UnicodeInputCharacter <- UnicodeEscape / RawInputCharacter
@@ -482,20 +483,20 @@ ArrayAccess<- ExpressionName O_SQUARE Expression C_SQUARE /PrimaryNoNewArray O_S
 PostfixExpression<-Primary/ExpressionName/PostIncrementExpression/PostDecrementExpression
 
 #15.14.2
-PostIncrementExpression<-PostfixExpression '++'
+PostIncrementExpression<-PostfixExpression INC
 
 #15.14.3
-PostDecrementExpression<-PostfixExpression '--'
+PostDecrementExpression<-PostfixExpression DEC
 
 #15.15
 UnaryExpression<-
         PreIncrementExpression
         /PreDecrementExpression
-        /[+-] UnaryExpression
+        /(PLUS/MINUS) UnaryExpression
         /UnaryExpressionNotPlusMinus
-PreIncrementExpression<-'++' UnaryExpression
-PreDecrementExpression<-'--' UnaryExpression
-UnaryExpressionNotPlusMinus<-PostfixExpression/[~!] UnaryExpression/CastExpression
+PreIncrementExpression<-INC UnaryExpression
+PreDecrementExpression<-DEC UnaryExpression
+UnaryExpressionNotPlusMinus<-PostfixExpression/(L_NOT/B_NOT) UnaryExpression/CastExpression
 
 #15.16
 CastExpression<-
@@ -503,8 +504,47 @@ CastExpression<-
         /O_PAREN ReferenceType C_PAREN UnaryExpressionNotPlusMinus
 
 #15.17
-MultiplicativeExpression<-MultiplicativeExpression [*/%] UnaryExpression / UnaryExpression
+MultiplicativeExpression<-MultiplicativeExpression (TIMES/DIV/MOD) UnaryExpression / UnaryExpression
 
+#15.18
+AdditiveExpression<-AdditiveExpression (PLUS/MINUS) MultiplicativeExpression / MultiplicativeExpression
+
+#15.19
+ShiftExpression<-ShiftExpression (L_SHIFT/U_SHIFT/R_SHIFT) AdditiveExpression / AdditiveExpression
+
+#15.20
+RelationalExpression<-RelationalExpression (LTE/GTE/LT/GT) ShiftExpression
+        /RelationalExpression instanceof ReferenceType
+        /ShiftExpression
+        
+#15.21
+EqualityExpression<-EqualityExpression (EQ/NOT_EQ) RelationalExpression/RelationalExpression
+
+#15.22
+AndExpression<-AndExpression AND EqualityExpression/EqualityExpression
+ExclusiveOrExpression<-ExclusiveOrExpression XOR AndExpression/AndExpression
+InclusiveOrExpression<-InclusiveOrExpression OR ExclusiveOrExpression/ExclusiveOrExpression
+
+#15.23
+ConditionalAndExpression<-ConditionalAndExpression C_AND InclusiveOrExpression/InclusiveOrExpression
+
+#15.24
+ConditionalOrExpression<-ConditionalOrExpression C_OR ConditionalAndExpression/ConditionalAndExpression
+
+#15.25
+ConditionalExpression<-ConditionalOrExpression QUESTION Expression COLON ConditionalExpression/ConditionalOrExpression
+        
+#15.26
+AssignmentExpression<-ConditionalExpression/Assignment
+Assignment<-LeftHandSide AssignmentOperator AssignmentExpression
+LeftHandSide<-ExpressionName/FieldAccess/ArrayAccess
+AssignmentOperator<-EQUALS/ TIMES_E/DIV_E/MOD_E/PLUS_E/MINUS_E/L_SHIFT_E/R_SHIFT_E/U_SHIFT_E/AND_E/XOR_E/OR_E
+
+#15.27
+Expression<-AssignmentExpression
+
+#15.28
+ConstantExpression<-Expression
 
 
 ARRAY <- O_SQUARE C_SQUARE
@@ -526,7 +566,41 @@ EQUALS <- '='
 ELIPSIS <- '...'
 AT <- '@'
 COLON <- ':'
+INC <- '++'
+DEC <- '--'
+PLUS <- '+'
+MINUS <- '-'
+TIMES <- '*'
+DIV <- '/'
+MOD <- '%'
+L_NOT <- '!'
+B_NOT <- '~'
+L_SHIFT <- '<<'
+R_SHIFT <- '>>'
+U_SHIFT <- '>>>'
+LT <- '<'
+GT <- '>'
+LTE <- '<='
+GTE <- '>='
+EQ <- '=='
+NOT_EQ <- '!='
+XOR <- '^'
+OR <- '|'
+C_AND <- '&&'
+C_OR <- '||'
+TIMES_E <- '*='
+DIV_E <- '/='
+MOD_E <- '%='
+PLUS_E <- '+='
+MINUS_E <- '-='
+L_SHIFT_E <- '<<='
+R_SHIFT_E <- '>>='
+U_SHIFT_E <- '>>>='
+AND_E <- '&='
+XOR_E <- '^='
+OR_E <- '|='
 
+instanceof <- 'instanceof'
 new <- 'new'
 try <- 'try'
 catch <- 'catch'
@@ -578,3 +652,4 @@ char <- 'char'
 float <- 'float'
 double <- 'double'
 void <- 'void'
+}}}
