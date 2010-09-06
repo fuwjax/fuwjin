@@ -7,7 +7,7 @@
  *******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -30,7 +30,7 @@ public class PogoCodeSerializerTest {
     */
    @Test
    public void testCodeGeneration() throws Exception {
-      final Grammar pogo = readGrammar(stream(TEST_POGO));
+      final Grammar pogo = readGrammar(streamBytes(TEST_POGO));
       final String code = pogo.toCode(QUALIFIED_NAME);
       final RuntimeClassLoader loader = new RuntimeClassLoader();
       assertTrue(loader.compile(QUALIFIED_NAME, code));

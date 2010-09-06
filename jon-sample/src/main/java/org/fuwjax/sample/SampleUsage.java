@@ -8,7 +8,7 @@
 package org.fuwjax.sample;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.open;
-import static org.fuwjin.pogo.CodePointStreamFactory.stream;
+import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 
 import java.io.FileNotFoundException;
 import java.text.ParseException;
@@ -30,7 +30,7 @@ public final class SampleUsage {
    private static final String EXPECTED_RESULT = "&0=(&1=java.util.ArrayList)[&2=(&3=org.fuwjax.sample.Model){name:\"Mike D\",description:\"me\",contactNumbers:&4=(&5=java.util.HashMap){(&6=org.fuwjax.sample.Phone$PhoneType)WORK:&7=(&8=org.fuwjax.sample.Phone){areaCode:123,block:456,index:7890}}},&9=(&3){name:\"Mike the Lesser\",description:\"some other Mike\",contactNumbers:&10=(&5){(&6)HOME:&11=(&8){areaCode:123,block:789,index:4560}}}]"; //$NON-NLS-1$
 
    private static TransformationService createService(final String context) throws PogoException, FileNotFoundException {
-      final JonReader reader = new JonReader(stream(open(context)));
+      final JonReader reader = new JonReader(streamBytes(open(context)));
       return reader.read(TransformationService.class);
    }
 
@@ -39,7 +39,7 @@ public final class SampleUsage {
     * is at the end of the input.
     */
    private static List<Model> fetchData(final String data) throws PogoException, FileNotFoundException {
-      final JonReader reader = new JonReader(stream(open(data)));
+      final JonReader reader = new JonReader(streamBytes(open(data)));
       return reader.readAll(Model.class);
    }
 

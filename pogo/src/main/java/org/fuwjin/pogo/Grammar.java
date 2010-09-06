@@ -26,10 +26,17 @@ public class Grammar extends Pogo implements Iterable<Rule> {
    private final Map<String, Rule> rules = new LinkedHashMap<String, Rule>();
    private final Postage postage;
 
+   /**
+    * Creates a new instance.
+    */
    public Grammar() {
       this(new Postage(new PogoCategory(), new VoidCategory("default")));
    }
 
+   /**
+    * Creates a new instance.
+    * @param postage the custom postage.
+    */
    public Grammar(final Postage postage) {
       this.postage = postage;
    }
@@ -68,10 +75,20 @@ public class Grammar extends Pogo implements Iterable<Rule> {
       return new Pogo(rule);
    }
 
+   /**
+    * Returns the named category.
+    * @param category the name of the category
+    * @return the category
+    */
    public Category getCategory(final String category) {
       return postage.getCategory(category);
    }
 
+   /**
+    * Returns the named rule.
+    * @param name the rule name
+    * @return the rule
+    */
    public Rule getRule(final String name) {
       return rules.get(name);
    }
@@ -97,10 +114,21 @@ public class Grammar extends Pogo implements Iterable<Rule> {
       return this;
    }
 
+   /**
+    * Returns the generated code corresponding to this grammar.
+    * @param qualifiedName the package/classname of the generated class
+    * @return the generated code
+    * @throws PogoException if there was a serialization error
+    */
    public String toCode(final String qualifiedName) throws PogoException {
       return PredefinedGrammar.grammarToJava(qualifiedName, this);
    }
 
+   /**
+    * Returns the pogo grammar for this grammar.
+    * @return the generated pogo grammar
+    * @throws PogoException if there was a serialization error
+    */
    public String toPogo() throws PogoException {
       return PredefinedGrammar.grammarToPogo(this);
    }
