@@ -21,7 +21,7 @@
     <groupId>org.fuwjin</groupId>
     <artifactId>fuwjin</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Fuwjin</name>
     <description>
                 The central management site for Postage, Pogo, and JON as well as host
