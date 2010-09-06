@@ -1,0 +1,8 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+The Pogo API was designed to be both simple and extensible. For most normal uses of Pogo, you'll follow the following pattern.
+
+{{{
+Grammar domain = Grammar.
