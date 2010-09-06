@@ -5,4 +5,26 @@
 The Pogo API was designed to be both simple and extensible. For most normal uses of Pogo, you'll follow the following pattern.
 
 {{{
-Grammar domain = Grammar.
+public class PogoPattern{
+   private final Grammar domain;
+   public PogoPattern(){
+      CodePointStream stream = CodePointStreamFactory.stream("domain.pogo", "UTF-8");
+      domain = PogoGrammar.readGrammar(stream);
+   }
+
+   public DomainObject loadObject(String fileName){
+      CodePointStream stream = CodePointStreamFactory.stream(fileName,"UTF-8");
+      return (DomainObject)domain.parse(stream);
+   }
+}
+}}}
+
+The constructor uses the standard Pogo grammar to load the domain object grammar. The loadObject method uses the domain object grammar to parse the domain object. The domain parser may be reused any number of times, so loadObject may be called several times on the same PogoPattern instance. The grammar may not be thread safe, so an effort should be made to not use the grammar concurrently.
+
+It is suggested to use a charset, however if the input file is an ASCII byte stream, the CodePointStreamFactory.streamBytes(fileName) can be used instead of the stream method.
+
+Pogo can be used to serialize as well as parse, using the Grammar.serial(object, appender) method. This usually requires a different grammar with slightly different rules.
+
+Using this method, Pogo actually compiles itself to source code. The PogoGrammar class is generated code, in large part. Any grammar could be serialized to code using the code generator, however the generated code simply builds the same object model as the readGrammar method. The performance improvement is marginal, so it is not suggested at this time.
+
+The main extensibility mechanism for Pogo is to specify custom attribute handlers via a Postage instance. The readGrammar method is overloaded with a version to specify a Postage instance. See the Postage docs for help and examples.
