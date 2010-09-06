@@ -1,0 +1,5 @@
+#summary Postage is a simplified standardized reflection mechanism.
+
+= Introduction =
+
+Java refelection is unfortunately complicated. The java.lang.reflect.* classes effectively model the Java class, but Fields are not Methods are not Constructors. Postage effectively reduces every method, constructor and field to a Function. The easiest way to envision a Function is to imagine a public static funtion 
