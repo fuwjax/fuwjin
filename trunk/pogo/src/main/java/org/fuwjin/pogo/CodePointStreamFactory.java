@@ -13,28 +13,19 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
+/**
+ * Creates standard CodePointStreams. Technically, not all these stream code
+ * points, a byte stream could also be a code point stream.
+ */
 public class CodePointStreamFactory {
-   public static abstract class CharStream implements CodePointStream {
-      @Override
-      public int next() {
-         try {
-            final int c1 = readChar();
-            if(c1 != EOF && isHighSurrogate((char)c1)) {
-               final int c2 = readChar();
-               if(c2 == EOF) {
-                  return EOF;
-               }
-               return toCodePoint((char)c1, (char)c2);
-            }
-            return c1;
-         } catch(final IOException e) {
-            return EOF;
-         }
-      }
-
-      protected abstract int readChar() throws IOException;
-   }
-
+   /**
+    * Opens a new file for streaming. The file is searched for first in the
+    * classpath, then in the local file system.
+    * @param file the file to open.
+    * @return the new input stream.
+    * @throws FileNotFoundException if the file cannot be found on the classpath
+    *         or file system.
+    */
    public static InputStream open(final String file) throws FileNotFoundException {
       InputStream s = currentThread().getContextClassLoader().getResourceAsStream(file);
       if(s == null) {
@@ -46,18 +37,30 @@ public class CodePointStreamFactory {
       return s;
    }
 
-   public static CodePointStream stream(final InputStream stream) {
-      return new CharStream() {
-         @Override
-         protected int readChar() throws IOException {
-            return stream.read();
-         }
-      };
-   }
-
+   /**
+    * Wraps a reader as a code point stream.
+    * @param reader the reader
+    * @return the new stream
+    */
    public static CodePointStream stream(final Reader reader) {
-      return new CharStream() {
+      return new CodePointStream() {
          @Override
+         public int next() {
+            try {
+               final int c1 = readChar();
+               if(c1 != EOF && isHighSurrogate((char)c1)) {
+                  final int c2 = readChar();
+                  if(c2 == EOF) {
+                     return EOF;
+                  }
+                  return toCodePoint((char)c1, (char)c2);
+               }
+               return c1;
+            } catch(final IOException e) {
+               return EOF;
+            }
+         }
+
          protected int readChar() throws IOException {
             return reader.read();
          }
@@ -65,28 +68,51 @@ public class CodePointStreamFactory {
    }
 
    /**
-    * Opens a file from the context classloader.
-    * @param file the file to open
-    * @return the reader for the file
-    * @throws FileNotFoundException
-    */
-   public static CodePointStream stream(final String file) throws FileNotFoundException {
-      return stream(open(file));
-   }
-
-   /**
-    * Opens a file from the context classloader.
+    * Opens a file as a code point stream.
     * @param file the file to open
     * @param encoding the character encoding for the file
-    * @return the reader for the file
-    * @throws UnsupportedEncodingException
-    * @throws FileNotFoundException
+    * @return the new stream
+    * @throws UnsupportedEncodingException if the encoding does not exist
+    * @throws FileNotFoundException if the file does not exist
     */
    public static CodePointStream stream(final String file, final String encoding) throws UnsupportedEncodingException,
          FileNotFoundException {
       return stream(new InputStreamReader(open(file), encoding));
    }
 
+   /**
+    * Wraps a byte stream as a code point stream.
+    * @param stream the byte stream
+    * @return the new stream
+    */
+   public static CodePointStream streamBytes(final InputStream stream) {
+      return new CodePointStream() {
+         @Override
+         public int next() {
+            try {
+               return stream.read();
+            } catch(final IOException e) {
+               return EOF;
+            }
+         }
+      };
+   }
+
+   /**
+    * Opens a file as a byte stream.
+    * @param file the file to open
+    * @return the new stream
+    * @throws FileNotFoundException if the file does not exist
+    */
+   public static CodePointStream streamBytes(final String file) throws FileNotFoundException {
+      return streamBytes(open(file));
+   }
+
+   /**
+    * Wraps a string as a code point stream.
+    * @param string the string to wrap
+    * @return the new stream
+    */
    public static CodePointStream streamOf(final String string) {
       return stream(new StringReader(string));
    }

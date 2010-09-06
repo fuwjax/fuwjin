@@ -10,8 +10,6 @@ package org.fuwjin.pogo;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import java.text.ParseException;
-
 import org.fuwjin.pogo.position.SerialStreamPosition;
 import org.fuwjin.pogo.position.StreamPosition;
 import org.fuwjin.postage.StandardAdaptable;
@@ -52,6 +50,12 @@ public class Pogo {
       return hash(getClass(), rule);
    }
 
+   /**
+    * Parses the input stream.
+    * @param input the input stream
+    * @return the parsed object
+    * @throws PogoException if the parse fails
+    */
    public Object parse(final CodePointStream input) throws PogoException {
       return parse(input, StandardAdaptable.UNSET);
    }
@@ -61,7 +65,7 @@ public class Pogo {
     * @param input the input stream
     * @param object the object to fill
     * @return the filled object
-    * @throws ParseException if the parse fails
+    * @throws PogoException if the parse fails
     */
    public Object parse(final CodePointStream input, final Object object) throws PogoException {
       return parse(new StreamPosition(input), object).getValue();
@@ -70,13 +74,20 @@ public class Pogo {
    /**
     * Parses the context.
     * @param context the context
-    * @throws ParseException if the parse fails
+    * @throws PogoException if the parse fails
     */
    public void parse(final Position context) throws PogoException {
       rule.parse(context);
       context.assertSuccess();
    }
 
+   /**
+    * Parses from the position into the supplied object.
+    * @param position the start position
+    * @param object the object to fill
+    * @return the memoized result
+    * @throws PogoException if the parse fails
+    */
    public Memo parse(final Position position, final Object object) throws PogoException {
       position.createMemo(rule.name(), object);
       final Position next = rule.parse(position);
@@ -89,7 +100,8 @@ public class Pogo {
    /**
     * Serializes the input into the string.
     * @param input the input to serialize
-    * @return the serialized string
+    * @param appender the destination for the serialization
+    * @throws PogoException if the serialization fails
     */
    public void serial(final Object input, final Appendable appender) throws PogoException {
       final Position pos = new SerialStreamPosition(appender);
@@ -107,6 +119,12 @@ public class Pogo {
       this.rule = rule;
    }
 
+   /**
+    * Serializes the object to a string.
+    * @param object the object to serialize
+    * @return the serialized string
+    * @throws PogoException if the serialization fails
+    */
    public String toString(final Object object) throws PogoException {
       final StringBuilder builder = new StringBuilder();
       serial(object, builder);

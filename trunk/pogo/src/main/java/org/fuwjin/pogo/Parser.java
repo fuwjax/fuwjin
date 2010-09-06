@@ -7,17 +7,23 @@
  *******************************************************************************/
 package org.fuwjin.pogo;
 
-
 /**
  * The standard interface for the Pogo parser/matcher.
  */
 public interface Parser {
+   /**
+    * Parses starting at the given position. If this rule matches, it will
+    * return the final position. If it does not match, it returns the given
+    * position.
+    * @param position the start position
+    * @return the final position
+    */
    Position parse(Position position);
 
    /**
     * Resolves this parser according to the grammar and type.
     * @param grammar the grammar for resolving any rule references
-    * @param type the class for resolving any method references
+    * @param parent the containing rule
     */
    void resolve(Grammar grammar, Rule parent);
 }
