@@ -1,0 +1,33 @@
+{
+	name:"Mike D",
+	description:"me",
+	contactNumbers:(&HM=java.util.HashMap){
+		(&PT=org.fuwjax.sample.Phone$PhoneType)WORK:(&PH=org.fuwjax.sample.Phone){
+			areaCode:123,
+			block:456,
+			index:7890
+		}
+	}
+}
+{
+	name:"Bubba Bo Bob",
+	description:"someone else",
+	contactNumbers:(&HM){
+		(&PT)HOME:(&PH){
+			areaCode:789,
+			block:123,
+			index:4560
+		}
+	}
+}
+{
+	name:"Mike the Lesser",
+	description:"some other Mike",
+	contactNumbers:(&HM){
+		(&PT)HOME:(&PH){
+			areaCode:123,
+			block:789,
+			index:4560
+		}
+	}
+}
