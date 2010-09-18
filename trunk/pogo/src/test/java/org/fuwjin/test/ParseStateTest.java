@@ -8,19 +8,29 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.fuwjin.pogo.PogoException;
-import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.ParseState;
+import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 import org.junit.Test;
 
+/**
+ * Demos the Parse state.
+ */
 public class ParseStateTest {
+   /**
+    * The parse state should be able to advance on a matched character.
+    */
    @Test
    public void testAdvance() {
       final PogoState state = new ParseState(streamOf("a"));
       assertTrue(state.advance('a', 'a'));
    }
 
+   /**
+    * The parse state should be able to advance on an any character if there is
+    * a next character.
+    */
    @Test
    public void testAnyChar() {
       final PogoState state = new ParseState(streamOf("a"));
@@ -28,6 +38,9 @@ public class ParseStateTest {
       assertFalse(state.advance(0, Integer.MAX_VALUE));
    }
 
+   /**
+    * The parse state should be able to buffer the output.
+    */
    @Test
    public void testBuffer() {
       final PogoState state = new ParseState(streamOf("abc"));
@@ -39,6 +52,9 @@ public class ParseStateTest {
       buffer.release();
    }
 
+   /**
+    * The parse state should allow an advance after a failure.
+    */
    @Test
    public void testFailThenAdvance() {
       final PogoState state = new ParseState(streamOf("a"));
@@ -46,6 +62,9 @@ public class ParseStateTest {
       assertTrue(state.advance('a', 'a'));
    }
 
+   /**
+    * The parse state should support memoization.
+    */
    @Test
    public void testMemo() {
       final PogoState state = new ParseState(streamOf("zabc"));
@@ -62,6 +81,9 @@ public class ParseStateTest {
       assertThat((String)memo.value(), is("value"));
    }
 
+   /**
+    * The parse state should memoize memos.
+    */
    @Test
    public void testMemoed() {
       final PogoState state = new ParseState(streamOf("zabc"));
@@ -82,6 +104,9 @@ public class ParseStateTest {
       assertTrue(state.advance('c', 'c'));
    }
 
+   /**
+    * The parse state should be able to reset to an earlier state.
+    */
    @Test
    public void testReset() {
       final PogoState state = new ParseState(streamOf("a"));
@@ -93,6 +118,9 @@ public class ParseStateTest {
       assertFalse(state.advance('a', 'a'));
    }
 
+   /**
+    * The parse state should be able to generate an exception after a failure.
+    */
    @Test
    public void testRuleFailure() {
       final PogoState state = new ParseState(streamOf("a"));
@@ -104,6 +132,9 @@ public class ParseStateTest {
       assertThat(ex.getMessage(), is("Error parsing @[1,2]: could not finalize Rule\n  in Parent[1,1]"));
    }
 
+   /**
+    * The parse state should support reset without buffering.
+    */
    @Test
    public void testSequenceReset() {
       final PogoState state = new ParseState(streamOf("a"));
@@ -118,6 +149,9 @@ public class ParseStateTest {
       }
    }
 
+   /**
+    * The parse state should support failed sub buffers.
+    */
    @Test
    public void testSubBuffer() {
       final PogoState state = new ParseState(streamOf("zabc"));

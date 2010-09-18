@@ -10,9 +10,16 @@
  *******************************************************************************/
 package org.fuwjin.test.object;
 
+/**
+ * A wrapper around a primitive.
+ */
 public class PrimitiveContainer {
-   private int index;
+   private final int index;
 
+   /**
+    * Creates a new instance.
+    * @param index the primitive
+    */
    public PrimitiveContainer(final int index) {
       this.index = index;
    }

@@ -16,9 +16,16 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.LiteralReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds an enum value.
+ */
 public class EnumBuilder extends LiteralBuilder {
    private Enum<?> value;
 
+   /**
+    * Creates a new instance.
+    * @param type the enum type
+    */
    public EnumBuilder(final Class<?> type) {
       super(type);
    }

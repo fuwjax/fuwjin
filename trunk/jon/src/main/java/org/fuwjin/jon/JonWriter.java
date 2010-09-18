@@ -18,6 +18,9 @@ import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.ConstantCategory;
 import org.fuwjin.postage.category.VoidCategory;
 
+/**
+ * Manages writing for JON files.
+ */
 public class JonWriter {
    private static final Grammar JON;
    static {
@@ -30,14 +33,29 @@ public class JonWriter {
    }
    private final ReferenceStorage storage;
 
+   /**
+    * Creates a new instance.
+    */
    public JonWriter() {
       storage = new ReferenceStorage();
    }
 
+   /**
+    * Writes the object to a string in a JON format.
+    * @param obj the object to serialize
+    * @return the JON formatted string
+    * @throws PogoException if the serialize fails
+    */
    public String write(final Object obj) throws PogoException {
       return JON.toString(storage.get(obj, null));
    }
 
+   /**
+    * Writes the object to the appender in a JON format.
+    * @param obj the object to serialize
+    * @param appender the destination for the serialization
+    * @throws PogoException if the serialize fails
+    */
    public void write(final Object obj, final Appendable appender) throws PogoException {
       JON.serial(storage.get(obj, null), appender);
    }

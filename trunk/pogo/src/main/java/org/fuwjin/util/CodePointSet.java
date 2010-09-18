@@ -1,22 +1,23 @@
 package org.fuwjin.util;
 
-public class IntRangeSet {
+/**
+ * A partition set for code points. Partition sets are an attempt at managing a
+ * set of values by tracking ranges instead of individual elements. This set
+ * tracks int ranges under the assumption that they represent code points.
+ */
+public class CodePointSet {
    private int[] values = new int[10];
    private int size;
 
+   /**
+    * Clears the set.
+    */
    public void clear() {
       size = 0;
    }
 
    private String of(final int index) {
       return new String(Character.toChars(values[index]));
-   }
-
-   private String toString(final int index) {
-      if(values[index] == values[index + 1]) {
-         return of(index);
-      }
-      return of(index) + "-" + of(index + 1);
    }
 
    @Override
@@ -31,6 +32,19 @@ public class IntRangeSet {
       return builder.toString();
    }
 
+   private String toString(final int index) {
+      if(values[index] == values[index + 1]) {
+         return of(index);
+      }
+      return of(index) + "-" + of(index + 1);
+   }
+
+   /**
+    * Performs an in-place union of this set with the set [low-high]. Both low
+    * and high are included in the union.
+    * @param low the low code point in the range
+    * @param high the high code point in the range
+    */
    public void unionRange(final int low, final int high) {
       int trim = Integer.MAX_VALUE;
       for(int index = 0; index < size; index += 2) {

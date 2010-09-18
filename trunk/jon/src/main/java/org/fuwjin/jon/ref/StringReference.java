@@ -10,14 +10,27 @@
  *******************************************************************************/
 package org.fuwjin.jon.ref;
 
+/**
+ * Manages a string reference.
+ */
 public class StringReference extends BaseReference {
    private final String value;
 
+   /**
+    * Creates a new instance.
+    * @param name the reference name
+    * @param type the string type
+    * @param value the value
+    */
    public StringReference(final String name, final Object type, final Object value) {
       super(name, type);
       this.value = value.toString();
    }
 
+   /**
+    * Returns the value.
+    * @return the value
+    */
    public Object get() {
       return value;
    }

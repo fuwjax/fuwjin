@@ -12,9 +12,16 @@ import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.category.ClassCategory;
 
+/**
+ * Builds a new function.
+ */
 public class InvokerBuilder extends LiteralBuilder {
    private Function value;
 
+   /**
+    * Creates a new instance.
+    * @param type the function's category
+    */
    public InvokerBuilder(final Class<?> type) {
       super(type);
    }

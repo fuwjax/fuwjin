@@ -16,7 +16,14 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ListReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds a list.
+ */
 public class ListBuilder extends ElementsBuilder {
+   /**
+    * Creates a new instance.
+    * @param type the list type
+    */
    public ListBuilder(final Class<?> type) {
       super(type);
    }

@@ -10,10 +10,18 @@
  *******************************************************************************/
 package org.fuwjin.jon.ref;
 
+/**
+ * Manages a reference for an entry.
+ */
 public class EntryReference {
    protected final Object key;
    protected final Object value;
 
+   /**
+    * Creates a new instance.
+    * @param key the entry key
+    * @param val the entry value
+    */
    public EntryReference(final Object key, final Object val) {
       this.key = key;
       value = val;

@@ -3,6 +3,9 @@ package org.fuwjin.pogo.state;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * The standard position implementation.
+ */
 public abstract class AbstractPosition implements PogoPosition {
    private final AbstractState state;
    private final int index;
@@ -11,6 +14,14 @@ public abstract class AbstractPosition implements PogoPosition {
    private final List<PogoMemo> memos;
    private PogoPosition next;
 
+   /**
+    * Creates a new instance from a previous instance.
+    * @param previous the previous instance
+    * @param shouldBufferNext true if the previous instance should point to this
+    *        new instance
+    * @param line the new line number
+    * @param column the new column number
+    */
    public AbstractPosition(final AbstractPosition previous, final boolean shouldBufferNext, final int line,
          final int column) {
       if(shouldBufferNext) {
@@ -25,6 +36,10 @@ public abstract class AbstractPosition implements PogoPosition {
       this.column = column;
    }
 
+   /**
+    * Creates a new initial instance.
+    * @param state the state managing the positions
+    */
    public AbstractPosition(final AbstractState state) {
       this.state = state;
       memos = new LinkedList<PogoMemo>();

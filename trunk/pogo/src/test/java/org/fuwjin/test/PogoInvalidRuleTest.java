@@ -34,6 +34,6 @@ public class PogoInvalidRuleTest {
                // pass
             }
          }
-      };
+      }.toString();
    }
 }

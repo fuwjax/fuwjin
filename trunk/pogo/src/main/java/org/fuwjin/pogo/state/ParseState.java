@@ -2,11 +2,18 @@ package org.fuwjin.pogo.state;
 
 import org.fuwjin.pogo.CodePointStream;
 
+/**
+ * The state of a parse.
+ */
 public class ParseState extends AbstractState {
    private int buffers;
    private final StringBuilder builder = new StringBuilder();
    private final CodePointStream stream;
 
+   /**
+    * Creates a new instance.
+    * @param stream the stream to parse
+    */
    public ParseState(final CodePointStream stream) {
       this.stream = stream;
       super.set(new ParsePosition(this, stream.next()));

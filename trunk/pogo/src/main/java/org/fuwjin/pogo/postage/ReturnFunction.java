@@ -2,19 +2,32 @@ package org.fuwjin.pogo.postage;
 
 import org.fuwjin.postage.function.AbstractFunction;
 
+/**
+ * Returns the last argument.
+ */
 public class ReturnFunction extends AbstractFunction {
+   /**
+    * A wrapper for the last argument.
+    */
    public class ReturnValue {
       private final Object value;
 
-      public ReturnValue(final Object value) {
+      private ReturnValue(final Object value) {
          this.value = value;
       }
 
+      /**
+       * Returns the wrapped argument.
+       * @return the argument
+       */
       public Object value() {
          return value;
       }
    }
 
+   /**
+    * Creates a new instance.
+    */
    public ReturnFunction() {
       super("return", ReturnValue.class, true, Object.class, Object[].class);
    }

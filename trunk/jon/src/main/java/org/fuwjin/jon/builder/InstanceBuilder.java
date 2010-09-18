@@ -17,10 +17,17 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.InstanceReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds an object instance.
+ */
 public class InstanceBuilder extends Builder implements Iterable<ObjectBuilder> {
    private final Object obj;
    private final Iterable<Class<?>> supers;
 
+   /**
+    * Creates a new instance.
+    * @param type the object type
+    */
    public InstanceBuilder(final Class<?> type) {
       super(type);
       obj = newInstance();
@@ -53,12 +60,12 @@ public class InstanceBuilder extends Builder implements Iterable<ObjectBuilder> 
       return new InstanceReference(storage.nextName(), storage, cast(storage, refObj, cls), refObj);
    }
 
+   ObjectBuilder superBuilder(final Class<?> superClass) {
+      return new ObjectBuilder(superClass, obj);
+   }
+
    @Override
    public Object toObjectImpl() {
       return obj;
-   }
-
-   ObjectBuilder superBuilder(final Class<?> superClass) {
-      return new ObjectBuilder(superClass, obj);
    }
 }

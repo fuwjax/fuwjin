@@ -14,10 +14,19 @@ import static org.fuwjin.jon.BuilderRegistry.getBuilder;
 
 import java.util.IdentityHashMap;
 
+/**
+ * Stores references.
+ */
 public class ReferenceStorage {
    private final IdentityHashMap<Object, BaseReference> map = new IdentityHashMap<Object, BaseReference>();
    private int index;
 
+   /**
+    * Returns a reference.
+    * @param obj the referenced value
+    * @param type the value type
+    * @return the reference
+    */
    public Object get(final Object obj, final Class<?> type) {
       if(obj == null) {
          return null;
@@ -35,6 +44,10 @@ public class ReferenceStorage {
       return ref;
    }
 
+   /**
+    * Returns the next reference name.
+    * @return the next name
+    */
    public String nextName() {
       return Integer.toString(index++);
    }

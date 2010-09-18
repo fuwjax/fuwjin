@@ -16,12 +16,19 @@ import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.category.ClassCategory;
 
+/**
+ * The base class for object builders.
+ */
 public abstract class Builder {
    private final Class<?> type;
    private Class<?> verified;
    private Function invoker;
    private Builder builder;
 
+   /**
+    * Creates a new instance.
+    * @param type the type to build
+    */
    public Builder(final Class<?> type) {
       this.type = type;
       builder = this;
@@ -34,6 +41,10 @@ public abstract class Builder {
       return null;
    }
 
+   /**
+    * Creates a new builder for the refined type.
+    * @return the new builder
+    */
    public Builder forType() {
       if(verified != null && !verified.equals(type)) {
          builder = forTypeImpl(verified);
@@ -56,8 +67,19 @@ public abstract class Builder {
       return ret;
    }
 
+   /**
+    * Creates a new reference.
+    * @param obj the object to reference
+    * @param cls the object type
+    * @param storage the storage
+    * @return the new reference
+    */
    public abstract BaseReference newReference(Object obj, Class<?> cls, ReferenceStorage storage);
 
+   /**
+    * Returns the built object.
+    * @return the built object
+    */
    public Object toObject() {
       return builder.toObjectImpl();
    }
@@ -68,6 +90,10 @@ public abstract class Builder {
       return type;
    }
 
+   /**
+    * Verifies a refined type.
+    * @param test the new type
+    */
    public void verify(final Class<?> test) {
       if(!type.isAssignableFrom(test)) {
          throw new IllegalArgumentException();

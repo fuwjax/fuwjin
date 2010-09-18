@@ -15,6 +15,9 @@ import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.category.ClassCategory;
 
+/**
+ * Builds primitive literals.
+ */
 public class PrimitiveBuilder extends LiteralBuilder {
    private static final Map<Class<?>, Class<?>> WRAPPERS;
    static {
@@ -29,6 +32,11 @@ public class PrimitiveBuilder extends LiteralBuilder {
       WRAPPERS.put(char.class, Character.class);
    }
 
+   /**
+    * Returns true if test is a wrapper class.
+    * @param test the test class
+    * @return true if the test is a wrapper
+    */
    public static boolean isWrapper(final Class<?> test) {
       return WRAPPERS.containsValue(test);
    }
@@ -36,6 +44,10 @@ public class PrimitiveBuilder extends LiteralBuilder {
    private Object value;
    private final Function invoker;
 
+   /**
+    * Creates a new instance.
+    * @param type the primitive type
+    */
    public PrimitiveBuilder(final Class<?> type) {
       super(type);
       final Class<?> target = WRAPPERS.get(type);

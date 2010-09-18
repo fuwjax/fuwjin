@@ -3,6 +3,9 @@ package org.fuwjin.pogo.state;
 import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
 
+/**
+ * The standard state implementation.
+ */
 public abstract class AbstractState implements PogoState {
    private Object value;
    private AbstractPosition current;
@@ -30,7 +33,7 @@ public abstract class AbstractState implements PogoState {
    }
 
    protected void failStack(final int level, final String name, final AbstractPosition pos) {
-      failure.failStack(level, name, pos);
+      failure.failStack(pos, name, level);
    }
 
    @Override

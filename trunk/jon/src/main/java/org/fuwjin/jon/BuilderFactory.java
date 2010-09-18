@@ -14,15 +14,26 @@ import static org.fuwjin.jon.BuilderRegistry.getBuilder;
 
 import org.fuwjin.jon.builder.Builder;
 
+/**
+ * Builds new builder instances.
+ */
 public class BuilderFactory {
    private Class<?> type;
    private transient Builder builder;
 
+   /**
+    * Creates a builder for the internal type.
+    * @return the builder
+    */
    public Builder forType() {
       builder = getBuilder(type);
       return builder;
    }
 
+   /**
+    * Creates a new object from the internal builder.
+    * @return the new object
+    */
    public Object toObject() {
       if(builder == null) {
          throw new RuntimeException();

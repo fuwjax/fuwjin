@@ -1,6 +1,12 @@
 package org.fuwjin.pogo.state;
 
+/**
+ * Marks a position during a pogo operation.
+ */
 public interface PogoPosition {
+   /**
+    * The null position.
+    */
    PogoPosition NULL = new PogoPosition() {
       @Override
       public void release() {
@@ -18,10 +24,21 @@ public interface PogoPosition {
       }
    };
 
+   /**
+    * Releases the position.
+    */
    void release();
 
+   /**
+    * Resets the state to this position.
+    */
    void reset();
 
+   /**
+    * Returns the line/column number normally, but in the case of a
+    * {@link PogoState#buffer(boolean)}, returns the buffered string.
+    * @return the line/column or the matched string.
+    */
    @Override
    String toString();
 }

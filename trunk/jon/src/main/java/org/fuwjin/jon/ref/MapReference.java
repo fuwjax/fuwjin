@@ -13,12 +13,24 @@ package org.fuwjin.jon.ref;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Manages the reference for the map.
+ */
 public class MapReference extends BaseReference implements BaseReference.MapReference {
    private final Map<?, ?> value;
    private final ReferenceStorage storage;
    private final Class<?> keyType;
    private final Class<?> valueType;
 
+   /**
+    * Creates a new instance.
+    * @param name the reference name
+    * @param storage the storage
+    * @param type the map type
+    * @param value the map instance
+    * @param keyType the key type
+    * @param valueType the value type
+    */
    public MapReference(final String name, final ReferenceStorage storage, final Object type, final Map<?, ?> value,
          final Class<?> keyType, final Class<?> valueType) {
       super(name, type);

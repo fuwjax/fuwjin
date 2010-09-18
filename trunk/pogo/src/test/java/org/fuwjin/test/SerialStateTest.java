@@ -8,7 +8,13 @@ import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.pogo.state.SerialState;
 import org.junit.Test;
 
+/**
+ * Demos the serialization state.
+ */
 public class SerialStateTest {
+   /**
+    * The serial state should persist a character in a single character advance.
+    */
    @Test
    public void testAdvance() {
       final StringBuilder builder = new StringBuilder();
@@ -18,6 +24,10 @@ public class SerialStateTest {
       assertThat(builder.toString(), is("a"));
    }
 
+   /**
+    * The serial state should persist the current value in an any character
+    * advance.
+    */
    @Test
    public void testAdvanceObject() {
       final StringBuilder builder = new StringBuilder();

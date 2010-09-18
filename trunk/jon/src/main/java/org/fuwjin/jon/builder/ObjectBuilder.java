@@ -13,7 +13,15 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.postage.Function;
 
+/**
+ * Builds an object.
+ */
 public class ObjectBuilder extends EntriesBuilder {
+   /**
+    * Creates a new instance.
+    * @param type the object type
+    * @param obj the object
+    */
    public ObjectBuilder(final Class<?> type, final Object obj) {
       super(type, obj);
    }

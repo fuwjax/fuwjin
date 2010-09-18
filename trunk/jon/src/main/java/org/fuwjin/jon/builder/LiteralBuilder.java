@@ -10,10 +10,21 @@
  *******************************************************************************/
 package org.fuwjin.jon.builder;
 
+/**
+ * Builds a literal.
+ */
 public abstract class LiteralBuilder extends Builder {
+   /**
+    * Creates a new instance.
+    * @param type the literal type
+    */
    public LiteralBuilder(final Class<?> type) {
       super(type);
    }
 
+   /**
+    * Sets the serialized form of the literal.
+    * @param value the serialized literal
+    */
    public abstract void set(final String value);
 }

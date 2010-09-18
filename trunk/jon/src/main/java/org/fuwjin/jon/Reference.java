@@ -7,33 +7,59 @@
  *******************************************************************************/
 package org.fuwjin.jon;
 
+/**
+ * Manages the references.
+ */
 public class Reference {
    private String name;
    private Object value;
 
+   /**
+    * Creates a new instance.
+    */
    public Reference() {
       // do nothing
    }
 
+   /**
+    * Creates a new instance.
+    * @param value the reference value
+    */
    public Reference(final Object value) {
       this.value = value;
    }
 
+   /**
+    * Returns the reference name.
+    * @return the reference name
+    */
    public String name() {
       return name;
    }
 
-   protected void name(final String name) {
+   /**
+    * Sets the reference name.
+    * @param newName the new name
+    */
+   protected void name(final String newName) {
       assert this.name == null;
-      this.name = name;
+      this.name = newName;
    }
 
+   /**
+    * Returns the reference value.
+    * @return the reference value
+    */
    public Object value() {
       return value;
    }
 
-   protected void value(final Object value) {
+   /**
+    * Sets the reference value.
+    * @param newValue the new value
+    */
+   protected void value(final Object newValue) {
       assert this.value == null;
-      this.value = value;
+      this.value = newValue;
    }
 }

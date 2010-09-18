@@ -15,7 +15,14 @@ import org.fuwjin.jon.JonReader;
 import org.fuwjin.pogo.PogoException;
 import org.junit.Test;
 
+/**
+ * Demos JON reading incomplete values.
+ */
 public class WhenReadingIncompleteJonValues {
+   /**
+    * A forward reference must be present.
+    * @throws PogoException if it fails
+    */
    @Test
    public void shouldNotPutForwardReferenceInMap() throws PogoException {
       final Map<?, ?> result = new JonReader("{\"a\":&1}").read(Map.class);

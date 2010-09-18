@@ -16,11 +16,20 @@ import java.util.Iterator;
 import org.fuwjin.jon.builder.util.SerializableFieldIterable;
 import org.fuwjin.jon.ref.BaseReference.MapReference;
 
+/**
+ * Manages an object reference.
+ */
 public class ObjectReference implements MapReference {
    private final Iterable<Field> type;
    private final Object value;
    private final ReferenceStorage storage;
 
+   /**
+    * Creates a new instance.
+    * @param storage the storage
+    * @param type the class type
+    * @param value the object value
+    */
    public ObjectReference(final ReferenceStorage storage, final Class<?> type, final Object value) {
       this.storage = storage;
       this.type = new SerializableFieldIterable(type);
