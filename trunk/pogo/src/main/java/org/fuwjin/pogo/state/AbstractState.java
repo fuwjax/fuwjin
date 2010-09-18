@@ -6,6 +6,7 @@ public abstract class AbstractState implements PogoState {
    private Object value;
    private AbstractPosition current;
    private int marks;
+   private int memos;
    private final ParseFailure failure = new ParseFailure();
 
    @Override
@@ -27,18 +28,20 @@ public abstract class AbstractState implements PogoState {
       failure.fail(current, string, cause);
    }
 
-   protected void failStack(final String name, final AbstractPosition pos) {
-      failure.failStack(name, pos);
+   protected void failStack(final int level, final String name, final AbstractPosition pos) {
+      failure.failStack(level, name, pos);
    }
 
    @Override
    public ParseMemo getMemo(final String name, final boolean needsBuffer) {
+      memos++;
       ParseMemo memo = current.getMemo(name, needsBuffer);
       if(memo == null) {
          memo = new ParseMemo(name, this);
       } else {
          current = memo.end();
       }
+      memo.setLevel(memos);
       return memo;
    }
 
@@ -60,6 +63,10 @@ public abstract class AbstractState implements PogoState {
 
    protected void release() {
       marks--;
+   }
+
+   protected void releaseMemo() {
+      memos--;
    }
 
    protected void set(final AbstractPosition pos) {
