@@ -12,12 +12,12 @@ import static org.junit.Assert.assertNull;
 import java.util.Map;
 
 import org.fuwjin.jon.JonReader;
-import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.state.ParseException;
 import org.junit.Test;
 
 public class WhenReadingIncompleteJonValues {
    @Test
-   public void shouldNotPutForwardReferenceInMap() throws PogoException {
+   public void shouldNotPutForwardReferenceInMap() throws ParseException {
       final Map<?, ?> result = new JonReader("{\"a\":&1}").read(Map.class);
       assertNull(result.get("a"));
    }

@@ -10,10 +10,8 @@ package org.fuwjin.pogo.parser;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
 
 /**
@@ -53,12 +51,6 @@ public abstract class ParserOperator implements Parser {
    @Override
    public int hashCode() {
       return hash(getClass(), parser);
-   }
-
-   protected Position parseBuffered(final Position position) {
-      final BufferedPosition buffer = position.buffered();
-      final Position next = parser.parse(buffer);
-      return buffer.flush(next);
    }
 
    @Override

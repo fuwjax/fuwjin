@@ -3,6 +3,7 @@ package org.fuwjin.pogo;
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 
 import org.fuwjin.complier.RuntimeClassLoader;
+import org.fuwjin.pogo.state.ParseException;
 
 /**
  * A code generation class loader that builds a class from a pogo grammar.
@@ -40,7 +41,7 @@ public class PogoClassLoader {
             grammar.serial(generator, builder);
             loader.compile(name, builder.toString());
             return loader.loadClass(name);
-         } catch(final PogoException e1) {
+         } catch(final ParseException e1) {
             throw new ClassNotFoundException("Could not build class", e1);
          }
       }

@@ -10,6 +10,8 @@ package org.fuwjin.pogo;
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
+import org.fuwjin.pogo.state.ParseException;
+
 /**
  * The set of predefined grammars from the pogo package.
  */
@@ -54,9 +56,9 @@ public enum PredefinedGrammar {
     * @param qualifiedName the name of the generated class
     * @param grammar the grammar to serialize
     * @return the serialized grammar
-    * @throws PogoException if the serialization fails
+    * @throws ParseException if the serialization fails
     */
-   public static String grammarToJava(final String qualifiedName, final Grammar grammar) throws PogoException {
+   public static String grammarToJava(final String qualifiedName, final Grammar grammar) throws ParseException {
       return PogoCodeSerial.grammar().toString(new PogoCodeGenerator(qualifiedName, grammar));
    }
 
@@ -64,9 +66,9 @@ public enum PredefinedGrammar {
     * Serializes the input grammar to a string.
     * @param grammar the grammar to serialize
     * @return the serialized grammar
-    * @throws PogoException if the parse fails
+    * @throws ParseException if the parse fails
     */
-   public static String grammarToPogo(final Grammar grammar) throws PogoException {
+   public static String grammarToPogo(final Grammar grammar) throws ParseException {
       return PogoSerial.grammar().toString(grammar);
    }
 

@@ -7,9 +7,9 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * A zero-match parser that succeeds if the inner parser succeeds.
@@ -31,13 +31,17 @@ public class PositiveLookaheadParser extends ParserOperator {
    }
 
    @Override
-   public Position parse(final Position position) {
-      final BufferedPosition buffer = position.buffered();
-      final Position next = parser.parse(buffer);
-      if(!next.isSuccess()) {
-         buffer.fail("expected match", null);
+   public boolean parse(final PogoState state) {
+      final PogoPosition mark = state.mark();
+      try {
+         if(parser.parse(state)) {
+            mark.reset();
+            return true;
+         }
+         return false;
+      } finally {
+         mark.release();
       }
-      return buffer.flush(buffer);
    }
 
    @Override

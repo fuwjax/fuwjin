@@ -20,6 +20,7 @@ import static org.fuwjin.pogo.LiteratePogo.seq;
 import static org.fuwjin.pogo.LiteratePogo.star;
 
 import org.fuwjin.pogo.postage.Doppleganger;
+import org.fuwjin.pogo.state.ParseException;
 import org.fuwjin.postage.Postage;
 
 /**
@@ -147,7 +148,7 @@ public final class PogoGrammar extends Grammar {
     * @return the new parser
     * @throws PogoException if the parse fails
     */
-   public static Grammar readGrammar(final CodePointStream stream) throws PogoException {
+   public static Grammar readGrammar(final CodePointStream stream) throws ParseException {
       return (Grammar)grammar.parse(stream);
    }
 
@@ -159,7 +160,7 @@ public final class PogoGrammar extends Grammar {
     * @return the new grammar
     * @throws PogoException if the parse fails
     */
-   public static Grammar readGrammar(final CodePointStream stream, final Postage postage) throws PogoException {
+   public static Grammar readGrammar(final CodePointStream stream, final Postage postage) throws ParseException {
       return (Grammar)grammar.parse(stream, postage);
    }
 

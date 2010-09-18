@@ -1,22 +1,11 @@
 package org.fuwjin.pogo.postage;
 
-import org.fuwjin.pogo.BufferedPosition;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.postage.ReturnFunction.ReturnValue;
 import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
 public class PostageUtils {
-   private static final Failure TEST_WAS_FALSE = new Failure("function returned false");
-
-   public static BufferedPosition buffer(final Position position, final Function function) {
-      if(!isCustomFunction(function)) {
-         return position.unbuffered();
-      }
-      return position.buffered();
-   }
-
    public static Object invoke(final Function function, final Object... args) {
       final Object result = invokeImpl(function, args);
       if(result instanceof ReturnValue) {
@@ -41,7 +30,7 @@ public class PostageUtils {
          if((Boolean)result) {
             return args[0];
          }
-         return TEST_WAS_FALSE;
+         return new Failure(function.name() + " returned false");
       }
       return result;
    }

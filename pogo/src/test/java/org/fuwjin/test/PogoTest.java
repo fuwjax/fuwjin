@@ -44,6 +44,7 @@ public class PogoTest {
    @Test
    public void testParser() throws Exception {
       final String grammar = staticPogoGrammar().toPogo();
+      System.out.println(grammar);
       final Grammar peg = readGrammar(streamOf(grammar));
       final Grammar peg2 = (Grammar)peg.parse(streamOf(grammar));
       assertThat(peg, is(peg2));

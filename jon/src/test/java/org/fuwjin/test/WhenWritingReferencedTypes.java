@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.fuwjin.jon.JonWriter;
-import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.state.ParseException;
 import org.fuwjin.test.object.ClassRef;
 import org.fuwjin.test.object.ComplexChild;
 import org.fuwjin.test.object.InnerChild;
@@ -39,25 +39,25 @@ import org.junit.Test;
 
 public class WhenWritingReferencedTypes {
    @Test
-   public void shouldWriteArray() throws PogoException {
+   public void shouldWriteArray() throws ParseException {
       final String result = new JonWriter().write(new String[]{"hi", "hello"});
       assertThat(result, is("&0=(&1=java.lang.String[])[\"hi\",\"hello\"]"));
    }
 
    @Test
-   public void shouldWriteClass() throws PogoException {
+   public void shouldWriteClass() throws ParseException {
       final String result = new JonWriter().write(String[].class);
       assertEquals(result, "&0=java.lang.String[]");
    }
 
    @Test
-   public void shouldWriteDefaultClassRef() throws PogoException {
+   public void shouldWriteDefaultClassRef() throws ParseException {
       final String result = new JonWriter().write(new ClassRef());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.ClassRef){cls:&1}"));
    }
 
    @Test
-   public void shouldWriteDefaultComplexChild() throws PogoException {
+   public void shouldWriteDefaultComplexChild() throws ParseException {
       final String result = new JonWriter().write(new ComplexChild());
       assertThat(
             result,
@@ -65,43 +65,43 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldWriteDefaultInnerChild() throws PogoException {
+   public void shouldWriteDefaultInnerChild() throws ParseException {
       final String result = new JonWriter().write(new InnerChild());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.InnerChild){inner:&2={i:1,this$0:&0}}"));
    }
 
    @Test
-   public void shouldwriteDefaultIntegerObject() throws PogoException {
+   public void shouldwriteDefaultIntegerObject() throws ParseException {
       final String result = new JonWriter().write(new IntegerObject());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.IntegerObject){i:15}"));
    }
 
    @Test
-   public void shouldwriteDefaultObject() throws PogoException {
+   public void shouldwriteDefaultObject() throws ParseException {
       final String result = new JonWriter().write(new Object());
       assertThat(result, is("&0=(&1=java.lang.Object){}"));
    }
 
    @Test
-   public void shouldwriteDefaultSelfRefObject() throws PogoException {
+   public void shouldwriteDefaultSelfRefObject() throws ParseException {
       final String result = new JonWriter().write(new SelfReferencingObject());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.SelfReferencingObject){obj:&0}"));
    }
 
    @Test
-   public void shouldwriteDefaultSimpleChild() throws PogoException {
+   public void shouldwriteDefaultSimpleChild() throws ParseException {
       final String result = new JonWriter().write(new SimpleChild());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.SimpleChild){s:12.234|s:\"curious\",io:&2={i:181}}"));
    }
 
    @Test
-   public void shouldwriteDefaultSimpleGrandChild() throws PogoException {
+   public void shouldwriteDefaultSimpleGrandChild() throws ParseException {
       final String result = new JonWriter().write(new SimpleGrandChild());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.SimpleGrandChild){s:82.24|s:\"bland\",io:&2={i:134}}"));
    }
 
    @Test
-   public void shouldwriteDefaultSimpleGreatGrandChild() throws PogoException {
+   public void shouldwriteDefaultSimpleGreatGrandChild() throws ParseException {
       final String result = new JonWriter().write(new SimpleGreatGrandChild());
       assertThat(
             result,
@@ -109,31 +109,31 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteDefaultSimpleObject() throws PogoException {
+   public void shouldwriteDefaultSimpleObject() throws ParseException {
       final String result = new JonWriter().write(new SimpleObject());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.SimpleObject){s:\"howdy\",io:&2={i:17}}"));
    }
 
    @Test
-   public void shouldwriteDefaultTransientChild() throws PogoException {
+   public void shouldwriteDefaultTransientChild() throws ParseException {
       final String result = new JonWriter().write(new TransientChild());
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.TransientChild){i:191}"));
    }
 
    @Test
-   public void shouldwriteDoubleArray() throws PogoException {
+   public void shouldwriteDoubleArray() throws ParseException {
       final String result = new JonWriter().write(new double[]{5.23, 1.7E-13, -131.212});
       assertThat(result, is("&0=(&1=double[])[5.23,1.7E-13,-131.212]"));
    }
 
    @Test
-   public void shouldwriteEnum() throws PogoException {
+   public void shouldwriteEnum() throws ParseException {
       final String result = new JonWriter().write(ElementType.TYPE);
       assertThat(result, is("(&0=java.lang.annotation.ElementType)TYPE"));
    }
 
    @Test
-   public void shouldwriteList() throws PogoException {
+   public void shouldwriteList() throws ParseException {
       final LinkedList<String> expected = new LinkedList<String>();
       expected.add("hi");
       expected.add("hello");
@@ -142,7 +142,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteMap() throws PogoException {
+   public void shouldwriteMap() throws ParseException {
       final Map<String, String> expected = new LinkedHashMap<String, String>();
       expected.put("hi", "mom");
       expected.put("hello", "world");
@@ -151,31 +151,31 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteNullInArray() throws PogoException {
+   public void shouldwriteNullInArray() throws ParseException {
       final String result = new JonWriter().write(new String[]{null});
       assertThat(result, is("&0=(&1=java.lang.String[])[null]"));
    }
 
    @Test
-   public void shouldwriteNullStringField() throws PogoException {
+   public void shouldwriteNullStringField() throws ParseException {
       final String result = new JonWriter().write(new SimpleObject(null, null));
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.SimpleObject){s:null,io:null}"));
    }
 
    @Test
-   public void shouldwriteNullWrapperField() throws PogoException {
+   public void shouldwriteNullWrapperField() throws ParseException {
       final String result = new JonWriter().write(new IntegerField(null));
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.IntegerField){i:null}"));
    }
 
    @Test
-   public void shouldwriteObject() throws PogoException {
+   public void shouldwriteObject() throws ParseException {
       final String result = new JonWriter().write(new PrimitiveContainer(17));
       assertThat(result, is("&0=(&1=org.fuwjin.test.object.PrimitiveContainer){index:17}"));
    }
 
    @Test
-   public void shouldwriteSelfRefArray() throws PogoException {
+   public void shouldwriteSelfRefArray() throws ParseException {
       final Object[] expected = new Object[1];
       expected[0] = expected;
       final String result = new JonWriter().write(expected);
@@ -183,7 +183,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSelfRefList() throws PogoException {
+   public void shouldwriteSelfRefList() throws ParseException {
       final List<List<?>> list = new ArrayList<List<?>>();
       list.add(list);
       final String result = new JonWriter().write(list);
@@ -191,7 +191,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSelfRefList2() throws PogoException {
+   public void shouldwriteSelfRefList2() throws ParseException {
       final List<Object> list = new ArrayList<Object>();
       list.add(list);
       list.add("test");
@@ -200,7 +200,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSelfRefMap() throws PogoException {
+   public void shouldwriteSelfRefMap() throws ParseException {
       final Map<Object, Object> map = new IdentityHashMap<Object, Object>();
       map.put(map, map);
       final String result = new JonWriter().write(map);
@@ -208,7 +208,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSelfRefMapKey() throws PogoException {
+   public void shouldwriteSelfRefMapKey() throws ParseException {
       final Map<Object, String> map = new IdentityHashMap<Object, String>();
       map.put(map, "test");
       final String result = new JonWriter().write(map);
@@ -216,7 +216,7 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSelfRefMapValue() throws PogoException {
+   public void shouldwriteSelfRefMapValue() throws ParseException {
       final Map<String, Object> map = new HashMap<String, Object>();
       map.put("test", map);
       final String result = new JonWriter().write(map);
@@ -224,25 +224,25 @@ public class WhenWritingReferencedTypes {
    }
 
    @Test
-   public void shouldwriteSingleList() throws PogoException {
+   public void shouldwriteSingleList() throws ParseException {
       final String result = new JonWriter().write(Collections.singletonList("a"));
       assertThat(result, is("&0=(&1=java.util.Collections$SingletonList){element:\"a\"}"));
    }
 
    @Test
-   public void shouldwriteSingleMap() throws PogoException {
+   public void shouldwriteSingleMap() throws ParseException {
       final String result = new JonWriter().write(Collections.singletonMap("a", "b"));
       assertThat(result, is("&0=(&1=java.util.Collections$SingletonMap){k:\"a\",v:\"b\"}"));
    }
 
    @Test
-   public void shouldwriteStringConstructor() throws PogoException {
+   public void shouldwriteStringConstructor() throws ParseException {
       final String result = new JonWriter().write(new StringBuilder("hi mom"));
       assertThat(result, is("&0=(&1=java.lang.StringBuilder)\"hi mom\""));
    }
 
    @Test
-   public void shouldwriteValueOf() throws PogoException {
+   public void shouldwriteValueOf() throws ParseException {
       final String result = new JonWriter().write(100L);
       assertThat(result, is("100L"));
    }

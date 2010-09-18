@@ -7,7 +7,6 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.buffer;
 import static org.fuwjin.pogo.postage.PostageUtils.invoke;
 import static org.fuwjin.pogo.postage.PostageUtils.invokeReturn;
 import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
@@ -17,13 +16,13 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import java.util.NoSuchElementException;
 
-import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
 import org.fuwjin.pogo.postage.Doppleganger;
+import org.fuwjin.pogo.state.ParseMemo;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
@@ -80,41 +79,49 @@ public class RuleReferenceParser implements Parser {
    }
 
    @Override
-   public Position parse(final Position position) {
+   public boolean parse(final PogoState state) {
       if(simple) {
-         return rule.parse(position);
+         final Object parent = state.getValue();
+         state.setValue(UNSET);
+         final boolean success = rule.parse(state);
+         state.setValue(parent);
+         return success;
       }
-      final BufferedPosition pos = buffer(position, matcher);
-      final Memo parent = pos.memo();
-      Object result = invoke(constructor, UNSET, parent.getValue());
+      boolean success = false;
+      final Object parent = state.getValue();
+      Object result = invoke(constructor, UNSET, parent);
       if(result instanceof Failure) {
-         pos.fail("could not initialize rule reference " + ruleName, (Failure)result);
+         state.fail("could not initialize rule reference " + ruleName, (Failure)result);
       } else {
-         Memo memo = pos.createMemo(ruleName, result);
-         Position next;
-         if(memo == null) {
-            next = rule.parse(pos);
-            memo = next.releaseMemo(parent);
-            memo.setEnd(next);
-         } else {
-            next = memo.getEnd();
-         }
-         if(next.isSuccess()) {
-            result = invokeReturn(matcher, parent.getValue(), pos.match(next));
-            if(result instanceof Failure) {
-               next.fail("could not handle rule reference match " + ruleName, (Failure)result);
+         final ParseMemo memo = state.getMemo(ruleName, isCustomFunction(matcher));
+         if(!memo.isStored()) {
+            state.setValue(result);
+            final PogoPosition buffer = state.buffer(isCustomFunction(matcher));
+            if(rule.parse(state)) {
+               memo.store(buffer.toString(), state.getValue());
             } else {
-               result = invokeReturn(converter, result, memo.getValue());
+               memo.fail();
+               buffer.reset();
+            }
+            buffer.release();
+            state.setValue(parent);
+         }
+         if(memo.isStored()) {
+            result = invokeReturn(matcher, parent, memo.buffer());
+            if(result instanceof Failure) {
+               state.fail("could not handle rule reference match " + ruleName, (Failure)result);
+            } else {
+               result = invokeReturn(converter, result, memo.value());
                if(result instanceof Failure) {
-                  next.fail("could not finalize rule reference " + ruleName, (Failure)result);
+                  state.fail("could not finalize rule reference " + ruleName, (Failure)result);
                } else {
-                  parent.setValue(result);
-                  return pos.flush(next);
+                  state.setValue(result);
+                  success = true;
                }
             }
          }
       }
-      return pos.flush(pos);
+      return success;
    }
 
    @Override
