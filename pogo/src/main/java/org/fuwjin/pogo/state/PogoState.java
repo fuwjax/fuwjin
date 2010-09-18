@@ -1,5 +1,6 @@
 package org.fuwjin.pogo.state;
 
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
 
 public interface PogoState {
@@ -9,11 +10,11 @@ public interface PogoState {
 
    PogoPosition current();
 
-   ParseException exception();
+   PogoException exception();
 
    void fail(final String string, final Failure cause);
 
-   ParseMemo getMemo(final String name, final boolean needsBuffer);
+   PogoMemo getMemo(final String name, final boolean needsBuffer);
 
    Object getValue();
 

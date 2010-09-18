@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.fuwjin.pogo.postage.PogoCategory;
-import org.fuwjin.pogo.state.ParseException;
 import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.VoidCategory;
@@ -119,18 +118,18 @@ public class Grammar extends Pogo implements Iterable<Rule> {
     * Returns the generated code corresponding to this grammar.
     * @param qualifiedName the package/classname of the generated class
     * @return the generated code
-    * @throws ParseException if there was a serialization error
+    * @throws PogoException if there was a serialization error
     */
-   public String toCode(final String qualifiedName) throws ParseException {
+   public String toCode(final String qualifiedName) throws PogoException {
       return PredefinedGrammar.grammarToJava(qualifiedName, this);
    }
 
    /**
     * Returns the pogo grammar for this grammar.
     * @return the generated pogo grammar
-    * @throws ParseException if there was a serialization error
+    * @throws PogoException if there was a serialization error
     */
-   public String toPogo() throws ParseException {
+   public String toPogo() throws PogoException {
       return PredefinedGrammar.grammarToPogo(this);
    }
 

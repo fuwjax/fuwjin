@@ -20,7 +20,7 @@ import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Rule;
 import org.fuwjin.pogo.postage.Doppleganger;
-import org.fuwjin.pogo.state.ParseMemo;
+import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Failure;
@@ -93,7 +93,7 @@ public class RuleReferenceParser implements Parser {
       if(result instanceof Failure) {
          state.fail("could not initialize rule reference " + ruleName, (Failure)result);
       } else {
-         final ParseMemo memo = state.getMemo(ruleName, isCustomFunction(matcher));
+         final PogoMemo memo = state.getMemo(ruleName, isCustomFunction(matcher));
          if(!memo.isStored()) {
             state.setValue(result);
             final PogoPosition buffer = state.buffer(isCustomFunction(matcher));

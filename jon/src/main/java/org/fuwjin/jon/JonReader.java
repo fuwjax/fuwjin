@@ -20,8 +20,8 @@ import java.util.List;
 import org.fuwjin.jon.container.JonContainer;
 import org.fuwjin.pogo.CodePointStream;
 import org.fuwjin.pogo.Grammar;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.postage.PogoCategory;
-import org.fuwjin.pogo.state.ParseException;
 import org.fuwjin.pogo.state.ParseState;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Postage;
@@ -54,7 +54,7 @@ public class JonReader {
       this(streamOf(content));
    }
 
-   public <T> T fill(final T obj) throws ParseException {
+   public <T> T fill(final T obj) throws PogoException {
       container.clear();
       if(obj == null) {
          return (T)JON.parse(stream);
@@ -62,11 +62,11 @@ public class JonReader {
       return (T)JON.parse(stream, obj);
    }
 
-   public Object read() throws ParseException {
+   public Object read() throws PogoException {
       return read(null);
    }
 
-   public <T> T read(final Class<T> type) throws ParseException {
+   public <T> T read(final Class<T> type) throws PogoException {
       return (T)fill(getBuilder(type));
    }
 
@@ -83,7 +83,7 @@ public class JonReader {
             final Object value = JON.parse(pos, getBuilder(type));
             list.add((T)value);
          }
-      } catch(final ParseException e) {
+      } catch(final PogoException e) {
          // continue;
       }
       return list;

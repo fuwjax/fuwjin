@@ -1,6 +1,6 @@
 package org.fuwjin.pogo.state;
 
-public class ParseMemo {
+public class PogoMemo {
    private String buffer;
    private Object value;
    private final AbstractState state;
@@ -9,7 +9,7 @@ public class ParseMemo {
    private final String name;
    private int level;
 
-   public ParseMemo(final String name, final AbstractState state) {
+   public PogoMemo(final String name, final AbstractState state) {
       this.name = name;
       this.state = state;
       start = state.current();

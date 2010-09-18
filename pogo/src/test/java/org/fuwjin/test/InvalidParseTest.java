@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.state.ParseException;
+import org.fuwjin.pogo.PogoException;
 import org.junit.Test;
 
 /**
@@ -24,7 +24,6 @@ import org.junit.Test;
 public class InvalidParseTest {
    /**
     * The stock parse.
-    * @throws ParseException if it fails
     */
    @Test
    public void testDefault() {
@@ -35,7 +34,7 @@ public class InvalidParseTest {
                resolve();
             }
          }.parse(streamOf("ac"));
-      } catch(final ParseException e) {
+      } catch(final PogoException e) {
          assertThat(e.getMessage(), is("Error parsing @[1,2]: failed test: 'c' expecting [b]"));
       }
    }

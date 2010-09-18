@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.fuwjin.jon.JonReader;
-import org.fuwjin.pogo.state.ParseException;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.test.object.ClassRef;
 import org.fuwjin.test.object.ComplexChild;
 import org.fuwjin.test.object.InnerChild;
@@ -37,25 +37,25 @@ import org.junit.Test;
 
 public class WhenReadingReferencedTypes {
    @Test
-   public void shouldReadArray() throws ParseException {
+   public void shouldReadArray() throws PogoException {
       final String[] result = (String[])new JonReader("&0=(&1=java.lang.String[])[\"hi\",\"hello\"]").read();
       assertThat(result, is(new String[]{"hi", "hello"}));
    }
 
    @Test
-   public void shouldReadClass() throws ParseException {
+   public void shouldReadClass() throws PogoException {
       final Class<?> result = (Class<?>)new JonReader("&0=(&1=java.lang.Class)java.lang.String[]").read();
       assertEquals(result, String[].class);
    }
 
    @Test
-   public void shouldReadDefaultClassRef() throws ParseException {
+   public void shouldReadDefaultClassRef() throws PogoException {
       final ClassRef result = (ClassRef)new JonReader("&0=(&1=org.fuwjin.test.object.ClassRef){cls:&1}").read();
       assertThat(result, is(new ClassRef()));
    }
 
    @Test
-   public void shouldReadDefaultComplexChild() throws ParseException {
+   public void shouldReadDefaultComplexChild() throws PogoException {
       final ComplexChild result = (ComplexChild)new JonReader(
             "&0=(&1=org.fuwjin.test.object.ComplexChild){s:\"wow\",io:&2=(&3=org.fuwjin.test.object.IntegerChild){list:&4=(&5=java.util.ArrayList)[\"bob\",\"was\",\"here\"]|i:19}}")
             .read();
@@ -63,48 +63,48 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadDefaultInnerChild() throws ParseException {
+   public void shouldReadDefaultInnerChild() throws PogoException {
       final JonReader reader = new JonReader("&0=(&1=org.fuwjin.test.object.InnerChild){inner:&2={i:1,this$0:&0}}");
       final InnerChild result = (InnerChild)reader.read();
       assertThat(result, is(new InnerChild()));
    }
 
    @Test
-   public void shouldReadDefaultIntegerObject() throws ParseException {
+   public void shouldReadDefaultIntegerObject() throws PogoException {
       final IntegerObject result = (IntegerObject)new JonReader("&0=(&1=org.fuwjin.test.object.IntegerObject){i:15}")
             .read();
       assertThat(result, is(new IntegerObject()));
    }
 
    @Test
-   public void shouldReadDefaultObject() throws ParseException {
+   public void shouldReadDefaultObject() throws PogoException {
       final Object result = new JonReader("&0=(&1=java.lang.Object){}").read();
       assertThat(result, is(Object.class));
    }
 
    @Test
-   public void shouldReadDefaultSelfRefObject() throws ParseException {
+   public void shouldReadDefaultSelfRefObject() throws PogoException {
       final SelfReferencingObject result = (SelfReferencingObject)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SelfReferencingObject){obj:&0}").read();
       assertThat(result, sameInstance(result.getSelf()));
    }
 
    @Test
-   public void shouldReadDefaultSimpleChild() throws ParseException {
+   public void shouldReadDefaultSimpleChild() throws PogoException {
       final SimpleChild result = (SimpleChild)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SimpleChild){s:12.234|s:\"curious\",io:&2={i:181}}").read();
       assertThat(result, is(new SimpleChild()));
    }
 
    @Test
-   public void shouldReadDefaultSimpleGrandChild() throws ParseException {
+   public void shouldReadDefaultSimpleGrandChild() throws PogoException {
       final SimpleGrandChild result = (SimpleGrandChild)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SimpleGrandChild){s:82.24|s:\"bland\",io:&2={i:134}}").read();
       assertThat(result, is(new SimpleGrandChild()));
    }
 
    @Test
-   public void shouldReadDefaultSimpleGreatGrandChild() throws ParseException {
+   public void shouldReadDefaultSimpleGreatGrandChild() throws PogoException {
       final SimpleGreatGrandChild result = (SimpleGreatGrandChild)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SimpleGreatGrandChild){s:[\"crazy\",\"train\"]|s:57.354|s:\"nestedness\",io:&2={i:235}}")
             .read();
@@ -112,33 +112,33 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadDefaultSimpleObject() throws ParseException {
+   public void shouldReadDefaultSimpleObject() throws PogoException {
       final SimpleObject result = (SimpleObject)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SimpleObject){s:\"howdy\",io:&2={i:17}}").read();
       assertThat(result, is(new SimpleObject()));
    }
 
    @Test
-   public void shouldReadDefaultTransientChild() throws ParseException {
+   public void shouldReadDefaultTransientChild() throws PogoException {
       final TransientChild result = (TransientChild)new JonReader(
             "&0=(&1=org.fuwjin.test.object.TransientChild){i:191}").read();
       assertThat(result, is(new TransientChild()));
    }
 
    @Test
-   public void shouldReadDoubleArray() throws ParseException {
+   public void shouldReadDoubleArray() throws PogoException {
       final double[] result = (double[])new JonReader("&0=(&1=double[])[5.23,1.7E-13,-131.212]").read();
       assertThat(result, is(new double[]{5.23, 1.7E-13, -131.212}));
    }
 
    @Test
-   public void shouldReadEnum() throws ParseException {
+   public void shouldReadEnum() throws PogoException {
       final ElementType result = (ElementType)new JonReader("(&0=java.lang.annotation.ElementType)TYPE").read();
       assertThat(result, is(ElementType.TYPE));
    }
 
    @Test
-   public void shouldReadList() throws ParseException {
+   public void shouldReadList() throws PogoException {
       final LinkedList<String> result = (LinkedList<String>)new JonReader(
             "&0=(&1=java.util.LinkedList)[\"hi\",\"hello\"]").read();
       final LinkedList<String> expected = new LinkedList<String>();
@@ -148,7 +148,7 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadMap() throws ParseException {
+   public void shouldReadMap() throws PogoException {
       final TreeMap<String, String> result = (TreeMap<String, String>)new JonReader(
             "&0=(&1=java.util.TreeMap){\"hi\":\"mom\",\"hello\":\"world\"}").read();
       final TreeMap<String, String> expected = new TreeMap<String, String>();
@@ -158,54 +158,54 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadNullInArray() throws ParseException {
+   public void shouldReadNullInArray() throws PogoException {
       final String[] result = (String[])new JonReader("&0=(&1=java.lang.String[])[null]").read();
       assertThat(result, is(new String[]{null}));
    }
 
    @Test
-   public void shouldReadNullStringField() throws ParseException {
+   public void shouldReadNullStringField() throws PogoException {
       final SimpleObject result = (SimpleObject)new JonReader(
             "&0=(&1=org.fuwjin.test.object.SimpleObject){s:null,io:null}").read();
       assertThat(result, is(new SimpleObject(null, null)));
    }
 
    @Test
-   public void shouldReadNullWrapperField() throws ParseException {
+   public void shouldReadNullWrapperField() throws PogoException {
       final IntegerField result = (IntegerField)new JonReader("&0=(&1=org.fuwjin.test.object.IntegerField){i:null}")
             .read();
       assertThat(result, is(new IntegerField(null)));
    }
 
    @Test
-   public void shouldReadObject() throws ParseException {
+   public void shouldReadObject() throws PogoException {
       final PrimitiveContainer result = (PrimitiveContainer)new JonReader(
             "&1=(&2=org.fuwjin.test.object.PrimitiveContainer){index:17}").read();
       assertThat(result, is(new PrimitiveContainer(17)));
    }
 
    @Test
-   public void shouldReadReferenceNamedNull() throws ParseException {
+   public void shouldReadReferenceNamedNull() throws PogoException {
       final Object result = new JonReader("&null=(&1=java.lang.Object){}").read();
       assertThat(result, is(Object.class));
    }
 
    @Test
-   public void shouldReadSelfRefArray() throws ParseException {
+   public void shouldReadSelfRefArray() throws PogoException {
       final Object[] result = (Object[])new JonReader("&0=(&1=java.lang.Object[])[&0]").read();
       assertThat(result, sameInstance(result[0]));
       assertThat(result.length, is(1));
    }
 
    @Test
-   public void shouldReadSelfRefList() throws ParseException {
+   public void shouldReadSelfRefList() throws PogoException {
       final List<Object> result = (List<Object>)new JonReader("&0=(&1=java.util.ArrayList)[&0]").read();
       assertThat(result, sameInstance(result.get(0)));
       assertThat(result.size(), is(1));
    }
 
    @Test
-   public void shouldReadSelfRefList2() throws ParseException {
+   public void shouldReadSelfRefList2() throws PogoException {
       final List<Object> result = (List<Object>)new JonReader("&0=(&1=java.util.ArrayList)[&0,\"test\"]").read();
       assertThat(result, sameInstance(result.get(0)));
       assertThat((String)result.get(1), is("test"));
@@ -213,7 +213,7 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadSelfRefMap() throws ParseException {
+   public void shouldReadSelfRefMap() throws PogoException {
       final Map<Object, Object> result = (Map<Object, Object>)new JonReader("&0=(&1=java.util.IdentityHashMap){&0:&0}")
             .read();
       assertThat(result, sameInstance(result.get(result)));
@@ -221,7 +221,7 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadSelfRefMapKey() throws ParseException {
+   public void shouldReadSelfRefMapKey() throws PogoException {
       final Map<Object, String> result = (Map<Object, String>)new JonReader(
             "&0=(&1=java.util.IdentityHashMap){&0:\"test\"}").read();
       assertThat("test", is(result.get(result)));
@@ -229,7 +229,7 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadSelfRefMapValue() throws ParseException {
+   public void shouldReadSelfRefMapValue() throws PogoException {
       final Map<String, Object> result = (Map<String, Object>)new JonReader("&0=(&1=java.util.HashMap){\"test\":&0}")
             .read();
       assertThat(result, sameInstance(result.get("test")));
@@ -237,27 +237,27 @@ public class WhenReadingReferencedTypes {
    }
 
    @Test
-   public void shouldReadSingleList() throws ParseException {
+   public void shouldReadSingleList() throws PogoException {
       final List<String> result = (List<String>)new JonReader(
             "&0=(&1=java.util.Collections$SingletonList){element:\"a\"}").read();
       assertThat(result, is(Collections.singletonList("a")));
    }
 
    @Test
-   public void shouldReadSingleMap() throws ParseException {
+   public void shouldReadSingleMap() throws PogoException {
       final Map<String, String> result = (Map<String, String>)new JonReader(
             "&0=(&1=java.util.Collections$SingletonMap){k:\"a\",v:\"b\"}").read();
       assertThat(result, is(Collections.singletonMap("a", "b")));
    }
 
    @Test
-   public void shouldReadStringConstructor() throws ParseException {
+   public void shouldReadStringConstructor() throws PogoException {
       final StringBuilder result = (StringBuilder)new JonReader("&0=(&1=java.lang.StringBuilder)\"hi mom\"").read();
       assertThat(result.toString(), is("hi mom"));
    }
 
    @Test
-   public void shouldReadValueOf() throws ParseException {
+   public void shouldReadValueOf() throws PogoException {
       final Long result = (Long)new JonReader("(&0=java.lang.Long)100").read();
       assertThat(result, is(100L));
    }
