@@ -14,9 +14,16 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.jon.ref.StringReference;
 
+/**
+ * Builds any object with a string constructor.
+ */
 public class CharSequenceBuilder extends LiteralBuilder {
    private Object value;
 
+   /**
+    * Creates a new instance.
+    * @param type the type with a string constructor
+    */
    public CharSequenceBuilder(final Class<?> type) {
       super(type);
    }

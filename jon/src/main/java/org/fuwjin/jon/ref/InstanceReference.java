@@ -14,11 +14,21 @@ import java.util.Iterator;
 
 import org.fuwjin.jon.builder.util.SuperclassIterable;
 
+/**
+ * The reference for an instance.
+ */
 public class InstanceReference extends BaseReference implements Iterable<BaseReference.MapReference> {
    private final ReferenceStorage storage;
    private final Iterable<Class<?>> iterable;
    private final Object value;
 
+   /**
+    * Creates a new instance.
+    * @param name the reference name
+    * @param storage the storage
+    * @param type the object type
+    * @param value the object
+    */
    public InstanceReference(final String name, final ReferenceStorage storage, final Object type, final Object value) {
       super(name, type);
       this.storage = storage;

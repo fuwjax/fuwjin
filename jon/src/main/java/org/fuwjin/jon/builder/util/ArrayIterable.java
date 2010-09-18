@@ -15,14 +15,26 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Iterates over an array.
+ */
 public class ArrayIterable implements Iterable<Object> {
+   /**
+    * Creates an iterable for the array object.
+    * @param obj the array object
+    * @return the iterable
+    */
    public static Iterable<?> iterable(final Object obj) {
-      boolean primElm = obj.getClass().getComponentType().isPrimitive();
+      final boolean primElm = obj.getClass().getComponentType().isPrimitive();
       return primElm ? new ArrayIterable(obj) : Arrays.asList((Object[])obj);
    }
 
    private final Object arr;
 
+   /**
+    * Creates a new instance.
+    * @param arr the array
+    */
    public ArrayIterable(final Object arr) {
       this.arr = arr;
    }

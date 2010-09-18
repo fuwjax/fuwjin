@@ -24,6 +24,9 @@ import org.fuwjin.jon.builder.StringInstanceBuilder;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.category.ClassCategory;
 
+/**
+ * Manages the set of builders.
+ */
 public class BuilderRegistry {
    abstract static class ClassFilter {
       private Function invoker;
@@ -67,6 +70,11 @@ public class BuilderRegistry {
       builders.add(otherwise().create(InstanceBuilder.class));
    }
 
+   /**
+    * Returns the builder for a given type.
+    * @param type the build type
+    * @return the new builder
+    */
    public static Builder getBuilder(final Class<?> type) {
       try {
          for(final ClassFilter filter: builders) {

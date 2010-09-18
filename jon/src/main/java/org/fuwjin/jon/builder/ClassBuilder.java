@@ -15,9 +15,16 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.LiteralReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds a Class instance.
+ */
 public class ClassBuilder extends LiteralBuilder {
    private Class<?> cls;
 
+   /**
+    * Creates a new instance.
+    * @param type expected Class.class
+    */
    public ClassBuilder(final Class<?> type) {
       super(type);
    }

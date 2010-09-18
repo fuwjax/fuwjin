@@ -28,6 +28,9 @@ import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.InstanceCategory;
 import org.fuwjin.postage.category.VoidCategory;
 
+/**
+ * Reads JON files.
+ */
 public class JonReader {
    private static final Grammar JON;
    private static final JonContainer container = new JonContainer();;
@@ -42,18 +45,37 @@ public class JonReader {
    }
    private final CodePointStream stream;
 
+   /**
+    * Creates a new instance.
+    * @param stream the input stream
+    */
    public JonReader(final CodePointStream stream) {
       this.stream = stream;
    }
 
+   /**
+    * Creates a new instance.
+    * @param reader the input reader
+    */
    public JonReader(final Reader reader) {
       this(stream(reader));
    }
 
+   /**
+    * Creates a new instance.
+    * @param content the literal JON string.
+    */
    public JonReader(final String content) {
       this(streamOf(content));
    }
 
+   /**
+    * Fills an object from the stream.
+    * @param <T> the object type
+    * @param obj the object to fill
+    * @return the filled object
+    * @throws PogoException if the parse fails
+    */
    public <T> T fill(final T obj) throws PogoException {
       container.clear();
       if(obj == null) {
@@ -62,18 +84,40 @@ public class JonReader {
       return (T)JON.parse(stream, obj);
    }
 
+   /**
+    * Reads the next object from the stream.
+    * @return the next object
+    * @throws PogoException if the parse fails
+    */
    public Object read() throws PogoException {
       return read(null);
    }
 
+   /**
+    * Reads the next typed object from the stream.
+    * @param <T> the type of the next object
+    * @param type the object type
+    * @return the object
+    * @throws PogoException if the parse fails
+    */
    public <T> T read(final Class<T> type) throws PogoException {
       return (T)fill(getBuilder(type));
    }
 
+   /**
+    * Reads all the objects from the stream.
+    * @return the list
+    */
    public List<Object> readAll() {
       return readAll(null);
    }
 
+   /**
+    * Reads all the objects from the stream.
+    * @param <T> the element type
+    * @param type the element type
+    * @return the list of elements
+    */
    public <T> List<T> readAll(final Class<T> type) {
       container.clear();
       final List<T> list = new LinkedList<T>();

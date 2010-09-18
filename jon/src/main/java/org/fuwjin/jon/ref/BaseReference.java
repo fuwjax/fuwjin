@@ -10,11 +10,22 @@
  *******************************************************************************/
 package org.fuwjin.jon.ref;
 
+/**
+ * The base class for references.
+ */
 public abstract class BaseReference {
+   /**
+    * The base interface for list references.
+    */
    public abstract static interface ListReference extends Iterable<Object> {
+      // for consistency
    }
 
+   /**
+    * The base interface for map references.
+    */
    public abstract static interface MapReference extends Iterable<EntryReference> {
+      // for consistency
    }
 
    private final String name;
@@ -26,14 +37,26 @@ public abstract class BaseReference {
       this.name = name;
    }
 
+   /**
+    * Returns true if this reference is type cast.
+    * @return true if a cast, false otherwise
+    */
    public boolean isCast() {
       return type != null;
    }
 
+   /**
+    * Returns true if the cast should be omitted.
+    * @return true if just a reference, false otherwise
+    */
    public boolean isJustReference() {
       return justReference;
    }
 
+   /**
+    * Returns true if the reference is named.
+    * @return true if this is a reference, false otherwise
+    */
    public boolean isReference() {
       return name != null;
    }

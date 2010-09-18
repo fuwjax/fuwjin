@@ -13,9 +13,16 @@ package org.fuwjin.jon.builder;
 import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds a string.
+ */
 public class StringInstanceBuilder extends LiteralBuilder {
    private String value;
 
+   /**
+    * Creates a new instance.
+    * @param type the string type
+    */
    public StringInstanceBuilder(final Class<?> type) {
       super(type);
    }

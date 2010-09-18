@@ -49,6 +49,7 @@ public class RuleParser implements Rule {
     * @param name the name
     * @param type the bound type
     * @param initializer the rule initializer
+    * @param serializer the rule serializer
     * @param finalizer the rule finalizer
     * @param parser the expression
     */

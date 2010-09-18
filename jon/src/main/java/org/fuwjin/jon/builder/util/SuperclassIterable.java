@@ -16,6 +16,9 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Iterates over the super classes.
+ */
 public class SuperclassIterable implements Iterable<Class<?>> {
    private static Class<?> getSuperclass(final Class<?> type) {
       Class<?> next = type;
@@ -36,6 +39,10 @@ public class SuperclassIterable implements Iterable<Class<?>> {
 
    private final Class<?> type;
 
+   /**
+    * Creates a new instance.
+    * @param type the class type
+    */
    public SuperclassIterable(final Class<?> type) {
       this.type = getSuperclass(type);
    }

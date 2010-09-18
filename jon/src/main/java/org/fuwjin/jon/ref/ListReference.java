@@ -12,17 +12,32 @@ package org.fuwjin.jon.ref;
 
 import java.util.Iterator;
 
+/**
+ * Manages the reference to a list.
+ */
 public class ListReference extends BaseReference implements BaseReference.ListReference {
    private final Iterable<?> value;
    private final ReferenceStorage storage;
    private final Class<?> elementType;
 
+   /**
+    * Creates a new instance.
+    * @param name the reference name
+    * @param storage the storage
+    * @param cast the object type
+    * @param value the iterable value
+    * @param elementType the type of the list elements
+    */
    public ListReference(final String name, final ReferenceStorage storage, final Object cast, final Iterable<?> value,
          final Class<?> elementType) {
       super(name, cast);
       this.storage = storage;
       this.value = value;
       this.elementType = elementType;
+   }
+
+   Object getValue(final Object next) {
+      return storage.get(next, elementType);
    }
 
    @Override
@@ -44,9 +59,5 @@ public class ListReference extends BaseReference implements BaseReference.ListRe
             throw new UnsupportedOperationException();
          }
       };
-   }
-
-   Object getValue(final Object next) {
-      return storage.get(next, elementType);
    }
 }

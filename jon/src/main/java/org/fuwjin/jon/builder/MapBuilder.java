@@ -17,11 +17,21 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.MapReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds a map.
+ */
 public class MapBuilder extends EntriesBuilder {
+   /**
+    * Creates a new instance.
+    */
    public MapBuilder() {
       super(HashMap.class);
    }
 
+   /**
+    * Creates a new instance.
+    * @param type the map type
+    */
    public MapBuilder(final Class<?> type) {
       super(type);
    }
@@ -29,6 +39,10 @@ public class MapBuilder extends EntriesBuilder {
    @Override
    public EntryBuilder newEntry() {
       return new EntryBuilder() {
+         private Map<Object, Object> map() {
+            return (Map<Object, Object>)target;
+         }
+
          @Override
          public Builder newKey() {
             return null;
@@ -42,10 +56,6 @@ public class MapBuilder extends EntriesBuilder {
          @Override
          public void storeImpl() {
             map().put(key, value);
-         }
-
-         private Map<Object, Object> map() {
-            return (Map<Object, Object>)target;
          }
       };
    }

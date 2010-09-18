@@ -51,6 +51,7 @@ public class RuleReferenceParser implements Parser {
     * Creates a new instance.
     * @param ruleName the name of the referred rule
     * @param initializer the initializer for the reference
+    * @param serializer the serializer for the reference
     * @param finalizer the finalizer for the reference
     */
    public RuleReferenceParser(final String ruleName, final String initializer, final String serializer,

@@ -21,9 +21,16 @@ import org.fuwjin.jon.ref.BaseReference;
 import org.fuwjin.jon.ref.ListReference;
 import org.fuwjin.jon.ref.ReferenceStorage;
 
+/**
+ * Builds an array.
+ */
 public class ArrayBuilder extends ElementsBuilder {
    private Object arr;
 
+   /**
+    * Creates a new instance.
+    * @param type the array type
+    */
    public ArrayBuilder(final Class<?> type) {
       super(type);
    }
@@ -34,14 +41,14 @@ public class ArrayBuilder extends ElementsBuilder {
    }
 
    @Override
-   public BaseReference newReference(final Object obj, final Class<?> cls, final ReferenceStorage storage) {
-      return new ListReference(storage.nextName(), storage, cast(storage, obj, cls), iterable(obj), obj.getClass()
-            .getComponentType());
+   protected Object newInstance(final Object... args) {
+      return new ArrayList<Object>();
    }
 
    @Override
-   protected Object newInstance(final Object... args) {
-      return new ArrayList<Object>();
+   public BaseReference newReference(final Object obj, final Class<?> cls, final ReferenceStorage storage) {
+      return new ListReference(storage.nextName(), storage, cast(storage, obj, cls), iterable(obj), obj.getClass()
+            .getComponentType());
    }
 
    @Override

@@ -10,6 +10,9 @@ package org.fuwjin.jon;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manages literals for JON.
+ */
 public class JonLiteral {
    private static Map<String, String> primitives = new HashMap<String, String>();
    static {
@@ -31,6 +34,11 @@ public class JonLiteral {
       return 'L' + componentName + ';';
    }
 
+   /**
+    * Escapes the backslashes, line feeds, double quotes, and tabs.
+    * @param value the value to escape
+    * @return the escaped string
+    */
    public static String escape(final Object value) {
       return value.toString().replace("\\", "\\\\").replace("\n", "\\n").replace("\"", "\\\"").replace("\t", "\\t");
    }
@@ -47,6 +55,11 @@ public class JonLiteral {
       return Class.forName(builder.append(binaryName).toString());
    }
 
+   /**
+    * Returns a class instance for the name.
+    * @param value the class name
+    * @return the class instance
+    */
    public static Class<?> forName(final String value) {
       try {
          if(value.charAt(value.length() - 1) == ']') {
@@ -65,6 +78,11 @@ public class JonLiteral {
       return cls.getName();
    }
 
+   /**
+    * Returns the JON name for the class.
+    * @param cls the class
+    * @return the class name
+    */
    public static String getName(final Class<?> cls) {
       if(cls.isArray()) {
          return getArrayName(cls.getComponentType()) + "[]";
@@ -72,10 +90,18 @@ public class JonLiteral {
       return cls.getName();
    }
 
+   /**
+    * Returns the new line.
+    * @return the new line
+    */
    public static char newLine() {
       return '\n';
    }
 
+   /**
+    * Returns the tab.
+    * @return the tab
+    */
    public static char tab() {
       return '\t';
    }

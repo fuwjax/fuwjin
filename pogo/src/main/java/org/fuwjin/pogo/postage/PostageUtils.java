@@ -5,7 +5,18 @@ import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
+/**
+ * A bridge class for using legacy Pogo with the new Postage library. This class
+ * should be refactored away.
+ */
 public class PostageUtils {
+   /**
+    * Invokes the function with the given args. An attempt is made to resolve
+    * ReturnValue's correctly.
+    * @param function the function to invoke
+    * @param args the function arguments
+    * @return the function result
+    */
    public static Object invoke(final Function function, final Object... args) {
       final Object result = invokeImpl(function, args);
       if(result instanceof ReturnValue) {
@@ -35,6 +46,14 @@ public class PostageUtils {
       return result;
    }
 
+   /**
+    * Invokes function with the given args and returns the first arg. This
+    * function is used to manage the return values of the functions for rule
+    * references as they can sometimes replace their parent's value.
+    * @param function the function to invoke
+    * @param args the function arguments
+    * @return the function result
+    */
    public static Object invokeReturn(final Function function, final Object... args) {
       final Object result = invokeImpl(function, args);
       if(result instanceof Failure) {
@@ -46,10 +65,20 @@ public class PostageUtils {
       return args[0];
    }
 
+   /**
+    * Returns true if category is not default.
+    * @param category the category to test
+    * @return false if the category is default, true otherwise
+    */
    public static boolean isCustomCategory(final Category category) {
       return !"default".equals(category.name());
    }
 
+   /**
+    * Returns true if the function is not default.
+    * @param function the function to test
+    * @return false if the category is default, true otherwise
+    */
    public static boolean isCustomFunction(final Function function) {
       return !"default".equals(function.name());
    }

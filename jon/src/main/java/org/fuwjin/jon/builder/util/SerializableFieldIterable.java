@@ -17,6 +17,9 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Iterates over the serialized fields.
+ */
 public class SerializableFieldIterable implements Iterable<Field> {
    static boolean isSerializable(final Field field) {
       return !isStatic(field.getModifiers()) && !isTransient(field.getModifiers());
@@ -24,6 +27,10 @@ public class SerializableFieldIterable implements Iterable<Field> {
 
    private final Field[] fields;
 
+   /**
+    * Creates a new instance.
+    * @param type the class type
+    */
    public SerializableFieldIterable(final Class<?> type) {
       fields = type.getDeclaredFields();
    }
@@ -48,17 +55,17 @@ public class SerializableFieldIterable implements Iterable<Field> {
             return fields[ret];
          }
 
-         @Override
-         public void remove() {
-            throw new UnsupportedOperationException();
-         }
-
          private int nextField(final int i) {
             int newIndex = i;
             while(newIndex < fields.length && !isSerializable(fields[newIndex])) {
                newIndex++;
             }
             return newIndex;
+         }
+
+         @Override
+         public void remove() {
+            throw new UnsupportedOperationException();
          }
       };
    }

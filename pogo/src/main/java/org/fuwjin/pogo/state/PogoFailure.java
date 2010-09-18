@@ -6,15 +6,18 @@ import java.util.List;
 import org.fuwjin.pogo.CodePointStreamFactory;
 import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
-import org.fuwjin.util.IntRangeSet;
+import org.fuwjin.util.CodePointSet;
 
+/**
+ * Represents the most recent failure during a pogo operation.
+ */
 public class PogoFailure {
    private static class FailureTrace {
       private final String name;
       private final AbstractPosition position;
       private final int level;
 
-      public FailureTrace(final int level, final String name, final AbstractPosition position) {
+      private FailureTrace(final AbstractPosition position, final String name, final int level) {
          this.level = level;
          this.name = name;
          this.position = position;
@@ -26,12 +29,16 @@ public class PogoFailure {
       }
    }
 
-   private final IntRangeSet set = new IntRangeSet();
+   private final CodePointSet set = new CodePointSet();
    private AbstractPosition current;
    private final List<FailureTrace> stack = new LinkedList<FailureTrace>();
    private String message;
    private Failure cause;
 
+   /**
+    * Creates an exception corresponding to this failure.
+    * @return the new exception
+    */
    public PogoException exception() {
       if(message == null) {
          return new PogoException(current, "failed test: '"
@@ -44,6 +51,13 @@ public class PogoFailure {
       return new PogoException(current, message, cause.exception(), stack);
    }
 
+   /**
+    * Records a failure to match a character to a range. The test character
+    * belongs to the position.
+    * @param position the position and test character
+    * @param start the start of the expected range
+    * @param end the end of the expected range
+    */
    public void fail(final AbstractPosition position, final int start, final int end) {
       if(current == null) {
          current = position;
@@ -55,19 +69,31 @@ public class PogoFailure {
       set.unionRange(start, end);
    }
 
-   public void fail(final AbstractPosition position, final String message, final Failure cause) {
+   /**
+    * Records a failure during postage reflection.
+    * @param position the position of the failure
+    * @param newMessage the description of the failure
+    * @param newCause the cause of the failure
+    */
+   public void fail(final AbstractPosition position, final String newMessage, final Failure newCause) {
       if(current == null || position.index() >= current.index()) {
          current = position;
          set.clear();
          stack.clear();
-         this.message = message;
-         this.cause = cause;
+         message = newMessage;
+         cause = newCause;
       }
    }
 
-   public void failStack(final int level, final String name, final AbstractPosition position) {
+   /**
+    * Records a rule involved in the failure.
+    * @param position the failure position
+    * @param name the name of the rule
+    * @param level the stack level of the rule
+    */
+   public void failStack(final AbstractPosition position, final String name, final int level) {
       if(stack.size() == 0 || stack.get(stack.size() - 1).level > level) {
-         stack.add(new FailureTrace(level, name, position));
+         stack.add(new FailureTrace(position, name, level));
       }
    }
 }

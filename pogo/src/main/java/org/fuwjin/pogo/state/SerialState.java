@@ -4,10 +4,17 @@ import java.io.IOException;
 
 import org.fuwjin.pogo.CodePointStreamFactory;
 
+/**
+ * Manages the state of a serial operation.
+ */
 public class SerialState extends AbstractState {
    private final StringBuilder builder = new StringBuilder();
    private final Appendable appender;
 
+   /**
+    * Creates a new instance.
+    * @param appender the destination of the serilaization
+    */
    public SerialState(final Appendable appender) {
       this.appender = appender;
       super.set(new SerialPosition(this));
