@@ -117,6 +117,11 @@ public class CodePointStreamFactory {
       return stream(new StringReader(string));
    }
 
+   /**
+    * Returns the code point as a Java String.
+    * @param codePoint the code point
+    * @return the string version of the code point
+    */
    public static String toString(final int codePoint) {
       return new String(Character.toChars(codePoint));
    }

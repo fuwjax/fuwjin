@@ -1,5 +1,6 @@
 package org.fuwjin.pogo.state;
 
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
 
 public abstract class AbstractState implements PogoState {
@@ -7,7 +8,7 @@ public abstract class AbstractState implements PogoState {
    private AbstractPosition current;
    private int marks;
    private int memos;
-   private final ParseFailure failure = new ParseFailure();
+   private final PogoFailure failure = new PogoFailure();
 
    @Override
    public AbstractPosition current() {
@@ -15,7 +16,7 @@ public abstract class AbstractState implements PogoState {
    }
 
    @Override
-   public ParseException exception() {
+   public PogoException exception() {
       return failure.exception();
    }
 
@@ -33,11 +34,11 @@ public abstract class AbstractState implements PogoState {
    }
 
    @Override
-   public ParseMemo getMemo(final String name, final boolean needsBuffer) {
+   public PogoMemo getMemo(final String name, final boolean needsBuffer) {
       memos++;
-      ParseMemo memo = current.getMemo(name, needsBuffer);
+      PogoMemo memo = current.getMemo(name, needsBuffer);
       if(memo == null) {
-         memo = new ParseMemo(name, this);
+         memo = new PogoMemo(name, this);
       } else {
          current = memo.end();
       }

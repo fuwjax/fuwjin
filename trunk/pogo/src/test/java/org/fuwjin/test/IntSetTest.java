@@ -3,7 +3,7 @@ package org.fuwjin.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import org.fuwjin.pogo.position.IntRangeSet;
+import org.fuwjin.util.IntRangeSet;
 import org.junit.Test;
 
 public class IntSetTest {

@@ -15,7 +15,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.state.ParseException;
+import org.fuwjin.pogo.PogoException;
 import org.junit.Test;
 
 /**
@@ -26,10 +26,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests append finalization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testAddMethod() throws ParseException {
+   public void testAddMethod() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -43,10 +43,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests constructor initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testNewChild() throws ParseException {
+   public void testNewChild() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -60,10 +60,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests pass back finalization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testReturn() throws ParseException {
+   public void testReturn() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(
@@ -77,10 +77,10 @@ public class RuleReferenceTest {
 
    /**
     * Tests pass through initialization.
-    * @throws ParseException if it fails
+    * @throws PogoException if it fails
     */
    @Test
-   public void testThis() throws ParseException {
+   public void testThis() throws PogoException {
       final Object obj = new Grammar() {
          {
             add(rule(

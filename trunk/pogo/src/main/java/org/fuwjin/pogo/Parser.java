@@ -17,7 +17,7 @@ public interface Parser {
     * Parses starting at the given position. If this rule matches, it will
     * return the final position. If it does not match, it returns the given
     * position.
-    * @param position the start position
+    * @param state the parse state
     * @return the final position
     */
    boolean parse(PogoState state);

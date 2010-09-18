@@ -4,10 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.fuwjin.pogo.CodePointStreamFactory;
-import org.fuwjin.pogo.position.IntRangeSet;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
+import org.fuwjin.util.IntRangeSet;
 
-public class ParseFailure {
+public class PogoFailure {
    private static class FailureTrace {
       private final String name;
       private final AbstractPosition position;
@@ -31,16 +32,16 @@ public class ParseFailure {
    private String message;
    private Failure cause;
 
-   public ParseException exception() {
+   public PogoException exception() {
       if(message == null) {
-         return new ParseException(current, "failed test: '"
+         return new PogoException(current, "failed test: '"
                + CodePointStreamFactory.toString(((ParsePosition)current).codePoint()) + "' expecting [" + set + "]",
                stack);
       }
       if(cause == null) {
-         return new ParseException(current, message, stack);
+         return new PogoException(current, message, stack);
       }
-      return new ParseException(current, message, cause.exception(), stack);
+      return new PogoException(current, message, cause.exception(), stack);
    }
 
    public void fail(final AbstractPosition position, final int start, final int end) {

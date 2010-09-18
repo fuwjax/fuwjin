@@ -8,7 +8,7 @@ public abstract class AbstractPosition implements PogoPosition {
    private final int index;
    private final int line;
    private final int column;
-   private final List<ParseMemo> memos;
+   private final List<PogoMemo> memos;
    private PogoPosition next;
 
    public AbstractPosition(final AbstractPosition previous, final boolean shouldBufferNext, final int line,
@@ -19,7 +19,7 @@ public abstract class AbstractPosition implements PogoPosition {
          previous.next = PogoPosition.NULL;
       }
       index = previous.index + 1;
-      memos = new LinkedList<ParseMemo>();
+      memos = new LinkedList<PogoMemo>();
       state = previous.state;
       this.line = line;
       this.column = column;
@@ -27,7 +27,7 @@ public abstract class AbstractPosition implements PogoPosition {
 
    public AbstractPosition(final AbstractState state) {
       this.state = state;
-      memos = new LinkedList<ParseMemo>();
+      memos = new LinkedList<PogoMemo>();
       index = 0;
       line = 1;
       column = 1;
@@ -41,8 +41,8 @@ public abstract class AbstractPosition implements PogoPosition {
       return column;
    }
 
-   protected ParseMemo getMemo(final String name, final boolean needsBuffer) {
-      for(final ParseMemo memo: memos) {
+   protected PogoMemo getMemo(final String name, final boolean needsBuffer) {
+      for(final PogoMemo memo: memos) {
          if(memo.name().equals(name)) {
             if(!needsBuffer || memo.buffer() != null) {
                return memo;
@@ -74,7 +74,7 @@ public abstract class AbstractPosition implements PogoPosition {
       state.set(this);
    }
 
-   protected void setMemo(final ParseMemo memo) {
+   protected void setMemo(final PogoMemo memo) {
       memos.add(memo);
    }
 

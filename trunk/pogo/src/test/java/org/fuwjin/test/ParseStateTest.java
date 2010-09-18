@@ -7,8 +7,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.fuwjin.pogo.state.ParseException;
-import org.fuwjin.pogo.state.ParseMemo;
+import org.fuwjin.pogo.PogoException;
+import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.ParseState;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
@@ -50,7 +50,7 @@ public class ParseStateTest {
    public void testMemo() {
       final PogoState state = new ParseState(streamOf("zabc"));
       assertTrue(state.advance('z', 'z'));
-      final ParseMemo memo = state.getMemo("memo", true);
+      final PogoMemo memo = state.getMemo("memo", true);
       assertFalse(memo.isStored());
       final PogoPosition buffer = state.buffer(true);
       assertTrue(state.advance('a', 'a'));
@@ -67,7 +67,7 @@ public class ParseStateTest {
       final PogoState state = new ParseState(streamOf("zabc"));
       assertTrue(state.advance('z', 'z'));
       final PogoPosition mark = state.mark();
-      ParseMemo memo = state.getMemo("memo", true);
+      PogoMemo memo = state.getMemo("memo", true);
       final PogoPosition buffer = state.buffer(true);
       assertTrue(state.advance('a', 'a'));
       assertTrue(state.advance('b', 'b'));
@@ -96,11 +96,11 @@ public class ParseStateTest {
    @Test
    public void testRuleFailure() {
       final PogoState state = new ParseState(streamOf("a"));
-      final ParseMemo memo = state.getMemo("Parent", false);
+      final PogoMemo memo = state.getMemo("Parent", false);
       assertTrue(state.advance('a', 'a'));
       state.fail("could not finalize Rule", null);
       memo.fail();
-      final ParseException ex = state.exception();
+      final PogoException ex = state.exception();
       assertThat(ex.getMessage(), is("Error parsing @[1,2]: could not finalize Rule\n  in Parent[1,1]"));
    }
 
