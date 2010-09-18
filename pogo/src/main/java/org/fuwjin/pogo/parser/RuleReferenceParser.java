@@ -120,6 +120,7 @@ public class RuleReferenceParser implements Parser {
                }
             }
          }
+         memo.release();
       }
       return success;
    }

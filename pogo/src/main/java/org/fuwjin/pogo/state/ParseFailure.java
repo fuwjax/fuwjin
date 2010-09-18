@@ -11,8 +11,10 @@ public class ParseFailure {
    private static class FailureTrace {
       private final String name;
       private final AbstractPosition position;
+      private final int level;
 
-      public FailureTrace(final String name, final AbstractPosition position) {
+      public FailureTrace(final int level, final String name, final AbstractPosition position) {
+         this.level = level;
          this.name = name;
          this.position = position;
       }
@@ -62,9 +64,9 @@ public class ParseFailure {
       }
    }
 
-   public void failStack(final String name, final AbstractPosition position) {
-      if(stack.size() == 0 || stack.get(stack.size() - 1).position.index() >= position.index()) {
-         stack.add(new FailureTrace(name, position));
+   public void failStack(final int level, final String name, final AbstractPosition position) {
+      if(stack.size() == 0 || stack.get(stack.size() - 1).level > level) {
+         stack.add(new FailureTrace(level, name, position));
       }
    }
 }

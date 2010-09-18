@@ -7,6 +7,7 @@ public class ParseMemo {
    private final AbstractPosition start;
    private AbstractPosition end;
    private final String name;
+   private int level;
 
    public ParseMemo(final String name, final AbstractState state) {
       this.name = name;
@@ -23,7 +24,7 @@ public class ParseMemo {
    }
 
    public void fail() {
-      state.failStack(name, start);
+      state.failStack(level, name, start);
    }
 
    public boolean isStored() {
@@ -32,6 +33,14 @@ public class ParseMemo {
 
    public String name() {
       return name;
+   }
+
+   public void release() {
+      state.releaseMemo();
+   }
+
+   public void setLevel(final int level) {
+      this.level = level;
    }
 
    public void store(final String buffer, final Object value) {
