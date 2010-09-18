@@ -116,4 +116,8 @@ public class CodePointStreamFactory {
    public static CodePointStream streamOf(final String string) {
       return stream(new StringReader(string));
    }
+
+   public static String toString(final int codePoint) {
+      return new String(Character.toChars(codePoint));
+   }
 }

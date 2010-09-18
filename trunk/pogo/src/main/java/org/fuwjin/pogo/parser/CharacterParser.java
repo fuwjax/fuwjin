@@ -11,8 +11,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches any character from the input.
@@ -29,8 +29,8 @@ public class CharacterParser implements Parser {
    }
 
    @Override
-   public Position parse(final Position position) {
-      return position.advance(0, Integer.MAX_VALUE);
+   public boolean parse(final PogoState state) {
+      return state.advance(0, Integer.MAX_VALUE);
    }
 
    @Override

@@ -8,7 +8,8 @@
 package org.fuwjin.pogo.parser;
 
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches the inner parser zero or one times.
@@ -30,10 +31,11 @@ public class OptionalParser extends ParserOperator {
    }
 
    @Override
-   public Position parse(final Position position) {
-      final Position next = parseBuffered(position);
-      next.success();
-      return next;
+   public boolean parse(final PogoState state) {
+      final PogoPosition mark = state.mark();
+      parser.parse(state);
+      mark.release();
+      return true;
    }
 
    @Override

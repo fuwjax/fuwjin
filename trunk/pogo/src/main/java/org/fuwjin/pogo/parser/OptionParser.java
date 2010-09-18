@@ -7,9 +7,9 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a set of parsers in order against the input. As soon as any inner
@@ -22,16 +22,19 @@ public class OptionParser extends CompositeParser {
    }
 
    @Override
-   public Position parse(final Position position) {
-      final BufferedPosition buffer = position.buffered();
-      for(final Parser parser: this) {
-         buffer.success();
-         final Position next = parser.parse(buffer);
-         if(next.isSuccess()) {
-            return buffer.flush(next);
+   public boolean parse(final PogoState state) {
+      final PogoPosition mark = state.mark();
+      try {
+         for(final Parser parser: this) {
+            if(parser.parse(state)) {
+               return true;
+            }
+            mark.reset();
          }
+         return false;
+      } finally {
+         mark.release();
       }
-      return buffer.flush(buffer);
    }
 
    @Override

@@ -7,6 +7,8 @@
  *******************************************************************************/
 package org.fuwjin.pogo;
 
+import org.fuwjin.pogo.state.PogoState;
+
 /**
  * The standard interface for the Pogo parser/matcher.
  */
@@ -18,7 +20,7 @@ public interface Parser {
     * @param position the start position
     * @return the final position
     */
-   Position parse(Position position);
+   boolean parse(PogoState state);
 
    /**
     * Resolves this parser according to the grammar and type.

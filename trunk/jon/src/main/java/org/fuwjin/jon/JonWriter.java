@@ -12,8 +12,8 @@ import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.postage.PogoCategory;
+import org.fuwjin.pogo.state.ParseException;
 import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.ConstantCategory;
 import org.fuwjin.postage.category.VoidCategory;
@@ -34,11 +34,11 @@ public class JonWriter {
       storage = new ReferenceStorage();
    }
 
-   public String write(final Object obj) throws PogoException {
+   public String write(final Object obj) throws ParseException {
       return JON.toString(storage.get(obj, null));
    }
 
-   public void write(final Object obj, final Appendable appender) throws PogoException {
+   public void write(final Object obj, final Appendable appender) throws ParseException {
       JON.serial(storage.get(obj, null), appender);
    }
 }

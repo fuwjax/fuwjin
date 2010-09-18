@@ -7,19 +7,17 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.buffer;
 import static org.fuwjin.pogo.postage.PostageUtils.invoke;
 import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
-import org.fuwjin.pogo.BufferedPosition;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Memo;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
 import org.fuwjin.pogo.postage.Doppleganger;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
@@ -96,34 +94,36 @@ public class RuleParser implements Rule {
    }
 
    @Override
-   public Position parse(final Position position) {
+   public boolean parse(final PogoState state) {
       if(simple) {
-         return parser.parse(position);
+         return parser.parse(state);
       }
-      final BufferedPosition pos = buffer(position, serializer);
-      final Memo memo = pos.memo();
-      Object result = invoke(initializer, memo.getValue());
+      boolean success = false;
+      Object result = invoke(initializer, state.getValue());
       if(result instanceof Failure) {
-         pos.fail("could not initialize rule " + name, (Failure)result);
+         state.fail("could not initialize rule " + name, (Failure)result);
       } else {
-         memo.setValue(result);
-         final Position next = parser.parse(pos);
-         if(next.isSuccess()) {
-            result = invoke(serializer, memo.getValue(), pos.match(next));
+         final PogoPosition buffer = state.buffer(isCustomFunction(serializer));
+         state.setValue(result);
+         if(parser.parse(state)) {
+            result = invoke(serializer, state.getValue(), buffer.toString());
             if(result instanceof Failure) {
-               next.fail("could not handle rule match" + name, (Failure)result);
+               state.fail("could not handle rule match" + name, (Failure)result);
             } else {
                result = invoke(finalizer, result);
                if(result instanceof Failure) {
-                  next.fail("could not finalize rule " + name, (Failure)result);
+                  state.fail("could not finalize rule " + name, (Failure)result);
                } else {
-                  memo.setValue(result);
-                  return pos.flush(next);
+                  state.setValue(result);
+                  success = true;
                }
             }
+         } else {
+            buffer.reset();
          }
+         buffer.release();
       }
-      return pos.flush(pos);
+      return success;
    }
 
    /**

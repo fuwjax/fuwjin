@@ -12,8 +12,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a single character against a range. The range is from start to end,
@@ -55,8 +55,8 @@ public class CharacterRangeParser implements Parser {
    }
 
    @Override
-   public Position parse(final Position position) {
-      return position.advance(start, end);
+   public boolean parse(final PogoState state) {
+      return state.advance(start, end);
    }
 
    @Override

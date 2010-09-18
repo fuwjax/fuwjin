@@ -20,11 +20,10 @@ import java.util.List;
 import org.fuwjin.jon.container.JonContainer;
 import org.fuwjin.pogo.CodePointStream;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Memo;
-import org.fuwjin.pogo.PogoException;
-import org.fuwjin.pogo.Position;
-import org.fuwjin.pogo.position.StreamPosition;
 import org.fuwjin.pogo.postage.PogoCategory;
+import org.fuwjin.pogo.state.ParseException;
+import org.fuwjin.pogo.state.ParseState;
+import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.InstanceCategory;
 import org.fuwjin.postage.category.VoidCategory;
@@ -55,7 +54,7 @@ public class JonReader {
       this(streamOf(content));
    }
 
-   public <T> T fill(final T obj) throws PogoException {
+   public <T> T fill(final T obj) throws ParseException {
       container.clear();
       if(obj == null) {
          return (T)JON.parse(stream);
@@ -63,29 +62,28 @@ public class JonReader {
       return (T)JON.parse(stream, obj);
    }
 
-   public Object read() throws PogoException {
+   public Object read() throws ParseException {
       return read(null);
    }
 
-   public <T> T read(final Class<T> type) throws PogoException {
+   public <T> T read(final Class<T> type) throws ParseException {
       return (T)fill(getBuilder(type));
    }
 
-   public List<Object> readAll() throws PogoException {
+   public List<Object> readAll() {
       return readAll(null);
    }
 
-   public <T> List<T> readAll(final Class<T> type) throws PogoException {
+   public <T> List<T> readAll(final Class<T> type) {
       container.clear();
       final List<T> list = new LinkedList<T>();
       try {
-         Position pos = new StreamPosition(stream);
+         final PogoState pos = new ParseState(stream);
          while(true) {
-            final Memo memo = JON.parse(pos, getBuilder(type));
-            list.add((T)memo.getValue());
-            pos = memo.getEnd();
+            final Object value = JON.parse(pos, getBuilder(type));
+            list.add((T)value);
          }
-      } catch(final PogoException e) {
+      } catch(final ParseException e) {
          // continue;
       }
       return list;

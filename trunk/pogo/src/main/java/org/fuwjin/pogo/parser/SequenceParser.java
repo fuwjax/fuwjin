@@ -8,7 +8,8 @@
 package org.fuwjin.pogo.parser;
 
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
+import org.fuwjin.pogo.state.PogoPosition;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a sequence of various parsers.
@@ -21,15 +22,15 @@ public class SequenceParser extends CompositeParser {
 
    // intentionally unbuffered
    @Override
-   public Position parse(final Position position) {
-      Position next = position;
+   public boolean parse(final PogoState state) {
+      final PogoPosition notMark = state.current();
       for(final Parser parser: this) {
-         next = parser.parse(next);
-         if(!next.isSuccess()) {
-            return position;
+         if(!parser.parse(state)) {
+            notMark.reset();
+            return false;
          }
       }
-      return next;
+      return true;
    }
 
    @Override

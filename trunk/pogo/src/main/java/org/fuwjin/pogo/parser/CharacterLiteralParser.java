@@ -12,8 +12,8 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Position;
 import org.fuwjin.pogo.Rule;
+import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a single specified character from the input.
@@ -107,8 +107,8 @@ public class CharacterLiteralParser implements Parser {
    }
 
    @Override
-   public Position parse(final Position position) {
-      return position.advance(ch, ch);
+   public boolean parse(final PogoState state) {
+      return state.advance(ch, ch);
    }
 
    @Override
