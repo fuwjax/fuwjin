@@ -3,7 +3,6 @@ package org.fuwjin.pogo.state;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.fuwjin.pogo.CodePointStreamFactory;
 import org.fuwjin.pogo.PogoException;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.util.CodePointSet;
@@ -41,9 +40,8 @@ public class PogoFailure {
     */
    public PogoException exception() {
       if(message == null) {
-         return new PogoException(current, "failed test: '"
-               + CodePointStreamFactory.toString(((ParsePosition)current).codePoint()) + "' expecting [" + set + "]",
-               stack);
+         return new PogoException(current, "failed test: " + ((ParsePosition)current).toChar() + " expecting [" + set
+               + "]", stack);
       }
       if(cause == null) {
          return new PogoException(current, message, stack);

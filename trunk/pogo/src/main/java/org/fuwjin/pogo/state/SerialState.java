@@ -2,8 +2,6 @@ package org.fuwjin.pogo.state;
 
 import java.io.IOException;
 
-import org.fuwjin.pogo.CodePointStreamFactory;
-
 /**
  * Manages the state of a serial operation.
  */
@@ -24,7 +22,7 @@ public class SerialState extends AbstractState {
    public boolean advance(final int start, final int end) {
       String out;
       if(start == end) {
-         out = CodePointStreamFactory.toString(start);
+         out = new String(Character.toChars(start));
       } else {
          out = String.valueOf(getValue());
       }
