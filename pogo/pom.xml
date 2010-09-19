@@ -15,13 +15,13 @@
 	<parent>
 		<groupId>org.fuwjin</groupId>
 		<artifactId>fuwjin</artifactId>
-		<version>0.9.3-SNAPSHOT</version>
+		<version>0.9.3</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>pogo</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.3</version>
 	<name>Pogo PEG Parser</name>
 	<description>
 		Pogo is a PEG style parser and transformation engine for Java. It is designed
@@ -36,7 +36,7 @@
 		<dependency>
 		  <groupId>org.fuwjin</groupId>
 		  <artifactId>postage</artifactId>
-		  <version>0.9.3-SNAPSHOT</version>
+		  <version>0.9.3</version>
 		</dependency>
 	</dependencies>
 </project>
