@@ -54,9 +54,6 @@ public class ParseState extends AbstractState {
          @Override
          public void release() {
             buffers--;
-            if(buffers == 0) {
-               builder.setLength(0);
-            }
          }
 
          @Override
@@ -74,6 +71,10 @@ public class ParseState extends AbstractState {
    @Override
    public PogoPosition buffer(final boolean required) {
       if(required || buffers > 0) {
+         if(buffers == 0) {
+            builder.setLength(0);
+            current().setStart(0);
+         }
          buffers++;
          return buffer();
       }
