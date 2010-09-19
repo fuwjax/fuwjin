@@ -59,4 +59,15 @@ public class ParsePosition extends AbstractPosition {
    public int start() {
       return start;
    }
+
+   /**
+    * Returns the code point as a Java String.
+    * @return the string version of the code point
+    */
+   public String toChar() {
+      if(ch == -1) {
+         return "EOF";
+      }
+      return '\'' + new String(Character.toChars(ch)) + '\'';
+   }
 }
