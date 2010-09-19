@@ -15,13 +15,13 @@
 	<parent>
 		<groupId>org.fuwjin</groupId>
 		<artifactId>fuwjin</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.9.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>jon</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.9.1</version>
 	<name>Java Object Notation</name>
 	<description>
 		Java Object Notation is an extension to the JSON data format
@@ -37,7 +37,7 @@
                 <dependency>
                         <groupId>org.fuwjin</groupId>
                         <artifactId>pogo</artifactId>
-                        <version>1.0.0-SNAPSHOT</version>
+                        <version>0.9.1</version>
                 </dependency>
 	</dependencies>
 </project>
