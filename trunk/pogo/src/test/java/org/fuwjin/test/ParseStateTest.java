@@ -171,4 +171,20 @@ public class ParseStateTest {
       assertThat(buffer.toString(), is("abc"));
       buffer.release();
    }
+
+   /**
+    * The parse state should support failed sub buffers.
+    */
+   @Test
+   public void testSubBuffer2() {
+      final PogoState state = new ParseState(streamOf("zabc"));
+      assertTrue(state.advance('z', 'z'));
+      final PogoPosition buffer = state.buffer(true);
+      assertTrue(state.advance('a', 'a'));
+      buffer.release();
+      final PogoPosition sub = state.buffer(true);
+      assertTrue(state.advance('b', 'b'));
+      sub.release();
+      assertThat(sub.toString(), is("b"));
+   }
 }
