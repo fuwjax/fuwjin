@@ -1,0 +1,22 @@
+#summary Csv Example project
+
+= CSV sample project =
+
+[http://code.google.com/p/fuwjin/downloads/detail?name=PogoScreencast1.mov&can=2&q= Screencast 1: Intro to Pogo Grammar]
+
+Introduces the following Pogo grammar elements:
+  * Rule definition
+    * if *e* is a parsing expression, *Name <- e* is a rule named "Name"
+  * Consuming parsing expressions
+    * *.* consumes any single character
+    * *'lit'* or *"lit"* consumes a literal sequence of characters
+    * *`[`a-z`]`* consumes a character if it is in the range
+  * Lookahead parsing expressions
+    * if *e* is a parsing expression, *!e* is a negative lookahead
+    * if *e* is a parsing expression, *&e* is a positive lookahead
+  * Repeating parsing expressions
+    * if *e* is a parsing expression, *e?* is an optional expression (zero or one match)
+    * if *e* is a parsing expression, *e`*`* is an optionally repeating expression (zero or more matches)
+    * if *e* is a parsing expression, *e+* is a required repeating expression (one or more matches)
+  * Set parsing expressions
+    * if *e1*, *e2*, ... are parsing expressions, *e1 e2...* is a sequence parsing expression
