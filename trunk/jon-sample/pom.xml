@@ -15,13 +15,13 @@
 	<parent>
 		<groupId>org.fuwjin</groupId>
 		<artifactId>fuwjin</artifactId>
-		<version>0.9.3-SNAPSHOT</version>
+		<version>0.9.3</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>jon-sample</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.3</version>
 	<name>JON Sample Project</name>
 	<description>
 		The JON Sample Project is intended to demonstrate some of the general uses of the JON project.
@@ -30,7 +30,7 @@
                 <dependency>
                         <groupId>org.fuwjin</groupId>
                         <artifactId>jon</artifactId>
-                        <version>0.9.3-SNAPSHOT</version>
+                        <version>0.9.3</version>
                 </dependency>
 	</dependencies>
 </project>
