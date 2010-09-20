@@ -17,7 +17,7 @@ JON has an official release on maven central. Download the current binary or sou
 
 The jon-sample module is available in the distribution. It contains examples for JON as a input/output format as well as a dependency injection mechanism.
 
-  * [JON Format]
-  * [JON Mapping]
-  * [JON Usage]
-  * [JON Example Catalog]
+  * [JonFormat JON Format]
+  * [JonMapping JON Mapping]
+  * [JonUsage JON Usage]
+  * [JonCatalog JON Example Catalog]
