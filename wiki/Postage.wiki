@@ -2,4 +2,73 @@
 
 = Introduction =
 
-Java refelection is unfortunately complicated. The java.lang.reflect.* classes effectively model the Java class, but Fields are not Methods are not Constructors. Postage effectively reduces every method, constructor and field to a Function. The easiest way to envision a Function is to imagine a public static funtion 
+Java refelection is unfortunately complicated. The java.lang.reflect.`*` classes effectively model the Java class, but Fields are not Methods are not Constructors. Postage effectively reduces every method, constructor and field to a Function. 
+
+= Functions =
+
+A Postage Function is a reflection object with a name, return type, and parameter types, and functions very similarly to public static methods. In fact, the Function for a public static method has exactly the same signature. For instance
+
+{{{
+package org.example;
+public class SomeClass {
+    public static String staticMethod(int length, int size) {
+        ...
+    }
+}
+}}}
+
+In this case, the _staticMethod_ method will have a Function signature like _String org.example.!SomeClass.staticMethod(int, int)_. In other words, the return type is the same, the parameter list is the same, and the name is the fully qualified method name, so _package.class.method_.
+
+It's easiest to understand the mapping between Postage Functions and the corresponding Java elements by example, so here's a fairly elaborate example detail most of the standard Class Category Functions
+
+{{{
+package org.example;
+public class ExampleClass {
+    // Every class includes a virtual instanceof Function
+    // boolean org.example.ExampleClass.instanceof( Object )
+
+    // A static field gets two Functions, a getter and a setter
+    // String org.example.ExampleClass.staticField()
+    // void org.example.ExampleClass.staticField( String )
+   public static String staticField;
+
+    // An instance field also gets two Functions, a getter and a setter
+    // String org.example.ExampleClass.instanceField( ExampleClass )
+    // void org.example.ExampleClass.instanceField( ExampleClass, String )
+    public String instanceField;
+
+    // A constructor gets a Function named "new"
+    // ExampleClass org.example.ExampleClass.new( String )
+    public ExampleClass( String init ){
+        //...
+    }
+
+    // A static method gets one Function with the same signature
+    // void org.example.ExampleClass.staticMethod( String, int )
+    public static void staticMethod( String value, int len ){
+        //...
+    }
+
+    // An instance method Function includes the instance as the first argument
+    // String org.example.ExampleClass.instanceMethod( ExampleClass, int )
+    public String instanceMethod( int len ){
+        //...
+    }
+}
+
+class SubClass extends ExampleClass {
+    // boolean org.example.SubClass.instanceof( Object )
+
+    // Inherited Functions from the parent class are typed with the sub class
+    // String org.example.SubClass.instanceField( SubClass )
+    // void org.example.SubClass.instanceField( SubClass, String )
+    // String org.example.SubClass.instanceMethod( SubClass, int )
+
+    // Static methods and fields, as well as constructors, are not inherited
+    
+    // A default constructor, if it exists, is also exposed as a Function called new
+    // SubClass org.example.SubClass.new()
+}
+}}}
+
+Postage can be extended with arbitrary categories, which provide Functions for other situations. For example, the InstanceCategory exposes Functions for all of the instance fields and methods that use a predefined instance as the first argument.
