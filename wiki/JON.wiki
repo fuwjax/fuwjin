@@ -7,7 +7,7 @@ Java Object Notation is an extension to the JSON data format suitable for the se
   
 Hosted
 
-JON is currently hosted at [http://fuwjin.googlecode.com/wiki/JON]. The maven site is at [http://jon.fuwjin.org]
+JON is currently hosted at [http://code.google.com/p/fuwjin/wiki/JON]. The maven site is at [http://jon.fuwjin.org]
   
 Current Release
  
