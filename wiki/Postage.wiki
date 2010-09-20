@@ -35,7 +35,7 @@ public class ExampleClass {
     // An instance field also gets two Functions, a getter and a setter
     // String org.example.ExampleClass.instanceField( ExampleClass )
     // void org.example.ExampleClass.instanceField( ExampleClass, String )
-    public String instanceField;
+    private String instanceField;
 
     // A constructor gets a Function named "new"
     // ExampleClass org.example.ExampleClass.new( String )
@@ -45,13 +45,13 @@ public class ExampleClass {
 
     // A static method gets one Function with the same signature
     // void org.example.ExampleClass.staticMethod( String, int )
-    public static void staticMethod( String value, int len ){
+    private static void staticMethod( String value, int len ){
         //...
     }
 
     // An instance method Function includes the instance as the first argument
     // String org.example.ExampleClass.instanceMethod( ExampleClass, int )
-    public String instanceMethod( int len ){
+    protected String instanceMethod( int len ){
         //...
     }
 }
