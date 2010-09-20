@@ -1,0 +1,184 @@
+#summary JON Object Mapping
+
+=Preamble=
+
+  The [JonFormat JON Format Specification] is clearly not all there is to JON. In addition to specifying 
+  the format, there must be some mapping between Java Objects and a JON Element.
+  
+  This mapping is extensible. Any conversion from an Object to a valid JON Element is possible from JON. JON does 
+  however come out of the box with a set of sensible defaults.
+  
+  References are optional. By default any object that is not something resembling a language level singleton in 
+  Java is assigned a reference. So primitives and their wrappers, String objects, and Enum instances are not 
+  formatted with references, everything else is.  Classes are assigned references only because they tend to be 
+  very long literals reused fairly often.
+  
+  Class Casts are also optional. By default JON does not write a class cast if it can completely determine the 
+  type of the object from the class definition. It also omits class casts with primitive literals, using instead 
+  the Java literal syntax.
+  
+=Mapping=
+
+===Null===
+
+  The Java null object is rendered as the JON identifier "null".  It is never referenced or class cast. 
+  
+{{{
+null
+}}}
+
+===Boolean===
+
+  The Java boolean type and Boolean wrapper argument are rendered as "true" or "false". They are not referenced 
+  by default or class cast.
+  
+{{{
+true
+
+false
+}}}
+
+===Integer, Short, Char, and Byte===
+
+  The Java primitive integer types and their wrappers are rendered with the toString method. They are not 
+  referenced by default or class cast. 
+  
+{{{
+0
+
+153
+
+-19312
+}}}
+
+===Long===
+
+  The Java primitive long type and its wrapper are rendered using the toString method. They are not referenced 
+  by default.  Instead of class casting when its type is indeterminate, it is written with a trailing capital L, 
+  as per the Java literal format. When parsed, the case of the trailing capital L is ignored.
+  
+{{{
+1234567890
+
+5L
+}}}
+
+===Float===
+
+  The Java primitive float type and its wrapper are rendered using the toString method. They are not referenced 
+  by default. Instead of class casting when its type is indeterminate, it is written with a trailing capital F, 
+  as per the Java literal format. When parsed, the case of both the trailing capital F and the exponential 
+  marker E are ignored.
+  
+{{{
+1.0E17
+
+17.23F
+}}}
+
+===Double===
+
+  The Java primitive double type and its wrapper are rendered using the toString method. They are not referenced 
+  by default. Instead of class casting when its type is indeterminate, it is written with a trailing capital D, 
+  as per the Java literal format. When parsed, the case of both the trailing capital D and the exponential 
+  marker E are ignored.
+
+{{{
+1.24234
+
+1.0E-13D
+}}}
+
+===String===
+ 
+  The Java String type is rendered as a JON string. Newlines (\n) and tabs (\t) are escaped, as are double 
+  quotes (") and backslashes (\). When parsed, a backslash escape is rendered according to the following list:
+  
+  * *\n* a new line
+  
+  * *\t* a horizontal tab
+  
+  * *\anything else* any other escaped character is rendered as that character
+
+  
+{{{
+"a newline\nfollowed by a \ttab"
+
+"a string that continues
+    to the next line."
+}}}
+
+===Enum===
+
+  Any Java Enum type is rendered using the name method. They are not referenced by default, and are class cast 
+  when the type cannot be deduced. 
+  
+{{{
+(org.fuwjax.poker.Suit)SPADES
+}}}
+
+===Class===
+
+  A Java class type is rendered using its getCanonicalName method. They are referenced (although this is only 
+  for convenience), and are class cast when their type cannot be deduced.
+  
+{{{
+(java.lang.Class)java.lang.Object
+
+int
+}}}
+
+===Array===
+  
+  A Java array is rendered as a JON list. Each element is flattened in order, according to its own type. Arrays
+  are referenced by default and class cast when their type cannot be deduced.
+  
+{{{
+(java.lang.String[])["a","string","array"]
+}}}
+
+===Byte Array===
+  
+  A Java byte array is serialized as a JON string by first being converted to base 64 using the following string 
+  of digits from 0 to 63:
+
+{{{
+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$
+}}}
+
+  They are referenced by default and class cast when their type cannot be deduced.
+  
+===Collection===
+
+  Java Collection implementations with default constructors are serialized as JON lists. Each element is flattened
+  in the order provided by the iterator method according to its own type. Lists are referenced by default and
+  class cast when their type cannot be deduced.
+  
+{{{
+(java.util.ArrayList)[(java.lang.Object){},null]
+}}}
+
+===Map===
+
+  Java Map implementations with default constructors are serialized as JON objects with a single partition of 
+  entries. Each entry of the map is flattened in the order provided by the entrySet iterator. Each key and value 
+  of the entry are flattened according to their own type. Maps are referenced by default and class cast when 
+  their type cannot be deduced.
+  
+{{{
+(java.util.HashMap){"key":"value"}
+}}}
+
+===Object===
+
+  Every other Java class is mapped as a JON object with a partition of entries for itself and for each super type 
+  which has any declared fields. Each entry key is the field name as an identifier, and each entry value is the
+  value of the field flattened according to its own type. Fields which are synthetic, transient, or static are not
+  included in the set of flattened fields.  Fields are flattened in the order provided by the getDeclaredFields
+  method.
+ 
+{{{
+(org.sample.Type){id:7}
+
+(org.sample.SubType){id:"313"|id:313}
+}}}
