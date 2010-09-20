@@ -1,19 +1,19 @@
-#summary One-sentence summary of this page.
+#summary JON summary
 #labels Featured
 
-About Java Object Notation
+==About Java Object Notation==
 
 Java Object Notation is an extension to the JSON data format suitable for the serialization of Java objects. The intuitive format and the simple yet extensible library allow both humans and computers to read and write complex object graphs.
   
-Hosted
+==Hosted==
 
 JON is currently hosted at [http://code.google.com/p/fuwjin/wiki/JON]. The maven site is at [http://jon.fuwjin.org]
-  
-Current Release
+
+==Current Release==
  
 JON has an official release on maven central. Download the current binary or source jar from the files page.
 
-Sample JON Usage
+==Sample JON Usage==
 
 The jon-sample module is available in the distribution. It contains examples for JON as a input/output format as well as a dependency injection mechanism.
 
