@@ -12,8 +12,10 @@ import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 import static org.fuwjin.pogo.PogoGrammar.staticPogoGrammar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.fuwjin.pogo.Grammar;
+import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.PredefinedGrammar;
 import org.junit.Test;
 
@@ -58,6 +60,21 @@ public class PogoWriterTest {
       final Grammar grammar = readGrammar(streamOf("Rule <- ('test' Sub)* Sub = org.fuwjin.test.PogoWriterTest~toggle <- ''"));
       final String out = grammar.toString(null);
       assertThat(out, is("test"));
+   }
+
+   /**
+    * Test for Issue 2.
+    * @throws Exception if it fails
+    */
+   @Test
+   public void testWriteClassShouldFail() throws Exception {
+      final Grammar grammar = readGrammar(streamOf("Rule <- [a-z]"));
+      try {
+         grammar.toString("test");
+         fail("Serialization does not support character classes");
+      } catch(final PogoException e) {
+         // pass
+      }
    }
 
    /**

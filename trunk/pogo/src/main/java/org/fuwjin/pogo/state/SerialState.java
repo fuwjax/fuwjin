@@ -23,8 +23,11 @@ public class SerialState extends AbstractState {
       String out;
       if(start == end) {
          out = new String(Character.toChars(start));
-      } else {
+      } else if(start == 0 && end == Integer.MAX_VALUE) {
          out = String.valueOf(getValue());
+      } else {
+         fail("Character class not supported by serialization", null);
+         return false;
       }
       append(out);
       int newLine = current().line();
