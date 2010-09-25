@@ -24,6 +24,15 @@ public class PogoWriterTest {
    private static final String GRAMMAR = " grammar"; //$NON-NLS-1$
    private static final String COMMENT = "# "; //$NON-NLS-1$
    private static final String PACKAGE = "org.fuwjin.generated."; //$NON-NLS-1$
+   private static boolean toggle = false;
+
+   /**
+    * Support function for Issue 1.
+    * @return true then false
+    */
+   public static boolean toggle() {
+      return toggle = !toggle;
+   }
 
    /**
     * Generates the hardcoded parsers for each of the predefined grammars.
@@ -38,6 +47,17 @@ public class PogoWriterTest {
       for(final PredefinedGrammar grammar: PredefinedGrammar.values()) {
          System.out.println(grammar.grammar().toCode(PACKAGE + grammar.toString()));
       }
+   }
+
+   /**
+    * Test for Issue 1.
+    * @throws Exception if it fails
+    */
+   @Test
+   public void testSimpleWriteRewind() throws Exception {
+      final Grammar grammar = readGrammar(streamOf("Rule <- ('test' Sub)* Sub = org.fuwjin.test.PogoWriterTest~toggle <- ''"));
+      final String out = grammar.toString(null);
+      assertThat(out, is("test"));
    }
 
    /**

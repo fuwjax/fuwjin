@@ -71,6 +71,7 @@ public class SerialState extends AbstractState {
       if(!shouldBufferNext()) {
          appendImpl(builder);
          builder.setLength(0);
+         current().setStart(0);
       }
    }
 
