@@ -4,7 +4,7 @@ package org.fuwjin.pogo.state;
  * Manages the current position of a serial operation.
  */
 public class SerialPosition extends AbstractPosition {
-   private final int start;
+   private int start;
 
    /**
     * Creates a new instance.
@@ -25,6 +25,10 @@ public class SerialPosition extends AbstractPosition {
    public SerialPosition(final SerialState state) {
       super(state);
       start = 0;
+   }
+
+   protected void setStart(final int start) {
+      this.start = start;
    }
 
    protected int start() {
