@@ -1,6 +1,5 @@
 package org.fuwjin.pogo;
 
-import org.fuwjin.postage.Category;
 
 /**
  * A rule is a named parser.
@@ -10,7 +9,7 @@ public interface Rule extends Parser {
     * Returns the category.
     * @return the category
     */
-   Category category();
+   String category();
 
    /**
     * Returns the name.

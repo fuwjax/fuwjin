@@ -1,13 +1,14 @@
 package org.fuwjin.postage.category;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.FunctionFactory;
 import org.fuwjin.postage.function.CompositeFunction;
 
-public abstract class AbstractCategory implements Category {
+public abstract class AbstractCategory implements FunctionFactory {
    private final String name;
    private final Map<String, CompositeFunction> functions = new HashMap<String, CompositeFunction>();
 
@@ -32,7 +33,7 @@ public abstract class AbstractCategory implements Category {
    protected abstract void fillFunction(CompositeFunction function);
 
    @Override
-   public final CompositeFunction getFunction(final String name) {
+   public final CompositeFunction getFunction(final String name, final Type... parameters) {
       CompositeFunction function = functions.get(name);
       if(function == null) {
          function = new CompositeFunction(name);

@@ -19,7 +19,7 @@ public class WhenPostingToVoidMethods {
 
    @Test
    public void shouldFailAlways() {
-      final Function func = postage.getFunction("void", "anything");
+      final Function func = postage.getFunction("void.anything");
       try {
          func.invoke();
          fail("should fail");

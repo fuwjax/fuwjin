@@ -28,8 +28,7 @@ Definition      =org.fuwjin.pogo.parser.RuleParser
                    ', ' Function~finalizer
                    ', ' Expression~parser 
                    '));\n'
-Category        =org.fuwjin.postage.Category
-                <- QuotedIdent~name
+Category        <- QuotedIdent~this
 Function        =org.fuwjin.postage.Function
                 <- QuotedIdent~name                
 Expression      <- Option~this / SequenceChain~this

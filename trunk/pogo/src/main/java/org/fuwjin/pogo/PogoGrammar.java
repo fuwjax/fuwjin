@@ -40,8 +40,8 @@ public final class PogoGrammar extends Grammar {
             "OUT", "default", "default", "default"), ref("Function", "default", "default", "serializer"))),
             optional(seq(ref("COLON", "default", "default", "default"), ref("Function", "default", "default",
                   "finalizer"))))));
-      add(rule("Category", Doppleganger.class, "default", "default", "new", ref("ClassIdentifier", "default",
-            "default", "return")));
+      add(rule("Category", "default", "default", "default", "default", ref("ClassIdentifier", "default", "default",
+            "return")));
       add(rule("Function", Doppleganger.class, "default", "default", "new", ref("Identifier", "default", "default",
             "return")));
       add(rule("Expression", org.fuwjin.pogo.parser.OptionParser.class, "new", "default", "reduce", seq(ref("Sequence",

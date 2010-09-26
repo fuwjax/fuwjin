@@ -22,13 +22,13 @@ public class WhenPostingToDuckMethods {
    @Test
    public void shouldDuckTypeAppropriately() throws FailureException {
       final String str = "test";
-      final Function func = postage.getFunction("true", "length");
+      final Function func = postage.getFunction("true.length");
       assertThat((Integer)func.invoke(str), is(str.length()));
    }
 
    @Test
    public void shouldFailOnNoTarget() {
-      final Function func = postage.getFunction("true", "anything");
+      final Function func = postage.getFunction("true.anything");
       try {
          func.invoke();
          fail("should fail");
@@ -39,7 +39,7 @@ public class WhenPostingToDuckMethods {
 
    @Test
    public void shouldFailOnNullTarget() {
-      final Function func = postage.getFunction("true", "anything");
+      final Function func = postage.getFunction("true.anything");
       try {
          func.invoke((Object)null);
          fail("should fail");
