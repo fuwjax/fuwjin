@@ -132,9 +132,9 @@ public class RuleReferenceParser implements Parser {
       if(rule == null) {
          throw new NoSuchElementException(String.format(UNKNOWN_RULE, ruleName));
       }
-      constructor = parent.category().getFunction(Doppleganger.<String> content(constructor));
-      matcher = parent.category().getFunction(Doppleganger.<String> content(matcher));
-      converter = parent.category().getFunction(Doppleganger.<String> content(converter));
+      constructor = grammar.getFunction(parent.category(), Doppleganger.<String> content(constructor));
+      matcher = grammar.getFunction(parent.category(), Doppleganger.<String> content(matcher));
+      converter = grammar.getFunction(parent.category(), Doppleganger.<String> content(converter));
       simple = !isCustomFunction(constructor) && !isCustomFunction(matcher) && !isCustomFunction(converter);
    }
 

@@ -27,7 +27,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldCurry() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(TrivialInterface.class.getCanonicalName(), "update");
+      final Function func = postage.getFunction(TrivialInterface.class.getCanonicalName() + ".update");
       func.curry(object).curry(new Observable()).invoke("test");
       assertThat((String)object.updated, is("test"));
    }
@@ -35,7 +35,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldFailPostIncorrectArgsMessages() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "sample");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".sample");
       try {
          func.invoke(object, 7);
          fail("should fail");
@@ -46,7 +46,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostIncorrectMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "field");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".field");
       try {
          func.invoke(7);
          fail("should fail");
@@ -57,13 +57,13 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostInvalidArgsCastMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "instanceof");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".instanceof");
       assertTrue(!(Boolean)func.invoke(7));
    }
 
    @Test
    public void shouldFailPostInvalidArgsCreateMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "new");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".new");
       try {
          func.invoke(7);
          fail("should fail");
@@ -74,7 +74,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostInvalidCastMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "instanceof");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".instanceof");
       try {
          func.invoke(7, 7);
          fail("should fail");
@@ -85,7 +85,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostInvalidCreateMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "new");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".new");
       try {
          func.invoke(7, 7);
          fail("should fail");
@@ -97,7 +97,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldFailPostMessageFail() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "fails");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".fails");
       try {
          func.invoke(object);
          fail("should fail");
@@ -108,7 +108,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostSetMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "staticField");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".staticField");
       try {
          func.invoke(7);
          fail("should fail");
@@ -119,7 +119,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostTooManyArgsMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "staticField");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".staticField");
       try {
          func.invoke(7, 7);
          fail("should fail");
@@ -130,7 +130,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostUnknownMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "doesNotExist");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".doesNotExist");
       try {
          func.invoke("test");
          fail("should fail");
@@ -142,7 +142,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldFailUnknownCategory() throws FailureException {
       try {
-         postage.getFunction("doesNotExist", "doesNotExist");
+         postage.getFunction("doesNotExist.doesNotExist");
          fail("should fail");
       } catch(final IllegalArgumentException e) {
          // pass();
@@ -152,20 +152,20 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldPostCastMessages() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "instanceof");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".instanceof");
       assertThat((Boolean)func.invoke(object), is(true));
    }
 
    @Test
    public void shouldPostCreateMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "new");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".new");
       assertThat(func.invoke(), is(SampleObject.class));
    }
 
    @Test
    public void shouldPostFieldMessages() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "field");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".field");
       assertNull(func.invoke(object));
       assertNull(func.invoke(object, "test"));
       assertThat((String)func.invoke(object), is("test"));
@@ -174,7 +174,7 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldPostMessagesByInterface() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(TrivialInterface.class.getCanonicalName(), "update");
+      final Function func = postage.getFunction(TrivialInterface.class.getCanonicalName() + ".update");
       func.invoke(object, null, "test");
       assertThat((String)object.updated, is("test"));
    }
@@ -182,13 +182,13 @@ public class WhenPostingToClassMethods {
    @Test
    public void shouldPostNoArgMessages() throws FailureException {
       final SampleObject object = new SampleObject();
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "sample");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".sample");
       assertThat((String)func.invoke(object), is("test"));
    }
 
    @Test
    public void shouldPostStaticFieldMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "staticField");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".staticField");
       assertNull(func.invoke());
       assertNull(func.invoke("test"));
       assertThat((String)func.invoke(), is("test"));
@@ -196,7 +196,7 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldPostStaticMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName(), "sampleStatic");
+      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".sampleStatic");
       assertThat((String)func.invoke("test"), is("test"));
    }
 }

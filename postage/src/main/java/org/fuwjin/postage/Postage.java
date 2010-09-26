@@ -1,5 +1,6 @@
 package org.fuwjin.postage;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,35 +9,49 @@ import java.util.Map;
 import org.fuwjin.postage.category.ClassCategory;
 import org.fuwjin.postage.category.CompositeCategory;
 
-public class Postage {
+/**
+ * The interface to shiny happy reflection. Postage exposes Java elements as
+ * Functions, standardized execution hooks.
+ */
+public class Postage implements FunctionFactory {
+   /**
+    * Returns true if result is not a failure.
+    * @param result the possible failure
+    * @return false if result is a failure, true otherwise
+    */
    public static boolean isSuccess(final Object result) {
       return !(result instanceof Failure);
    }
 
-   private final Map<String, Category> categories = new HashMap<String, Category>();
-   private final List<Category> nullCategories = new ArrayList<Category>();
+   private final Map<String, FunctionFactory> categories = new HashMap<String, FunctionFactory>();
+   private final List<FunctionFactory> nullCategories = new ArrayList<FunctionFactory>();
 
-   public Postage(final Category... extras) {
-      for(final Category category: extras) {
+   /**
+    * Creates a new instance.
+    * @param factories custom factories for extending the standard reflection
+    *        hooks
+    */
+   public Postage(final FunctionFactory... factories) {
+      for(final FunctionFactory category: factories) {
          if(category.name() == null) {
             nullCategories.add(category);
          }
       }
-      for(final Category category: extras) {
+      for(final FunctionFactory category: factories) {
          if(category.name() != null) {
             addCategory(category);
          }
       }
    }
 
-   private CompositeCategory addCategory(final Category category) {
+   private CompositeCategory addCategory(final FunctionFactory category) {
       final CompositeCategory cat = new CompositeCategory(category, nullCategories);
       categories.put(cat.name(), cat);
       return cat;
    }
 
-   public Category getCategory(final String category) {
-      Category cat = categories.get(category);
+   private FunctionFactory getCategory(final String category) {
+      FunctionFactory cat = categories.get(category);
       if(cat == null) {
          cat = newCategory(category);
          cat = addCategory(cat);
@@ -52,15 +67,25 @@ public class Postage {
       }
    }
 
-   public Function getFunction(final String category, final String name) {
-      return getCategory(category).getFunction(name);
+   @Override
+   public Function getFunction(final String name, final Type... parameters) {
+      final int index = name.lastIndexOf('.');
+      if(index >= 0) {
+         return getCategory(name.substring(0, index)).getFunction(name.substring(index + 1));
+      }
+      return getCategory(null).getFunction(name);
    }
 
-   protected Category newCategory(final Class<?> type) {
+   @Override
+   public String name() {
+      return "";
+   }
+
+   protected FunctionFactory newCategory(final Class<?> type) {
       return new ClassCategory(type);
    }
 
-   protected Category newCategory(final String category) {
+   protected FunctionFactory newCategory(final String category) {
       final Class<?> type = getClass(category);
       return newCategory(type);
    }

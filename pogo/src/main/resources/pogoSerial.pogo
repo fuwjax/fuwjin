@@ -6,9 +6,7 @@ Definition      =org.fuwjin.pogo.parser.RuleParser
 TypeInfo        =org.fuwjin.pogo.parser.RuleParser
                 <- '=' Category~type ('~' Function~initializer)? ('>' Function~serializer)? (':' Function~finalizer)? '\n\t\t'
 Category        =org.fuwjin.pogo.postage.PostageUtils~isCustomCategory
-                <- CategoryName~this
-CategoryName    =org.fuwjin.postage.Category                
-                <- Identifier~name
+                <- Identifier~this
 Function        =org.fuwjin.pogo.postage.PostageUtils~isCustomFunction
                 <- FunctionName~this
 FunctionName    =org.fuwjin.postage.Function

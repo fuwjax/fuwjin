@@ -1,7 +1,6 @@
 package org.fuwjin.pogo.postage;
 
 import org.fuwjin.pogo.postage.ReturnFunction.ReturnValue;
-import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
@@ -70,8 +69,8 @@ public class PostageUtils {
     * @param category the category to test
     * @return false if the category is default, true otherwise
     */
-   public static boolean isCustomCategory(final Category category) {
-      return !"default".equals(category.name());
+   public static boolean isCustomCategory(final String category) {
+      return !"default".equals(category);
    }
 
    /**

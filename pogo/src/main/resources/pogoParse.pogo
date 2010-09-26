@@ -5,8 +5,7 @@ Definition      =org.fuwjin.pogo.parser.RuleParser~new
                 <- Identifier:name TypeInfo~this? LEFTARROW Expression:parser
 TypeInfo        =org.fuwjin.pogo.parser.RuleParser
                 <- EQUALS Category:type (HASH Function:initializer)? (OUT Function:serializer)? (COLON Function:finalizer)?
-Category        =org.fuwjin.pogo.postage.Doppleganger:new
-                <- ClassIdentifier:return
+Category        <- ClassIdentifier:return
 Function        =org.fuwjin.pogo.postage.Doppleganger:new
                 <- Identifier:return
 Expression      =org.fuwjin.pogo.parser.OptionParser~new:reduce

@@ -18,7 +18,6 @@ import org.fuwjin.pogo.Rule;
 import org.fuwjin.pogo.postage.Doppleganger;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
-import org.fuwjin.postage.Category;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 
@@ -29,7 +28,7 @@ public class RuleParser implements Rule {
    private String name;
    private Parser parser;
    private Function finalizer;
-   private Category type;
+   private final String type;
    private Function initializer;
    private Function serializer;
    private boolean simple = true;
@@ -38,7 +37,7 @@ public class RuleParser implements Rule {
     * Creates a new instance.
     */
    RuleParser() {
-      type = Doppleganger.create("default", Category.class);
+      type = "default";
       initializer = Doppleganger.create("default", Function.class);
       serializer = Doppleganger.create("default", Function.class);
       finalizer = Doppleganger.create("default", Function.class);
@@ -56,7 +55,7 @@ public class RuleParser implements Rule {
    public RuleParser(final String name, final String type, final String initializer, final String serializer,
          final String finalizer, final Parser parser) {
       this.name = name;
-      this.type = Doppleganger.create(type, Category.class);
+      this.type = type;
       this.initializer = Doppleganger.create(initializer, Function.class);
       this.serializer = Doppleganger.create(serializer, Function.class);
       this.finalizer = Doppleganger.create(finalizer, Function.class);
@@ -64,7 +63,7 @@ public class RuleParser implements Rule {
    }
 
    @Override
-   public Category category() {
+   public String category() {
       return type;
    }
 
@@ -72,7 +71,7 @@ public class RuleParser implements Rule {
    public boolean equals(final Object obj) {
       try {
          final RuleParser o = (RuleParser)obj;
-         return eq(getClass(), o.getClass()) && eq(name, o.name) && eq(type.name(), o.type.name())
+         return eq(getClass(), o.getClass()) && eq(name, o.name) && eq(type, o.type)
                && eq(initializer.name(), o.initializer.name()) && eq(serializer.name(), o.serializer.name())
                && eq(finalizer.name(), o.finalizer.name()) && eq(parser, o.parser);
       } catch(final ClassCastException e) {
@@ -133,10 +132,9 @@ public class RuleParser implements Rule {
     */
    @Override
    public void resolve(final Grammar grammar, final Rule parent) {
-      type = grammar.getCategory(Doppleganger.<String> content(type));
-      initializer = type.getFunction(Doppleganger.<String> content(initializer));
-      serializer = type.getFunction(Doppleganger.<String> content(serializer));
-      finalizer = type.getFunction(Doppleganger.<String> content(finalizer));
+      initializer = grammar.getFunction(type, Doppleganger.<String> content(initializer));
+      serializer = grammar.getFunction(type, Doppleganger.<String> content(serializer));
+      finalizer = grammar.getFunction(type, Doppleganger.<String> content(finalizer));
       simple = !isCustomFunction(initializer) && !isCustomFunction(serializer) && !isCustomFunction(finalizer);
       parser.resolve(grammar, this);
    }

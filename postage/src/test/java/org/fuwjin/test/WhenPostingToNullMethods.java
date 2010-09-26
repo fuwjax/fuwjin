@@ -21,7 +21,7 @@ public class WhenPostingToNullMethods {
 
    @Test
    public void shouldFailOnArgs() {
-      final Function func = postage.getFunction("null", "instanceof");
+      final Function func = postage.getFunction("null.instanceof");
       try {
          func.invoke();
          fail("should fail");
@@ -32,20 +32,20 @@ public class WhenPostingToNullMethods {
 
    @Test
    public void shouldFailOnNonNull() throws FailureException {
-      final Function func = postage.getFunction("null", "instanceof");
+      final Function func = postage.getFunction("null.instanceof");
       assertTrue(!(Boolean)func.invoke("test"));
    }
 
    @Test
    public void shouldReturnNull() throws FailureException {
-      final Function func = postage.getFunction("null", "anything");
+      final Function func = postage.getFunction("null.anything");
       assertNull(func.invoke());
       assertNull(func.invoke("anything"));
    }
 
    @Test
    public void shouldReturnNullInstanceOf() throws FailureException {
-      final Function func = postage.getFunction("null", "instanceof");
+      final Function func = postage.getFunction("null.instanceof");
       assertTrue((Boolean)func.invoke((Object)null));
    }
 }

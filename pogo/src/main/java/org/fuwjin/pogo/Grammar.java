@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.fuwjin.pogo.postage.PogoCategory;
-import org.fuwjin.postage.Category;
+import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.VoidCategory;
 
@@ -76,12 +76,16 @@ public class Grammar extends Pogo implements Iterable<Rule> {
    }
 
    /**
-    * Returns the named category.
-    * @param category the name of the category
-    * @return the category
+    * Returns the named function.
+    * @param category the function category prefix
+    * @param name the name of the function
+    * @return the function
     */
-   public Category getCategory(final String category) {
-      return postage.getCategory(category);
+   public Function getFunction(final String category, final String name) {
+      if("default".equals(category)) {
+         return postage.getFunction("default." + name);
+      }
+      return postage.getFunction(category + "." + name);
    }
 
    /**
