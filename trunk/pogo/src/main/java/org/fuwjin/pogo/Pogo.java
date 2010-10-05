@@ -13,7 +13,7 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import org.fuwjin.pogo.state.ParseState;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.pogo.state.SerialState;
-import org.fuwjin.postage.StandardAdaptable;
+import org.fuwjin.postage.type.Optional;
 
 /**
  * The main parsing interface.
@@ -58,7 +58,7 @@ public class Pogo {
     * @throws PogoException if the parse fails
     */
    public Object parse(final CodePointStream input) throws PogoException {
-      return parse(input, StandardAdaptable.UNSET);
+      return parse(input, Optional.UNSET);
    }
 
    /**

@@ -16,7 +16,7 @@ import org.fuwjin.pogo.PogoException;
 import org.fuwjin.pogo.postage.PogoCategory;
 import org.fuwjin.postage.Postage;
 import org.fuwjin.postage.category.ConstantCategory;
-import org.fuwjin.postage.category.VoidCategory;
+import org.fuwjin.postage.category.ReflectionCategory;
 
 /**
  * Manages writing for JON files.
@@ -25,7 +25,7 @@ public class JonWriter {
    private static final Grammar JON;
    static {
       try {
-         final Postage postage = new Postage(new PogoCategory(), new VoidCategory("default"), new ConstantCategory());
+         final Postage postage = new Postage(new ReflectionCategory(), new PogoCategory(), new ConstantCategory());
          JON = readGrammar(streamBytes("jon.writer.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);

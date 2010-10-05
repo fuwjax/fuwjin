@@ -1,12 +1,25 @@
 package org.fuwjin.postage.function;
 
-import java.lang.reflect.Constructor;
+import static org.fuwjin.postage.type.ObjectUtils.access;
 
-public class ConstructorFunction extends AbstractFunction {
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+
+import org.fuwjin.postage.FunctionTarget;
+
+public class ConstructorFunction implements FunctionTarget {
+   public static FunctionTarget constructor(final Constructor<?> c) {
+      final FunctionTarget target = new ConstructorFunction(c);
+      if(c.isVarArgs()) {
+         return new VarArgsTarget(target);
+      }
+      return target;
+   }
+
    private final Constructor<?> c;
 
-   public ConstructorFunction(final Constructor<?> c) {
-      super("new", c.getDeclaringClass(), c.isVarArgs(), c.getParameterTypes());
+   private ConstructorFunction(final Constructor<?> c) {
       this.c = c;
    }
 
@@ -21,12 +34,30 @@ public class ConstructorFunction extends AbstractFunction {
    }
 
    @Override
-   public String toString() {
-      return c.toString();
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
+      return access(c).newInstance(args);
    }
 
    @Override
-   protected Object tryInvoke(final Object... args) throws Exception {
-      return access(c).newInstance(args);
+   public Type parameterType(final int index) {
+      if(index >= requiredArguments()) {
+         return null;
+      }
+      return c.getParameterTypes()[index];
+   }
+
+   @Override
+   public int requiredArguments() {
+      return c.getParameterTypes().length;
+   }
+
+   @Override
+   public Type returnType() {
+      return c.getDeclaringClass();
+   }
+
+   @Override
+   public String toString() {
+      return c.toString();
    }
 }

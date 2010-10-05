@@ -7,10 +7,7 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.invoke;
-import static org.fuwjin.pogo.postage.PostageUtils.invokeReturn;
 import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
-import static org.fuwjin.postage.StandardAdaptable.UNSET;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
@@ -19,12 +16,13 @@ import java.util.NoSuchElementException;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Rule;
-import org.fuwjin.pogo.postage.Doppleganger;
 import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
+import org.fuwjin.postage.CompositeFunction;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.type.Optional;
 
 /**
  * Matches a rule indirectly and optionally persists the result of the rule.
@@ -42,9 +40,9 @@ public class RuleReferenceParser implements Parser {
     * Creates a new instance.
     */
    RuleReferenceParser() {
-      constructor = Doppleganger.create("default", Function.class);
-      matcher = Doppleganger.create("default", Function.class);
-      converter = Doppleganger.create("default", Function.class);
+      constructor = new CompositeFunction("default");
+      matcher = new CompositeFunction("default");
+      converter = new CompositeFunction("default");
    }
 
    /**
@@ -57,9 +55,9 @@ public class RuleReferenceParser implements Parser {
    public RuleReferenceParser(final String ruleName, final String initializer, final String serializer,
          final String finalizer) {
       this.ruleName = ruleName;
-      constructor = Doppleganger.create(initializer, Function.class);
-      matcher = Doppleganger.create(serializer, Function.class);
-      converter = Doppleganger.create(finalizer, Function.class);
+      constructor = new CompositeFunction(initializer);
+      matcher = new CompositeFunction(serializer);
+      converter = new CompositeFunction(finalizer);
    }
 
    @Override
@@ -83,14 +81,14 @@ public class RuleReferenceParser implements Parser {
    public boolean parse(final PogoState state) {
       if(simple) {
          final Object parent = state.getValue();
-         state.setValue(UNSET);
+         state.setValue(Optional.UNSET);
          final boolean success = rule.parse(state);
          state.setValue(parent);
          return success;
       }
       boolean success = false;
       final Object parent = state.getValue();
-      Object result = invoke(constructor, UNSET, parent);
+      Object result = constructor.invokeSafe(Optional.UNSET, parent);
       if(result instanceof Failure) {
          state.fail("could not initialize rule reference " + ruleName, (Failure)result);
       } else {
@@ -108,11 +106,11 @@ public class RuleReferenceParser implements Parser {
             state.setValue(parent);
          }
          if(memo.isStored()) {
-            result = invokeReturn(matcher, parent, memo.buffer());
+            result = matcher.invokeSafe(parent, memo.buffer());
             if(result instanceof Failure) {
                state.fail("could not handle rule reference match " + ruleName, (Failure)result);
             } else {
-               result = invokeReturn(converter, result, memo.value());
+               result = converter.invokeSafe(result, memo.value());
                if(result instanceof Failure) {
                   state.fail("could not finalize rule reference " + ruleName, (Failure)result);
                } else {
@@ -132,9 +130,9 @@ public class RuleReferenceParser implements Parser {
       if(rule == null) {
          throw new NoSuchElementException(String.format(UNKNOWN_RULE, ruleName));
       }
-      constructor = grammar.getFunction(parent.category(), Doppleganger.<String> content(constructor));
-      matcher = grammar.getFunction(parent.category(), Doppleganger.<String> content(matcher));
-      converter = grammar.getFunction(parent.category(), Doppleganger.<String> content(converter));
+      constructor = grammar.getFunction(parent.category(), constructor.name(), void.class, Optional.OBJECT);
+      matcher = grammar.getReturnFunction(parent.category(), matcher.name(), Optional.OBJECT, String.class);
+      converter = grammar.getReturnFunction(parent.category(), converter.name(), Optional.OBJECT, Optional.OBJECT);
       simple = !isCustomFunction(constructor) && !isCustomFunction(matcher) && !isCustomFunction(converter);
    }
 

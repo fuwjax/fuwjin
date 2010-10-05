@@ -11,6 +11,7 @@ import java.util.Observable;
 import org.fuwjin.postage.Failure.FailureException;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.Postage;
+import org.fuwjin.postage.category.ReflectionCategory;
 import org.fuwjin.sample.SampleObject;
 import org.fuwjin.sample.TrivialInterface;
 import org.junit.Before;
@@ -21,7 +22,7 @@ public class WhenPostingToClassMethods {
 
    @Before
    public void setup() {
-      postage = new Postage();
+      postage = new Postage(new ReflectionCategory());
    }
 
    @Test
@@ -130,11 +131,10 @@ public class WhenPostingToClassMethods {
 
    @Test
    public void shouldFailPostUnknownMessages() throws FailureException {
-      final Function func = postage.getFunction(SampleObject.class.getCanonicalName() + ".doesNotExist");
       try {
-         func.invoke("test");
+         postage.getFunction(SampleObject.class.getCanonicalName() + ".doesNotExist");
          fail("should fail");
-      } catch(final FailureException e) {
+      } catch(final IllegalArgumentException e) {
          // pass();
       }
    }

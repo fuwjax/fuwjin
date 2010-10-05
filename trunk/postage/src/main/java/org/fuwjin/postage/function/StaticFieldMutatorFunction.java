@@ -1,14 +1,17 @@
 package org.fuwjin.postage.function;
 
+import static org.fuwjin.postage.type.ObjectUtils.access;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 
-import org.fuwjin.postage.Function;
+import org.fuwjin.postage.FunctionTarget;
 
-public class StaticFieldMutatorFunction extends AbstractFunction implements Function {
+public class StaticFieldMutatorFunction implements FunctionTarget {
    private final Field field;
 
    public StaticFieldMutatorFunction(final Field field) {
-      super(field.getName(), Void.class, false, field.getType());
       this.field = field;
    }
 
@@ -23,13 +26,31 @@ public class StaticFieldMutatorFunction extends AbstractFunction implements Func
    }
 
    @Override
-   public String toString() {
-      return field.toString();
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
+      access(field).set(null, args[0]);
+      return null;
    }
 
    @Override
-   public Object tryInvoke(final Object... args) throws Exception {
-      access(field).set(null, args[0]);
+   public Type parameterType(final int index) {
+      if(index == 0) {
+         return field.getType();
+      }
       return null;
+   }
+
+   @Override
+   public int requiredArguments() {
+      return 1;
+   }
+
+   @Override
+   public Type returnType() {
+      return void.class;
+   }
+
+   @Override
+   public String toString() {
+      return field.toString();
    }
 }

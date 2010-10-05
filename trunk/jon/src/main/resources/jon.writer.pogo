@@ -1,5 +1,5 @@
 Element         <- Null~this / ReferenceOnly~this / Reference~this? Cast~this? Value~this
-Null            =null~instanceof
+Null            =null~equals
                 <- 'null'
 ReferenceOnly   =org.fuwjin.jon.ref.BaseReference~isJustReference
                 <- '&' Identifier~name

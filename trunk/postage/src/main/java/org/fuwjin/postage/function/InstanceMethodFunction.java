@@ -1,13 +1,26 @@
 package org.fuwjin.postage.function;
 
-import java.lang.reflect.Method;
+import static org.fuwjin.postage.type.ObjectUtils.access;
 
-public class InstanceMethodFunction extends AbstractFunction {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+import org.fuwjin.postage.FunctionTarget;
+
+public class InstanceMethodFunction implements FunctionTarget {
+   public static FunctionTarget method(final Method method, final Object object) {
+      final FunctionTarget target = new InstanceMethodFunction(method, object);
+      if(method.isVarArgs()) {
+         return new VarArgsTarget(target);
+      }
+      return target;
+   }
+
    private final Method method;
    private final Object target;
 
-   public InstanceMethodFunction(final Method method, final Object target) {
-      super(method.getName(), method.getReturnType(), method.isVarArgs(), method.getParameterTypes());
+   private InstanceMethodFunction(final Method method, final Object target) {
       this.method = method;
       this.target = target;
    }
@@ -24,12 +37,30 @@ public class InstanceMethodFunction extends AbstractFunction {
    }
 
    @Override
-   public String toString() {
-      return method.toString();
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
+      return access(method).invoke(target, args);
    }
 
    @Override
-   public Object tryInvoke(final Object... args) throws Exception {
-      return access(method).invoke(target, args);
+   public Type parameterType(final int index) {
+      if(index >= requiredArguments()) {
+         return null;
+      }
+      return method.getParameterTypes()[index];
+   }
+
+   @Override
+   public int requiredArguments() {
+      return method.getParameterTypes().length;
+   }
+
+   @Override
+   public Type returnType() {
+      return method.getReturnType();
+   }
+
+   @Override
+   public String toString() {
+      return method.toString();
    }
 }

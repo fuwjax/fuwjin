@@ -1,15 +1,18 @@
 package org.fuwjin.postage.function;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 
-import org.fuwjin.postage.Function;
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.FunctionTarget;
+import org.fuwjin.postage.type.ObjectUtils;
 
-public class FieldAccessFunction extends AbstractFunction implements Function {
+public class FieldAccessFunction implements FunctionTarget {
    private final Field field;
    private final Class<?> firstParam;
 
    public FieldAccessFunction(final Field field, final Class<?> firstParam) {
-      super(field.getName(), field.getType(), false, firstParam);
       this.field = field;
       this.firstParam = firstParam;
    }
@@ -25,12 +28,33 @@ public class FieldAccessFunction extends AbstractFunction implements Function {
    }
 
    @Override
-   public String toString() {
-      return field.toString();
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
+      if(!firstParam.isInstance(args[0])) {
+         return new Failure("Target must be %s, not %s", firstParam, args[0].getClass());
+      }
+      return ObjectUtils.access(field).get(args[0]);
    }
 
    @Override
-   public Object tryInvoke(final Object... args) throws Exception {
-      return access(field).get(args[0]);
+   public Type parameterType(final int index) {
+      if(index == 0) {
+         return firstParam;
+      }
+      return null;
+   }
+
+   @Override
+   public int requiredArguments() {
+      return 1;
+   }
+
+   @Override
+   public Type returnType() {
+      return field.getType();
+   }
+
+   @Override
+   public String toString() {
+      return field.toString();
    }
 }

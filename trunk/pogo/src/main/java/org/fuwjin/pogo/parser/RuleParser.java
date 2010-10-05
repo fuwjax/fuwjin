@@ -7,7 +7,6 @@
  *******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.invoke;
 import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
@@ -15,11 +14,12 @@ import static org.fuwjin.util.ObjectUtils.hash;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.Rule;
-import org.fuwjin.pogo.postage.Doppleganger;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
+import org.fuwjin.postage.CompositeFunction;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
+import org.fuwjin.postage.type.Optional;
 
 /**
  * A grammar rule.
@@ -38,9 +38,9 @@ public class RuleParser implements Rule {
     */
    RuleParser() {
       type = "default";
-      initializer = Doppleganger.create("default", Function.class);
-      serializer = Doppleganger.create("default", Function.class);
-      finalizer = Doppleganger.create("default", Function.class);
+      initializer = new CompositeFunction("default");
+      serializer = new CompositeFunction("default");
+      finalizer = new CompositeFunction("default");
    }
 
    /**
@@ -56,9 +56,9 @@ public class RuleParser implements Rule {
          final String finalizer, final Parser parser) {
       this.name = name;
       this.type = type;
-      this.initializer = Doppleganger.create(initializer, Function.class);
-      this.serializer = Doppleganger.create(serializer, Function.class);
-      this.finalizer = Doppleganger.create(finalizer, Function.class);
+      this.initializer = new CompositeFunction(initializer);
+      this.serializer = new CompositeFunction(serializer);
+      this.finalizer = new CompositeFunction(finalizer);
       this.parser = parser;
    }
 
@@ -99,18 +99,18 @@ public class RuleParser implements Rule {
          return parser.parse(state);
       }
       boolean success = false;
-      Object result = invoke(initializer, state.getValue());
+      Object result = initializer.invokeSafe(state.getValue());
       if(result instanceof Failure) {
          state.fail("could not initialize rule " + name, (Failure)result);
       } else {
          final PogoPosition buffer = state.buffer(isCustomFunction(serializer));
          state.setValue(result);
          if(parser.parse(state)) {
-            result = invoke(serializer, state.getValue(), buffer.toString());
+            result = serializer.invokeSafe(state.getValue(), buffer.toString());
             if(result instanceof Failure) {
                state.fail("could not handle rule match" + name, (Failure)result);
             } else {
-               result = invoke(finalizer, result);
+               result = finalizer.invokeSafe(result);
                if(result instanceof Failure) {
                   state.fail("could not finalize rule " + name, (Failure)result);
                } else {
@@ -132,9 +132,9 @@ public class RuleParser implements Rule {
     */
    @Override
    public void resolve(final Grammar grammar, final Rule parent) {
-      initializer = grammar.getFunction(type, Doppleganger.<String> content(initializer));
-      serializer = grammar.getFunction(type, Doppleganger.<String> content(serializer));
-      finalizer = grammar.getFunction(type, Doppleganger.<String> content(finalizer));
+      initializer = grammar.getFunction(type, initializer.name(), Optional.OBJECT);
+      serializer = grammar.getFunction(type, serializer.name(), Optional.OBJECT, String.class);
+      finalizer = grammar.getFunction(type, finalizer.name(), Optional.OBJECT);
       simple = !isCustomFunction(initializer) && !isCustomFunction(serializer) && !isCustomFunction(finalizer);
       parser.resolve(grammar, this);
    }

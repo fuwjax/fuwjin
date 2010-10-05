@@ -6,7 +6,7 @@ Definition      =org.fuwjin.pogo.parser.RuleParser~new
 TypeInfo        =org.fuwjin.pogo.parser.RuleParser
                 <- EQUALS Category:type (HASH Function:initializer)? (OUT Function:serializer)? (COLON Function:finalizer)?
 Category        <- ClassIdentifier:return
-Function        =org.fuwjin.pogo.postage.Doppleganger:new
+Function        =org.fuwjin.postage.CompositeFunction:new
                 <- Identifier:return
 Expression      =org.fuwjin.pogo.parser.OptionParser~new:reduce
                 <- Sequence:add (SLASH Sequence:add)*

@@ -84,7 +84,8 @@ public class BuilderRegistry {
          }
          return null;
       } catch(final Exception e) {
-         throw new RuntimeException(e);
+         // throw new RuntimeException(e);
+         return null;
       }
    }
 

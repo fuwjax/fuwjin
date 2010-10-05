@@ -16,7 +16,7 @@ public class WhenPostingToDuckMethods {
 
    @Before
    public void setup() {
-      postage = new Postage(new DuckCategory());
+      postage = new Postage(new DuckCategory("true"));
    }
 
    @Test
