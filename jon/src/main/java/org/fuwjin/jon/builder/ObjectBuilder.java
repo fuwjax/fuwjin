@@ -40,7 +40,7 @@ public class ObjectBuilder extends EntriesBuilder {
 
          @Override
          public Builder newValue() {
-            return getBuilder(invoker().signature().params(2)[1]);
+            return getBuilder((Class<?>)invoker().parameterType(1));
          }
 
          @Override

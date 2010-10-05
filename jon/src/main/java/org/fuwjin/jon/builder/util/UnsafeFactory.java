@@ -43,7 +43,7 @@ public final class UnsafeFactory {
       try {
          return UNSAFE_METHOD.invoke(UNSAFE, type);
       } catch(final Exception e) {
-         return new Failure(e, "Failed Unsafe creation");
+         return new Failure(true, e, "Failed Unsafe creation");
       }
    }
 

@@ -1,10 +1,14 @@
 package org.fuwjin.postage.function;
 
-public class InstanceOfFunction extends AbstractFunction {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
+
+import org.fuwjin.postage.FunctionTarget;
+
+public class InstanceOfFunction implements FunctionTarget {
    private final Class<?> type;
 
    public InstanceOfFunction(final Class<?> type) {
-      super("instanceof", boolean.class, false, Object.class);
       this.type = type;
    }
 
@@ -19,12 +23,30 @@ public class InstanceOfFunction extends AbstractFunction {
    }
 
    @Override
-   public String toString() {
-      return type.getCanonicalName();
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
+      return type.isInstance(args[0]);
    }
 
    @Override
-   public Object tryInvoke(final Object... args) {
-      return type.isInstance(args[0]);
+   public Type parameterType(final int index) {
+      if(index == 0) {
+         return Object.class;
+      }
+      return null;
+   }
+
+   @Override
+   public int requiredArguments() {
+      return 1;
+   }
+
+   @Override
+   public Type returnType() {
+      return boolean.class;
+   }
+
+   @Override
+   public String toString() {
+      return type.getCanonicalName();
    }
 }

@@ -19,7 +19,7 @@ import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.fuwjin.pogo.LiteratePogo.seq;
 import static org.fuwjin.pogo.LiteratePogo.star;
 
-import org.fuwjin.pogo.postage.Doppleganger;
+import org.fuwjin.postage.CompositeFunction;
 import org.fuwjin.postage.Postage;
 
 /**
@@ -42,8 +42,8 @@ public final class PogoGrammar extends Grammar {
                   "finalizer"))))));
       add(rule("Category", "default", "default", "default", "default", ref("ClassIdentifier", "default", "default",
             "return")));
-      add(rule("Function", Doppleganger.class, "default", "default", "new", ref("Identifier", "default", "default",
-            "return")));
+      add(rule("Function", CompositeFunction.class, "default", "default", "new", ref("Identifier", "default",
+            "default", "return")));
       add(rule("Expression", org.fuwjin.pogo.parser.OptionParser.class, "new", "default", "reduce", seq(ref("Sequence",
             "default", "default", "add"), star(seq(ref("SLASH", "default", "default", "default"), ref("Sequence",
             "default", "default", "add"))))));

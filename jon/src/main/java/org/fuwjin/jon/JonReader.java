@@ -25,8 +25,8 @@ import org.fuwjin.pogo.postage.PogoCategory;
 import org.fuwjin.pogo.state.ParseState;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Postage;
-import org.fuwjin.postage.category.InstanceCategory;
-import org.fuwjin.postage.category.VoidCategory;
+import org.fuwjin.postage.category.ConstantCategory;
+import org.fuwjin.postage.category.ReflectionCategory;
 
 /**
  * Reads JON files.
@@ -36,8 +36,8 @@ public class JonReader {
    private static final JonContainer container = new JonContainer();;
    static {
       try {
-         final Postage postage = new Postage(new PogoCategory(), new VoidCategory("default"), new InstanceCategory(
-               "context", container));
+         final Postage postage = new Postage(new ReflectionCategory(), new PogoCategory(), new ConstantCategory().put(
+               "context", container, JonContainer.class));
          JON = readGrammar(streamBytes("jon.reader.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);

@@ -14,7 +14,7 @@ public class WhenPostingToVoidMethods {
 
    @Before
    public void setup() {
-      postage = new Postage(new VoidCategory());
+      postage = new Postage(new VoidCategory("void"));
    }
 
    @Test
@@ -22,6 +22,17 @@ public class WhenPostingToVoidMethods {
       final Function func = postage.getFunction("void.anything");
       try {
          func.invoke();
+         fail("should fail");
+      } catch(final FailureException e) {
+         // pass
+      }
+   }
+
+   @Test
+   public void shouldFailAlwaysWithTypes() {
+      final Function func = postage.getFunction("void.anything");
+      try {
+         func.invoke("test");
          fail("should fail");
       } catch(final FailureException e) {
          // pass

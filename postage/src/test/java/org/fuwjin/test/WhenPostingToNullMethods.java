@@ -20,8 +20,14 @@ public class WhenPostingToNullMethods {
    }
 
    @Test
+   public void shouldBeFalseOnNonNull() throws FailureException {
+      final Function func = postage.getFunction("null.equals");
+      assertTrue(!(Boolean)func.invoke("test"));
+   }
+
+   @Test
    public void shouldFailOnArgs() {
-      final Function func = postage.getFunction("null.instanceof");
+      final Function func = postage.getFunction("null.equals");
       try {
          func.invoke();
          fail("should fail");
@@ -31,21 +37,53 @@ public class WhenPostingToNullMethods {
    }
 
    @Test
-   public void shouldFailOnNonNull() throws FailureException {
-      final Function func = postage.getFunction("null.instanceof");
-      assertTrue(!(Boolean)func.invoke("test"));
+   public void shouldFailOnNullWithExtraArgs() throws FailureException {
+      final Function func = postage.getFunction("null.anything").withSignature(Object.class);
+      try {
+         func.invoke("anything");
+         fail("should fail");
+      } catch(final FailureException e) {
+         // pass
+      }
+   }
+
+   @Test
+   public void shouldFailOnNullWithMissingArgs() throws FailureException {
+      final Function func = postage.getFunction("null.anything").withSignature(Object.class, String.class);
+      try {
+         func.invoke();
+         fail("should fail");
+      } catch(final FailureException e) {
+         // pass
+      }
+   }
+
+   @Test
+   public void shouldFailOnParams() {
+      final Function func = postage.getFunction("null.equals");
+      try {
+         func.invoke();
+         fail("should fail");
+      } catch(final FailureException e) {
+         // pass
+      }
    }
 
    @Test
    public void shouldReturnNull() throws FailureException {
       final Function func = postage.getFunction("null.anything");
       assertNull(func.invoke());
-      assertNull(func.invoke("anything"));
    }
 
    @Test
    public void shouldReturnNullInstanceOf() throws FailureException {
-      final Function func = postage.getFunction("null.instanceof");
+      final Function func = postage.getFunction("null.equals");
       assertTrue((Boolean)func.invoke((Object)null));
+   }
+
+   @Test
+   public void shouldReturnNullWithArgs() throws FailureException {
+      final Function func = postage.getFunction("null.anything");
+      assertNull(func.invoke("anything"));
    }
 }

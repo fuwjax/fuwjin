@@ -1,19 +1,64 @@
 package org.fuwjin.postage.function;
 
-public class ConstantFunction extends AbstractFunction {
-   private final Object value;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 
-   public ConstantFunction(final String name, final Object value) {
-      this(name, value, value == null ? Object.class : value.getClass());
+import org.fuwjin.postage.FunctionTarget;
+
+/**
+ * Creates a new target backed by a value.
+ */
+public class ConstantFunction implements FunctionTarget {
+   private final Object value;
+   private final Class<?> type;
+
+   /**
+    * Creates a new instance.
+    * @param value the constant value
+    */
+   public ConstantFunction(final Object value) {
+      this.value = value;
+      type = value == null ? Object.class : value.getClass();
    }
 
-   public ConstantFunction(final String name, final Object value, final Class<?> type) {
-      super(name, type, true, Object[].class);
+   public ConstantFunction(final Object value, final Class<?> type) {
       this.value = value;
+      this.type = type;
    }
 
    @Override
-   protected Object tryInvoke(final Object... args) {
+   public boolean equals(final Object obj) {
+      try {
+         final ConstantFunction o = (ConstantFunction)obj;
+         return getClass().equals(o.getClass()) && type.equals(o.type)
+               && (value == null ? o.value == null : value.equals(o.value));
+      } catch(final RuntimeException e) {
+         return false;
+      }
+   }
+
+   @Override
+   public int hashCode() {
+      return type.hashCode();
+   }
+
+   @Override
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
       return value;
+   }
+
+   @Override
+   public Type parameterType(final int index) {
+      return Object.class;
+   }
+
+   @Override
+   public int requiredArguments() {
+      return 0;
+   }
+
+   @Override
+   public Type returnType() {
+      return type;
    }
 }

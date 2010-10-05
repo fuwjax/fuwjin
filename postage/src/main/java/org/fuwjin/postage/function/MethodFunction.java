@@ -1,22 +1,27 @@
 package org.fuwjin.postage.function;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
+import static org.fuwjin.postage.type.ObjectUtils.access;
 
-public class MethodFunction extends AbstractFunction {
-   private static <T> T[] prepend(final T first, final T[] array) {
-      final T[] trim = (T[])Array.newInstance(array.getClass().getComponentType(), array.length + 1);
-      System.arraycopy(array, 0, trim, 1, array.length);
-      trim[0] = first;
-      return trim;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+
+import org.fuwjin.postage.Failure;
+import org.fuwjin.postage.FunctionTarget;
+
+public class MethodFunction implements FunctionTarget {
+   public static FunctionTarget method(final Method method, final Class<?> firstParam) {
+      final FunctionTarget target = new MethodFunction(method, firstParam);
+      if(method.isVarArgs()) {
+         return new VarArgsTarget(target);
+      }
+      return target;
    }
 
    private final Method method;
    private final Class<?> firstParam;
 
-   public MethodFunction(final Method method, final Class<?> firstParam) {
-      super(method.getName(), method.getReturnType(), method.isVarArgs(), prepend(firstParam,
-            method.getParameterTypes()));
+   private MethodFunction(final Method method, final Class<?> firstParam) {
       this.method = method;
       this.firstParam = firstParam;
    }
@@ -33,15 +38,39 @@ public class MethodFunction extends AbstractFunction {
    }
 
    @Override
-   public String toString() {
-      return method.toString();
-   }
-
-   @Override
-   public Object tryInvoke(final Object... args) throws Exception {
+   public Object invoke(final Object[] args) throws InvocationTargetException, Exception {
       final Object[] trim = new Object[args.length - 1];
       System.arraycopy(args, 1, trim, 0, trim.length);
       final Object object = args[0];
+      if(!firstParam.isInstance(object)) {
+         return new Failure("Target must be %s, not %s", firstParam, object.getClass());
+      }
       return access(method).invoke(object, trim);
+   }
+
+   @Override
+   public Type parameterType(final int index) {
+      if(index == 0) {
+         return firstParam;
+      }
+      if(index < requiredArguments()) {
+         return method.getParameterTypes()[index - 1];
+      }
+      return null;
+   }
+
+   @Override
+   public int requiredArguments() {
+      return method.getParameterTypes().length + 1;
+   }
+
+   @Override
+   public Type returnType() {
+      return method.getReturnType();
+   }
+
+   @Override
+   public String toString() {
+      return method.toString();
    }
 }

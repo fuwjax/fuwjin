@@ -1,22 +1,14 @@
 package org.fuwjin.postage;
 
-import java.lang.reflect.Type;
-
 /**
  * A factory for Function instances.
  */
 public interface FunctionFactory {
    /**
-    * Returns a function instance for the name and parameter list.
+    * Returns a function instance for the name. Returns null if no Function
+    * could be found for the name.
     * @param name the function name.
-    * @param parameters the type parameters for a returned function
-    * @return the function
+    * @return the function, or null if no function exists
     */
-   Function getFunction(String name, Type... parameters);
-
-   /**
-    * Returns the prefix of Functions produced by this factory.
-    * @return the factory prefix
-    */
-   String name();
+   Function getFunction(String name);
 }
