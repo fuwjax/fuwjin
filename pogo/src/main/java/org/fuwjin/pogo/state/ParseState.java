@@ -58,6 +58,10 @@ public class ParseState extends AbstractState {
       }
    }
 
+   public void append(final String str) {
+      builder.append(str);
+   }
+
    private PogoPosition buffer() {
       final int start = builder.length();
       return new PogoPosition() {
@@ -97,8 +101,20 @@ public class ParseState extends AbstractState {
    }
 
    @Override
+   protected AbstractMemo newMemo(final String name) {
+      if(buffers > 0) {
+         return new ParseMemo(name, this, builder.length());
+      }
+      return new ParseMemo(name, this, -1);
+   }
+
+   @Override
    protected void set(final AbstractPosition pos) {
       super.set(pos);
       builder.setLength(current().start());
+   }
+
+   public String substring(final int start) {
+      return builder.substring(start);
    }
 }

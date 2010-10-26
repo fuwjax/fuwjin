@@ -27,7 +27,7 @@ public class PogoClassLoader {
     */
    public PogoClassLoader(final String pogoFile) {
       try {
-         grammar = PogoGrammar.readGrammar(streamBytes(pogoFile));
+         grammar = Grammar.readGrammar(streamBytes(pogoFile));
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }

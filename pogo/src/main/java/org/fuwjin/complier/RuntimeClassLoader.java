@@ -14,12 +14,14 @@ import static java.util.Collections.singleton;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.tools.FileObject;
 import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardJavaFileManager;
@@ -46,7 +48,9 @@ public class RuntimeClassLoader extends ClassLoader {
     */
    public boolean compile(final String name, final String source) {
       final Set<BufferedFileObject> compUnit = singleton(new BufferedFileObject(name, source));
-      return getSystemJavaCompiler().getTask(null, manager, null, null, null, compUnit).call();
+      final JavaCompiler compiler = getSystemJavaCompiler();
+      final OutputStreamWriter log = new OutputStreamWriter(System.err);
+      return compiler.getTask(log, manager, null, null, null, compUnit).call();
    }
 
    @Override

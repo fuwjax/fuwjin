@@ -12,7 +12,6 @@ package org.fuwjin.test;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
-import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 import static org.fuwjin.pogo.PogoGrammar.staticPogoGrammar;
 import static org.fuwjin.pogo.PredefinedGrammar.PogoParse;
 import static org.hamcrest.CoreMatchers.is;
@@ -35,7 +34,7 @@ public class PogoTest {
    @Test
    public void testParsedParser() throws Exception {
       final Grammar parsed = (Grammar)PogoParse.grammar().parse(streamBytes(POGO_GRAMMAR));
-      final Grammar orig = readGrammar(streamBytes(POGO_GRAMMAR));
+      final Grammar orig = Grammar.readGrammar(streamBytes(POGO_GRAMMAR));
       assertThat(orig, is(parsed));
    }
 
@@ -47,8 +46,7 @@ public class PogoTest {
    @Test
    public void testParser() throws Exception {
       final String grammar = staticPogoGrammar().toPogo();
-      System.out.println(grammar);
-      final Grammar peg = readGrammar(streamOf(grammar));
+      final Grammar peg = Grammar.readGrammar(streamOf(grammar));
       final Grammar peg2 = (Grammar)peg.parse(streamOf(grammar));
       assertThat(peg, is(peg2));
    }

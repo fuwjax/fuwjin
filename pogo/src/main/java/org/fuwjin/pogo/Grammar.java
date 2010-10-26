@@ -158,4 +158,26 @@ public class Grammar extends Pogo implements Iterable<Rule> {
    public String toString() {
       return "Grammar " + super.toString();
    }
+
+   /**
+    * Creates a new Pogo parser from the Pogo formatted input with the custom
+    * postage.
+    * @param stream the input
+    * @param postage the custom postage
+    * @return the new grammar
+    * @throws PogoException if the parse fails
+    */
+   public static Grammar readGrammar(final CodePointStream stream, final Postage postage) throws PogoException {
+      return (Grammar)PogoGrammar.staticPogoGrammar().parse(stream, postage);
+   }
+
+   /**
+    * Creates a new Pogo parser from the Pogo formatted input.
+    * @param stream the input
+    * @return the new parser
+    * @throws PogoException if the parse fails
+    */
+   public static Grammar readGrammar(final CodePointStream stream) throws PogoException {
+      return (Grammar)PogoGrammar.staticPogoGrammar().parse(stream);
+   }
 }

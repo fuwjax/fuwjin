@@ -28,7 +28,7 @@ public interface Parser {
    /**
     * Resolves this parser according to the grammar and type.
     * @param grammar the grammar for resolving any rule references
-    * @param parent the containing rule
+    * @param namespace the current namespace
     */
-   void resolve(Grammar grammar, Rule parent);
+   void resolve(Grammar grammar, String namespace);
 }

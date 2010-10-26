@@ -21,7 +21,15 @@ public class ObjectUtils {
     * @return true if both objects are null or equal, false otherwise
     */
    public static boolean eq(final Object o1, final Object o2) {
-      return o1 == null ? o2 == null : o1.equals(o2);
+      // return o1 == null ? o2 == null : o1.equals(o2);
+      if(o1 == null) {
+         if(o2 == null) {
+            return true;
+         }
+      } else if(o1.equals(o2)) {
+         return true;
+      }
+      return false;
    }
 
    /**

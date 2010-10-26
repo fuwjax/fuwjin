@@ -79,6 +79,11 @@ public class SerialState extends AbstractState {
    }
 
    @Override
+   protected AbstractMemo newMemo(final String name) {
+      return new AbstractMemo(name, this);
+   }
+
+   @Override
    protected void release() {
       super.release();
       if(!shouldBufferNext()) {

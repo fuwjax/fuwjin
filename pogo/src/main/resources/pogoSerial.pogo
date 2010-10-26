@@ -1,10 +1,20 @@
 # POGO serializer grammar
 Grammar         =org.fuwjin.pogo.Grammar~iterator
-                <- Definition~next+
-Definition      =org.fuwjin.pogo.parser.RuleParser
-                <- Identifier~name '\t' TypeInfo~this? '<- ' Expression~parser '\n'
-TypeInfo        =org.fuwjin.pogo.parser.RuleParser
-                <- '=' Category~type ('~' Function~initializer)? ('>' Function~serializer)? (':' Function~finalizer)? '\n\t\t'
+                <- Rule~next+
+Rule            =org.fuwjin.pogo.parser.RuleParser
+                <- Identifier~name '\t' RuleNamespace~this? '<- ' Expression~parser '\n'
+RuleNamespace   =org.fuwjin.pogo.parser.RuleParser
+                <- '=' Category~namespace RuleAttributes~attributes '\n\t\t'
+RuleAttributes  =java.lang.Iterable~iterator
+                <- RuleAttribute~next*
+RuleAttribute   <- RuleInit~this / RuleMatch~this / RuleResult~this
+RuleInit        =org.fuwjin.pogo.parser.RuleInitAttribute
+                <- '~' Identifier~name
+RuleMatch       =org.fuwjin.pogo.parser.RuleMatchAttribute
+                <- '>' Identifier~name
+RuleResult      =org.fuwjin.pogo.parser.RuleResultAttribute
+                <- ':' Identifier~name
+
 Category        =org.fuwjin.pogo.postage.PostageUtils~isCustomCategory
                 <- Identifier~this
 Function        =org.fuwjin.pogo.postage.PostageUtils~isCustomFunction
@@ -26,7 +36,16 @@ SuffixChain     <- Suffix~this / Primary~this
 Primary         <- Reference~this / DOT~this / Literal~this / CharClass~this / SubEx~this
 SubEx           <- '(' Expression~this ')'
 Reference       =org.fuwjin.pogo.parser.RuleReferenceParser
-                <- Identifier~ruleName ('~' Function~constructor)? ('>' Function~matcher)? (':' Function~converter)?
+                <- Identifier~ruleName RefAttributes~attributes
+RefAttributes   =java.lang.Iterable~iterator
+                <- RefAttribute~next*
+RefAttribute    <- RefInit~this / RefMatch~this / RefResult~this
+RefInit         =org.fuwjin.pogo.parser.ReferenceInitAttribute
+                <- '~' Identifier~name
+RefMatch        =org.fuwjin.pogo.parser.ReferenceMatchAttribute
+                <- '>' (RETURN~isReturn / Identifier~name)
+RefResult       =org.fuwjin.pogo.parser.ReferenceResultAttribute
+                <- ':' (RETURN~isReturn / Identifier~name)
 Literal         <- LitSeq~this / SingleLit~this
 LitSeq          =org.fuwjin.pogo.parser.SequenceParser~isLiteral
                 <- '\'' LitChars~this '\''
@@ -60,3 +79,4 @@ PLUS            =org.fuwjin.pogo.parser.RequiredSeriesParser~instanceof
                 <- '+'
 DOT             =org.fuwjin.pogo.parser.CharacterParser~instanceof
                 <- '.'
+RETURN          <- 'return'

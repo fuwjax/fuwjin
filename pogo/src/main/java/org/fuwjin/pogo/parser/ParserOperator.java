@@ -15,7 +15,6 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Rule;
 
 /**
  * The standard base class for parse operators.
@@ -57,7 +56,7 @@ public abstract class ParserOperator implements Parser {
    }
 
    @Override
-   public void resolve(final Grammar grammar, final Rule parent) {
-      parser.resolve(grammar, parent);
+   public void resolve(final Grammar grammar, final String namespace) {
+      parser.resolve(grammar, namespace);
    }
 }

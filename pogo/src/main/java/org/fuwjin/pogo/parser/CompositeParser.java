@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Rule;
 
 /**
  * A base class for composite parsers.
@@ -95,9 +94,9 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
    }
 
    @Override
-   public void resolve(final Grammar grammar, final Rule parent) {
+   public void resolve(final Grammar grammar, final String namespace) {
       for(final Parser parser: parsers) {
-         parser.resolve(grammar, parent);
+         parser.resolve(grammar, namespace);
       }
    }
 }
