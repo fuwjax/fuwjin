@@ -11,11 +11,14 @@
 package org.fuwjin.test;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
-import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 import static org.fuwjin.pogo.PogoGrammar.staticPogoGrammar;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.PogoException;
@@ -45,12 +48,17 @@ public class PogoWriterTest {
     */
    @Test
    public void outputGrammars() throws Exception {
+      new File("target/generated/" + PACKAGE.replace(".", "/")).mkdirs();
       for(final PredefinedGrammar grammar: PredefinedGrammar.values()) {
-         System.out.println(COMMENT + grammar + GRAMMAR);
-         System.out.println(grammar.grammar().toPogo());
+         final Writer writer = new FileWriter("target/generated/" + grammar + ".pogo");
+         writer.append(COMMENT + grammar + GRAMMAR + '\n');
+         writer.append(grammar.grammar().toPogo());
+         writer.close();
       }
       for(final PredefinedGrammar grammar: PredefinedGrammar.values()) {
-         System.out.println(grammar.grammar().toCode(PACKAGE + grammar.toString()));
+         final Writer writer = new FileWriter("target/generated/" + PACKAGE.replace(".", "/") + grammar + ".java");
+         writer.append(grammar.grammar().toCode(PACKAGE + grammar.toString()));
+         writer.close();
       }
    }
 
@@ -60,7 +68,8 @@ public class PogoWriterTest {
     */
    @Test
    public void testSimpleWriteRewind() throws Exception {
-      final Grammar grammar = readGrammar(streamOf("Rule <- ('test' Sub)* Sub = org.fuwjin.test.PogoWriterTest~toggle <- ''"));
+      final Grammar grammar = Grammar
+            .readGrammar(streamOf("Rule <- ('test' Sub)* Sub = org.fuwjin.test.PogoWriterTest~toggle <- ''"));
       final String out = grammar.toString(null);
       assertThat(out, is("test"));
    }
@@ -71,7 +80,7 @@ public class PogoWriterTest {
     */
    @Test
    public void testWriteClassShouldFail() throws Exception {
-      final Grammar grammar = readGrammar(streamOf("Rule <- [a-z]"));
+      final Grammar grammar = Grammar.readGrammar(streamOf("Rule <- [a-z]"));
       try {
          grammar.toString("test");
          fail("Serialization does not support character classes");
@@ -88,7 +97,7 @@ public class PogoWriterTest {
    @Test
    public void testWriter() throws Exception {
       final String grammar = staticPogoGrammar().toPogo();
-      final Grammar peg = readGrammar(streamOf(grammar));
+      final Grammar peg = Grammar.readGrammar(streamOf(grammar));
       final String written = peg.toPogo();
       assertThat(written, is(grammar));
    }

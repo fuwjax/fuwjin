@@ -42,20 +42,20 @@ public abstract class AbstractState implements PogoState {
       failure.fail(current, string, cause);
    }
 
-   protected void failStack(final int level, final String name, final AbstractPosition pos) {
-      failure.failStack(pos, name, level);
+   protected void failStack(final String name) {
+      releaseMemo();
+      failure.failStack(current, name, memos);
    }
 
    @Override
-   public PogoMemo getMemo(final String name, final boolean needsBuffer) {
+   public PogoMemo getMemo(final String name) {
       memos++;
-      PogoMemo memo = current.getMemo(name, needsBuffer);
+      AbstractMemo memo = current.getMemo(name);
       if(memo == null) {
-         memo = new PogoMemo(name, this);
+         memo = newMemo(name);
       } else {
-         current = memo.end();
+         memo.restore();
       }
-      memo.setLevel(memos);
       return memo;
    }
 
@@ -74,6 +74,8 @@ public abstract class AbstractState implements PogoState {
       marks++;
       return current;
    }
+
+   protected abstract AbstractMemo newMemo(String name);
 
    protected void release() {
       marks--;

@@ -79,38 +79,24 @@ public class ParseStateTest {
    public void testMemo() {
       final PogoState state = new ParseState(streamOf("zabc"));
       assertTrue(state.advance('z', 'z'));
-      final PogoMemo memo = state.getMemo("memo", true);
-      assertFalse(memo.isStored());
-      final PogoPosition buffer = state.buffer(true);
-      assertTrue(state.advance('a', 'a'));
-      assertTrue(state.advance('b', 'b'));
-      memo.store(buffer.toString(), "value");
-      buffer.release();
-      assertTrue(memo.isStored());
-      assertThat(memo.buffer(), is("ab"));
-      assertThat((String)memo.value(), is("value"));
-   }
-
-   /**
-    * The parse state should memoize memos.
-    */
-   @Test
-   public void testMemoed() {
-      final PogoState state = new ParseState(streamOf("zabc"));
-      assertTrue(state.advance('z', 'z'));
       final PogoPosition mark = state.mark();
-      PogoMemo memo = state.getMemo("memo", true);
-      final PogoPosition buffer = state.buffer(true);
+      PogoPosition buffer = state.buffer(true);
+      PogoMemo memo = state.getMemo("memo");
+      assertFalse(memo.isStored());
       assertTrue(state.advance('a', 'a'));
       assertTrue(state.advance('b', 'b'));
-      memo.store(buffer.toString(), "value");
+      state.setValue("value");
+      memo.store();
+      buffer.reset();
       buffer.release();
       mark.reset();
       mark.release();
-      memo = state.getMemo("memo", true);
+      buffer = state.buffer(true);
+      memo = state.getMemo("memo");
       assertTrue(memo.isStored());
-      assertThat(memo.buffer(), is("ab"));
-      assertThat((String)memo.value(), is("value"));
+      assertThat((String)state.getValue(), is("value"));
+      assertThat(buffer.toString().toCharArray(), is("ab".toCharArray()));
+      buffer.release();
       assertTrue(state.advance('c', 'c'));
    }
 
@@ -134,9 +120,12 @@ public class ParseStateTest {
    @Test
    public void testRuleFailure() {
       final PogoState state = new ParseState(streamOf("a"));
-      final PogoMemo memo = state.getMemo("Parent", false);
+      final PogoMemo memo = state.getMemo("Parent");
+      final PogoPosition mark = state.mark();
       assertTrue(state.advance('a', 'a'));
       state.fail("could not finalize Rule", null);
+      mark.reset();
+      mark.release();
       memo.fail();
       final PogoException ex = state.exception();
       assertThat(ex.getMessage(), is("Error parsing @[1,2]: could not finalize Rule\n  in Parent[1,1]"));

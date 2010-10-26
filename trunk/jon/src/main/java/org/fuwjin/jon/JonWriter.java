@@ -11,7 +11,6 @@
 package org.fuwjin.jon;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
-import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
 import org.fuwjin.jon.ref.ReferenceStorage;
 import org.fuwjin.pogo.Grammar;
@@ -29,7 +28,7 @@ public class JonWriter {
    static {
       try {
          final Postage postage = new Postage(new ReflectionCategory(), new PogoCategory(), new ConstantCategory());
-         JON = readGrammar(streamBytes("jon.writer.pogo"), postage);
+         JON = Grammar.readGrammar(streamBytes("jon.writer.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }

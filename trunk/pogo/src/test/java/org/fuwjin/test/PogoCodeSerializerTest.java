@@ -33,7 +33,7 @@ public class PogoCodeSerializerTest {
     */
    @Test
    public void testCodeGeneration() throws Exception {
-      final Grammar pogo = readGrammar(streamBytes(TEST_POGO));
+      final Grammar pogo = Grammar.readGrammar(streamBytes(TEST_POGO));
       final String code = pogo.toCode(QUALIFIED_NAME);
       final RuntimeClassLoader loader = new RuntimeClassLoader();
       assertTrue(loader.compile(QUALIFIED_NAME, code));

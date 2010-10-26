@@ -14,7 +14,6 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Rule;
 import org.fuwjin.pogo.state.PogoState;
 
 /**
@@ -37,7 +36,7 @@ public class CharacterParser implements Parser {
    }
 
    @Override
-   public void resolve(final Grammar grammar, final Rule parent) {
+   public void resolve(final Grammar grammar, final String namespace) {
       // do nothing
    }
 

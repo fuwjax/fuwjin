@@ -18,8 +18,15 @@ import org.fuwjin.pogo.parser.OptionParser;
 import org.fuwjin.pogo.parser.OptionalParser;
 import org.fuwjin.pogo.parser.OptionalSeriesParser;
 import org.fuwjin.pogo.parser.PositiveLookaheadParser;
+import org.fuwjin.pogo.parser.ReferenceInitAttribute;
+import org.fuwjin.pogo.parser.ReferenceMatchAttribute;
+import org.fuwjin.pogo.parser.ReferenceResultAttribute;
 import org.fuwjin.pogo.parser.RequiredSeriesParser;
+import org.fuwjin.pogo.parser.RuleInitAttribute;
+import org.fuwjin.pogo.parser.RuleMatchAttribute;
+import org.fuwjin.pogo.parser.RuleParser;
 import org.fuwjin.pogo.parser.RuleReferenceParser;
+import org.fuwjin.pogo.parser.RuleResultAttribute;
 import org.fuwjin.pogo.parser.SequenceParser;
 
 /**
@@ -44,12 +51,41 @@ public class LiteratePogo { // NO_UCD
    }
 
    /**
+    * Creates a new Rule Init Attribute.
+    * @param name the attribute name
+    * @return the new attribute
+    */
+   public static Attribute init(final String name) {
+      return new RuleInitAttribute(name);
+   }
+
+   public static Attribute initRef(final String name) {
+      return new ReferenceInitAttribute(name);
+   }
+
+   /**
     * Creates a literal character parser.
     * @param ch the character to match
     * @return the new parser
     */
    public static Parser lit(final char ch) {
       return new CharacterLiteralParser(Character.toString(ch));
+   }
+
+   /**
+    * Creates a new Rule Match Attribute.
+    * @param name the attribute name
+    * @return the new attribute
+    */
+   public static Attribute match(final String name) {
+      return new RuleMatchAttribute(name);
+   }
+
+   public static Attribute matchRef(final String name) {
+      if("return".equals(name)) {
+         return ReferenceMatchAttribute.RETURN;
+      }
+      return new ReferenceMatchAttribute(name);
    }
 
    /**
@@ -105,6 +141,10 @@ public class LiteratePogo { // NO_UCD
       return peg;
    }
 
+   public static RuleReferenceParser ref(final String name) {
+      return new RuleReferenceParser(name);
+   }
+
    /**
     * Creates a reference parser.
     * @param name the name of the rule to redirect to
@@ -114,7 +154,33 @@ public class LiteratePogo { // NO_UCD
     * @return the parser
     */
    public static Parser ref(final String name, final String initializer, final String serializer, final String finalizer) {
-      return new RuleReferenceParser(name, initializer, serializer, finalizer);
+      final RuleReferenceParser ref = ref(name);
+      if(!"default".equals(initializer)) {
+         ref.add(initRef(initializer));
+      }
+      if(!"default".equals(serializer)) {
+         ref.add(matchRef(serializer));
+      }
+      if(!"default".equals(finalizer)) {
+         ref.add(resultRef(finalizer));
+      }
+      return ref;
+   }
+
+   /**
+    * Creates a new Rule Result Attribute.
+    * @param name the attribute name
+    * @return the new attribute
+    */
+   public static Attribute result(final String name) {
+      return new RuleResultAttribute(name);
+   }
+
+   public static Attribute resultRef(final String name) {
+      if("return".equals(name)) {
+         return ReferenceResultAttribute.RETURN;
+      }
+      return new ReferenceResultAttribute(name);
    }
 
    /**
@@ -127,10 +193,19 @@ public class LiteratePogo { // NO_UCD
     * @param parser the expression to parse
     * @return the parser
     */
-   public static Rule rule(final String name, final Class<?> type, final String initializer, final String serializer,
-         final String finalizer, final Parser parser) {
-      return new org.fuwjin.pogo.parser.RuleParser(name, type.getCanonicalName(), initializer, serializer, finalizer,
-            parser);
+   public static RuleParser rule(final String name, final Class<?> type, final String initializer,
+         final String serializer, final String finalizer, final Parser parser) {
+      return rule(name, type.getCanonicalName(), initializer, serializer, finalizer, parser);
+   }
+
+   /**
+    * Creates a new Rule.
+    * @param name the name of the rule
+    * @param type the type bound to the rule
+    * @return the parser
+    */
+   public static RuleParser rule(final String name, final String type) {
+      return new RuleParser(name, type);
    }
 
    /**
@@ -143,9 +218,20 @@ public class LiteratePogo { // NO_UCD
     * @param parser the expression to parse
     * @return the parser
     */
-   public static Rule rule(final String name, final String type, final String initializer, final String serializer,
-         final String finalizer, final Parser parser) {
-      return new org.fuwjin.pogo.parser.RuleParser(name, type, initializer, serializer, finalizer, parser);
+   public static RuleParser rule(final String name, final String type, final String initializer,
+         final String serializer, final String finalizer, final Parser parser) {
+      final RuleParser rule = rule(name, type);
+      if(!"default".equals(initializer)) {
+         rule.add(init(initializer));
+      }
+      if(!"default".equals(serializer)) {
+         rule.add(match(serializer));
+      }
+      if(!"default".equals(finalizer)) {
+         rule.add(result(finalizer));
+      }
+      rule.expression(parser);
+      return rule;
    }
 
    /**

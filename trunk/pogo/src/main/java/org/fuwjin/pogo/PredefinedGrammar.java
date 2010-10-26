@@ -11,8 +11,7 @@
 package org.fuwjin.pogo;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
-import static org.fuwjin.pogo.PogoGrammar.readGrammar;
-
+import static org.fuwjin.pogo.Grammar.readGrammar;
 
 /**
  * The set of predefined grammars from the pogo package.

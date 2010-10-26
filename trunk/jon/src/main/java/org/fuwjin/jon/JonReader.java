@@ -14,7 +14,6 @@ import static org.fuwjin.jon.BuilderRegistry.getBuilder;
 import static org.fuwjin.pogo.CodePointStreamFactory.stream;
 import static org.fuwjin.pogo.CodePointStreamFactory.streamBytes;
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
-import static org.fuwjin.pogo.PogoGrammar.readGrammar;
 
 import java.io.Reader;
 import java.util.LinkedList;
@@ -41,7 +40,7 @@ public class JonReader {
       try {
          final Postage postage = new Postage(new ReflectionCategory(), new PogoCategory(), new ConstantCategory().put(
                "context", container, JonContainer.class));
-         JON = readGrammar(streamBytes("jon.reader.pogo"), postage);
+         JON = Grammar.readGrammar(streamBytes("jon.reader.pogo"), postage);
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }

@@ -58,11 +58,9 @@ public interface PogoState {
     * Returns a memo for the given rule name. If the memo already exists, the
     * current position is updated to the end position of the memo.
     * @param name the rule name
-    * @param needsBuffer true if the memo must have a valid buffer, false
-    *        otherwise
     * @return the memo
     */
-   PogoMemo getMemo(final String name, final boolean needsBuffer);
+   PogoMemo getMemo(final String name);
 
    /**
     * Returns the currently associated object.
