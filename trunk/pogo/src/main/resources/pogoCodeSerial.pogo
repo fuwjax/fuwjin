@@ -53,14 +53,14 @@ Primary         <- Reference~this / DOT~this / Literal~this / Range~this / Expre
 Reference       =org.fuwjin.pogo.parser.RuleReferenceParser~instanceof
                 <- 'ref(' QuotedIdent~ruleName ')' RefAttributes~attributes
 RefAttributes   =java.lang.Iterable~iterator
-                <- RuleAttribute~next*
-RefAttribute    <- '.add(' (RuleInit~this / RuleMatch~this / RuleResult~this) ')'
+                <- RefAttribute~next*
+RefAttribute    <- '.add(' (RefInit~this / RefMatch~this / RefResult~this) ')'
 RefInit         =org.fuwjin.pogo.parser.ReferenceInitAttribute
                 <- 'initRef(' QuotedIdent~name ')'
 RefMatch        =org.fuwjin.pogo.parser.ReferenceMatchAttribute
-                <- 'matchRef(' QuotedIdent~name ')'
+                <- 'matchRef(' (RETURN~isReturn / QuotedIdent~name) ')'
 RefResult       =org.fuwjin.pogo.parser.ReferenceResultAttribute
-                <- 'resultRef(' QuotedIdent~name ')'
+                <- 'resultRef(' (RETURN~isReturn / QuotedIdent~name) ')'
 
 Literal         =org.fuwjin.pogo.parser.CharacterLiteralParser~instanceof
                 <- 'lit(\'' Char~getLitChar '\')'
@@ -81,3 +81,4 @@ PLUS            =org.fuwjin.pogo.parser.RequiredSeriesParser~instanceof
                 <- 'plus'
 DOT             =org.fuwjin.pogo.parser.CharacterParser~instanceof
                 <- 'dot()'
+RETURN          <- '"return"'
