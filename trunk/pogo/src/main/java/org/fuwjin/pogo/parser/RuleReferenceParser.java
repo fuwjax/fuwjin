@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 import org.fuwjin.pogo.Attribute;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.LiteratePogo;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Function;
@@ -29,22 +29,24 @@ import org.fuwjin.postage.type.Optional;
 /**
  * Matches a rule indirectly and optionally persists the result of the rule.
  */
-public class RuleReferenceParser implements Parser {
-   public class MemoParser implements Parser {
+public class RuleReferenceParser implements ParsingExpression {
+   public class MemoParser implements ParsingExpression {
       @Override
       public boolean parse(final PogoState state) {
          if(!isInit) {
             state.setValue(Optional.UNSET);
          }
+         boolean success = true;
          final PogoMemo memo = state.getMemo(ruleName);
          if(!memo.isStored()) {
-            if(rule.parse(state)) {
+            if(rule.expression().parse(state)) {
                memo.store();
             } else {
                memo.fail();
+               success = false;
             }
          }
-         return memo.isStored();
+         return success;
       }
 
       @Override
@@ -55,11 +57,11 @@ public class RuleReferenceParser implements Parser {
 
    private static final String UNKNOWN_RULE = "No rule named %s in grammar"; //$NON-NLS-1$ 
    private String ruleName;
-   private Parser rule;
+   private RuleParser rule;
    private Function constructor;
    private Function matcher;
    private Function converter;
-   private Parser attributed;
+   private ParsingExpression attributed;
    private final LinkedList<Attribute> attributes = new LinkedList<Attribute>();
    private boolean isReturn = false;
    private boolean isInit = false;
@@ -129,15 +131,13 @@ public class RuleReferenceParser implements Parser {
       if(converter != null && isCustomFunction(converter)) {
          add(LiteratePogo.resultRef(converter.name()));
       }
-      if(attributes.isEmpty()) {
-         attributed = rule;
-      } else {
-         attributed = new MemoParser();
+      attributed = new MemoParser();
+      if(!attributes.isEmpty()) {
          for(final Attribute attribute: attributes) {
             attributed = attribute.decorate(attributed);
          }
-         attributed.resolve(grammar, namespace);
       }
+      attributed.resolve(grammar, namespace);
    }
 
    @Override

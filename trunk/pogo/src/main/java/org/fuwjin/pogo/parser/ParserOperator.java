@@ -14,16 +14,16 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 
 /**
  * The standard base class for parse operators.
  */
-public abstract class ParserOperator implements Parser {
+public abstract class ParserOperator implements ParsingExpression {
    /**
     * The target parser for this operaton.
     */
-   protected Parser parser;
+   protected ParsingExpression parser;
 
    /**
     * Creates a new instance.
@@ -36,7 +36,7 @@ public abstract class ParserOperator implements Parser {
     * Creates a new instance.
     * @param parser the operated upon parser
     */
-   protected ParserOperator(final Parser parser) {
+   protected ParserOperator(final ParsingExpression parser) {
       this.parser = parser;
    }
 

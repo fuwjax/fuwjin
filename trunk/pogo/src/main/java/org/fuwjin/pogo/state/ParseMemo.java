@@ -20,10 +20,13 @@ public class ParseMemo extends AbstractMemo {
    }
 
    @Override
-   public void store() {
-      super.store();
+   public boolean store() {
+      if(!super.store()) {
+         return false;
+      }
       if(start >= 0) {
          buffer = state.substring(start);
       }
+      return true;
    }
 }

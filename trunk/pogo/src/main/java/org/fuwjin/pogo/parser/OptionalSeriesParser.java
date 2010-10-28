@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 
@@ -29,7 +29,7 @@ public class OptionalSeriesParser extends ParserOperator {
     * Creates a new instance.
     * @param parser the optionally repeating parser
     */
-   public OptionalSeriesParser(final Parser parser) {
+   public OptionalSeriesParser(final ParsingExpression parser) {
       super(parser);
    }
 

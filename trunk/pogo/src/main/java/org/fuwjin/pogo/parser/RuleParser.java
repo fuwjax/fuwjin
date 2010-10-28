@@ -19,17 +19,16 @@ import java.util.LinkedList;
 import org.fuwjin.pogo.Attribute;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
-import org.fuwjin.pogo.Rule;
-import org.fuwjin.pogo.state.PogoState;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.postage.Function;
 
 /**
  * A grammar rule.
  */
-public class RuleParser implements Rule {
+public class RuleParser extends Parser {
    private String name;
-   private Parser parser;
-   private Parser attributed;
+   private ParsingExpression parser;
+   private ParsingExpression attributed;
    private final String namespace;
    private Function initializer;
    private Function serializer;
@@ -78,7 +77,12 @@ public class RuleParser implements Rule {
       }
    }
 
-   public RuleParser expression(final Parser expression) {
+   @Override
+   public ParsingExpression expression() {
+      return attributed;
+   }
+
+   public RuleParser expression(final ParsingExpression expression) {
       parser = expression;
       return this;
    }
@@ -92,21 +96,14 @@ public class RuleParser implements Rule {
     * Returns the name.
     * @return the name
     */
-   @Override
    public String name() {
       return name;
-   }
-
-   @Override
-   public boolean parse(final PogoState state) {
-      return attributed.parse(state);
    }
 
    /**
     * Resolves this rule and the inner expression.
     * @param grammar the grammar to resolve rule references
     */
-   @Override
    public void resolve(final Grammar grammar, final String ignore) {
       if(initializer != null && isCustomFunction(initializer)) {
          add(new RuleInitAttribute(initializer.name()));

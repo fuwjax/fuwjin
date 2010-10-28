@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.fuwjin.pogo.state;
 
+import org.fuwjin.postage.type.Optional;
+
 /**
  * The memo structure for a pogo state.
  */
@@ -61,10 +63,14 @@ public class AbstractMemo implements PogoMemo {
     * Stores the memo for further retrieval.
     */
    @Override
-   public void store() {
+   public boolean store() {
+      state.releaseMemo();
       value = state.getValue();
+      if(value == Optional.UNSET) {
+         return false;
+      }
       end = state.current();
       start.addMemo(this);
-      state.releaseMemo();
+      return true;
    }
 }

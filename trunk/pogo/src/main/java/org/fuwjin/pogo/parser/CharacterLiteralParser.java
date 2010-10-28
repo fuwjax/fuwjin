@@ -14,13 +14,13 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a single specified character from the input.
  */
-public class CharacterLiteralParser implements Parser {
+public class CharacterLiteralParser implements ParsingExpression {
    private static String getCh(final int ch, final String dirty, final String escaped) {
       final int index = dirty.indexOf(ch);
       if(index >= 0) {

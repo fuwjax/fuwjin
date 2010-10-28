@@ -27,6 +27,7 @@ public interface PogoMemo {
 
    /**
     * Stores the memo for further retrieval.
+    * @return true if the memo was stored
     */
-   public void store();
+   public boolean store();
 }

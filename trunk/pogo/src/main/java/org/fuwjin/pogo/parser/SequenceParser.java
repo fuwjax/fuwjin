@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 
@@ -19,7 +19,7 @@ import org.fuwjin.pogo.state.PogoState;
  */
 public class SequenceParser extends CompositeParser {
    @Override
-   protected boolean isLiteral(final Parser parser) {
+   protected boolean isLiteral(final ParsingExpression parser) {
       return parser instanceof CharacterLiteralParser;
    }
 
@@ -27,7 +27,7 @@ public class SequenceParser extends CompositeParser {
    @Override
    public boolean parse(final PogoState state) {
       final PogoPosition notMark = state.current();
-      for(final Parser parser: this) {
+      for(final ParsingExpression parser: this) {
          if(!parser.parse(state)) {
             notMark.reset();
             return false;
@@ -39,7 +39,7 @@ public class SequenceParser extends CompositeParser {
    @Override
    public String toString() {
       final StringBuilder builder = new StringBuilder();
-      for(final Parser parser: this) {
+      for(final ParsingExpression parser: this) {
          if(builder.length() > 0) {
             builder.append(' ');
          }
