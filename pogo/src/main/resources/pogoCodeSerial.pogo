@@ -36,7 +36,7 @@ RuleResult      =org.fuwjin.pogo.parser.RuleResultAttribute
 
 Function        =org.fuwjin.postage.Function
                 <- QuotedIdent~name
-Expression      =org.fuwjin.pogo.Parser~instanceof
+Expression      =org.fuwjin.pogo.ParsingExpression~instanceof
                 <- Option~this / SequenceChain~this
 Option          =org.fuwjin.pogo.parser.OptionParser~iterator
                 <- 'option(' SequenceChain~next (', ' SequenceChain~next)* ')'

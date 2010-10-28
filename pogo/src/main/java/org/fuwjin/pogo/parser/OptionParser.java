@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 
@@ -20,7 +20,7 @@ import org.fuwjin.pogo.state.PogoState;
  */
 public class OptionParser extends CompositeParser {
    @Override
-   protected boolean isLiteral(final Parser parser) {
+   protected boolean isLiteral(final ParsingExpression parser) {
       return parser instanceof CharacterLiteralParser || parser instanceof CharacterRangeParser;
    }
 
@@ -28,7 +28,7 @@ public class OptionParser extends CompositeParser {
    public boolean parse(final PogoState state) {
       final PogoPosition mark = state.mark();
       try {
-         for(final Parser parser: this) {
+         for(final ParsingExpression parser: this) {
             if(parser.parse(state)) {
                return true;
             }
@@ -43,7 +43,7 @@ public class OptionParser extends CompositeParser {
    @Override
    public String toString() {
       final StringBuilder builder = new StringBuilder();
-      for(final Parser parser: this) {
+      for(final ParsingExpression parser: this) {
          if(builder.length() > 0) {
             builder.append('/');
          }

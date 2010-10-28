@@ -14,14 +14,14 @@ import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches a single character against a range. The range is from start to end,
  * inclusive.
  */
-public class CharacterRangeParser implements Parser {
+public class CharacterRangeParser implements ParsingExpression {
    private int start;
    private int end;
 

@@ -5,24 +5,24 @@ import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Attribute;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 import org.fuwjin.postage.Failure;
 import org.fuwjin.postage.Function;
 import org.fuwjin.postage.type.Optional;
 
-public class RuleMatchAttribute implements Parser, Attribute {
+public class RuleMatchAttribute implements ParsingExpression, Attribute {
    private final String name;
    private Function function;
-   private Parser parser;
+   private ParsingExpression parser;
 
    public RuleMatchAttribute(final String name) {
       this.name = name;
    }
 
    @Override
-   public Parser decorate(final Parser target) {
+   public ParsingExpression decorate(final ParsingExpression target) {
       parser = target;
       return this;
    }

@@ -38,7 +38,7 @@ public class LiteratePogo { // NO_UCD
     * @param parser the inner parser
     * @return the new parser
     */
-   public static Parser and(final Parser parser) {
+   public static ParsingExpression and(final ParsingExpression parser) {
       return new PositiveLookaheadParser(parser);
    }
 
@@ -46,7 +46,7 @@ public class LiteratePogo { // NO_UCD
     * Creates an any character parser.
     * @return the new parser
     */
-   public static Parser dot() {
+   public static ParsingExpression dot() {
       return new CharacterParser();
    }
 
@@ -68,7 +68,7 @@ public class LiteratePogo { // NO_UCD
     * @param ch the character to match
     * @return the new parser
     */
-   public static Parser lit(final char ch) {
+   public static ParsingExpression lit(final char ch) {
       return new CharacterLiteralParser(Character.toString(ch));
    }
 
@@ -93,7 +93,7 @@ public class LiteratePogo { // NO_UCD
     * @param parser the inner parser
     * @return the new parser
     */
-   public static Parser not(final Parser parser) {
+   public static ParsingExpression not(final ParsingExpression parser) {
       return new NegativeLookaheadParser(parser);
    }
 
@@ -102,9 +102,9 @@ public class LiteratePogo { // NO_UCD
     * @param parsers the set of options
     * @return the new parser
     */
-   public static Parser option(final Parser... parsers) {
+   public static ParsingExpression option(final ParsingExpression... parsers) {
       final OptionParser p = new OptionParser();
-      for(final Parser parser: parsers) {
+      for(final ParsingExpression parser: parsers) {
          p.add(parser);
       }
       return p.reduce();
@@ -115,7 +115,7 @@ public class LiteratePogo { // NO_UCD
     * @param parser the inner parser
     * @return the new parser
     */
-   public static Parser optional(final Parser parser) {
+   public static ParsingExpression optional(final ParsingExpression parser) {
       return new OptionalParser(parser);
    }
 
@@ -124,7 +124,7 @@ public class LiteratePogo { // NO_UCD
     * @param parser the inner parser
     * @return the new parser
     */
-   public static Parser plus(final Parser parser) {
+   public static ParsingExpression plus(final ParsingExpression parser) {
       return new RequiredSeriesParser(parser);
    }
 
@@ -134,7 +134,7 @@ public class LiteratePogo { // NO_UCD
     * @param end the largest allowed character
     * @return the new parser
     */
-   public static Parser range(final char start, final char end) {
+   public static ParsingExpression range(final char start, final char end) {
       final CharacterRangeParser peg = new CharacterRangeParser();
       peg.setStart(Character.toString(start));
       peg.setEnd(Character.toString(end));
@@ -153,7 +153,7 @@ public class LiteratePogo { // NO_UCD
     * @param finalizer the finalizer after the rule is parsed
     * @return the parser
     */
-   public static Parser ref(final String name, final String initializer, final String serializer, final String finalizer) {
+   public static ParsingExpression ref(final String name, final String initializer, final String serializer, final String finalizer) {
       final RuleReferenceParser ref = ref(name);
       if(!"default".equals(initializer)) {
          ref.add(initRef(initializer));
@@ -194,7 +194,7 @@ public class LiteratePogo { // NO_UCD
     * @return the parser
     */
    public static RuleParser rule(final String name, final Class<?> type, final String initializer,
-         final String serializer, final String finalizer, final Parser parser) {
+         final String serializer, final String finalizer, final ParsingExpression parser) {
       return rule(name, type.getCanonicalName(), initializer, serializer, finalizer, parser);
    }
 
@@ -219,7 +219,7 @@ public class LiteratePogo { // NO_UCD
     * @return the parser
     */
    public static RuleParser rule(final String name, final String type, final String initializer,
-         final String serializer, final String finalizer, final Parser parser) {
+         final String serializer, final String finalizer, final ParsingExpression parser) {
       final RuleParser rule = rule(name, type);
       if(!"default".equals(initializer)) {
          rule.add(init(initializer));
@@ -239,9 +239,9 @@ public class LiteratePogo { // NO_UCD
     * @param parsers the inner parsers
     * @return the new parser
     */
-   public static Parser seq(final Parser... parsers) {
+   public static ParsingExpression seq(final ParsingExpression... parsers) {
       final SequenceParser p = new SequenceParser();
-      for(final Parser parser: parsers) {
+      for(final ParsingExpression parser: parsers) {
          p.add(parser);
       }
       return p.reduce();
@@ -252,7 +252,7 @@ public class LiteratePogo { // NO_UCD
     * @param parser the inner parser
     * @return the new parser
     */
-   public static Parser star(final Parser parser) {
+   public static ParsingExpression star(final ParsingExpression parser) {
       return new OptionalSeriesParser(parser);
    }
 }

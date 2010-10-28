@@ -13,13 +13,13 @@ package org.fuwjin.pogo.parser;
 import static org.fuwjin.util.ObjectUtils.hash;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoState;
 
 /**
  * Matches any character from the input.
  */
-public class CharacterParser implements Parser {
+public class CharacterParser implements ParsingExpression {
    @Override
    public boolean equals(final Object obj) {
       return obj instanceof CharacterParser;

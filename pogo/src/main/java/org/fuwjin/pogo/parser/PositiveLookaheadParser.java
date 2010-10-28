@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoPosition;
 import org.fuwjin.pogo.state.PogoState;
 
@@ -29,7 +29,7 @@ public class PositiveLookaheadParser extends ParserOperator {
     * Creates a new instance.
     * @param parser the expected parser
     */
-   public PositiveLookaheadParser(final Parser parser) {
+   public PositiveLookaheadParser(final ParsingExpression parser) {
       super(parser);
    }
 

@@ -18,19 +18,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.Parser;
+import org.fuwjin.pogo.ParsingExpression;
 
 /**
  * A base class for composite parsers.
  */
-public abstract class CompositeParser implements Parser, Iterable<Parser> {
-   private final List<Parser> parsers = new LinkedList<Parser>();
+public abstract class CompositeParser implements ParsingExpression, Iterable<ParsingExpression> {
+   private final List<ParsingExpression> parsers = new LinkedList<ParsingExpression>();
 
    /**
     * Adds a parser to this composite.
     * @param parser the parser to add
     */
-   public void add(final Parser parser) {
+   public void add(final ParsingExpression parser) {
       parsers.add(parser);
    }
 
@@ -54,7 +54,7 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
     * @return true if a literal composite, false otherwise
     */
    protected boolean isLiteral() {
-      for(final Parser parser: parsers) {
+      for(final ParsingExpression parser: parsers) {
          if(!isLiteral(parser)) {
             return false;
          }
@@ -68,10 +68,10 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
     * @param parser the parser which may be literal
     * @return true if {@code parser} is literal, false otherwise
     */
-   protected abstract boolean isLiteral(Parser parser);
+   protected abstract boolean isLiteral(ParsingExpression parser);
 
    @Override
-   public Iterator<Parser> iterator() {
+   public Iterator<ParsingExpression> iterator() {
       return parsers.iterator();
    }
 
@@ -80,9 +80,9 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
     * should be used in place of the parser that generated it.
     * @return the reduced parser
     */
-   public Parser reduce() {
+   public ParsingExpression reduce() {
       for(int index = 0; index < parsers.size(); index++) {
-         final Parser parser = parsers.get(index);
+         final ParsingExpression parser = parsers.get(index);
          if(parser instanceof CompositeParser) {
             parsers.set(index, ((CompositeParser)parser).reduce());
          }
@@ -95,7 +95,7 @@ public abstract class CompositeParser implements Parser, Iterable<Parser> {
 
    @Override
    public void resolve(final Grammar grammar, final String namespace) {
-      for(final Parser parser: parsers) {
+      for(final ParsingExpression parser: parsers) {
          parser.resolve(grammar, namespace);
       }
    }
