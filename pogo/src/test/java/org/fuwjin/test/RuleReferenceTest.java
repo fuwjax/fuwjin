@@ -11,8 +11,11 @@
 package org.fuwjin.test;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
+import static org.fuwjin.pogo.LiteratePogo.init;
+import static org.fuwjin.pogo.LiteratePogo.initRef;
 import static org.fuwjin.pogo.LiteratePogo.lit;
 import static org.fuwjin.pogo.LiteratePogo.ref;
+import static org.fuwjin.pogo.LiteratePogo.resultRef;
 import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -35,9 +38,8 @@ public class RuleReferenceTest {
    public void testAddMethod() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", ref("Rule", "default", "default", "addChild"))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(ref("Rule").add(resultRef("addChild")))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));
@@ -52,9 +54,8 @@ public class RuleReferenceTest {
    public void testNewChild() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", ref("Rule", "newChild", "default", "addChild"))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
-            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class, "instanceof", "default", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(ref("Rule").add(initRef("newChild")).add(resultRef("addChild")))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("instanceof")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));
@@ -69,9 +70,8 @@ public class RuleReferenceTest {
    public void testReturn() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", Object.class, "default", "default", "default", ref("Rule", "default", "default", "return"))); //$NON-NLS-1$//$NON-NLS-2$
-            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", Object.class.getCanonicalName()).expression(ref("Rule").add(resultRef("return")))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));
@@ -86,9 +86,8 @@ public class RuleReferenceTest {
    public void testThis() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", ref("Rule", "this", "default", "addChild"))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class, "instanceof", "default", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(ref("Rule").add(initRef("this")).add(resultRef("addChild")))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+            add(rule("Rule", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("instanceof")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));

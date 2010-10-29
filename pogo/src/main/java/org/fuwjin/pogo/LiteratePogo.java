@@ -146,28 +146,6 @@ public class LiteratePogo { // NO_UCD
    }
 
    /**
-    * Creates a reference parser.
-    * @param name the name of the rule to redirect to
-    * @param initializer the initalizer before the rule is parsed
-    * @param serializer the serializer for the match after the rule is parsed
-    * @param finalizer the finalizer after the rule is parsed
-    * @return the parser
-    */
-   public static ParsingExpression ref(final String name, final String initializer, final String serializer, final String finalizer) {
-      final RuleReferenceParser ref = ref(name);
-      if(!"default".equals(initializer)) {
-         ref.add(initRef(initializer));
-      }
-      if(!"default".equals(serializer)) {
-         ref.add(matchRef(serializer));
-      }
-      if(!"default".equals(finalizer)) {
-         ref.add(resultRef(finalizer));
-      }
-      return ref;
-   }
-
-   /**
     * Creates a new Rule Result Attribute.
     * @param name the attribute name
     * @return the new attribute
@@ -187,51 +165,10 @@ public class LiteratePogo { // NO_UCD
     * Creates a new Rule.
     * @param name the name of the rule
     * @param type the type bound to the rule
-    * @param initializer the initializer before the rule is parsed
-    * @param serializer the serializer for the match after the rule is parsed
-    * @param finalizer the finalizer after the rule is parsed
-    * @param parser the expression to parse
-    * @return the parser
-    */
-   public static RuleParser rule(final String name, final Class<?> type, final String initializer,
-         final String serializer, final String finalizer, final ParsingExpression parser) {
-      return rule(name, type.getCanonicalName(), initializer, serializer, finalizer, parser);
-   }
-
-   /**
-    * Creates a new Rule.
-    * @param name the name of the rule
-    * @param type the type bound to the rule
     * @return the parser
     */
    public static RuleParser rule(final String name, final String type) {
       return new RuleParser(name, type);
-   }
-
-   /**
-    * Creates a new Rule.
-    * @param name the name of the rule
-    * @param type the type bound to the rule
-    * @param initializer the initializer before the rule is parsed
-    * @param serializer the serializer for the match after the rule is parsed
-    * @param finalizer the finalizer after the rule is parsed
-    * @param parser the expression to parse
-    * @return the parser
-    */
-   public static RuleParser rule(final String name, final String type, final String initializer,
-         final String serializer, final String finalizer, final ParsingExpression parser) {
-      final RuleParser rule = rule(name, type);
-      if(!"default".equals(initializer)) {
-         rule.add(init(initializer));
-      }
-      if(!"default".equals(serializer)) {
-         rule.add(match(serializer));
-      }
-      if(!"default".equals(finalizer)) {
-         rule.add(result(finalizer));
-      }
-      rule.expression(parser);
-      return rule;
    }
 
    /**

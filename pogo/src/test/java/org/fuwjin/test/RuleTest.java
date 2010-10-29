@@ -11,7 +11,10 @@
 package org.fuwjin.test;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
+import static org.fuwjin.pogo.LiteratePogo.init;
 import static org.fuwjin.pogo.LiteratePogo.lit;
+import static org.fuwjin.pogo.LiteratePogo.match;
+import static org.fuwjin.pogo.LiteratePogo.result;
 import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -34,7 +37,7 @@ public class RuleTest {
    public void testDefault() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", Object.class, "default", "return", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", Object.class.getCanonicalName()).add(match("return")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));
@@ -49,7 +52,7 @@ public class RuleTest {
    public void testInstanceFieldFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "builder", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).add(result("builder")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
@@ -65,7 +68,7 @@ public class RuleTest {
    public void testInstanceFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "toResult", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).add(result("toResult")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
@@ -80,7 +83,7 @@ public class RuleTest {
    public void testNew() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", lit('a'))); //$NON-NLS-1$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(lit('a'))); //$NON-NLS-1$
             resolve();
          }
       }.parse(streamOf(A));
@@ -95,8 +98,7 @@ public class RuleTest {
    public void testStaticConstantFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "default", "default", "newInstance", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(result("newInstance")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
@@ -111,7 +113,7 @@ public class RuleTest {
    public void testStaticFieldFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class, "default", "default", "NULL", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(result("NULL")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
@@ -126,7 +128,7 @@ public class RuleTest {
    public void testStaticFinalizer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class, "default", "valueOf", "default", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(match("valueOf")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
@@ -141,8 +143,7 @@ public class RuleTest {
    public void testStaticInitializer() throws PogoException {
       final Object obj = new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "newInstance", "default", "default", lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("newInstance")).expression(lit('a'))); //$NON-NLS-1$//$NON-NLS-2$
             resolve();
          }
       }.parse(streamOf(A));
