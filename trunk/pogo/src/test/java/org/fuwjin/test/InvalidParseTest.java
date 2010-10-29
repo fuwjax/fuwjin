@@ -12,6 +12,7 @@ package org.fuwjin.test;
 
 import static org.fuwjin.pogo.CodePointStreamFactory.streamOf;
 import static org.fuwjin.pogo.LiteratePogo.lit;
+import static org.fuwjin.pogo.LiteratePogo.match;
 import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.fuwjin.pogo.LiteratePogo.seq;
 import static org.hamcrest.CoreMatchers.is;
@@ -33,7 +34,7 @@ public class InvalidParseTest {
       try {
          new Grammar() {
             {
-               add(rule("Grammar", Object.class, "default", "default", "default", seq(lit('a'), lit('b')))); //$NON-NLS-1$
+               add(rule("Grammar", Object.class.getCanonicalName()).add(match("default")).expression(seq(lit('a'), lit('b')))); //$NON-NLS-1$
                resolve();
             }
          }.parse(streamOf("ac"));

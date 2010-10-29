@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
@@ -19,11 +18,9 @@ import java.util.NoSuchElementException;
 
 import org.fuwjin.pogo.Attribute;
 import org.fuwjin.pogo.Grammar;
-import org.fuwjin.pogo.LiteratePogo;
 import org.fuwjin.pogo.ParsingExpression;
 import org.fuwjin.pogo.state.PogoMemo;
 import org.fuwjin.pogo.state.PogoState;
-import org.fuwjin.postage.Function;
 import org.fuwjin.postage.type.Optional;
 
 /**
@@ -58,9 +55,6 @@ public class RuleReferenceParser implements ParsingExpression {
    private static final String UNKNOWN_RULE = "No rule named %s in grammar"; //$NON-NLS-1$ 
    private String ruleName;
    private RuleParser rule;
-   private Function constructor;
-   private Function matcher;
-   private Function converter;
    private ParsingExpression attributed;
    private final LinkedList<Attribute> attributes = new LinkedList<Attribute>();
    private boolean isReturn = false;
@@ -103,7 +97,7 @@ public class RuleReferenceParser implements ParsingExpression {
 
    @Override
    public int hashCode() {
-      return hash(getClass(), ruleName, constructor, converter);
+      return hash(getClass(), ruleName);
    }
 
    @Override
@@ -121,15 +115,6 @@ public class RuleReferenceParser implements ParsingExpression {
       rule = grammar.getRule(ruleName);
       if(rule == null) {
          throw new NoSuchElementException(String.format(UNKNOWN_RULE, ruleName));
-      }
-      if(constructor != null && isCustomFunction(constructor)) {
-         add(new ReferenceInitAttribute(constructor.name()));
-      }
-      if(matcher != null && isCustomFunction(matcher)) {
-         add(LiteratePogo.matchRef(matcher.name()));
-      }
-      if(converter != null && isCustomFunction(converter)) {
-         add(LiteratePogo.resultRef(converter.name()));
       }
       attributed = new MemoParser();
       if(!attributes.isEmpty()) {

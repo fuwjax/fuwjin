@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.fuwjin.test;
 
+import static org.fuwjin.pogo.LiteratePogo.init;
 import static org.fuwjin.pogo.LiteratePogo.ref;
+import static org.fuwjin.pogo.LiteratePogo.resultRef;
 import static org.fuwjin.pogo.LiteratePogo.rule;
 import static org.junit.Assert.fail;
 
@@ -28,8 +30,7 @@ public class PogoInvalidRuleTest {
    public void testUnknownRule() {
       new Grammar() {
          {
-            add(rule(
-                  "Grammar", org.fuwjin.test.SampleBuilderPattern.class, "new", "default", "default", ref("Rule", "default", "default", "addChild"))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+            add(rule("Grammar", org.fuwjin.test.SampleBuilderPattern.class.getCanonicalName()).add(init("new")).expression(ref("Rule").add(resultRef("addChild")))); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
             try {
                resolve();
                fail("Should throw an exception"); //$NON-NLS-1$

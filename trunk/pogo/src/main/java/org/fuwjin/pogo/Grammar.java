@@ -123,18 +123,6 @@ public class Grammar extends Parser implements Iterable<RuleParser> {
    }
 
    /**
-    * Returns the named function.
-    * @param category the function category prefix
-    * @param name the name of the function
-    * @param parameters the function parameters
-    * @return the function
-    */
-   public Function getReturnFunction(final String category, final String name, final Type... parameters) {
-      return postage.getFunction(category + "." + name).withSignature(Optional.OBJECT, parameters).filter(
-            PostageUtils.RETURN_FILTER);
-   }
-
-   /**
     * Returns the named rule.
     * @param name the rule name
     * @return the rule

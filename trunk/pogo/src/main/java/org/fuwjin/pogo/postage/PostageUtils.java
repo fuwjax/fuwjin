@@ -138,15 +138,6 @@ public class PostageUtils {
          return target;
       }
    };
-   public static final TargetTransform RETURN_FILTER = new TargetTransform() {
-      @Override
-      public FunctionTarget transform(final FunctionTarget target) {
-         if(Return.class.equals(target.returnType())) {
-            return new ReturnTarget(target);
-         }
-         return new ThisTarget(target, false);
-      }
-   };
 
    /**
     * Returns true if category is not default.

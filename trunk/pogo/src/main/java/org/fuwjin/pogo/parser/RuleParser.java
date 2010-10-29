@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.pogo.parser;
 
-import static org.fuwjin.pogo.postage.PostageUtils.isCustomFunction;
 import static org.fuwjin.util.ObjectUtils.eq;
 import static org.fuwjin.util.ObjectUtils.hash;
 
@@ -20,7 +19,6 @@ import org.fuwjin.pogo.Attribute;
 import org.fuwjin.pogo.Grammar;
 import org.fuwjin.pogo.Parser;
 import org.fuwjin.pogo.ParsingExpression;
-import org.fuwjin.postage.Function;
 
 /**
  * A grammar rule.
@@ -30,9 +28,6 @@ public class RuleParser extends Parser {
    private ParsingExpression parser;
    private ParsingExpression attributed;
    private final String namespace;
-   private Function initializer;
-   private Function serializer;
-   private Function finalizer;
    private final LinkedList<Attribute> attributes = new LinkedList<Attribute>();
 
    /**
@@ -105,15 +100,6 @@ public class RuleParser extends Parser {
     * @param grammar the grammar to resolve rule references
     */
    public void resolve(final Grammar grammar, final String ignore) {
-      if(initializer != null && isCustomFunction(initializer)) {
-         add(new RuleInitAttribute(initializer.name()));
-      }
-      if(serializer != null && isCustomFunction(serializer)) {
-         add(new RuleMatchAttribute(serializer.name()));
-      }
-      if(finalizer != null && isCustomFunction(finalizer)) {
-         add(new RuleResultAttribute(finalizer.name()));
-      }
       attributed = parser;
       for(final Attribute attribute: attributes) {
          attributed = attribute.decorate(attributed);
