@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 import org.fuwjin.postage.Failure;
-import org.fuwjin.postage.Function;
 import org.fuwjin.postage.FunctionTarget;
 import org.fuwjin.postage.TargetTransform;
 
@@ -146,14 +145,5 @@ public class PostageUtils {
     */
    public static boolean isCustomCategory(final String category) {
       return !"default".equals(category);
-   }
-
-   /**
-    * Returns true if the function is not default.
-    * @param function the function to test
-    * @return false if the category is default, true otherwise
-    */
-   public static boolean isCustomFunction(final Function function) {
-      return !"default".equals(function.name());
    }
 }

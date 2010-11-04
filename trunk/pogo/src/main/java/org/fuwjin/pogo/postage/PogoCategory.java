@@ -31,7 +31,6 @@ public class PogoCategory extends AbstractCategory {
     */
    public PogoCategory() {
       super(null);
-      addFunction("default", new ConstantFunction(true, boolean.class));
       addFunction("true", new ConstantFunction(Boolean.TRUE));
       addFunction("null", new ConstantFunction(null));
       addFunction("false", new ConstantFunction(Boolean.FALSE));
