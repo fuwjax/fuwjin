@@ -17,10 +17,6 @@ RuleResult      =org.fuwjin.pogo.parser.RuleResultAttribute
 
 Category        =org.fuwjin.pogo.postage.PostageUtils~isCustomCategory
                 <- Identifier~this
-Function        =org.fuwjin.pogo.postage.PostageUtils~isCustomFunction
-                <- FunctionName~this
-FunctionName    =org.fuwjin.postage.Function
-                <- Identifier~name                
 Expression      <- LitOpt~this / Option~this / SequenceChain~this
 Option          =org.fuwjin.pogo.parser.OptionParser~iterator
                 <- SequenceChain~next (' / ' SequenceChain~next)*

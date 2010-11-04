@@ -1,5 +1,5 @@
 # POGO serializer grammar
-CodeGen         =org.fuwjin.pogo.PredefinedGrammar$PogoCodeGenerator
+CodeGen         =org.fuwjin.pogo.PogoClassLoader$QualifiedGenerator
                 <- 
 'package ' Identifier~packageName ';
 
@@ -8,7 +8,7 @@ import org.fuwjin.pogo.Grammar;
 
 public final class ' Identifier~name ' extends Grammar{
   {
-'    Grammar~grammar
+'    Grammar~generator
 '    resolve();
   }
   

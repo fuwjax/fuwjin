@@ -18,6 +18,31 @@ import org.fuwjin.complier.RuntimeClassLoader;
  * A code generation class loader that builds a class from a pogo grammar.
  */
 public class PogoClassLoader {
+   public static class QualifiedGenerator {
+      private final String packageName;
+      private final String name;
+      private final Object generator;
+      private final String qualifiedName;
+
+      /**
+       * Creates a new instance.
+       * @param qualifiedName the qualified class name of the generated source
+       * @param generator the grammar to encode
+       */
+      public QualifiedGenerator(final String qualifiedName, final Object generator) {
+         this.generator = generator;
+         this.qualifiedName = qualifiedName;
+         final int index = qualifiedName.lastIndexOf('.');
+         packageName = qualifiedName.substring(0, index);
+         name = qualifiedName.substring(index + 1);
+      }
+
+      @Override
+      public String toString() {
+         return packageName + '.' + name + '=' + generator;
+      }
+   }
+
    private final Grammar grammar;
    private final RuntimeClassLoader loader = new RuntimeClassLoader();
 
@@ -31,6 +56,10 @@ public class PogoClassLoader {
       } catch(final Exception e) {
          throw new RuntimeException(e);
       }
+   }
+
+   public Class<?> loadClass(final QualifiedGenerator generator) throws ClassNotFoundException {
+      return loadClass(generator.qualifiedName, generator);
    }
 
    /**
