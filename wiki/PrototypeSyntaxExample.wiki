@@ -48,303 +48,184 @@
 #The Grammar below does not match this syntax, but the new attribute syntax on Pogo.
 
 
-
-import org.fuwjin.pogo.*
-
-<Grammar>{
-   grammar = new Grammar(postage)
-   <Spacing>
-   do{
-     name = <Identifier>
-     '<-' <Spacing>
-     grammar.add(name, <Expression>)
-   }
-   <EndOfFile>
-   grammar.resolve()
-   return grammar
+<Pogo>{
+  <S>
+  pogo = Pogo.new()
+  repeat {
+    name = <Name>
+    accept "<-" <S>
+    Pogo.add(pogo, name, <Expression>)
+  }
+  <EndOfFile>
+  return pogo
 }
 <Expression>{
   first = <Sequence>
   either{
-    assert not '/'
-    option = first
-  } or {
-    option = new OptionParser
-    option.add(first)
-    do{
-      '/' <Spacing>
-      option.add(<Sequence>)
+    accept "/" <S>
+    option = OptionExpression.new(first)
+    OptionExpression.add(option, <Sequence>)
+    could repeat {
+      accept "/" <S>
+      OptionExpression.add(option, <Sequence>)
     }
-  }
+  } or option = first
   return option
 }
 <Sequence>{
-  first = <Statement>
+  first = <Prefix>
   either{
-    second = <Statement>
-    seq = new SequenceParser
-    seq.add(first)
-    seq.add(second)
-    while{
-      seq.add(<Statement>)
-    }
-  } or {
-    seq = first
-  }
+    second = <Prefix>
+    seq = SequenceExpression.new(first, second)
+    could repeat SequenceExpression.add(seq, <Sequence>)
+  } or seq = first
   return seq
 }
-<Statement>{
-  either{
-    stmt = <Attribute>
-  } or {
-    stmt = <Prefix>
-  }
-  return stmt
-}
 <Prefix>{
-  either{
-    '&' <Spacing>
-    prefix = new PositiveLookahead(<Assertion>)
-  } or {
-    '!' <Spacing>
-    prefix = new NegativeLookahead(<Assertion>)
-  } or {
+  either {
+    accept '&' <S>
+    prefix = PositiveLookaheadExpression.new(<Suffix>)
+  }or{
+    accept '!' <S>
+    prefix = NegativeLookaheadExpression.new(<Suffix>)
+  }or{
     prefix = <Suffix>
   }
   return prefix
 }
-<Assertion>{
-  either{
-    '{' <Spacing>
-    assertion = <Function>
-    '}' <Spacing>
-  }or{
-    assertion = <Suffix>
-  }
-  return assertion
-}
 <Suffix>{
   primary = <Primary>
-  either{
-    '?' <Spacing>
-    suffix = new OptionalParser(primary)
-  }or{
-    '*' <Spacing>
-    suffix = new OptionalSeriesParser(primary)
-  }or{
-    '+' <Spacing>
-    suffix = new RequiredSeriesParser(primary)
-  }or{
-    suffix = primary
-  }
+  either {
+    accept '?' <S>
+    suffix = OptionalExpression.new(primary)
+  } or {
+    accept '*' <S>
+    suffix = OptionallyRepeatingExpression.new(primary)
+  } or {
+    accept '+' <S>
+    suffix = RequiredRepeatingExpression.new(primary)
+  } or suffix = primary
   return suffix
 }
 <Primary>{
-  either{
-    '(' <Spacing>
+  either {
+    name = <Name>
+    is not '<'
+    either {
+      accept ':' <S>
+      primary = Reference.new(name, <Attribute>)
+    } or primary = Reference.new(name)
+  } or {
+    accept '(' <S>
     primary = <Expression>
-    ')' <Spacing>
-  } or {
-    primary = <Reference>
-  } or {
-    primary = <Literal>
-  } or {
-    primary = <CharClass>
-  } or {
-    '.' <Spacing>
-    primary = CharacterParser.DOT
+    accept ')' <S>
+  } or primary = <Literal>
+  or primary = <Class>
+  or {
+    accept '.' <S>
+    primary = CharClass.ANY()
   }
   return primary
 }
-<Reference>{
-  name = <Identifier>
-  assert not '<'
-  ref = new RuleReference(name)
-  try{
-    ':' Spacing
-    ref.attribute(<Attribute>)
-  }
-  return ref
-}
-<Attribute>{
-  '{' <Spacing>
-  either{
-    attr = <Assignment>
-  } or {
-    attr = <Function>
-  }
-  '}' <Spacing>
-  return attr
-}
-<Assignment>{
-  name = <Identifier>
-  '=' <Spacing>
-  either{
-    attr = <Function>
-  } or {
-    attr = new AttributeVariable(<Identifier>)
-  }
-  attr.assignTo(name)
-  return attr
-}
-<Function>{
-  name = <QualifiedIdentifier>
-  '(' <Spacing>
-  function = new AttributeFunction(name)
-  try{
-    function.addParameter(<Identifier>)
-    while{
-      ',' <Spacing>
-      function.addParameter(<Identifier>)
-    }
-  }
-  ')' <Spacing>
-  return function
-}
-<Literal>{
-  either{
-    '\''
-    lit = new LiteralParser
-    while{
-      assert not '\''
-      lit.append(<Char>)
-    }
-    '\'' <Spacing>
-  } or {
-    '"'
-    lit = new LiteralParser
-    while{
-      assert not '"'
-      lit.append(<Char>)
-    }
-    '"' <Spacing>
-  }
-  return lit
-}
-<CharClass>{
-  '['
-  set = new CharSetParser
-  while{
-    assert not ']'
-    first = <Char>
-    either{
-      '-'
-      set.addRange(first, <Char>)
-    } or {
-      set.addChar(first)
-    }
-  }
-  ']' <Spacing>
-  return set
+<Name> {
+  id = <Identifier> <S>
+  return id
 }
 <Identifier>{
-  id = <Ident>
-  <Spacing>
-  return id
-}
-<QualifiedIdentifier>{
-  id = <QualifiedIdent>
-  <Spacing>
-  return id
-}
-<QualifiedIdent>{
-  <Ident>
-  try either {
-    do '[]'
-    <QualifiedSep>
-    <SimpleQualIdent>
-  } or {
-    <QualifiedSep>
-    <QualifiedIdent>
-  }
-  return match
-}
-<QualifiedSep>{
-  in ., $
-}
-<SimpleQualIdent>{
-  <Ident>
-  while{
-    <QualifiedSep>
-    <Ident>
-  }
-}
-<Ident>{
   <IdentStart>
-  while <IdentPart>
+  could repeat <IdentCont>
   return match
 }
 <IdentStart>{
-  assert Character.isIdentifierStart(@)
+  accept in a-z, A-Z, _
 }
-<IdentPart>{
-  assert Character.isIdentifierPart(@)
+<IdentCont>{
+  accept in a-z, A-Z, _, 0-9
 }
-<Char>{
-  either{
-    '\\'
-    char = <EscapeChar>
+
+<Literal> {
+  either {
+    accept "'"
+    lit = Literal.new()
+    could repeat {
+      is not "'"
+      Literal.append(lit, <Char>)
+    }
+    accept "'" <S>
   } or {
-    char = <PlainChar>
+    accept '"'
+    could repeat {
+      is not '"'
+      Literal.append(lit, <Char>)
+    }
+    accept '"' <S>
+  }
+  return lit
+}
+<Class> {
+  accept "["
+  class = CharClass.new()
+  could repeat {
+    is not "["
+    <Range>
+  }
+  accept "]" <S>
+}
+<Range> {
+  first = <Char>
+  either {
+    accept "-" <S>
+    CharClass.add(class, first, <Char>)
+  } or CharClass.add(class, first)
+}
+<Char> {
+  either char = accept not '\\' or char = <Escape>
+  return char
+}
+<Escape> {
+  accept '\\'
+  either {
+    accept 'n'
+    char = codepoint('\n')
+  } or {
+    accept 'r'
+    char = codepoint('\r')
+  } or {
+    accept 't'
+    char = codepoint('\t')
+  } or {
+    char = accept in ',",[,],\\
+  } or {
+    char = Integer.parseInt(<Octal>, 8)
   }
   return char
 }
-<PlainChar>{
-  return not '\\'
-}
-<EscapeChar>{
-  either{
-    escape = <Operator>
+<Octal> {
+  either {
+    accept in 0-2
+    accept in 0-7
+    accept in 0-7
   } or {
-    'n'
-    escape = LiteralParser.NEWLINE
-  } or {
-    'r'
-    escape = LiteralParser.RETURN
-  } or {
-    't'
-    escape = LiteralParser.TAB
-  } or {
-    'x'
-    escape = <HexChar>
-  } or {
-    escape = <OctalChar>
+    accept in 0-7
+    could accept in 0-7
   }
-  return escape
+  return match
 }
-<Operator>{
-  return in -, ', ", [, ], \\
+<S> {
+  could repeat either <Space> or <Comment>
 }
-<HexChar>{
-  do in 0-9, A-F, a-f
-  return LiteralParser.parseHex(match)
-}
-<OctalChar>{
-  either{
-    in 0-3
-    in 0-7
-    in 0-7
-  }or{
-    in 0-7
-    try in 0-7
-  }
-  return LiteralParser.parseOctal(match)
-}
-
-<Spacing>{
-  while in \ , \n, \r, \t
+<Space>{
+  accept \ ,\t,\n,\r
 }
 <Comment>{
-  '#'
-  while not in \r, \n
-  either{
-    '\n'
-  }or{
-    '\r'
-    try '\n'
-  }
+  accept '#'
+  accept not <EndOfLine> <EndOfLine>
+}
+<EndOfline>{
+  could accept '\r'
+  accept '\n'
 }
 <EndOfFile>{
-  assert not @
+  is not next
 }
 }}}
