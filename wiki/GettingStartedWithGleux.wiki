@@ -15,11 +15,11 @@ Gleux is at it's heart a scripting language. So we'll start with a simple script
 }
 }}}
 
-Surprise of all surprises... this is the tried and true hello-world script in Gleux. The script is named <HelloWorld> which may seem awkward at first, but there's a subtle ploy at work here. Script names are "elevated identifiers;" they are intended to be visually distinguishable and distinguished among the various identifiers in Gleux. 
+Surprise of all surprises... this is the tried and true hello-world script in Gleux. The script is named `<HelloWorld>` which may seem awkward at first, but there's a subtle ploy at work here. Script names are "elevated identifiers;" they are intended to be visually distinguishable and distinguished among the various identifiers in Gleux. 
 
 By now, curly braces as block delimiters are old hat, but why, you might ask, why would Gleux stoop to old hat. The answer should not be surprising. Any restrictions to presentation are better than none, but fewer are better than more. Keep in mind here that presentation is not content, even though some modern languages such as python insist on blurring the line. White space has meaning to people and meaning to computers, but those meanings are rarely the same. So since delimiters are a necessary evil, stick with the least surprising choice.
 
-Next, let's look at the only statement in our HelloWorld script, starting with the keyword "publish". Publish simply means to pass the following value expression, in this case "Hello, world!" to the script's output stream. Every Gleux script has an input stream and an output stream, generally these default to the standard console input and output. 
+Next, let's look at the only statement in our `<HelloWorld>` script, starting with the keyword "publish". Publish simply means to pass the following value expression, in this case "Hello, world!" to the script's output stream. Every Gleux script has an input stream and an output stream, generally these default to the standard console input and output. 
 
 There aren't many keywords in Gleux, and publish is one of only 7 keywords that can start a statement. We'll bring up the others as we go, but the impatient may detour to the GleuxLanguage for more details.
 
@@ -29,7 +29,7 @@ The value expression "Hello, world!" is called a literal, or more specifically a
   publish 'Hello, world!'
 }
 }}}
-In this case, both <HelloWorld> and <HelloWorldRedux> would publish the same thing to the output stream, but the literals can be used in different ways, as we will see in a bit.
+In this case, both `<HelloWorld>` and `<HelloWorldRedux>` would publish the same thing to the output stream, but the literals can be used in different ways, as we will see in a bit.
 
 Let's look at getting some input
 {{{
@@ -53,7 +53,7 @@ Here we have a script which will consume any number, or a case-insensitive A, B,
   accept in \ , \,, \\
 }
 }}}
-Note that space, new line, comma and backslash must all be escaped when used with the "in" keyword. This may be an opportune time to point out that Gleux is very liberal with respect to whitespace; the following script is identical to <ProblemCharacterFilter>
+Note that space, new line, comma and backslash must all be escaped when used with the "in" keyword. This may be an opportune time to point out that Gleux is very liberal with respect to whitespace; the following script is identical to `<ProblemCharacterFilter>`
 {{{
 <ProblemCharacterFilterFormatted> 
   {
@@ -76,7 +76,7 @@ The "accept" keyword has a few other tricks up its sleeve. One in particular is 
 
 Let's say I'm secretly offended that the romans couldn't develop a proper number system and the arabs couldn't develop a proper alphabet forcing billions of people for thousands of years to mix two different symbol sets with horribly conflicting glyphs and therefore, I refuse, on principle, to accept those characters into my script. Just as an example. Nothing personal to the romans or arabs who might be secretly offended that I'm offended. 
 
-So I wrote <OurFirstRealScript> to scan in an unoffensive character from the input stream and then publish it to the output stream. The first statement is an assignment, which is just a fancy way of saying we're going to name the result of a value expression. In this case, the value expression we're naming starts with "accept", which as I just hinted can start a statement or a value. The value of an "accept" is the character read in from the input, assuming of course that it passed the filter condition. Our filter condition this time includes the "not" keyword, which reverses the filter. So, in this example, the value of the "accept" is the next character from the input as long as it is not the number one, an uppercase I, a lowercase l, a zero, an uppercase O, a five, or an uppercase S. 
+So I wrote `<OurFirstRealScript>` to scan in an unoffensive character from the input stream and then publish it to the output stream. The first statement is an assignment, which is just a fancy way of saying we're going to name the result of a value expression. In this case, the value expression we're naming starts with "accept", which as I just hinted can start a statement or a value. The value of an "accept" is the character read in from the input, assuming of course that it passed the filter condition. Our filter condition this time includes the "not" keyword, which reverses the filter. So, in this example, the value of the "accept" is the next character from the input as long as it is not the number one, an uppercase I, a lowercase l, a zero, an uppercase O, a five, or an uppercase S. 
 
 An assignment "names" the result, so the consumed character in this instance will be named "ch", which is referred to as a variable, much like "x" and "y" were variables in high school algebra. That variable name can be used throughout the rest of the script to refer back to the consumed character, whatever it may have been. In fact, we used it in the "publish" statement. 
 
@@ -91,7 +91,7 @@ If we wanted to do the same thing with a static literal, we could have written t
   publish '.'
 }
 }}}
-You might be thinking to yourself, why wouldn't Gluex just print out all the values that follow "publish"? And that's a good question. Keep in mind that the following script is completely identical to <OurFirstReallyClunkyScript>
+You might be thinking to yourself, why wouldn't Gluex just print out all the values that follow "publish"? And that's a good question. Keep in mind that the following script is completely identical to `<OurFirstReallyClunkyScript>`
 {{{
 <OurFirstReallyUnreadableClunkyScript> {
   ch = accept not in 1,I,l,0,O,5,S
@@ -120,6 +120,7 @@ The "could" keyword can be used without "repeat" to indicate any optional statem
 <OptionalStatementsAreJustAsFun> {
   could accept a,b
 }
+}}}
 This script will consume the next character from the input if it is an a or b, but it won't fail if it doesn't match. In a certain sense "could" is a bit like an "if" statement in other languages, it allows for a branch of sorts. The corresponding statement in Gleux to "if-else" would be "either-or". 
 {{{
 <DecisionsDecisions> {
@@ -140,11 +141,13 @@ So, here either the input stream starts with "the cake is a lie" or we'll abort 
 }}}
 I threw in two new ideas to see if you're still paying attention. The first (technically the last) is the "return" keyword. A script can end with a "return" statement which will pass a value expression back to the caller of the script. The second is that scripts can be called from other scripts. They may be called either as statements or value expressions, and as a value, a script will supply its return value.
 
-So, let's say we call <KindaLikeSwitchCase> with the input "!23" where the <Int> script was defined as
+So, let's say we call `<KindaLikeSwitchCase>` with the input "!23" where the `<Int>` script was defined as
 {{{
 <Int> {
   repeat accept 0-9
   return java.lang.Integer.valueOf(match)
 }
 }}}
-Then <KindaLikeSwitchCase> will return the int 123.Once again two new features showed up.
+Then `<KindaLikeSwitchCase>` will return the int 123. Once again two new features showed up. The easy one is the "match" keyword. It's like "next" in that it's a built in keyword, but where "next" returns the next character, "match" returns the characters consumed from the input by the current script. The more complicated feature is this method call-like value expression "java.lang.Integer.valueOf(match)"
+
+Within Gleux this is called an invocation, and invocations are a special sort 
