@@ -150,4 +150,52 @@ So, let's say we call `<KindaLikeSwitchCase>` with the input "!23" where the `<I
 }}}
 Then `<KindaLikeSwitchCase>` will return the int 123. Once again two new features showed up. The easy one is the "match" keyword. It's like "next" in that it's a built in keyword, but where "next" returns the next character, "match" returns the characters consumed from the input by the current script. The more complicated feature is this method call-like value expression "java.lang.Integer.valueOf(match)"
 
-Within Gleux this is called an invocation, and invocations are a special sort 
+Within Gleux this is called an invocation. Invocations are the binding between Gleux and the underlying implementation language, which in this case would appear to be Java. How these bindings work is magic specific to each implementation, but every implementation must obey a few fundamental rules. 
+
+First, an invocation is always a qualified identifier with a comma separated argument list enclosed in parentheses. That's a long-winded way of saying that the invocation looks exactly like a function call in a procedural language such as C. In particular, it is very unlikely that the underlying implementation will give an object oriented view, so while you might say "obj.toString()" in Java, you'd say "java.lang.Object.toString(obj)" in Gleux.
+
+At first this may seem frustrating, but the intention is to give Gleux a common binding format that can be used in as many implementation languages as possible. This particular implementation works with every programming language that uses reflection, which is to say, the lion's share of mainstream languages. And it can be adapted to work even where reflection style indirection is not possible, for instance, with C.
+
+Next, every invocation must return a value. Because invocations are just a binding to the underlying language, this can usually always be pulled off, for instance in Java "void" methods return "null". And honestly, that's pretty much it. An invocation passes a set of values to the underlying language and returns a value back to the script.
+
+So, we've looked at "either-or", "could", "repeat", "accept", "publish", and "abort" statements. We've seen scripts called from other scripts. There have been a few assignments and an invocation. We learned that values can be static and dynamic literals, "next", "match", variables, invocations, and even other scripts. There are only 3 features left in all of Gleux. It's slightly amusing that this "getting started with Gleux" can double as the language specification.
+
+But before we dive into those features, let's look at something we've glossed over a bit. Gleux is fundamentally built around the idea of failure. An "either-or" statement triggers the "or" when the "either" fails. An "accept" fails when the filter doesn't match the input. A "could" statement ignores failures. Failures in Gleux blur the line between Java's "if" and "try-catch" and do it all without conditions.This is one of those things that Gleux does perfectly well without. There are no comparison operations in Gleux.
+
+Generally speaking there are two ways to generate root failures in Gleux, mismatched input during "accept" and a underlying language error during an invocation. Or to put it another way, Gleux triggers a failure on either unexpected input or function error. I tried really hard to make the case that this was all the failure we needed. I lost.
+
+Gleux has one final way of generating root failures, the "is" keyword. An "is" statement works very similarly to the "accept" statement, so there are two styles, "is" with a value expression or "is in" with a filter, and both of those can have corresponding "not" forms just like you may have expected.
+
+Let's look at the last example with new features now
+{{{
+alias java.util.Map as Map
+<TheRestOfTheStory> {
+  either {
+    is Map.instanceof(value)
+    publish "it's a map"
+  } or
+    publish "it's not a map"
+}
+}}}
+The first line is very different. Up until now, the only top level element has been a script definition, but now we see that it shares the billing with the "alias" instruction. An "alias" allows a invocation qualified identifier to be given a shorter name, which in this case is shortened from "java.util.Map" to just "Map". You'll see this used in the "is" statement, instead of the longer "java.util.Map.instanceof" we can now use "Map.instanceof".
+
+You'll also notice that the curly braces can show up in more places than just the script start and end. Any set of statements can be wrapped in curly braces to indicate that they are a composite statement. Blocks tend to show up most frequently in "either-or", "should" and "repeat" statements, though they can appear anywhere statements are legal.
+
+Finally the "is". The "is" keyword is tricky, and in general it's use might be a code smell, but it is useful in certain circumstances, so it's best to know about it. There are subtle tricks about "is" with respect to the different value types, but for the most part, "is" fails under two conditions: if the value does not exist, or if it equals the boolean false. In this example, the "is" verifies that the "value" (a variable presumably set from outside the script) is an instance of java.util.Map. If it is, we publish "it's a map", otherwise the "is" statement will fail, control will pass to the "or" statement and we will instead publish "it's not a map".
+
+The "is" statement has an additional useful feature. The state of a Gleux script is 3 pieces, the current input position, the current output buffer, and the current environment. Whether an "is" succeeds or fails, the state of all three of these pieces is restored to their original state before the "is" executed. What this means is that there is no impact to the Gleux state during an "is" statement, even if input is consumed or output is published or assignments are made. Note that invocations are not rolled back, so there may be side effects in the underlying language model that are outside the control of Gleux.
+
+That's it. That's not just Gleux in a nutshell, that's all of Gleux. I'll leave you with one more example, see if you can guess it's meaning
+
+{{{
+alias java.lang.Iterable.iterator as iterator
+alias java.util.Iterator as Iterator
+<MysteryInAnEnigma> {
+  values = iterator(list)
+  could repeat {
+    value = Iterator.next(values)
+    publish "value = 'value'"
+  }
+  is not Iterator.hasNext(values)
+}
+}}}
