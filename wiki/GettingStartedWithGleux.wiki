@@ -98,7 +98,7 @@ You might be thinking to yourself, why wouldn't Gluex just print out all the val
   publish 'accepted a ' publish ch publish '.'
 }
 }}}
-Remember that whitespace is for the most part a presentation detail. You're free to use whitespace to communicate your ideas in your way without being burdened by the computer's needs. The only expression is when it would be hard to determine the keywords. For instance you couldn't use "publishch" and expect Gleux to know when you wanted it to infer a statement and when you wanted an explicit variable name. Instead Gluex assumes you always mean a variable name if there's no space.
+Remember that whitespace is for the most part a presentation detail. You're free to use whitespace to communicate your ideas in your way without being burdened by the computer's needs. The only exception is when it would be hard to determine the keywords. For instance you couldn't use "publishch" and expect Gleux to know when you wanted it to infer a statement and when you wanted an explicit variable name. Instead Gluex assumes you always mean a variable name if there's no space.
 
 So, fine, we've seen input, output, and assignment, but we all know the dirty details of programming live in the control structures. Have you ever thought about control structures? Why did anyone ever think that "while" or "until" or "for" imply repetition? Gleux is certainly not the first to suggest the use of "repeat" as a keyword, but see if you can tell the difference with Gleux's interpretation
 
