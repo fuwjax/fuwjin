@@ -1,0 +1,279 @@
+alias java.lang.Boolean as Boolean
+alias java.lang.Character as Character
+alias org.fuwjin.gleux.AbortStatement as AbortStatement
+alias org.fuwjin.gleux.Assignment as Assignment
+alias org.fuwjin.gleux.Block as Block
+alias org.fuwjin.gleux.CouldStatement as CouldStatement
+alias org.fuwjin.gleux.Declaration as Declaration
+alias org.fuwjin.gleux.EitherOrStatement as EitherOrStatement
+alias org.fuwjin.gleux.Filter as Filter
+alias org.fuwjin.gleux.FilterAcceptStatement as FilterAcceptStatement
+alias org.fuwjin.gleux.Gleux as Gleux
+alias org.fuwjin.gleux.Invocation as Invocation
+alias org.fuwjin.gleux.IsStatement as IsStatement
+alias org.fuwjin.gleux.Literal as Literal
+alias org.fuwjin.gleux.CompositeLiteral as CompositeLiteral
+alias org.fuwjin.gleux.PublishStatement as PublishStatement
+alias org.fuwjin.gleux.RepeatStatement as RepeatStatement
+alias org.fuwjin.gleux.Specification as Specification
+alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
+alias org.fuwjin.gleux.Variable as Variable
+alias org.fuwjin.util.CodePointSet$Range as Range
+alias org.fuwjin.gleux.Indent as Indent
+alias java.lang.Iterable.iterator as iterator
+alias java.util.Iterator.next as getNext
+alias java.util.Iterator.hasNext as hasNext
+alias java.util.Map$Entry.getKey as key
+alias java.util.Map$Entry.getValue as value
+
+<Gleux>{
+  aliases = iterator(Gleux.aliases(gleux))
+  could {
+    repeat <AliasDeclaration>
+    publish '\n'
+  }
+  is not hasNext(aliases)
+  specs = iterator(Gleux.specifications(gleux))
+  repeat <SpecificationDeclaration>
+  is not hasNext(specs)
+}
+<AliasDeclaration>{
+    entry = getNext(aliases)
+    name = key(entry)
+    alias = value(entry)
+    publish "alias 'alias' as 'name'\n"
+}
+<SpecificationDeclaration>{
+  spec = Specification.declaration(getNext(specs))
+  name = Declaration.name(spec)
+  publish "\<'name'> {"
+  indent = Indent.new()
+  statements = iterator(Declaration.statements(spec))
+  could repeat {
+    statement = getNext(statements)
+    publish "'indent'"
+    <Statement>
+  }
+  is not hasNext(statements)
+  could{
+    value = Declaration.returns(spec)
+    is value
+    publish "'indent'return "
+    <Value>
+  }
+  publish "\n}\n"
+}
+
+<Value>{
+  statement = value
+  either <Specification>
+  or <StaticLiteral>
+  or <DynamicLiteral>
+  or <AcceptStatement>
+  or <Invocation>
+  or <Variable>
+}
+<Statement>{
+  either <IsStatement>
+  or <EitherOrStatement>
+  or <CouldStatement>
+  or <RepeatStatement>
+  or <AcceptStatement>
+  or <PublishStatement>
+  or <AbortStatement>
+  or <Specification>
+  or <Block>
+  or <Assignment>
+  or <Invocation>
+}
+
+<IsStatement>{
+  is IsStatement.instanceof(statement)
+  publish "is "
+  could {
+    is IsStatement.isNot(statement)
+    publish "not "
+  }
+  value = IsStatement.value(statement)
+  <Value>
+}
+<EitherOrStatement>{
+  is EitherOrStatement.instanceof(statement)
+  stmt = statement
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "either "
+  statement = getNext(statements)
+  <Statement>
+  repeat{
+    old = statement
+    statement = getNext(statements)
+    either is Block.instanceof(old)
+    or publish "'indent'"
+    publish "or "
+    <Statement>
+  }
+}
+<CouldStatement>{
+  is CouldStatement.instanceof(statement)
+  stmt = statement
+  publish "could "
+  statement = CouldStatement.statement(stmt)
+  <Statement>
+}
+<RepeatStatement>{
+  is RepeatStatement.instanceof(statement)
+  stmt = statement
+  publish "repeat "
+  statement = RepeatStatement.statement(stmt)
+  <Statement>
+}
+<AcceptStatement>{
+  either <FilterAcceptStatement>
+  or <ValueAcceptStatement>
+}
+<ValueAcceptStatement>{
+  is ValueAcceptStatement.instanceof(statement)
+  publish "accept "
+  could {
+    is ValueAcceptStatement.isNot(statement)
+    publish "not "
+  }
+  value = ValueAcceptStatement.value(statement)
+  <Value>
+}
+<FilterAcceptStatement>{
+  is FilterAcceptStatement.instanceof(statement)
+  publish "accept "
+  could {
+    is FilterAcceptStatement.isNot(statement)
+    publish "not "
+  }
+  publish "in "
+  filter = FilterAcceptStatement.filter(statement)
+  <Filter>
+}
+<PublishStatement>{
+  is PublishStatement.instanceof(statement)
+  publish "publish "
+  value = PublishStatement.value(statement)
+  <Value>
+}
+<AbortStatement>{
+  is AbortStatement.instanceof(statement)
+  publish "abort "
+  value = AbortStatement.value(statement)
+  <Value>
+}
+<Block>{
+  is Block.instanceof(statement)
+  block = statement
+  Indent.increase(indent)
+  publish "{"
+  statements = iterator(Block.statements(block))
+  could repeat {
+    statement = getNext(statements)
+    publish "'indent'"
+    <Statement>
+  }
+  is not hasNext(statements)
+  Indent.decrease(indent)
+  publish indent
+  publish "'indent'} "
+}
+<Assignment>{
+  is Assignment.instanceof(statement)
+  name = Assignment.name(statement)
+  publish "'name' = "
+  value = Assignment.value(statement)
+  <Value>
+}
+<Invocation>{
+  is Invocation.instanceof(statement)
+  name = Invocation.name(statement)
+  alias = Gleux.encode(gleux, name)
+  publish "'alias'("
+  params = iterator(Invocation.params(statement))
+  could {
+    value = getNext(params)
+    <Value>
+    could repeat{
+      value = getNext(params)
+      publish ", "
+      <Value>
+    }
+  }
+  is not hasNext(params)
+  publish ")"
+}
+
+<Filter>{
+  is Filter.instanceof(filter)
+  ranges = iterator(Filter.ranges(filter))
+  range = getNext(ranges)
+  <Range>
+  could repeat{
+    range = getNext(ranges)
+    publish ", "
+    <Range>
+  }
+  is not hasNext(ranges)
+}
+<Range>{
+  is Range.instanceof(range)
+  ch = Range.start(range)
+  publish Filter.escape(ch)
+  could{
+    is Range.isRange(range)
+    publish '-'
+    ch = Range.end(range)
+    publish Filter.escape(ch)
+  }
+}
+
+<StaticLiteral>{
+  is Literal.instanceof(value)
+  publish '\''
+  chars = iterator(Literal.chars(value))
+  could repeat{
+    ch = getNext(chars)
+    publish Literal.escape(ch)
+  }
+  is not hasNext(chars)
+  publish '\''
+}
+<DynamicLiteral>{
+  is CompositeLiteral.instanceof(value)
+  composite = value
+  publish '"'
+  values = iterator(CompositeLiteral.values(composite))
+  could repeat{
+    value = getNext(values)
+    either{
+      is Literal.instanceof(value)
+      chars = iterator(Literal.chars(value))
+      could repeat{
+        ch = getNext(chars)
+        publish CompositeLiteral.escape(ch)
+      }
+      is not hasNext(chars)
+    }or{
+      is Variable.instanceof(value)
+      name = Variable.name(value)
+      publish "\''name'\'"
+    }or{
+      <Specification>
+    }
+  }
+  is not hasNext(values)
+  publish '"'
+}
+
+<Specification>{
+  is Specification.instanceof(statement)
+  name = Specification.name(statement)
+  publish "\<'name'\>"
+}
+<Variable>{
+  is Variable.instanceof(value)
+  publish Variable.name(value)
+}

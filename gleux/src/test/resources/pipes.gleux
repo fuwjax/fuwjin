@@ -1,0 +1,12 @@
+<OutA> {
+  publish "a"
+  return "true"
+}
+<InAThenOutB> {
+  accept "a"
+  publish "b"
+  return "false"
+}
+<InB> {
+  accept "b"
+}
