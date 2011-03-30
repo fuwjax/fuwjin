@@ -15,7 +15,7 @@ alias org.fuwjin.gleux.Literal as Literal
 alias org.fuwjin.gleux.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.gleux.PublishStatement as PublishStatement
 alias org.fuwjin.gleux.RepeatStatement as RepeatStatement
-alias org.fuwjin.gleux.Specification as Specification
+alias org.fuwjin.gleux.Script as Script
 alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.gleux.Variable as Variable
 alias org.fuwjin.util.CodePointSet$Range as Range
@@ -33,8 +33,8 @@ alias java.util.Map$Entry.getValue as value
     publish '\n'
   }
   is not hasNext(aliases)
-  specs = iterator(Gleux.specifications(gleux))
-  repeat <SpecificationDeclaration>
+  specs = iterator(Gleux.scripts(gleux))
+  repeat <ScriptDeclaration>
   is not hasNext(specs)
 }
 <AliasDeclaration>{
@@ -43,8 +43,8 @@ alias java.util.Map$Entry.getValue as value
     alias = value(entry)
     publish "alias 'alias' as 'name'\n"
 }
-<SpecificationDeclaration>{
-  spec = Specification.declaration(getNext(specs))
+<ScriptDeclaration>{
+  spec = Script.declaration(getNext(specs))
   name = Declaration.name(spec)
   publish "\<'name'> {"
   indent = Indent.new()
@@ -66,7 +66,7 @@ alias java.util.Map$Entry.getValue as value
 
 <Value>{
   statement = value
-  either <Specification>
+  either <Script>
   or <StaticLiteral>
   or <DynamicLiteral>
   or <AcceptStatement>
@@ -81,7 +81,7 @@ alias java.util.Map$Entry.getValue as value
   or <AcceptStatement>
   or <PublishStatement>
   or <AbortStatement>
-  or <Specification>
+  or <Script>
   or <Block>
   or <Assignment>
   or <Invocation>
@@ -261,16 +261,16 @@ alias java.util.Map$Entry.getValue as value
       name = Variable.name(value)
       publish "\''name'\'"
     }or{
-      <Specification>
+      <Script>
     }
   }
   is not hasNext(values)
   publish '"'
 }
 
-<Specification>{
-  is Specification.instanceof(statement)
-  name = Specification.name(statement)
+<Script>{
+  is Script.instanceof(statement)
+  name = Script.name(statement)
   publish "\<'name'\>"
 }
 <Variable>{

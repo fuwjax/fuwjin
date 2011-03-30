@@ -3,11 +3,11 @@ package org.fuwjin.gleux;
 /**
  * Represents a Specificaton reference.
  */
-public class Specification extends Transformer {
+public class Script extends Transformer {
    private Declaration decl;
    private final String name;
 
-   public Specification(final String name) {
+   public Script(final String name) {
       this.name = name;
    }
 

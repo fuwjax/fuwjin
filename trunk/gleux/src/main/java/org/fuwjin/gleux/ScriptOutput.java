@@ -1,10 +1,10 @@
 package org.fuwjin.gleux;
 
-public class SpecificationOutput extends Transformer {
+public class ScriptOutput extends Transformer {
    private final Transformer spec;
    private final String name;
 
-   public SpecificationOutput(final Transformer spec, final String name) {
+   public ScriptOutput(final Transformer spec, final String name) {
       this.spec = spec;
       this.name = name;
    }

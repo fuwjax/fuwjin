@@ -13,3 +13,8 @@ alias java.util.Iterator.next as value
   publish "'aout'\n"
   return <P:InAThenOutB> << "a"
 }
+#<Gluon> {
+#  test = (java.lang.HashMap){
+#    "key":"value"
+#  }
+#}

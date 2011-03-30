@@ -15,7 +15,7 @@ alias org.fuwjin.gleux.Literal as Literal
 alias org.fuwjin.gleux.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.gleux.PublishStatement as PublishStatement
 alias org.fuwjin.gleux.RepeatStatement as RepeatStatement
-alias org.fuwjin.gleux.Specification as Specification
+alias org.fuwjin.gleux.Script as Script
 alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.gleux.Variable as Variable
 alias org.fuwjin.util.StringUtils as StringUtils
@@ -26,7 +26,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
     repeat <AliasDeclaration>
     publish "\n"
   }
-  repeat <SpecificationDeclaration>
+  repeat <ScriptDeclaration>
   <EndOfFile>
 }
 <AliasDeclaration>{
@@ -40,10 +40,10 @@ alias org.fuwjin.util.StringUtils as StringUtils
   or abort "alias-as keywords require a name"
   publish "alias 'name' as 'alias'\n"
 }
-<SpecificationDeclaration>{
-  <Specification>
+<ScriptDeclaration>{
+  <Script>
   either accept '{'
-  or abort "specification declarations must start with a brace"
+  or abort "script declarations must start with a brace"
   <S>
   publish " {"
   indent = Indent.new()
@@ -58,13 +58,13 @@ alias org.fuwjin.util.StringUtils as StringUtils
     or abort "return keyword requires a value"
   }
   either accept '}'
-  or abort "specification declarations must end with a brace" 
+  or abort "script declarations must end with a brace" 
   <S>
   publish "\n}\n"
 }
 
 <Value>{
-  either <Specification>
+  either <Script>
   or <StaticLiteral>
   or <DynamicLiteral>
   or <AcceptStatement>
@@ -79,7 +79,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   or <AcceptStatement>
   or <PublishStatement>
   or <AbortStatement>
-  or <Specification>
+  or <Script>
   or <Block>
   or <Assignment>
   or <Invocation>
@@ -268,12 +268,12 @@ alias org.fuwjin.util.StringUtils as StringUtils
   accept in 0-9, a-f, A-F
 }
 
-<Specification>{
+<Script>{
   accept '<'
   either id = <Identifier>
-  or abort "specifications must be an identifier enclosed in angle brackets"
+  or abort "scripts must be an identifier enclosed in angle brackets"
   either accept '>'
-  or abort "specifications must end with an angle bracket" 
+  or abort "scripts must end with an angle bracket" 
   <S>
   return id
 }

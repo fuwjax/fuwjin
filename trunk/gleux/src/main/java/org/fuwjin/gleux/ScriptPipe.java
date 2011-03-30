@@ -1,10 +1,10 @@
 package org.fuwjin.gleux;
 
-public class SpecificationPipe extends Transformer {
+public class ScriptPipe extends Transformer {
    private final Transformer sink;
    private final Transformer source;
 
-   public SpecificationPipe(final Transformer source, final Transformer sink) {
+   public ScriptPipe(final Transformer source, final Transformer sink) {
       this.source = source;
       this.sink = sink;
    }

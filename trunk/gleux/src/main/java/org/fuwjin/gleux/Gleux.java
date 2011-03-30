@@ -7,6 +7,7 @@ import static org.fuwjin.util.StringUtils.readAll;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,11 +37,11 @@ public class Gleux extends Transformer {
     * @throws GleuxException if it fails
     */
    public static Gleux newGleux(final CharSequence input, final Postage postage) throws GleuxException {
-      return GleuxInterpreter.interpret(input, postage);
+      return (Gleux)GleuxInterpreter.interpret(input, Collections.singletonMap("postage", postage));
    }
 
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
-   private final Map<String, Specification> specs = new LinkedHashMap<String, Specification>();
+   private final Map<String, Script> scripts = new LinkedHashMap<String, Script>();
    private final Map<String, Gleux> modules = new LinkedHashMap<String, Gleux>();
    private Declaration root;
 
@@ -49,7 +50,7 @@ public class Gleux extends Transformer {
     * @param decl the new declaration
     */
    public void add(final Declaration decl) {
-      final Specification s = get(decl.name());
+      final Script s = get(decl.name());
       s.setDecl(decl);
       if(root == null) {
          root = decl;
@@ -110,11 +111,11 @@ public class Gleux extends Transformer {
     * @param name the name of the specification
     * @return the specification
     */
-   public Specification get(final String name) {
-      Specification s = specs.get(name);
+   public Script get(final String name) {
+      Script s = scripts.get(name);
       if(s == null) {
-         s = new Specification(name);
-         specs.put(name, s);
+         s = new Script(name);
+         scripts.put(name, s);
       }
       return s;
    }
@@ -133,11 +134,11 @@ public class Gleux extends Transformer {
    }
 
    /**
-    * Returns the set of specifications.
-    * @return the specifications
+    * Returns the set of scripts.
+    * @return the scripts
     */
-   public Iterable<Specification> specifications() {
-      return unmodifiableCollection(specs.values());
+   public Iterable<Script> scripts() {
+      return unmodifiableCollection(scripts.values());
    }
 
    @Override
