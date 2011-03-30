@@ -1,0 +1,52 @@
+<Grammar> {
+    csv = ArrayList.new()
+    repeat ArrayList.add(csv, <Line>)
+    <EOF>
+    return ArrayList.toArray(csv)
+}
+<Line> {
+    line = ArrayList.new()
+    is not <EOF>
+    ArrayList.add(line, <Value>)
+    could repeat{
+        accept ','
+        ArrayList.add(line, <Value>)
+    }
+    could <EOL>
+    return line
+}
+<Value> {
+    either value = <QuotedValue> or value = <UnquotedValue>
+    return value
+}
+<QuotedValue> { 
+    could repeat accept ' '
+    accept '"'
+    value = <QuotedText>
+    accept '"'
+    could repeat accept ' '
+    return value
+}
+<QuotedText> {
+    text = StringBuilder.new()
+    could repeat either StringBuilder.append(text, <EscapedQuote>) or StringBuilder.append(text, <PlainText>)
+    return text
+}
+<PlainText> {
+    could repeat accept not '"'
+    return match
+}
+<EscapedQuote> {
+    accept '"'
+    return accept '"'
+}
+<UnquotedValue> {
+    could repeat accept not in \,, \n
+    return match
+}
+<EOL> {
+    either accept '\r\n' or accept in \r, \n
+}
+<EOF> {
+    is not accept
+}

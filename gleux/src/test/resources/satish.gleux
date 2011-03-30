@@ -1,0 +1,15 @@
+load pipes.gleux as P
+alias java.lang.Iterable.iterator as iterator
+alias java.util.Iterator.next as value
+
+<Root> {
+  iter = iterator(list)
+  repeat {
+     value = value(iter)
+     publish "element = 'value'\n"
+  }
+  <P:OutA> >> <P:InAThenOutB> >> <P:InB>
+  <P:OutA> >> aout
+  publish "'aout'\n"
+  return <P:InAThenOutB> << "a"
+}
