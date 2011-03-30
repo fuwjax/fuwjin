@@ -15,10 +15,10 @@ alias org.fuwjin.gleux.Literal as Literal
 alias org.fuwjin.gleux.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.gleux.PublishStatement as PublishStatement
 alias org.fuwjin.gleux.RepeatStatement as RepeatStatement
-alias org.fuwjin.gleux.Specification as Specification
-alias org.fuwjin.gleux.SpecificationInput as SpecificationInput
-alias org.fuwjin.gleux.SpecificationOutput as SpecificationOutput
-alias org.fuwjin.gleux.SpecificationPipe as SpecificationPipe
+alias org.fuwjin.gleux.Script as Script
+alias org.fuwjin.gleux.ScriptInput as ScriptInput
+alias org.fuwjin.gleux.ScriptOutput as ScriptOutput
+alias org.fuwjin.gleux.ScriptPipe as ScriptPipe
 alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.gleux.Variable as Variable
 alias org.fuwjin.util.StringUtils as StringUtils
@@ -28,7 +28,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   gleux = Gleux.new()
   could repeat <LoadDeclaration>
   could repeat <AliasDeclaration>
-  repeat Gleux.add(gleux, <SpecificationDeclaration>)
+  repeat Gleux.add(gleux, <ScriptDeclaration>)
   <EndOfFile>
   return gleux
 }
@@ -52,15 +52,15 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either Gleux.alias(gleux, qname, <Name>)
   or abort "alias-as keywords require a name"
 }
-<SpecificationDeclaration>{
+<ScriptDeclaration>{
   accept '<'
   either name = <Identifier>
-  or abort "specification identifiers must be enclosed in angle brackets"
+  or abort "script identifiers must be enclosed in angle brackets"
   either accept '>'
-  or abort "specification identifiers must end with an angle bracket" 
+  or abort "script identifiers must end with an angle bracket" 
   <S>
   either accept '{'
-  or abort "specification declarations must start with a brace"
+  or abort "script declarations must start with a brace"
   <S>
   spec = Declaration.new(name)
   could repeat Declaration.add(spec, <Statement>)
@@ -70,13 +70,13 @@ alias org.fuwjin.util.StringUtils as StringUtils
     or abort "return keyword requires a value"
   }
   either accept '}'
-  or abort "specification declaration for 'name' must end with a brace" 
+  or abort "script declaration for 'name' must end with a brace" 
   <S>
   return spec
 }
 
 <Value>{
-  either val = <Specification>  # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
+  either val = <Script>  # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
   or val = <StaticLiteral>      # '...'
   or val = <DynamicLiteral>     # "..."
   or val = <AcceptStatement>    # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
@@ -94,7 +94,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   or stmt = <AcceptStatement>   # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
   or stmt = <PublishStatement>  # publish <Value>
   or stmt = <AbortStatement>    # abort <Value>
-  or stmt = <Specification>     # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
+  or stmt = <Script>     # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
   or stmt = <Block>             # { Statement Statement... }
   or stmt = <Assignment>        # <Identifier> = <Value>
   or stmt = <Invocation>        # <QualifiedIdentifier>(<Value>,<Value>,...)
@@ -210,26 +210,26 @@ alias org.fuwjin.util.StringUtils as StringUtils
   Invocation.resolve(inv, postage)
   return inv
 }
-<Specification>{
-  spec = <SpecificationIdent>
+<Script>{
+  spec = <ScriptIdent>
   could{
     accept '<<' <S>
-    spec = SpecificationInput.new(spec, <Value>)
+    spec = ScriptInput.new(spec, <Value>)
   }
   could repeat {
     accept '>>' <S>
-    spec = SpecificationPipe.new(spec, <SpecificationIdent>)
+    spec = ScriptPipe.new(spec, <ScriptIdent>)
   }
   could {
     accept '>>' <S>
-    spec = SpecificationOutput.new(spec, <Name>)
+    spec = ScriptOutput.new(spec, <Name>)
   }
   return spec
 }
-<SpecificationIdent>{
+<ScriptIdent>{
   accept '<'
   either id = <Identifier>
-  or abort "specification identifiers must be enclosed in angle brackets"
+  or abort "script identifiers must be enclosed in angle brackets"
   either {
     accept ':'
     name = <Identifier>
@@ -237,8 +237,9 @@ alias org.fuwjin.util.StringUtils as StringUtils
     spec = Gleux.get(module, name)
   } or {
     spec = Gleux.get(gleux, id)
-  } or abort "specification identifiers must be normal identifiers in angle brackets" 
-  accept '>'
+  }  
+  either accept '>'
+  or abort "script identifiers must be normal identifiers in angle brackets"
   <S>
   return spec
 }

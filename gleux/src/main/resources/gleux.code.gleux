@@ -19,7 +19,7 @@ alias org.fuwjin.gleux.Literal as Literal
 alias org.fuwjin.gleux.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.gleux.PublishStatement as PublishStatement
 alias org.fuwjin.gleux.RepeatStatement as RepeatStatement
-alias org.fuwjin.gleux.Specification as Specification
+alias org.fuwjin.gleux.Script as Script
 alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.gleux.Variable as Variable
 alias org.fuwjin.util.CodePointSet$Range as Range
@@ -37,8 +37,8 @@ alias java.util.Map$Entry.getValue as value
   <Preamble>
   varIndex = AtomicInteger.new()
   indexer = NameIndex.new()
-  specs = iterator(Gleux.specifications(gleux))
-  repeat <SpecificationDeclaration>
+  specs = iterator(Gleux.scripts(gleux))
+  repeat <ScriptDeclaration>
   is not hasNext(specs)
   <Postscript>
 }
@@ -75,6 +75,10 @@ public class 'className'Interpreter {
   public static class 'className'Exception extends Exception {
     private 'className'Exception(final String message) {
       super(message);
+    }
+    
+    private 'className'Exception(final Throwable cause) {
+      super(cause);
     }
   }
   
@@ -159,13 +163,13 @@ public class 'className'Interpreter {
       return new StringCursor(pos, seq, this);
     }
     
-    public String toString() {
+    public String match() {
       return seq.subSequence(start, pos).toString();
     }
   }"   
 }
-<SpecificationDeclaration>{
-  spec = Specification.declaration(getNext(specs))
+<ScriptDeclaration>{
+  spec = Script.declaration(getNext(specs))
   name = Declaration.name(spec)
   value = Declaration.returns(spec)
   indent = Indent.new()
@@ -195,7 +199,7 @@ public class 'className'Interpreter {
 
 <Value>{
   statement = value
-  either result = <Specification>
+  either result = <Script>
   or result = <StaticLiteral>
   or result = <DynamicLiteral>
   or result = <AcceptValue>
@@ -213,7 +217,7 @@ public class 'className'Interpreter {
   or <AcceptStatement>
   or <PublishStatement>
   or <AbortStatement>
-  or <SpecificationStatement>
+  or <ScriptStatement>
   or <Block>
   or <Assignment>
   or <InvocationStatement>
@@ -427,9 +431,17 @@ public class 'className'Interpreter {
     FunctionRenderer.addArg(renderer, <Value>)
   }
   is not hasNext(params)
+  publish "'indent'try {"
+  Indent.increase(indent)
   publish indent
   publish FunctionRenderer.render(renderer)
   publish ';'
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final Exception 'exception') {"
+  publish "'indent'  throw new 'className'Exception('exception');"
+  publish "'indent'}"
 }
 <Invocation>{
   is Invocation.instanceof(statement)
@@ -506,17 +518,17 @@ public class 'className'Interpreter {
 }
 <MatchValue>{
   is Object.equals(Variable.MATCH(), value)
-  return "'input'.toString()"
+  return "'input'.match()"
 }
 
-<SpecificationStatement>{
-  is Specification.instanceof(statement)
-  name = Specification.name(statement)
+<ScriptStatement>{
+  is Script.instanceof(statement)
+  name = Script.name(statement)
   publish "'indent''name'('input', env);"
 }
-<Specification>{
-  is Specification.instanceof(statement)
-  name = Specification.name(statement)
+<Script>{
+  is Script.instanceof(statement)
+  name = Script.name(statement)
   return "'name'('input', env)"
 }
 <Variable>{
