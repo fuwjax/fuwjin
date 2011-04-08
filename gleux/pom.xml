@@ -12,13 +12,13 @@
   <description>Gleux is a string manipulation language</description>
   <dependencies>
     <dependency>
-      <groupId>org.fuwjin</groupId>
-      <artifactId>postage</artifactId>
-      <version>0.9.4-SNAPSHOT</version>
-    </dependency>
-    <dependency>
     	<groupId>junit</groupId>
     	<artifactId>junit</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>org.fuwjin</groupId>
+    	<artifactId>dinah</artifactId>
+    	<version>0.9.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

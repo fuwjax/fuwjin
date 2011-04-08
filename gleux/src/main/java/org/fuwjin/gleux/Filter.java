@@ -35,15 +35,6 @@ public class Filter {
    }
 
    /**
-    * Adds a character to the filter.
-    * @param ch the codepoint to filter
-    * @return this filter
-    */
-   public Filter addChar(final String ch) {
-      return addChar(ch.codePointAt(0));
-   }
-
-   /**
     * Adds a character range to the filter.
     * @param start the first codepoint to filter
     * @param end the last codepoint to filter

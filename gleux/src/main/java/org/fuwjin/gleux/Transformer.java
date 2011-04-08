@@ -3,7 +3,7 @@ package org.fuwjin.gleux;
 import java.util.Collections;
 import java.util.Map;
 
-import org.fuwjin.postage.type.Optional;
+import org.fuwjin.util.Adapter;
 
 /**
  * Base utility class for all things transformative.
@@ -36,7 +36,7 @@ public abstract class Transformer implements Expression {
     * @return the result
     */
    public Object transform(final InStream input, final OutStream output, final Map<String, ? extends Object> scope) {
-      final State state = transform(new StateImpl(input.start(), output.start(), new Scope(scope), Optional.UNSET));
+      final State state = transform(new StateImpl(input.start(), output.start(), new Scope(scope), Adapter.unset()));
       return state.value();
    }
 }

@@ -75,14 +75,6 @@ public class Literal implements Expression {
    }
 
    /**
-    * Appends a code point to the literal.
-    * @param ch the next code point
-    */
-   public void append(final String ch) {
-      builder.append(ch);
-   }
-
-   /**
     * Returns the list of code points.
     * @return the code points
     */

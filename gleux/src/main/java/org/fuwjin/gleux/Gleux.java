@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.fuwjin.dinah.FunctionProvider;
+import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.gleux.GleuxInterpreter.GleuxException;
-import org.fuwjin.postage.Postage;
-import org.fuwjin.postage.category.ReflectionCategory;
 
 /**
  * Manages a collection of specificatons.
@@ -26,7 +27,7 @@ public class Gleux extends Transformer {
     * @throws GleuxException if it fails
     */
    public static Gleux newGleux(final CharSequence input) throws GleuxException {
-      return newGleux(input, new Postage(new ReflectionCategory()));
+      return newGleux(input, new ReflectiveFunctionProvider());
    }
 
    /**
@@ -36,11 +37,12 @@ public class Gleux extends Transformer {
     * @return the new collection
     * @throws GleuxException if it fails
     */
-   public static Gleux newGleux(final CharSequence input, final Postage postage) throws GleuxException {
+   public static Gleux newGleux(final CharSequence input, final FunctionProvider postage) throws GleuxException {
       return (Gleux)GleuxInterpreter.interpret(input, Collections.singletonMap("postage", postage));
    }
 
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
+   private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
    private final Map<String, Script> scripts = new LinkedHashMap<String, Script>();
    private final Map<String, Gleux> modules = new LinkedHashMap<String, Gleux>();
    private Declaration root;
@@ -87,6 +89,10 @@ public class Gleux extends Transformer {
       return unmodifiableCollection(aliases.entrySet());
    }
 
+   public void aliasSignature(final FunctionSignature signature, final String name) {
+      signatures.put(name, signature);
+   }
+
    /**
     * Encodes a qualified identifier into its aliased form.
     * @param qualified the qualified identifier
@@ -122,6 +128,14 @@ public class Gleux extends Transformer {
 
    public Gleux getModule(final String name) {
       return modules.get(name);
+   }
+
+   public FunctionSignature getSignature(final String name) {
+      final FunctionSignature signature = signatures.get(name);
+      if(signature == null) {
+         return new FunctionSignature(name);
+      }
+      return signature;
    }
 
    public void load(final String path, final String name) throws FileNotFoundException, UnsupportedEncodingException,

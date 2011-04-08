@@ -18,12 +18,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.gleux.Gleux;
 import org.fuwjin.gleux.GleuxInterpreter.GleuxException;
 import org.fuwjin.gleux.InStream;
 import org.fuwjin.gleux.OutStream;
-import org.fuwjin.postage.Postage;
-import org.fuwjin.postage.category.ReflectionCategory;
 import org.junit.Test;
 
 /**
@@ -38,7 +37,7 @@ public class GleuxDemo {
    public void demoForSatish() throws IOException, GleuxException {
       final Gleux parser = newGleux(readAll(reader("gleux.parse.gleux", "UTF-8")));
       final Gleux gleux = (Gleux)parser.transform(InStream.stream(reader("satish.gleux", "UTF-8")), OutStream.STDOUT,
-            Collections.<String, Object> singletonMap("postage", new Postage(new ReflectionCategory())));
+            Collections.<String, Object> singletonMap("postage", new ReflectiveFunctionProvider()));
       final InStream input = STDIN;
       final OutStream output = STDOUT;
       final Map<String, Object> environment = new HashMap<String, Object>();
@@ -56,7 +55,7 @@ public class GleuxDemo {
    public void demoGleux() throws IOException, GleuxException {
       final Gleux parser = newGleux(readAll(reader("gleux.parse.gleux", "UTF-8")));
       final Gleux gleux = (Gleux)parser.transform(stream(reader("gleux.parse.gleux", "UTF-8")), STDOUT, singletonMap(
-            "postage", new Postage(new ReflectionCategory())));
+            "postage", new ReflectiveFunctionProvider()));
       assertNotNull(gleux.get("EndOfFile"));
    }
 
@@ -70,7 +69,7 @@ public class GleuxDemo {
       new File("target/generated/org/fuwjin/test/generated").mkdirs();
       final Gleux gleux = newGleux(readAll(reader("gleux.parse.gleux", "UTF-8")));
       final Gleux serial = (Gleux)gleux.transform(stream(reader("gleux.code.gleux", "UTF-8")), STDOUT, singletonMap(
-            "postage", new Postage(new ReflectionCategory())));
+            "postage", new ReflectiveFunctionProvider()));
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("gleux", gleux);
       environment.put("package", "org.fuwjin.test.generated");
@@ -93,7 +92,7 @@ public class GleuxDemo {
       new File("target/generated").mkdirs();
       final Gleux gleux = newGleux(readAll(reader("gleux.parse.gleux", "UTF-8")));
       final Gleux serial = (Gleux)gleux.transform(stream(reader("gleux.serial.gleux", "UTF-8")), STDOUT, singletonMap(
-            "postage", new Postage(new ReflectionCategory())));
+            "postage", new ReflectiveFunctionProvider()));
       final Writer writer = writer("target/generated/gleux.parse.test.gleux", "UTF-8");
       try {
          serial.transform(InStream.NONE, OutStream.stream(writer), singletonMap("gleux", gleux));

@@ -1,6 +1,6 @@
 package org.fuwjin.gleux;
 
-import org.fuwjin.postage.type.Optional;
+import org.fuwjin.util.Adapter;
 
 /**
  * Represents an immutable state.
@@ -37,7 +37,7 @@ public class StateImpl implements State {
 
    @Override
    public State assign(final String name) {
-      if(Optional.UNSET.equals(value)) {
+      if(!Adapter.isSet(value)) {
          return failure("cannot assign an unset value");
       }
       return new StateImpl(input, output, scope.assign(name, value), value);
@@ -75,7 +75,7 @@ public class StateImpl implements State {
 
    @Override
    public State publish() {
-      if(Optional.UNSET.equals(value)) {
+      if(!Adapter.isSet(value)) {
          return failure("cannot publish unset value");
       }
       return new StateImpl(input, output.append(value), scope, value);
@@ -104,7 +104,7 @@ public class StateImpl implements State {
    @Override
    public State retrieve(final String name) {
       final Object v = scope.retrieve(name);
-      if(Optional.UNSET.equals(v)) {
+      if(!Adapter.isSet(v)) {
          return failure("variable %s is unset", name);
       }
       return value(v);

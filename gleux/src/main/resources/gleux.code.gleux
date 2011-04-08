@@ -26,10 +26,25 @@ alias org.fuwjin.util.CodePointSet$Range as Range
 alias org.fuwjin.util.StringUtils as StringUtils
 alias org.fuwjin.gleux.Indent as Indent
 alias org.fuwjin.gleux.NameIndex as NameIndex
-alias org.fuwjin.postage.FunctionRenderer as FunctionRenderer
+alias org.fuwjin.dinah.Function as Function
+alias org.fuwjin.dinah.function.ConstructorFunction as ConstructorFunction
+alias org.fuwjin.dinah.function.FieldAccessFunction as FieldAccessFunction
+alias org.fuwjin.dinah.function.FieldMutatorFunction as FieldMutatorFunction
+alias org.fuwjin.dinah.function.InstanceOfFunction as InstanceOfFunction
+alias org.fuwjin.dinah.function.MethodFunction as MethodFunction
+alias org.fuwjin.dinah.function.StaticFieldAccessFunction as StaticFieldAccessFunction
+alias org.fuwjin.dinah.function.StaticFieldMutatorFunction as StaticFieldMutatorFunction
+alias org.fuwjin.dinah.function.StaticMethodFunction as StaticMethodFunction
+alias org.fuwjin.dinah.function.VarArgsFunction as VarArgsFunction
+alias org.fuwjin.util.TypeUtils.toWrapper as toWrapper
+alias java.lang.Class as Class
+alias java.lang.reflect.Constructor as Constructor
+alias java.lang.reflect.Method as Method
+alias java.lang.reflect.Field as Field
 alias java.lang.Iterable.iterator as iterator
 alias java.util.Iterator.next as getNext
 alias java.util.Iterator.hasNext as hasNext
+alias java.util.Arrays.asList as asList
 alias java.util.Map$Entry.getKey as key
 alias java.util.Map$Entry.getValue as value
 
@@ -77,81 +92,109 @@ public class 'className'Interpreter {
       super(message);
     }
     
-    private 'className'Exception(final Throwable cause) {
-      super(cause);
+    private 'className'Exception(final String message, final Throwable cause) {
+      super(message, cause);
     }
   }
   
   private static class StringCursor {
     private int pos;
+    private int line;
+    private int column;
     private final CharSequence seq;
     private final int start;
     private final StringCursor parent;
     
     public StringCursor(final CharSequence seq) {
-      this(0, seq, null);
+      this(0, 1, 0, seq, null);
     }
     
-    public StringCursor(final int start, final CharSequence seq, final StringCursor parent) {
+    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent) {
       this.start = start;
       pos = start;
       this.seq = seq;
       this.parent = parent;
+      this.line = line;
+      this.column = column;
     }
     
     public int accept() throws 'className'Exception {
       checkBounds(pos);
-      return seq.charAt(pos++);
+      return advance();
     }
     
     public int accept(final String expected) throws 'className'Exception {
       if(expected == null || expected.length() == 0) {
-        throw new 'className'Exception(\"UNSET\");
+        throw ex(\"UNSET\");
       }
       checkBounds(pos + expected.length() - 1);
       final CharSequence sub = seq.subSequence(pos, pos + expected.length());
       if(!sub.equals(expected)) {
-        throw new 'className'Exception(\"unexpected character \"+sub+\"  \"+expected);
+        throw ex(\"unexpected character \"+sub+\"  \"+expected);
       }
-      pos = pos + expected.length();
-      return seq.charAt(pos - 1);
+      final int stop = pos + expected.length() - 1;
+      while(pos < stop) {
+        advance();
+      }
+      return advance();
     }
     
     public int acceptIn(final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) < 0) {
-        throw new 'className'Exception(\"unexpected character\");
+        throw ex(\"unexpected character\");
       }
-      return seq.charAt(pos++);
+      return advance();
     }
     
     public int acceptNot(final String expected) throws 'className'Exception {
       if(expected == null || expected.length() == 0) {
-        throw new 'className'Exception(\"UNSET\");
+        throw ex(\"UNSET\");
       }
       checkBounds(pos + expected.length() - 1);
       if(seq.subSequence(pos, pos + expected.length()).equals(expected)) {
-        throw new 'className'Exception(\"unexpected character\");
+        throw ex(\"unexpected character\");
       }
-      return seq.charAt(pos++);
+      return advance();
     }
     
     public int acceptNotIn(final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) >= 0) {
-        throw new 'className'Exception(\"unexpected character\");
+        throw ex(\"unexpected character\");
       }
-      return seq.charAt(pos++);
+      return advance();
     }
     
     protected void checkBounds(final int p) throws 'className'Exception {
       if(p >= seq.length()) {
-        throw new 'className'Exception(\"unexpected EOF\");
+        throw ex(\"unexpected EOF\");
       }
     }
     
     public void commit() {
       parent.pos = pos;
+      parent.line = line;
+      parent.column = column;
+    }
+    
+    public 'className'Exception ex(final String message) {
+      return new 'className'Exception(\"[\" + line + \",\" + column + \"] \" + message);
+    }
+    
+    public 'className'Exception ex(final Throwable cause) {
+      return new 'className'Exception(\"[\" + line + \",\" + column + \"]\", cause);
+    }
+    
+    private int advance() {
+      final char ch = seq.charAt(pos++);
+       if(ch == \'\\n\') {
+         line++;
+         column = 0;
+       } else {
+         column++;
+       }
+       return ch;
     }
     
     public int next() throws 'className'Exception {
@@ -160,7 +203,7 @@ public class 'className'Interpreter {
     }
     
     public StringCursor sub() {
-      return new StringCursor(pos, seq, this);
+      return new StringCursor(pos, line, column, seq, this);
     }
     
     public String match() {
@@ -189,7 +232,7 @@ public class 'className'Interpreter {
   is not hasNext(statements)
   either{
     is value
-    publish "'indent'return <Value>;"
+    publish "'indent'return '<Value>';"
   }or{
     publish "'indent'return null;"
   }
@@ -235,7 +278,7 @@ public class 'className'Interpreter {
     publish "'indent'boolean b = true;"
     publish "'indent'try {"
     Indent.increase(indent)
-    publish "'indent'if((Object)<Value> == Boolean.FALSE) {"
+    publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"
     publish "'indent'  b = false;"
     publish "'indent'}"
     Indent.decrease(indent)
@@ -245,11 +288,11 @@ public class 'className'Interpreter {
     publish "'indent'  b = false;"
     publish "'indent'}"
     publish "'indent'if(b){"
-    publish "'indent'  throw new 'className'Exception(\"unexpected value\");"
+    publish "'indent'  throw 'input'.ex(\"unexpected value\");"
     publish "'indent'}"
   } or {
-    publish "'indent'if((Object)<Value> == Boolean.FALSE) {"
-    publish "'indent'  throw new 'className'Exception(\"check failed\");"
+    publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"
+    publish "'indent'  throw 'input'.ex(\"check failed\");"
     publish "'indent'}"
   }
 }
@@ -350,7 +393,7 @@ public class 'className'Interpreter {
     publish "Not"
   }
   filter = FilterAcceptStatement.filter(statement)
-  publish "In(\"<Filter>\");"
+  publish "In(\"'<Filter>'\");"
 }
 <AcceptValue>{
   either value = <FilterAcceptValue>
@@ -384,7 +427,7 @@ public class 'className'Interpreter {
     notted = ''
   }
   filter = FilterAcceptStatement.filter(statement)
-  return "'input'.accept'notted'In(\"<Filter>\")"
+  return "'input'.accept'notted'In(\"'<Filter>'\")"
 }
 <PublishStatement>{
   is PublishStatement.instanceof(statement)
@@ -395,7 +438,7 @@ public class 'className'Interpreter {
 <AbortStatement>{
   is AbortStatement.instanceof(statement)
   value = AbortStatement.value(statement)
-  publish "'indent'throw new RuntimeException(<Value>"
+  publish "'indent'throw new RuntimeException('<Value>'"
   could publish ", 'exception'"
   publish ');'
 }
@@ -419,41 +462,118 @@ public class 'className'Interpreter {
   name = Assignment.name(statement)
   index = NameIndex.indexOf(indexer, name)
   value = Assignment.value(statement)
-  publish "'indent'env['index'] /*'name'*/= <Value>;"
+  publish "'indent'env['index'] /*'name'*/= '<Value>';"
 }
 <InvocationStatement>{
   is Invocation.instanceof(statement)
-  name = Invocation.name(statement)
-  renderer = Invocation.renderer(statement)
+  function = Invocation.function(statement)
   params = iterator(Invocation.params(statement))
-  could repeat {
-    value = getNext(params)
-    FunctionRenderer.addArg(renderer, <Value>)
-  }
-  is not hasNext(params)
   publish "'indent'try {"
   Indent.increase(indent)
   publish indent
-  publish FunctionRenderer.render(renderer)
+  publish <RenderFunction>
   publish ';'
   Indent.decrease(indent)
   exIndex = AtomicInteger.incrementAndGet(varIndex)
   exception = "e'exIndex'"
   publish "'indent'} catch(final Exception 'exception') {"
-  publish "'indent'  throw new 'className'Exception('exception');"
+  publish "'indent'  throw 'input'.ex('exception');"
   publish "'indent'}"
 }
 <Invocation>{
   is Invocation.instanceof(statement)
-  name = Invocation.name(statement)
-  renderer = Invocation.renderer(statement)
+  function = Invocation.function(statement)
   params = iterator(Invocation.params(statement))
-  could repeat {
-    value = getNext(params)
-    FunctionRenderer.addArg(renderer, <Value>)
-  }
+  return <RenderFunction>
+}
+<RenderFunction>{
+  either <Constructor> >> render
+  or <FieldAccess> >> render
+  or <FieldMutator> >> render
+  or <InstanceOf> >> render
+  or <Method> >> render
+  or <StaticFieldAccess> >> render
+  or <StaticFieldMutator> >> render
+  or <StaticMethod> >> render
+  or <VarArgs> >> render
   is not hasNext(params)
-  return FunctionRenderer.render(renderer)
+  return render
+}
+<Constructor>{
+  constructor = ConstructorFunction.constructor(function)
+  type = Constructor.getDeclaringClass(constructor)
+  publish "new '<Type>'"
+  types = iterator(asList(Constructor.getParameterTypes(constructor)))
+  <Params>
+}
+<FieldAccess>{
+  field = FieldAccessFunction.field(function)
+  type = Field.getDeclaringClass(field)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Field.getName(field)'"
+}
+<FieldMutator>{
+  field = FieldMutatorFunction.field(function)
+  type = Field.getDeclaringClass(field)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Field.getName(field)'"
+  type = Field.getType(field)
+  value = getNext(params)
+  publish " = ('<Type>')'<Value>'"
+}
+<InstanceOf> {
+  type = InstanceOfFunction.type(function)
+  value = getNext(params)
+  publish "'<Value>' instanceof '<Type>'"
+}
+<Method> {
+  method = MethodFunction.method(function)
+  type = Method.getDeclaringClass(method)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Method.getName(method)'"
+  types = iterator(asList(Method.getParameterTypes(method)))
+  <Params>
+}
+<StaticFieldAccess> {
+  field = StaticFieldAccessFunction.field(function)
+  type = Field.getDeclaringClass(field)
+  publish "'<Type>'.'Field.getName(field)'"
+}
+<StaticFieldMutator>{
+  field = StaticFieldMutatorFunction.field(function)
+  type = Field.getDeclaringClass(field)
+  publish "'<Type>'.'Field.getName(field)'"
+  type = Field.getType(field)
+  value = getNext(params)
+  publish " = ('<Type>')'<Value>'"
+}
+<StaticMethod> {
+  method = StaticMethodFunction.method(function)
+  type = Method.getDeclaringClass(method)
+  publish "'<Type>'.'Method.getName(method)'"
+  types = iterator(asList(Method.getParameterTypes(method)))
+  <Params>
+}
+<VarArgs> {
+  abort "VarArgs is currently unsupported: 'Function.name(function)'"
+}
+<Params> {
+  publish '('
+  could {
+    type = getNext(types)
+    value = getNext(params)
+    publish "('<Type>')'<Value>'"
+    could repeat {
+      type = getNext(types)
+      value = getNext(params)
+      publish ", ('<Type>')'<Value>'"
+    }
+  }
+  is not hasNext(types)
+  publish ')'
+}
+<Type> {
+  return Class.getCanonicalName(toWrapper(type))
 }
 
 <Filter>{
