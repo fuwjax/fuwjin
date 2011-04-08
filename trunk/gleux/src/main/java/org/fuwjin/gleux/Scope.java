@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.fuwjin.gleux.InStream.Position;
-import org.fuwjin.postage.type.Optional;
+import org.fuwjin.util.Adapter;
 
 /**
  * Defines a variable scope.
@@ -81,7 +81,7 @@ public class Scope {
          if(parent != null) {
             value = parent.retrieve(name);
          } else {
-            value = Optional.UNSET;
+            value = Adapter.unset();
          }
          map.put(name, value);
       }

@@ -1,5 +1,5 @@
 alias java.lang.Boolean as Boolean
-alias java.lang.Character as Character
+alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
 alias org.fuwjin.gleux.AbortStatement as AbortStatement
 alias org.fuwjin.gleux.Assignment as Assignment
 alias org.fuwjin.gleux.Block as Block
@@ -21,17 +21,37 @@ alias org.fuwjin.gleux.ScriptOutput as ScriptOutput
 alias org.fuwjin.gleux.ScriptPipe as ScriptPipe
 alias org.fuwjin.gleux.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.gleux.Variable as Variable
+alias org.fuwjin.gleux.Number as Number
+alias org.fuwjin.gleux.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
+alias org.fuwjin.dinah.FunctionSignature as FunctionSignature
+alias org.fuwjin.dinah.Function as Function
 alias org.fuwjin.util.StringUtils as StringUtils
 
-
+# Parses a Gleux stream and returns the corresponding Gleux Object Model.
+# << a Gleux stream
+# >> nil
+# env
+#   postage: the Postage reflection factory
+# returns the GOM for the Gleux stream
 <Gleux>{
   gleux = Gleux.new()
-  could repeat <LoadDeclaration>
-  could repeat <AliasDeclaration>
-  repeat Gleux.add(gleux, <ScriptDeclaration>)
+  <S>
+  could repeat 
+    either <LoadDeclaration>
+    or <AliasDeclaration>
+    or Gleux.add(gleux, <ScriptDeclaration>)
   <EndOfFile>
   return gleux
 }
+
+# Parses a "load path/to/gleux/file as name" declaration. The path and name are passed to the Gleux.load method.
+# << a Gleux load statement
+# >> nil
+# env
+#   gleux: the GOM
+# returns nil
+# fails if the path name does not map to a file
 <LoadDeclaration>{
   accept 'load' <Sep>
   either path = <PathName>
@@ -42,16 +62,46 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either Gleux.load(gleux, path, <Name>)
   or abort "load-as keywords require a name"
 }
+
+# Parses an "alias qualified.name as name" declaration. The qualified name and name are passed to the Gleux.alias method. 
+# << a Gleux alias statement
+# >> nil
+# env
+#   gleux: the GOM
+# returns nil
 <AliasDeclaration>{
   accept 'alias' <Sep>
   either qname = <QualifiedName>
   or abort "alias keyword requires a qualified name"
-  either accept 'as'
+  either {
+    accept 'as' <Sep>
+    either Gleux.alias(gleux, qname, <Name>)
+    or abort "alias-as keywords require a name"
+  } or {
+    accept '(' <S>
+    signature = FunctionSignature.new(qname)
+    could {
+      FunctionSignature.addArg(signature, <QualifiedName>)
+      could repeat {
+        accept ',' <S>
+        FunctionSignature.addArg(signature, <QualifiedName>)
+      }      
+    }
+    accept ')' <S>
+    accept 'as' <Sep>
+    either Gleux.aliasSignature(gleux, signature, <Name>)
+    or abort "alias-as keywords require a name"
+  }  
   or abort "alias keyword requires as keyword" 
-  <Sep>
-  either Gleux.alias(gleux, qname, <Name>)
-  or abort "alias-as keywords require a name"
 }
+
+# Parses a "<ScriptName> { ... }" declaration.
+# << a Gleux script declaration
+# >> nil
+# env
+#   gleux: the GOM
+#   postage: the reflection factory
+# returns the script
 <ScriptDeclaration>{
   accept '<'
   either name = <Identifier>
@@ -62,30 +112,38 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either accept '{'
   or abort "script declarations must start with a brace"
   <S>
-  spec = Declaration.new(name)
-  could repeat Declaration.add(spec, <Statement>)
+  script = Declaration.new(name)
+  could repeat Declaration.add(script, <Statement>)
   could{
     accept 'return' <Sep>
-    either Declaration.returns(spec, <Value>)
+    either Declaration.returns(script, <Value>)
     or abort "return keyword requires a value"
   }
   either accept '}'
   or abort "script declaration for 'name' must end with a brace" 
   <S>
-  return spec
+  return script
 }
 
+# Parses a Gleux Value.
+# << a Gleux Value
+# >> nil
+# env
+# returns the value
 <Value>{
-  either val = <Script>  # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
-  or val = <StaticLiteral>      # '...'
+  either val = <StaticLiteral>  # '...'
   or val = <DynamicLiteral>     # "..."
+  or val = <Script>             # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
   or val = <AcceptStatement>    # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
-  or val = <MatchValue>         # deprecated 
-  or val = <NextValue>          # deprecated
   or val = <Invocation>         # <QualifiedIdentifier>(<Value>,<Value>,...)
+  or val = <Number>             # integral, floating point, or scientific notation
+  or val = <Object>             # (<QualifiedIdentifier>) { <Field> : <Value>, ... }
+  or val = <MatchValue>         # deprecated, use input.buffer() instead
+  or val = <NextValue>          # deprecated, use input.next() instead
   or val = Variable.new(<Name>) # <Identifier>
   return val
 }
+
 <Statement>{
   either stmt = <IsStatement>   # is <Value>, is not <Value>, is in <Filter>, is not in <Filter>
   or stmt = <EitherOrStatement> # either <Statement> or <Statement> or <Statement> ...
@@ -94,7 +152,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   or stmt = <AcceptStatement>   # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
   or stmt = <PublishStatement>  # publish <Value>
   or stmt = <AbortStatement>    # abort <Value>
-  or stmt = <Script>     # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
+  or stmt = <Script>            # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
   or stmt = <Block>             # { Statement Statement... }
   or stmt = <Assignment>        # <Identifier> = <Value>
   or stmt = <Invocation>        # <QualifiedIdentifier>(<Value>,<Value>,...)
@@ -186,16 +244,11 @@ alias org.fuwjin.util.StringUtils as StringUtils
   return stmt
 }
 <Invocation>{
-  prefix = <Identifier>
-  alias = Gleux.alias(gleux, prefix)
-  either {
-    accept '.'
-    name = "'alias'.<QualifiedName>"
-  } or {
-    name = alias
-  }
+  name = <AliasName>
+  signature = Gleux.getSignature(gleux, name)
   accept '(' <S>
-  inv = Invocation.new(name)
+  function = FunctionProvider.getFunction(postage, signature)
+  inv = Invocation.new(function)
   could{
     Invocation.addParam(inv, <Value>)
     could repeat{
@@ -207,24 +260,24 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either accept ')'
   or abort "invocation must end with a parenthesis" 
   <S>
-  Invocation.resolve(inv, postage)
+  Invocation.resolve(inv)
   return inv
 }
 <Script>{
-  spec = <ScriptIdent>
+  script = <ScriptIdent>
   could{
     accept '<<' <S>
-    spec = ScriptInput.new(spec, <Value>)
+    script = ScriptInput.new(script, <Value>)
   }
   could repeat {
     accept '>>' <S>
-    spec = ScriptPipe.new(spec, <ScriptIdent>)
+    script = ScriptPipe.new(script, <ScriptIdent>)
   }
   could {
     accept '>>' <S>
-    spec = ScriptOutput.new(spec, <Name>)
+    script = ScriptOutput.new(script, <Name>)
   }
-  return spec
+  return script
 }
 <ScriptIdent>{
   accept '<'
@@ -234,14 +287,37 @@ alias org.fuwjin.util.StringUtils as StringUtils
     accept ':'
     name = <Identifier>
     module = Gleux.getModule(gleux, id)
-    spec = Gleux.get(module, name)
+    script = Gleux.get(module, name)
   } or {
-    spec = Gleux.get(gleux, id)
+    script = Gleux.get(gleux, id)
   }  
   either accept '>'
   or abort "script identifiers must be normal identifiers in angle brackets"
   <S>
-  return spec
+  return script
+}
+<Object>{
+  accept '(' <S>
+  type = <AliasName>
+  constructor = FunctionProvider.getFunction(postage,FunctionSignature.new("'type'.new",0))
+  object = ObjectTemplate.new(constructor)
+  accept ')' <S>
+  accept '{' <S>
+  could {
+    <Field>
+    could repeat {
+      accept ',' <S>
+      <Field>
+    }
+  }
+  accept '}' <S>
+  return object
+}
+<Field>{
+  name = <Name>
+  setter = FunctionProvider.getFunction(postage, FunctionSignature.new("'type'.'name'",2))
+  accept ':' <S>
+  ObjectTemplate.set(object, setter, <Value>)
 }
 <MatchValue>{
   accept 'match' <Sep>
@@ -300,12 +376,9 @@ alias org.fuwjin.util.StringUtils as StringUtils
   lit = CompositeLiteral.new()
   could repeat either {
     accept '\''
-    CompositeLiteral.append(lit, Variable.new(<Identifier>))
+    <S>
+    CompositeLiteral.append(lit, <Value>)
     accept '\''
-  } or {
-    accept '<'
-    CompositeLiteral.append(lit, Gleux.get(gleux, <Identifier>))
-    accept '>'
   } or {
     CompositeLiteral.appendChar(lit, <Escape>)
   } or {
@@ -344,6 +417,27 @@ alias org.fuwjin.util.StringUtils as StringUtils
 <HexDigit>{
   accept in 0-9, a-f, A-F
 }
+<Number> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could {
+      accept '.'
+      could repeat accept in 0-9
+    }
+  } or {
+    accept '.'
+    repeat accept in 0-9
+  }
+  could {
+    accept in e,E
+    could accept '-'
+    repeat accept in 0-9
+  }
+  num = Number.new(match)
+  <Sep>
+  return num
+}  
 <Path>{
   repeat {
     could accept '/'
@@ -356,7 +450,17 @@ alias org.fuwjin.util.StringUtils as StringUtils
   path = <Path> <S>
   return path
 }
-
+<AliasName> {
+  prefix = <Identifier>
+  alias = Gleux.alias(gleux, prefix)
+  either {
+    accept '.'
+    name = "'alias'.'<QualifiedName>'"
+  } or {
+    name = alias
+  }
+  return name
+}
 <Name>{
   id = <Identifier> <S>
   return id
@@ -386,7 +490,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   return match
 }
 <IdentifierChar>{
-  is Character.isJavaIdentifierPart(next)
+  is isIdentifierCodepoint(next)
   accept next
 }
 

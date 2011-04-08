@@ -1,0 +1,16 @@
+alias org.junit.Assert.assertThat as assertThat
+alias org.hamcrest.CoreMatchers.is as equals
+alias java.lang.String as String
+alias java.lang.String.toUpperCase as toUpper
+alias java.lang as jl 
+
+<AliasDemo> {
+  # a package can be aliased, here "java.lang" is aliased to "jl"
+  assertThat(jl.String.toUpperCase('value'), equals('VALUE'))
+  
+  # a class can be aliased, here "java.lang.String" is aliased to "String"
+  assertThat(String.toUpperCase('value'), equals('VALUE'))
+  
+  # a method can be aliased, here "java.lang.String.toUpperCase" is aliased to "toUpper"
+  assertThat(toUpper('value'), equals('VALUE'))
+}

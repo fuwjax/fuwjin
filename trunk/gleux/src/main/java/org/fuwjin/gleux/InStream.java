@@ -106,9 +106,11 @@ public abstract class InStream {
          protected void readTo(final int index) {
             final byte[] buf = new byte[Math.max(index - buffer.length(), 100)];
             try {
-               final int c = stream.read(buf);
-               if(c > -1) {
-                  buffer.append(new String(buf, 0, c));
+               if(stream.available() > 0) {
+                  final int c = stream.read(buf);
+                  if(c > -1) {
+                     buffer.append(new String(buf, 0, c));
+                  }
                }
             } catch(final IOException e) {
                // continue
