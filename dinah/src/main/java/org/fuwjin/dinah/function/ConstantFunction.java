@@ -11,8 +11,8 @@ public class ConstantFunction extends FixedArgsFunction {
    }
 
    @Override
-   protected void invokeSafe(final InvokeResult result, final Object[] args) {
-      result.set(value);
+   protected Object invokeSafe(final Object[] args) {
+      return value;
    }
 
    @Override

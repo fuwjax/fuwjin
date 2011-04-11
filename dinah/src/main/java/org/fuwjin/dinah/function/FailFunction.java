@@ -25,11 +25,11 @@ public class FailFunction extends AbstractFunction {
    }
 
    @Override
-   protected void invokeWithResult(final InvokeResult result, final Object[] args) {
+   public Object invoke(final Object[] args) throws FunctionInvocationException {
       if(cause == null) {
-         result.alert(pattern, alertArgs);
+         throw new FunctionInvocationException(pattern, alertArgs);
       } else {
-         result.alert(cause, pattern, alertArgs);
+         throw new FunctionInvocationException(cause, pattern, alertArgs);
       }
    }
 

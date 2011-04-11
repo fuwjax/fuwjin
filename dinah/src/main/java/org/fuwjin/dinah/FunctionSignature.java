@@ -9,38 +9,47 @@ import org.fuwjin.util.TypeUtils;
 public class FunctionSignature {
    private final String name;
    private final List<Type> args = new ArrayList<Type>();
-   private boolean checkArgs;
+   private int count = -1;
 
    public FunctionSignature(final String name) {
-      this.name = name;
+      this(name, -1);
    }
 
-   public FunctionSignature(final String name, final int size) {
+   public FunctionSignature(final String name, final int count) {
       this.name = name;
-      for(int i = 0; i < size; i++) {
+      this.count = count;
+   }
+
+   public FunctionSignature addArg(final String typeName) throws ClassNotFoundException {
+      if(typeName == null || "null".equals(typeName)) {
          args.add(null);
+      } else {
+         args.add(TypeUtils.forName(typeName));
       }
-      checkArgs = true;
-   }
-
-   public void addArg(final String typeName) throws Exception {
-      args.add(TypeUtils.forName(typeName));
-      checkArgs = true;
+      return this;
    }
 
    public int argCount() {
-      return args.size();
+      return count == -1 ? args.size() : count;
    }
 
    public Type argType(final int index) {
-      return args.get(index);
-   }
-
-   public boolean checkArgs() {
-      return checkArgs;
+      return index < args.size() ? args.get(index) : null;
    }
 
    public String name() {
+      return name;
+   }
+
+   public void setArgCount(final int count) {
+      if(args.size() > count) {
+         throw new IllegalArgumentException("count " + count + " must be at least " + args.size());
+      }
+      this.count = count;
+   }
+
+   @Override
+   public String toString() {
       return name;
    }
 }

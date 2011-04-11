@@ -1,5 +1,6 @@
 package org.fuwjin.dinah.function;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
@@ -7,6 +8,7 @@ import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
 import org.fuwjin.util.ArrayUtils;
+import org.fuwjin.util.BusinessException;
 import org.fuwjin.util.TypeUtils;
 
 public class VarArgsFunction extends AbstractFunction {
@@ -18,39 +20,31 @@ public class VarArgsFunction extends AbstractFunction {
    }
 
    @Override
-   protected void invokeWithResult(final InvokeResult result, final Object... args) {
+   public Object invoke(final Object... args) throws Exception {
       if(args.length < argCount()) {
-         result.alert("%s expects at least %d args not %d", name(), argCount(), args.length);
-         return;
+         throw new FunctionInvocationException("%s expects at least %d args not %d", name(), argCount(), args.length);
       }
       final Object[] realArgs = new Object[function.argCount()];
       for(int i = 0; i < realArgs.length - 1; i++) {
-         realArgs[i] = Adapter.adapt(args[i], argType(i), result);
-         if(!result.isSuccess()) {
-            return;
-         }
+         realArgs[i] = Adapter.adapt(args[i], argType(i));
       }
       final Type type = TypeUtils.getComponentType(function.argType(argCount()));
       if(args.length == function.argCount()
             && TypeUtils.isAssignableFrom(type, args[argCount()].getClass().getComponentType())) {
-         realArgs[argCount()] = Adapter.adapt(args[argCount()], function.argType(argCount()), result);
-         if(result.isSuccess()) {
-            function.invokeSafe(result, realArgs);
-            if(result.isSuccess()) {
-               return;
-            }
+         try {
+            realArgs[argCount()] = Adapter.adapt(args[argCount()], function.argType(argCount()));
+            return function.invokeSafe(realArgs);
+         } catch(final BusinessException e) {
+            // continue
          }
-         result.reset();
       }
-      final Object[] varArgs = new Object[args.length - argCount()];
+      final int varArgsLen = args.length - argCount();
+      final Object varArgs = TypeUtils.newArrayInstance(type, varArgsLen);
       realArgs[argCount()] = varArgs;
-      for(int i = 0; i < varArgs.length; i++) {
-         varArgs[i] = Adapter.adapt(args[i + argCount()], type, result);
-         if(!result.isSuccess()) {
-            return;
-         }
+      for(int i = 0; i < varArgsLen; i++) {
+         Array.set(varArgs, i, Adapter.adapt(args[i + argCount()], type));
       }
-      function.invokeSafe(result, realArgs);
+      return function.invokeSafe(realArgs);
    }
 
    @Override
@@ -60,24 +54,22 @@ public class VarArgsFunction extends AbstractFunction {
 
    @Override
    public Function restrict(final FunctionSignature signature) {
-      if(signature.checkArgs()) {
-         if(signature.argCount() < argCount()) {
-            return new FailFunction(name(), "Arg count mismatch");
+      if(signature.argCount() < argCount()) {
+         return new FailFunction(name(), "Arg count mismatch");
+      }
+      for(int index = 0; index < argCount(); index++) {
+         if(!TypeUtils.isAssignableFrom(argType(index), signature.argType(index))) {
+            return new FailFunction(name(), "Arg mismatch");
          }
-         for(int index = 0; index < argCount(); index++) {
-            if(!TypeUtils.isAssignableFrom(argType(index), signature.argType(index))) {
-               return new FailFunction(name(), "Arg mismatch");
-            }
-         }
-         if(signature.argCount() == function.argCount()
-               && TypeUtils.isAssignableFrom(function.argType(argCount()), signature.argType(argCount()))) {
-            return this;
-         }
-         final Type componentType = TypeUtils.getComponentType(function.argType(argCount()));
-         for(int index = argCount(); index < signature.argCount(); index++) {
-            if(!TypeUtils.isAssignableFrom(componentType, signature.argType(index))) {
-               return new FailFunction(name(), "Arg mismatch");
-            }
+      }
+      if(signature.argCount() == function.argCount()
+            && TypeUtils.isAssignableFrom(function.argType(argCount()), signature.argType(argCount()))) {
+         return this;
+      }
+      final Type componentType = TypeUtils.getComponentType(function.argType(argCount()));
+      for(int index = argCount(); index < signature.argCount(); index++) {
+         if(!TypeUtils.isAssignableFrom(componentType, signature.argType(index))) {
+            return new FailFunction(name(), "Arg mismatch");
          }
       }
       return this;

@@ -1,5 +1,6 @@
 package org.fuwjin.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -25,7 +26,7 @@ public class TypeUtils {
       }
    }
 
-   public static Type forName(final String name) throws Exception {
+   public static Type forName(final String name) throws ClassNotFoundException {
       try {
          return Class.forName(name);
       } catch(final ClassNotFoundException e) {
@@ -62,7 +63,7 @@ public class TypeUtils {
    }
 
    public static boolean isAssignableFrom(final Type type, final Type test) {
-      if(test == null) {
+      if(type == null || test == null) {
          return true;
       }
       return toClass(type).isAssignableFrom(toClass(test));
@@ -75,6 +76,10 @@ public class TypeUtils {
 
    public static boolean isInterface(final Type type) {
       return toClass(type).isInterface();
+   }
+
+   public static Object newArrayInstance(final Type type, final int length) {
+      return Array.newInstance(toClass(type), length);
    }
 
    private static Class<?> toClass(final Type type) {
