@@ -2,7 +2,7 @@ package org.fuwjin.dinah;
 
 
 public interface Function {
-   Object invoke(Object... args);
+   Object invoke(Object... args) throws Exception;
 
    String name();
 

@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.util.BusinessException;
+import org.fuwjin.util.CompositeException;
 
 public class CompositeFunction extends AbstractFunction {
    private final List<AbstractFunction> functions;
@@ -26,14 +28,19 @@ public class CompositeFunction extends AbstractFunction {
    }
 
    @Override
-   protected void invokeWithResult(final InvokeResult result, final Object[] args) {
+   public Object invoke(final Object... args) throws Exception {
+      Exception failure = null;
       for(final AbstractFunction function: functions) {
-         function.invokeWithResult(result, args);
-         if(result.isComplete()) {
-            return;
+         try {
+            return function.invoke(args);
+         } catch(final BusinessException e) {
+            failure = CompositeException.compose(failure, e);
          }
-         result.reset();
       }
+      if(failure == null) {
+         throw new FunctionInvocationException("No functions exist for %s", name());
+      }
+      throw failure;
    }
 
    @Override

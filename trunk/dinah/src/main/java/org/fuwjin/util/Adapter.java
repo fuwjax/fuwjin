@@ -3,40 +3,47 @@ package org.fuwjin.util;
 import java.lang.reflect.Type;
 
 public class Adapter {
-   public static interface AlertTarget {
-      void alert(String pattern, Object... args);
-
-      boolean isSuccess();
+   public static class AdaptException extends BusinessException {
+      public AdaptException(final String pattern, final Object... args) {
+         super(pattern, args);
+      }
    }
 
    private static final Object UNSET = new Object();
 
-   public static Object adapt(final Object value, final Type type, final AlertTarget target) {
-      Object val = value;
-      if(!isSet(val)) {
-         target.alert("Could not map unset value to %s", type);
-      } else if(type != null && !TypeUtils.isInstance(type, val)) {
-         if(val instanceof Number) {
+   public static Object adapt(final Object value, final Type type) throws AdaptException {
+      if(!isSet(value)) {
+         throw new AdaptException("Could not map unset value to %s", type);
+      } else if(value != null && type != null && !TypeUtils.isInstance(type, value)) {
+         if(value instanceof Number) {
             if(type == byte.class) {
-               val = ((Number)val).byteValue();
+               return ((Number)value).byteValue();
             } else if(type == short.class) {
-               val = ((Number)val).shortValue();
+               return ((Number)value).shortValue();
             } else if(type == int.class) {
-               val = ((Number)val).intValue();
+               return ((Number)value).intValue();
             } else if(type == long.class) {
-               val = ((Number)val).longValue();
+               return ((Number)value).longValue();
             } else if(type == float.class) {
-               val = ((Number)val).floatValue();
+               return ((Number)value).floatValue();
             } else if(type == double.class) {
-               val = ((Number)val).doubleValue();
+               return ((Number)value).doubleValue();
             } else {
-               target.alert("Could not map number to %s", type);
+               throw new AdaptException("Could not map %s to %s", value.getClass(), type);
             }
          } else {
-            target.alert("Could not map value to %s", type);
+            throw new AdaptException("Could not map %s to %s", value.getClass(), type);
          }
       }
-      return val;
+      return value;
+   }
+
+   public static Object[] adaptArray(final Object[] array, final Type[] types) throws AdaptException {
+      final Object[] result = new Object[array.length];
+      for(int i = 0; i < array.length; i++) {
+         result[i] = Adapter.adapt(array[i], types[i]);
+      }
+      return result;
    }
 
    public static boolean isAdaptable(final Object value, final Type type) {

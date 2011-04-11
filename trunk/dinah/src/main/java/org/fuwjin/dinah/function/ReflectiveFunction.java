@@ -11,14 +11,17 @@ public abstract class ReflectiveFunction extends FixedArgsFunction {
    protected abstract Object invokeImpl(Object[] args) throws InvocationTargetException, Exception;
 
    @Override
-   protected void invokeSafe(final InvokeResult result, final Object[] args) {
+   protected Object invokeSafe(final Object[] args) throws Exception {
       try {
          final Object value = invokeImpl(args);
-         result.set(value);
+         return value;
       } catch(final InvocationTargetException e) {
-         result.alert(true, e.getCause(), "Unexpected invocation failure in %s", name());
+         if(e.getCause() instanceof Exception) {
+            throw (Exception)e.getCause();
+         }
+         throw new Error(e.getCause());
       } catch(final Exception e) {
-         result.alert(e, "Arguments did not match %s", name());
+         throw new FunctionInvocationException(e, "Arguments did not match %s", name());
       }
    }
 }

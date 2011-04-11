@@ -14,8 +14,8 @@ public class InstanceOfFunction extends FixedArgsFunction {
    }
 
    @Override
-   public void invokeSafe(final InvokeResult result, final Object... args) {
-      result.set(TypeUtils.isInstance(type, args[0]));
+   public Object invokeSafe(final Object... args) {
+      return TypeUtils.isInstance(type, args[0]);
    }
 
    @Override

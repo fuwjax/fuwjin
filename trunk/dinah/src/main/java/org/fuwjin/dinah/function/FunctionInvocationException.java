@@ -1,13 +1,13 @@
 package org.fuwjin.dinah.function;
 
-public class FunctionInvocationException extends Exception {
-   public FunctionInvocationException(final FunctionInvocationException chain, final String pattern,
-         final Object... args) {
-      super(String.format(pattern, args));
+import org.fuwjin.util.BusinessException;
+
+public class FunctionInvocationException extends BusinessException {
+   public FunctionInvocationException(final String pattern, final Object... args) {
+      super(pattern, args);
    }
 
-   public FunctionInvocationException(final FunctionInvocationException chain, final Throwable cause,
-         final String pattern, final Object... args) {
-      super(String.format(pattern, args), cause);
+   public FunctionInvocationException(final Throwable cause, final String pattern, final Object... args) {
+      super(cause, pattern, args);
    }
 }
