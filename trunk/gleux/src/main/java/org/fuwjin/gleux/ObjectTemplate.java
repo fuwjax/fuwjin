@@ -30,22 +30,24 @@ public class ObjectTemplate implements Expression {
 
    @Override
    public State transform(final State state) {
-      final Object object = constructor.invoke();
-      if(object instanceof FunctionInvocationException) {
-         return state.failure("Could not construct object from template");
-      }
-      State result = state;
-      for(final FieldTemplate field: setters) {
-         result = field.value.transform(result);
-         if(!result.isSuccess()) {
-            return state.failure(result.failure("Could not transform field value"),
-                  "Could not build object from template");
+      try {
+         final Object object = constructor.invoke();
+         State result = state;
+         for(final FieldTemplate field: setters) {
+            result = field.value.transform(result);
+            if(!result.isSuccess()) {
+               return state.failure(result.failure("Could not transform field value"),
+                     "Could not build object from template");
+            }
+            final Object failure = field.setter.invoke(object, result.value());
+            if(failure instanceof FunctionInvocationException) {
+               return state
+                     .failure(result.failure("Could not set field value"), "Could not build object from template");
+            }
          }
-         final Object failure = field.setter.invoke(object, result.value());
-         if(failure instanceof FunctionInvocationException) {
-            return state.failure(result.failure("Could not set field value"), "Could not build object from template");
-         }
+         return state.value(object);
+      } catch(final Exception e) {
+         return state.failure("Could not construct object from template: %s", e);
       }
-      return state.value(object);
    }
 }

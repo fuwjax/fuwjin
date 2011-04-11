@@ -131,15 +131,15 @@ public class GleuxInterpreter {
    private static Object AbortStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub191 = input.sub();
-      sub191.accept("abort");
-      Sep(sub191, env);
+      final StringCursor sub192 = input.sub();
+      sub192.accept("abort");
+      Sep(sub192, env);
       try {
-         env[7] /* stmt */= new org.fuwjin.gleux.AbortStatement((org.fuwjin.gleux.Expression)Value(sub191, env));
-      } catch(final GleuxException e192) {
-         throw new RuntimeException("abort keyword requires a value", e192);
+         env[7] /* stmt */= new org.fuwjin.gleux.AbortStatement((org.fuwjin.gleux.Expression)Value(sub192, env));
+      } catch(final GleuxException e193) {
+         throw new RuntimeException("abort keyword requires a value", e193);
       }
-      sub191.commit();
+      sub192.commit();
       return env[7]/* stmt */;
    }
 
@@ -275,157 +275,157 @@ public class GleuxInterpreter {
    private static Object AliasName(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub209 = input.sub();
-      env[21] /* prefix */= Identifier(sub209, env);
+      final StringCursor sub210 = input.sub();
+      env[21] /* prefix */= Identifier(sub210, env);
       env[22] /* alias */= ((org.fuwjin.gleux.Gleux)env[1]/* gleux */).alias((java.lang.String)env[21]/* prefix */);
       try {
-         final StringCursor sub210 = sub209.sub();
-         sub210.accept(".");
-         env[4] /* name */= env[22]/* alias */+ "." + QualifiedName(sub210, env);
-         sub210.commit();
-      } catch(final GleuxException e211) {
-         final StringCursor sub212 = sub209.sub();
+         final StringCursor sub211 = sub210.sub();
+         sub211.accept(".");
+         env[4] /* name */= env[22]/* alias */+ "." + QualifiedName(sub211, env);
+         sub211.commit();
+      } catch(final GleuxException e212) {
+         final StringCursor sub213 = sub210.sub();
          env[4] /* name */= env[22]/* alias */;
-         sub212.commit();
+         sub213.commit();
       }
-      sub209.commit();
+      sub210.commit();
       return env[4]/* name */;
    }
 
    private static Object AnnotatedIdentifier(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub254 = input.sub();
-      Identifier(sub254, env);
+      final StringCursor sub255 = input.sub();
+      Identifier(sub255, env);
       try {
-         final StringCursor sub255 = sub254.sub();
-         sub255.accept("[");
+         final StringCursor sub256 = sub255.sub();
+         sub256.accept("[");
          try {
-            Identifier(sub255, env);
-         } catch(final GleuxException e256) {
+            Identifier(sub256, env);
+         } catch(final GleuxException e257) {
             // continue
          }
-         sub255.accept("]");
-         sub255.commit();
+         sub256.accept("]");
+         sub256.commit();
          try {
             while(true) {
-               final StringCursor sub257 = sub254.sub();
-               sub257.accept("[");
+               final StringCursor sub258 = sub255.sub();
+               sub258.accept("[");
                try {
-                  Identifier(sub257, env);
-               } catch(final GleuxException e258) {
+                  Identifier(sub258, env);
+               } catch(final GleuxException e259) {
                   // continue
                }
-               sub257.accept("]");
-               sub257.commit();
+               sub258.accept("]");
+               sub258.commit();
             }
-         } catch(final GleuxException e259) {
+         } catch(final GleuxException e260) {
             // continue
          }
-      } catch(final GleuxException e260) {
+      } catch(final GleuxException e261) {
          // continue
       }
-      sub254.commit();
+      sub255.commit();
       return null;
    }
 
    private static Object Assignment(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub199 = input.sub();
-      env[4] /* name */= Name(sub199, env);
-      sub199.accept("=");
-      S(sub199, env);
+      final StringCursor sub200 = input.sub();
+      env[4] /* name */= Name(sub200, env);
+      sub200.accept("=");
+      S(sub200, env);
       try {
          env[7] /* stmt */= new org.fuwjin.gleux.Assignment((java.lang.String)env[4]/* name */,
-               (org.fuwjin.gleux.Expression)Value(sub199, env));
-      } catch(final GleuxException e200) {
-         throw new RuntimeException("assignment requires a value", e200);
+               (org.fuwjin.gleux.Expression)Value(sub200, env));
+      } catch(final GleuxException e201) {
+         throw new RuntimeException("assignment requires a value", e201);
       }
-      sub199.commit();
+      sub200.commit();
       return env[7]/* stmt */;
    }
 
    private static Object Block(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub193 = input.sub();
-      sub193.accept("{");
-      S(sub193, env);
+      final StringCursor sub194 = input.sub();
+      sub194.accept("{");
+      S(sub194, env);
       env[19] /* block */= new org.fuwjin.gleux.Block();
       try {
          try {
-            ((org.fuwjin.gleux.Block)env[19]/* block */).add((org.fuwjin.gleux.Expression)Statement(sub193, env));
-         } catch(final Exception e194) {
-            throw sub193.ex(e194);
+            ((org.fuwjin.gleux.Block)env[19]/* block */).add((org.fuwjin.gleux.Expression)Statement(sub194, env));
+         } catch(final Exception e195) {
+            throw sub194.ex(e195);
          }
          try {
             while(true) {
                try {
-                  ((org.fuwjin.gleux.Block)env[19]/* block */).add((org.fuwjin.gleux.Expression)Statement(sub193, env));
-               } catch(final Exception e195) {
-                  throw sub193.ex(e195);
+                  ((org.fuwjin.gleux.Block)env[19]/* block */).add((org.fuwjin.gleux.Expression)Statement(sub194, env));
+               } catch(final Exception e196) {
+                  throw sub194.ex(e196);
                }
             }
-         } catch(final GleuxException e196) {
+         } catch(final GleuxException e197) {
             // continue
          }
-      } catch(final GleuxException e197) {
+      } catch(final GleuxException e198) {
          // continue
       }
       try {
-         sub193.accept("}");
-      } catch(final GleuxException e198) {
-         throw new RuntimeException("block must end with a brace", e198);
+         sub194.accept("}");
+      } catch(final GleuxException e199) {
+         throw new RuntimeException("block must end with a brace", e199);
       }
-      S(sub193, env);
-      sub193.commit();
+      S(sub194, env);
+      sub194.commit();
       return env[19]/* block */;
    }
 
    private static Object Comment(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub267 = input.sub();
-      sub267.accept("#");
+      final StringCursor sub268 = input.sub();
+      sub268.accept("#");
       try {
-         sub267.acceptNotIn("\n\r");
+         sub268.acceptNotIn("\n\r");
          try {
             while(true) {
-               sub267.acceptNotIn("\n\r");
+               sub268.acceptNotIn("\n\r");
             }
-         } catch(final GleuxException e268) {
+         } catch(final GleuxException e269) {
             // continue
          }
-      } catch(final GleuxException e269) {
-         // continue
-      }
-      try {
-         sub267.accept("\r");
       } catch(final GleuxException e270) {
          // continue
       }
       try {
-         sub267.accept("\n");
+         sub268.accept("\r");
       } catch(final GleuxException e271) {
-         EndOfFile(sub267, env);
+         // continue
       }
-      sub267.commit();
+      try {
+         sub268.accept("\n");
+      } catch(final GleuxException e272) {
+         EndOfFile(sub268, env);
+      }
+      sub268.commit();
       return null;
    }
 
    private static Object CouldStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub185 = input.sub();
-      sub185.accept("could");
-      Sep(sub185, env);
+      final StringCursor sub186 = input.sub();
+      sub186.accept("could");
+      Sep(sub186, env);
       try {
-         env[7] /* stmt */= new org.fuwjin.gleux.CouldStatement((org.fuwjin.gleux.Expression)Statement(sub185, env));
-      } catch(final GleuxException e186) {
-         throw new RuntimeException("could keyword requires a statement", e186);
+         env[7] /* stmt */= new org.fuwjin.gleux.CouldStatement((org.fuwjin.gleux.Expression)Statement(sub186, env));
+      } catch(final GleuxException e187) {
+         throw new RuntimeException("could keyword requires a statement", e187);
       }
-      sub185.commit();
+      sub186.commit();
       return env[7]/* stmt */;
    }
 
@@ -525,53 +525,53 @@ public class GleuxInterpreter {
    private static Object EitherOrStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub175 = input.sub();
-      sub175.accept("either");
-      Sep(sub175, env);
+      final StringCursor sub176 = input.sub();
+      sub176.accept("either");
+      Sep(sub176, env);
       try {
-         env[7] /* stmt */= new org.fuwjin.gleux.EitherOrStatement((org.fuwjin.gleux.Expression)Statement(sub175, env));
-      } catch(final GleuxException e176) {
-         throw new RuntimeException("either keyword requires a statement", e176);
+         env[7] /* stmt */= new org.fuwjin.gleux.EitherOrStatement((org.fuwjin.gleux.Expression)Statement(sub176, env));
+      } catch(final GleuxException e177) {
+         throw new RuntimeException("either keyword requires a statement", e177);
       }
       try {
-         final StringCursor sub177 = sub175.sub();
-         sub177.accept("or");
-         Sep(sub177, env);
+         final StringCursor sub178 = sub176.sub();
+         sub178.accept("or");
+         Sep(sub178, env);
          try {
             try {
-               ((org.fuwjin.gleux.EitherOrStatement)env[7]/* stmt */).or((org.fuwjin.gleux.Expression)Statement(sub177,
+               ((org.fuwjin.gleux.EitherOrStatement)env[7]/* stmt */).or((org.fuwjin.gleux.Expression)Statement(sub178,
                      env));
-            } catch(final Exception e178) {
-               throw sub177.ex(e178);
+            } catch(final Exception e179) {
+               throw sub178.ex(e179);
             }
-         } catch(final GleuxException e179) {
-            throw new RuntimeException("or keyword requires a statement", e179);
+         } catch(final GleuxException e180) {
+            throw new RuntimeException("or keyword requires a statement", e180);
          }
-         sub177.commit();
+         sub178.commit();
          try {
             while(true) {
-               final StringCursor sub180 = sub175.sub();
-               sub180.accept("or");
-               Sep(sub180, env);
+               final StringCursor sub181 = sub176.sub();
+               sub181.accept("or");
+               Sep(sub181, env);
                try {
                   try {
                      ((org.fuwjin.gleux.EitherOrStatement)env[7]/* stmt */).or((org.fuwjin.gleux.Expression)Statement(
-                           sub180, env));
-                  } catch(final Exception e181) {
-                     throw sub180.ex(e181);
+                           sub181, env));
+                  } catch(final Exception e182) {
+                     throw sub181.ex(e182);
                   }
-               } catch(final GleuxException e182) {
-                  throw new RuntimeException("or keyword requires a statement", e182);
+               } catch(final GleuxException e183) {
+                  throw new RuntimeException("or keyword requires a statement", e183);
                }
-               sub180.commit();
+               sub181.commit();
             }
-         } catch(final GleuxException e183) {
+         } catch(final GleuxException e184) {
             // continue
          }
-      } catch(final GleuxException e184) {
-         throw new RuntimeException("either keyword requires at least one or keyword", e184);
+      } catch(final GleuxException e185) {
+         throw new RuntimeException("either keyword requires at least one or keyword", e185);
       }
-      sub175.commit();
+      sub176.commit();
       return env[7]/* stmt */;
    }
 
@@ -598,106 +598,106 @@ public class GleuxInterpreter {
    private static Object Escape(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub230 = input.sub();
-      sub230.accept("\\");
+      final StringCursor sub231 = input.sub();
+      sub231.accept("\\");
       try {
-         final StringCursor sub231 = sub230.sub();
-         sub231.accept("n");
+         final StringCursor sub232 = sub231.sub();
+         sub232.accept("n");
          env[10] /* ch */= org.fuwjin.gleux.Literal.NEW_LINE;
-         sub231.commit();
-      } catch(final GleuxException e232) {
+         sub232.commit();
+      } catch(final GleuxException e233) {
          try {
-            final StringCursor sub233 = sub230.sub();
-            sub233.accept("t");
+            final StringCursor sub234 = sub231.sub();
+            sub234.accept("t");
             env[10] /* ch */= org.fuwjin.gleux.Literal.TAB;
-            sub233.commit();
-         } catch(final GleuxException e234) {
+            sub234.commit();
+         } catch(final GleuxException e235) {
             try {
-               final StringCursor sub235 = sub230.sub();
-               sub235.accept("r");
+               final StringCursor sub236 = sub231.sub();
+               sub236.accept("r");
                env[10] /* ch */= org.fuwjin.gleux.Literal.RETURN;
-               sub235.commit();
-            } catch(final GleuxException e236) {
+               sub236.commit();
+            } catch(final GleuxException e237) {
                try {
-                  final StringCursor sub237 = sub230.sub();
-                  sub237.accept("x");
-                  env[10] /* ch */= org.fuwjin.gleux.Literal.parseHex((java.lang.String)HexDigits(sub237, env));
-                  sub237.commit();
-               } catch(final GleuxException e238) {
-                  final StringCursor sub239 = sub230.sub();
-                  env[10] /* ch */= sub239.accept();
-                  sub239.commit();
+                  final StringCursor sub238 = sub231.sub();
+                  sub238.accept("x");
+                  env[10] /* ch */= org.fuwjin.gleux.Literal.parseHex((java.lang.String)HexDigits(sub238, env));
+                  sub238.commit();
+               } catch(final GleuxException e239) {
+                  final StringCursor sub240 = sub231.sub();
+                  env[10] /* ch */= sub240.accept();
+                  sub240.commit();
                }
             }
          }
       }
-      sub230.commit();
+      sub231.commit();
       return env[10]/* ch */;
    }
 
    private static Object Field(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub219 = input.sub();
-      env[4] /* name */= Name(sub219, env);
-      env[24] /* setter */= ((org.fuwjin.dinah.FunctionProvider)env[13]/* postage */)
+      final StringCursor sub220 = input.sub();
+      env[4] /* name */= Name(sub220, env);
+      env[24] /* setter */= ((org.fuwjin.dinah.FunctionProvider)env[14]/* postage */)
             .getFunction((org.fuwjin.dinah.FunctionSignature)new org.fuwjin.dinah.FunctionSignature(
                   (java.lang.String)env[16]/* type */+ "." + env[4]/* name */));
-      sub219.accept(":");
-      S(sub219, env);
+      sub220.accept(":");
+      S(sub220, env);
       try {
          ((org.fuwjin.gleux.ObjectTemplate)env[18]/* object */).set((org.fuwjin.dinah.Function)env[24]/* setter */,
-               (org.fuwjin.gleux.Expression)Value(sub219, env));
-      } catch(final Exception e220) {
-         throw sub219.ex(e220);
+               (org.fuwjin.gleux.Expression)Value(sub220, env));
+      } catch(final Exception e221) {
+         throw sub220.ex(e221);
       }
-      sub219.commit();
+      sub220.commit();
       return null;
    }
 
    private static Object FilterChar(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub227 = input.sub();
+      final StringCursor sub228 = input.sub();
       try {
-         final StringCursor sub228 = sub227.sub();
-         env[10] /* ch */= Escape(sub228, env);
-         sub228.commit();
-      } catch(final GleuxException e229) {
-         env[10] /* ch */= sub227.acceptNot("\\");
+         final StringCursor sub229 = sub228.sub();
+         env[10] /* ch */= Escape(sub229, env);
+         sub229.commit();
+      } catch(final GleuxException e230) {
+         env[10] /* ch */= sub228.acceptNot("\\");
       }
-      sub227.commit();
+      sub228.commit();
       return env[10]/* ch */;
    }
 
    private static Object FilterRange(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub221 = input.sub();
-      env[25] /* start */= FilterChar(sub221, env);
-      S(sub221, env);
+      final StringCursor sub222 = input.sub();
+      env[25] /* start */= FilterChar(sub222, env);
+      S(sub222, env);
       try {
-         final StringCursor sub222 = sub221.sub();
-         sub222.accept("-");
-         S(sub222, env);
+         final StringCursor sub223 = sub222.sub();
+         sub223.accept("-");
+         S(sub223, env);
          try {
             ((org.fuwjin.gleux.Filter)env[20]/* filter */).addRange((java.lang.Integer)env[25]/* start */,
-                  (java.lang.Integer)FilterChar(sub222, env));
-         } catch(final Exception e223) {
-            throw sub222.ex(e223);
+                  (java.lang.Integer)FilterChar(sub223, env));
+         } catch(final Exception e224) {
+            throw sub223.ex(e224);
          }
-         S(sub222, env);
-         sub222.commit();
-      } catch(final GleuxException e224) {
-         final StringCursor sub225 = sub221.sub();
+         S(sub223, env);
+         sub223.commit();
+      } catch(final GleuxException e225) {
+         final StringCursor sub226 = sub222.sub();
          try {
             ((org.fuwjin.gleux.Filter)env[20]/* filter */).addChar((java.lang.Integer)env[25]/* start */);
-         } catch(final Exception e226) {
-            throw sub225.ex(e226);
+         } catch(final Exception e227) {
+            throw sub226.ex(e227);
          }
-         sub225.commit();
+         sub226.commit();
       }
-      sub221.commit();
+      sub222.commit();
       return null;
    }
 
@@ -753,22 +753,22 @@ public class GleuxInterpreter {
    private static Object HexDigit(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub241 = input.sub();
-      sub241.acceptIn("0123456789ABCDEFabcdef");
-      sub241.commit();
+      final StringCursor sub242 = input.sub();
+      sub242.acceptIn("0123456789ABCDEFabcdef");
+      sub242.commit();
       return null;
    }
 
    private static Object HexDigits(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub240 = input.sub();
-      HexDigit(sub240, env);
-      HexDigit(sub240, env);
-      HexDigit(sub240, env);
-      HexDigit(sub240, env);
-      sub240.commit();
-      return sub240.match();
+      final StringCursor sub241 = input.sub();
+      HexDigit(sub241, env);
+      HexDigit(sub241, env);
+      HexDigit(sub241, env);
+      HexDigit(sub241, env);
+      sub241.commit();
+      return sub241.match();
    }
 
    private static Object Identifier(final StringCursor input, final Object... parentEnv) throws GleuxException {
@@ -790,57 +790,57 @@ public class GleuxInterpreter {
    private static Object IdentifierChar(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub261 = input.sub();
-      final StringCursor sub262 = sub261.sub();
-      if((Object)java.lang.Character.isJavaIdentifierPart((java.lang.Integer)sub262.next()) == Boolean.FALSE) {
-         throw sub262.ex("check failed");
+      final StringCursor sub262 = input.sub();
+      final StringCursor sub263 = sub262.sub();
+      if((Object)java.lang.Character.isJavaIdentifierPart((java.lang.Integer)sub263.next()) == Boolean.FALSE) {
+         throw sub263.ex("check failed");
       }
-      sub261.accept();
-      sub261.commit();
+      sub262.accept();
+      sub262.commit();
       return null;
    }
 
    private static Object InFilter(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub201 = input.sub();
-      sub201.accept("in");
-      Sep(sub201, env);
+      final StringCursor sub202 = input.sub();
+      sub202.accept("in");
+      Sep(sub202, env);
       env[20] /* filter */= new org.fuwjin.gleux.Filter();
       try {
-         FilterRange(sub201, env);
-      } catch(final GleuxException e202) {
-         throw new RuntimeException("in keyword requires at least one filter", e202);
+         FilterRange(sub202, env);
+      } catch(final GleuxException e203) {
+         throw new RuntimeException("in keyword requires at least one filter", e203);
       }
       try {
-         final StringCursor sub203 = sub201.sub();
-         sub203.accept(",");
-         S(sub203, env);
+         final StringCursor sub204 = sub202.sub();
+         sub204.accept(",");
+         S(sub204, env);
          try {
-            FilterRange(sub203, env);
-         } catch(final GleuxException e204) {
-            throw new RuntimeException("in keyword requires a filter after a comma", e204);
+            FilterRange(sub204, env);
+         } catch(final GleuxException e205) {
+            throw new RuntimeException("in keyword requires a filter after a comma", e205);
          }
-         sub203.commit();
+         sub204.commit();
          try {
             while(true) {
-               final StringCursor sub205 = sub201.sub();
-               sub205.accept(",");
-               S(sub205, env);
+               final StringCursor sub206 = sub202.sub();
+               sub206.accept(",");
+               S(sub206, env);
                try {
-                  FilterRange(sub205, env);
-               } catch(final GleuxException e206) {
-                  throw new RuntimeException("in keyword requires a filter after a comma", e206);
+                  FilterRange(sub206, env);
+               } catch(final GleuxException e207) {
+                  throw new RuntimeException("in keyword requires a filter after a comma", e207);
                }
-               sub205.commit();
+               sub206.commit();
             }
-         } catch(final GleuxException e207) {
+         } catch(final GleuxException e208) {
             // continue
          }
-      } catch(final GleuxException e208) {
+      } catch(final GleuxException e209) {
          // continue
       }
-      sub201.commit();
+      sub202.commit();
       return env[20]/* filter */;
    }
 
@@ -859,9 +859,9 @@ public class GleuxInterpreter {
       env[9] = environment.get("lit");
       env[10] = environment.get("ch");
       env[11] = environment.get("notted");
-      env[12] = environment.get("function");
-      env[13] = environment.get("postage");
-      env[14] = environment.get("inv");
+      env[12] = environment.get("inv");
+      env[13] = environment.get("function");
+      env[14] = environment.get("postage");
       env[15] = environment.get("num");
       env[16] = environment.get("type");
       env[17] = environment.get("constructor");
@@ -885,13 +885,11 @@ public class GleuxInterpreter {
             .getSignature((java.lang.String)env[4]/* name */);
       sub130.accept("(");
       S(sub130, env);
-      env[12] /* function */= ((org.fuwjin.dinah.FunctionProvider)env[13]/* postage */)
-            .getFunction((org.fuwjin.dinah.FunctionSignature)env[3]/* signature */);
-      env[14] /* inv */= new org.fuwjin.gleux.Invocation((org.fuwjin.dinah.Function)env[12]/* function */);
+      env[12] /* inv */= new org.fuwjin.gleux.Invocation();
       try {
          final StringCursor sub131 = sub130.sub();
          try {
-            ((org.fuwjin.gleux.Invocation)env[14]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(sub131, env));
+            ((org.fuwjin.gleux.Invocation)env[12]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(sub131, env));
          } catch(final Exception e132) {
             throw sub131.ex(e132);
          }
@@ -901,7 +899,7 @@ public class GleuxInterpreter {
             S(sub133, env);
             try {
                try {
-                  ((org.fuwjin.gleux.Invocation)env[14]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(sub133,
+                  ((org.fuwjin.gleux.Invocation)env[12]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(sub133,
                         env));
                } catch(final Exception e134) {
                   throw sub133.ex(e134);
@@ -917,7 +915,7 @@ public class GleuxInterpreter {
                   S(sub136, env);
                   try {
                      try {
-                        ((org.fuwjin.gleux.Invocation)env[14]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(
+                        ((org.fuwjin.gleux.Invocation)env[12]/* inv */).addParam((org.fuwjin.gleux.Expression)Value(
                               sub136, env));
                      } catch(final Exception e137) {
                         throw sub136.ex(e137);
@@ -944,51 +942,59 @@ public class GleuxInterpreter {
       }
       S(sub130, env);
       try {
-         ((org.fuwjin.gleux.Invocation)env[14]/* inv */).resolve();
+         ((org.fuwjin.dinah.FunctionSignature)env[3]/* signature */)
+               .setArgCount(((org.fuwjin.gleux.Invocation)env[12]/* inv */).paramCount());
       } catch(final Exception e143) {
          throw sub130.ex(e143);
       }
+      env[13] /* function */= ((org.fuwjin.dinah.FunctionProvider)env[14]/* postage */)
+            .getFunction((org.fuwjin.dinah.FunctionSignature)env[3]/* signature */);
+      try {
+         ((org.fuwjin.gleux.Invocation)env[12]/* inv */).setFunction((org.fuwjin.dinah.Function)env[13]/* function */);
+      } catch(final Exception e144) {
+         throw sub130.ex(e144);
+      }
       sub130.commit();
-      return env[14]/* inv */;
+      return env[12]/* inv */;
    }
 
    private static Object IsStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub168 = input.sub();
-      sub168.accept("is");
-      Sep(sub168, env);
+      final StringCursor sub169 = input.sub();
+      sub169.accept("is");
+      Sep(sub169, env);
       try {
-         final StringCursor sub169 = sub168.sub();
-         sub169.accept("not");
-         Sep(sub169, env);
+         final StringCursor sub170 = sub169.sub();
+         sub170.accept("not");
+         Sep(sub170, env);
          env[11] /* notted */= java.lang.Boolean.TRUE;
-         sub169.commit();
-      } catch(final GleuxException e170) {
-         final StringCursor sub171 = sub168.sub();
+         sub170.commit();
+      } catch(final GleuxException e171) {
+         final StringCursor sub172 = sub169.sub();
          env[11] /* notted */= java.lang.Boolean.FALSE;
-         sub171.commit();
+         sub172.commit();
       }
       try {
          env[7] /* stmt */= new org.fuwjin.gleux.IsStatement((java.lang.Boolean)env[11]/* notted */,
                (org.fuwjin.gleux.Expression)new org.fuwjin.gleux.FilterAcceptStatement(java.lang.Boolean.FALSE,
-                     (org.fuwjin.gleux.Filter)InFilter(sub168, env)));
-      } catch(final GleuxException e172) {
+                     (org.fuwjin.gleux.Filter)InFilter(sub169, env)));
+      } catch(final GleuxException e173) {
          try {
             env[7] /* stmt */= new org.fuwjin.gleux.IsStatement((java.lang.Boolean)env[11]/* notted */,
                   (org.fuwjin.gleux.Expression)new org.fuwjin.gleux.ValueAcceptStatement(
-                        (java.lang.Boolean)java.lang.Boolean.FALSE, (org.fuwjin.gleux.Expression)StaticLiteral(sub168,
+                        (java.lang.Boolean)java.lang.Boolean.FALSE, (org.fuwjin.gleux.Expression)StaticLiteral(sub169,
                               env)));
-         } catch(final GleuxException e173) {
+         } catch(final GleuxException e174) {
             try {
                env[7] /* stmt */= new org.fuwjin.gleux.IsStatement((java.lang.Boolean)env[11]/* notted */,
-                     (org.fuwjin.gleux.Expression)Value(sub168, env));
-            } catch(final GleuxException e174) {
-               throw new RuntimeException("is keyword requires value or in keyword", e174);
+                     (org.fuwjin.gleux.Expression)Value(sub169, env));
+            } catch(final GleuxException e175) {
+               throw new RuntimeException("is keyword requires value or in keyword", e175);
             }
          }
       }
-      sub168.commit();
+      sub169.commit();
       return env[7]/* stmt */;
    }
 
@@ -1026,10 +1032,10 @@ public class GleuxInterpreter {
    private static Object MatchValue(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub166 = input.sub();
-      sub166.accept("match");
-      Sep(sub166, env);
-      sub166.commit();
+      final StringCursor sub167 = input.sub();
+      sub167.accept("match");
+      Sep(sub167, env);
+      sub167.commit();
       return org.fuwjin.gleux.Variable.MATCH;
    }
 
@@ -1046,171 +1052,171 @@ public class GleuxInterpreter {
    private static Object NextValue(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub167 = input.sub();
-      sub167.accept("next");
-      Sep(sub167, env);
-      sub167.commit();
+      final StringCursor sub168 = input.sub();
+      sub168.accept("next");
+      Sep(sub168, env);
+      sub168.commit();
       return org.fuwjin.gleux.Variable.NEXT;
    }
 
    private static Object Number(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub144 = input.sub();
+      final StringCursor sub145 = input.sub();
       try {
-         sub144.accept("-");
-      } catch(final GleuxException e145) {
+         sub145.accept("-");
+      } catch(final GleuxException e146) {
          // continue
       }
       try {
-         final StringCursor sub146 = sub144.sub();
-         sub146.acceptIn("0123456789");
+         final StringCursor sub147 = sub145.sub();
+         sub147.acceptIn("0123456789");
          try {
             while(true) {
-               sub146.acceptIn("0123456789");
+               sub147.acceptIn("0123456789");
             }
-         } catch(final GleuxException e147) {
+         } catch(final GleuxException e148) {
             // continue
          }
          try {
-            final StringCursor sub148 = sub146.sub();
-            sub148.accept(".");
+            final StringCursor sub149 = sub147.sub();
+            sub149.accept(".");
             try {
-               sub148.acceptIn("0123456789");
+               sub149.acceptIn("0123456789");
                try {
                   while(true) {
-                     sub148.acceptIn("0123456789");
+                     sub149.acceptIn("0123456789");
                   }
-               } catch(final GleuxException e149) {
+               } catch(final GleuxException e150) {
                   // continue
                }
-            } catch(final GleuxException e150) {
+            } catch(final GleuxException e151) {
                // continue
             }
-            sub148.commit();
-         } catch(final GleuxException e151) {
+            sub149.commit();
+         } catch(final GleuxException e152) {
             // continue
          }
-         sub146.commit();
-      } catch(final GleuxException e152) {
-         final StringCursor sub153 = sub144.sub();
-         sub153.accept(".");
-         sub153.acceptIn("0123456789");
+         sub147.commit();
+      } catch(final GleuxException e153) {
+         final StringCursor sub154 = sub145.sub();
+         sub154.accept(".");
+         sub154.acceptIn("0123456789");
          try {
             while(true) {
-               sub153.acceptIn("0123456789");
+               sub154.acceptIn("0123456789");
             }
-         } catch(final GleuxException e154) {
+         } catch(final GleuxException e155) {
             // continue
          }
-         sub153.commit();
+         sub154.commit();
       }
       try {
-         final StringCursor sub155 = sub144.sub();
-         sub155.acceptIn("Ee");
+         final StringCursor sub156 = sub145.sub();
+         sub156.acceptIn("Ee");
          try {
-            sub155.accept("-");
-         } catch(final GleuxException e156) {
-            // continue
-         }
-         sub155.acceptIn("0123456789");
-         try {
-            while(true) {
-               sub155.acceptIn("0123456789");
-            }
+            sub156.accept("-");
          } catch(final GleuxException e157) {
             // continue
          }
-         sub155.commit();
-      } catch(final GleuxException e158) {
+         sub156.acceptIn("0123456789");
+         try {
+            while(true) {
+               sub156.acceptIn("0123456789");
+            }
+         } catch(final GleuxException e158) {
+            // continue
+         }
+         sub156.commit();
+      } catch(final GleuxException e159) {
          // continue
       }
-      env[15] /* num */= new org.fuwjin.gleux.Number(sub144.match());
-      Sep(sub144, env);
-      sub144.commit();
+      env[15] /* num */= new org.fuwjin.gleux.Number(sub145.match());
+      Sep(sub145, env);
+      sub145.commit();
       return env[15]/* num */;
    }
 
    private static Object Object(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub159 = input.sub();
-      sub159.accept("(");
-      S(sub159, env);
-      env[16] /* type */= AliasName(sub159, env);
-      env[17] /* constructor */= ((org.fuwjin.dinah.FunctionProvider)env[13]/* postage */)
+      final StringCursor sub160 = input.sub();
+      sub160.accept("(");
+      S(sub160, env);
+      env[16] /* type */= AliasName(sub160, env);
+      env[17] /* constructor */= ((org.fuwjin.dinah.FunctionProvider)env[14]/* postage */)
             .getFunction(new org.fuwjin.dinah.FunctionSignature((java.lang.String)env[16]/* type */+ ".new"));
       env[18] /* object */= new org.fuwjin.gleux.ObjectTemplate((org.fuwjin.dinah.Function)env[17]/* constructor */);
-      sub159.accept(")");
-      S(sub159, env);
-      sub159.accept("{");
-      S(sub159, env);
+      sub160.accept(")");
+      S(sub160, env);
+      sub160.accept("{");
+      S(sub160, env);
       try {
-         final StringCursor sub160 = sub159.sub();
-         Field(sub160, env);
+         final StringCursor sub161 = sub160.sub();
+         Field(sub161, env);
          try {
-            final StringCursor sub161 = sub160.sub();
-            sub161.accept(",");
-            S(sub161, env);
-            Field(sub161, env);
-            sub161.commit();
+            final StringCursor sub162 = sub161.sub();
+            sub162.accept(",");
+            S(sub162, env);
+            Field(sub162, env);
+            sub162.commit();
             try {
                while(true) {
-                  final StringCursor sub162 = sub160.sub();
-                  sub162.accept(",");
-                  S(sub162, env);
-                  Field(sub162, env);
-                  sub162.commit();
+                  final StringCursor sub163 = sub161.sub();
+                  sub163.accept(",");
+                  S(sub163, env);
+                  Field(sub163, env);
+                  sub163.commit();
                }
-            } catch(final GleuxException e163) {
+            } catch(final GleuxException e164) {
                // continue
             }
-         } catch(final GleuxException e164) {
+         } catch(final GleuxException e165) {
             // continue
          }
-         sub160.commit();
-      } catch(final GleuxException e165) {
+         sub161.commit();
+      } catch(final GleuxException e166) {
          // continue
       }
-      sub159.accept("}");
-      S(sub159, env);
-      sub159.commit();
+      sub160.accept("}");
+      S(sub160, env);
+      sub160.commit();
       return env[18]/* object */;
    }
 
    private static Object Path(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub247 = input.sub();
-      final StringCursor sub248 = sub247.sub();
+      final StringCursor sub248 = input.sub();
+      final StringCursor sub249 = sub248.sub();
       try {
-         sub248.accept("/");
-      } catch(final GleuxException e249) {
+         sub249.accept("/");
+      } catch(final GleuxException e250) {
          // continue
       }
-      QualifiedIdentifier(sub248, env);
-      sub248.commit();
+      QualifiedIdentifier(sub249, env);
+      sub249.commit();
       try {
          while(true) {
-            final StringCursor sub250 = sub247.sub();
+            final StringCursor sub251 = sub248.sub();
             try {
-               sub250.accept("/");
-            } catch(final GleuxException e251) {
+               sub251.accept("/");
+            } catch(final GleuxException e252) {
                // continue
             }
-            QualifiedIdentifier(sub250, env);
-            sub250.commit();
+            QualifiedIdentifier(sub251, env);
+            sub251.commit();
          }
-      } catch(final GleuxException e252) {
-         // continue
-      }
-      try {
-         sub247.accept("/");
       } catch(final GleuxException e253) {
          // continue
       }
-      sub247.commit();
-      return sub247.match();
+      try {
+         sub248.accept("/");
+      } catch(final GleuxException e254) {
+         // continue
+      }
+      sub248.commit();
+      return sub248.match();
    }
 
    private static Object PathName(final StringCursor input, final Object... parentEnv) throws GleuxException {
@@ -1226,43 +1232,43 @@ public class GleuxInterpreter {
    private static Object PublishStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub189 = input.sub();
-      sub189.accept("publish");
-      Sep(sub189, env);
+      final StringCursor sub190 = input.sub();
+      sub190.accept("publish");
+      Sep(sub190, env);
       try {
-         env[7] /* stmt */= new org.fuwjin.gleux.PublishStatement((org.fuwjin.gleux.Expression)Value(sub189, env));
-      } catch(final GleuxException e190) {
-         throw new RuntimeException("publish keyword requires a value", e190);
+         env[7] /* stmt */= new org.fuwjin.gleux.PublishStatement((org.fuwjin.gleux.Expression)Value(sub190, env));
+      } catch(final GleuxException e191) {
+         throw new RuntimeException("publish keyword requires a value", e191);
       }
-      sub189.commit();
+      sub190.commit();
       return env[7]/* stmt */;
    }
 
    private static Object QualifiedIdentifier(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub242 = input.sub();
-      AnnotatedIdentifier(sub242, env);
+      final StringCursor sub243 = input.sub();
+      AnnotatedIdentifier(sub243, env);
       try {
-         final StringCursor sub243 = sub242.sub();
-         sub243.accept(".");
-         AnnotatedIdentifier(sub243, env);
-         sub243.commit();
+         final StringCursor sub244 = sub243.sub();
+         sub244.accept(".");
+         AnnotatedIdentifier(sub244, env);
+         sub244.commit();
          try {
             while(true) {
-               final StringCursor sub244 = sub242.sub();
-               sub244.accept(".");
-               AnnotatedIdentifier(sub244, env);
-               sub244.commit();
+               final StringCursor sub245 = sub243.sub();
+               sub245.accept(".");
+               AnnotatedIdentifier(sub245, env);
+               sub245.commit();
             }
-         } catch(final GleuxException e245) {
+         } catch(final GleuxException e246) {
             // continue
          }
-      } catch(final GleuxException e246) {
+      } catch(final GleuxException e247) {
          // continue
       }
-      sub242.commit();
-      return sub242.match();
+      sub243.commit();
+      return sub243.match();
    }
 
    private static Object QualifiedName(final StringCursor input, final Object... parentEnv) throws GleuxException {
@@ -1278,15 +1284,15 @@ public class GleuxInterpreter {
    private static Object RepeatStatement(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub187 = input.sub();
-      sub187.accept("repeat");
-      Sep(sub187, env);
+      final StringCursor sub188 = input.sub();
+      sub188.accept("repeat");
+      Sep(sub188, env);
       try {
-         env[7] /* stmt */= new org.fuwjin.gleux.RepeatStatement((org.fuwjin.gleux.Expression)Statement(sub187, env));
-      } catch(final GleuxException e188) {
-         throw new RuntimeException("repeat keyword requires a statement", e188);
+         env[7] /* stmt */= new org.fuwjin.gleux.RepeatStatement((org.fuwjin.gleux.Expression)Statement(sub188, env));
+      } catch(final GleuxException e189) {
+         throw new RuntimeException("repeat keyword requires a statement", e189);
       }
-      sub187.commit();
+      sub188.commit();
       return env[7]/* stmt */;
    }
 
@@ -1429,32 +1435,32 @@ public class GleuxInterpreter {
    private static Object ScriptIdent(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub213 = input.sub();
-      sub213.accept("<");
+      final StringCursor sub214 = input.sub();
+      sub214.accept("<");
       try {
-         env[6] /* id */= Identifier(sub213, env);
-      } catch(final GleuxException e214) {
-         throw new RuntimeException("script identifiers must be enclosed in angle brackets", e214);
+         env[6] /* id */= Identifier(sub214, env);
+      } catch(final GleuxException e215) {
+         throw new RuntimeException("script identifiers must be enclosed in angle brackets", e215);
       }
       try {
-         final StringCursor sub215 = sub213.sub();
-         sub215.accept(":");
-         env[4] /* name */= Identifier(sub215, env);
+         final StringCursor sub216 = sub214.sub();
+         sub216.accept(":");
+         env[4] /* name */= Identifier(sub216, env);
          env[23] /* module */= ((org.fuwjin.gleux.Gleux)env[1]/* gleux */).getModule((java.lang.String)env[6]/* id */);
          env[5] /* script */= ((org.fuwjin.gleux.Gleux)env[23]/* module */).get((java.lang.String)env[4]/* name */);
-         sub215.commit();
-      } catch(final GleuxException e216) {
-         final StringCursor sub217 = sub213.sub();
+         sub216.commit();
+      } catch(final GleuxException e217) {
+         final StringCursor sub218 = sub214.sub();
          env[5] /* script */= ((org.fuwjin.gleux.Gleux)env[1]/* gleux */).get((java.lang.String)env[6]/* id */);
-         sub217.commit();
+         sub218.commit();
       }
       try {
-         sub213.accept(">");
-      } catch(final GleuxException e218) {
-         throw new RuntimeException("script identifiers must be normal identifiers in angle brackets", e218);
+         sub214.accept(">");
+      } catch(final GleuxException e219) {
+         throw new RuntimeException("script identifiers must be normal identifiers in angle brackets", e219);
       }
-      S(sub213, env);
-      sub213.commit();
+      S(sub214, env);
+      sub214.commit();
       return env[5]/* script */;
    }
 
@@ -1482,24 +1488,24 @@ public class GleuxInterpreter {
    private static Object Space(final StringCursor input, final Object... parentEnv) throws GleuxException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub263 = input.sub();
+      final StringCursor sub264 = input.sub();
       try {
-         sub263.acceptIn("\t\n\r ");
-      } catch(final GleuxException e264) {
-         Comment(sub263, env);
+         sub264.acceptIn("\t\n\r ");
+      } catch(final GleuxException e265) {
+         Comment(sub264, env);
       }
       try {
          while(true) {
             try {
-               sub263.acceptIn("\t\n\r ");
-            } catch(final GleuxException e265) {
-               Comment(sub263, env);
+               sub264.acceptIn("\t\n\r ");
+            } catch(final GleuxException e266) {
+               Comment(sub264, env);
             }
          }
-      } catch(final GleuxException e266) {
+      } catch(final GleuxException e267) {
          // continue
       }
-      sub263.commit();
+      sub264.commit();
       return null;
    }
 
