@@ -8,4 +8,4 @@ As much as it pains me to say it, Pogo is not currently, nor will it likely ever
 
 Grin is the spiritual successor to Pogo, a language born from the desire to have a deeper set of string parsing idioms than regular expressions but without the cryptic operators. Ultimately, Grin is a transformation language, capable of articulating complex exchanges between input and output streams and a set of objects.
 
-If you'd like to start experimenting with Chessur, the Java implementation of Grin, check out GettingStartedWithChessur. Perhaps you'd like to see a complete Grin program, if so, head over to GrinFormatterInGrin. And if you'd like the guided tour, then the GrinScreencasts might be just the thing.
+If you'd like to start experimenting with Chessur, the Java implementation of Grin, check out GettingStartedWithChessur and GettingStartedWithGrin. Perhaps you'd like to see a complete Grin program, if so, head over to GrinFormatterInGrin. And if you'd like the guided tour, then the GrinScreencasts might be just the thing.
