@@ -247,8 +247,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   name = <AliasName>
   signature = Gleux.getSignature(gleux, name)
   accept '(' <S>
-  function = FunctionProvider.getFunction(postage, signature)
-  inv = Invocation.new(function)
+  inv = Invocation.new()
   could{
     Invocation.addParam(inv, <Value>)
     could repeat{
@@ -260,7 +259,9 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either accept ')'
   or abort "invocation must end with a parenthesis" 
   <S>
-  Invocation.resolve(inv)
+  FunctionSignature.setArgCount(signature, Invocation.paramCount(inv))
+  function = FunctionProvider.getFunction(postage, signature)
+  Invocation.setFunction(inv, function)
   return inv
 }
 <Script>{

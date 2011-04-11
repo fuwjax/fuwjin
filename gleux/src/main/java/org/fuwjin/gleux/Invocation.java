@@ -4,21 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.fuwjin.dinah.Function;
-import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.dinah.function.FunctionInvocationException;
+import org.fuwjin.util.BusinessException;
 
 /**
  * 
  */
 public class Invocation implements Expression {
-   private final String name;
    private Function function;
    private final List<Expression> params = new ArrayList<Expression>();
-
-   public Invocation(final Function function) {
-      name = function.name();
-      this.function = function;
-   }
 
    /**
     * Adds a new parameter value.
@@ -28,8 +21,16 @@ public class Invocation implements Expression {
       params.add(value);
    }
 
-   public void resolve() {
-      function = function.restrict(new FunctionSignature(name, params.size()));
+   public String name() {
+      return function.name();
+   }
+
+   public int paramCount() {
+      return params.size();
+   }
+
+   public void setFunction(final Function function) {
+      this.function = function;
    }
 
    @Override
@@ -59,10 +60,14 @@ public class Invocation implements Expression {
          }
          args[index++] = result.value();
       }
-      final Object ret = function.invoke(args);
-      if(ret instanceof FunctionInvocationException) {
-         return state.failure(result.failure("Postage failure: %s", ret), "Could not invoke postage function");
+      try {
+         final Object ret = function.invoke(args);
+         return result.value(ret);
+      } catch(final Exception e) {
+         if(e instanceof BusinessException) {
+            System.out.println(e);
+         }
+         return state.failure(result.failure("Postage failure: %s", e), "Could not invoke postage function");
       }
-      return result.value(ret);
    }
 }
