@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2011 Michael Doberenz.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
- * Contributors:
- *     Michael Doberenz - initial API and implementation
+ * Copyright (c) 2011 Michael Doberenz. All rights reserved. This program and
+ * the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz -
+ * initial API and implementation
  ******************************************************************************/
 package org.fuwjin.chessur;
 
@@ -15,7 +12,7 @@ import java.util.Iterator;
 /**
  * Represents a static string value.
  */
-public class Literal implements Expression {
+public class Literal implements Expression{
    public static final int NEW_LINE = '\n';
    public static final int TAB = '\t';
    public static final int RETURN = '\r';
@@ -25,8 +22,8 @@ public class Literal implements Expression {
     * @param ch the code point
     * @return the escaped character
     */
-   public static String dynamicEscape(final int ch) {
-      switch(ch) {
+   public static String dynamicEscape(final int ch){
+      switch(ch){
          case '"':
             return "\\\"";
       }
@@ -38,8 +35,8 @@ public class Literal implements Expression {
     * @param ch the code point
     * @return the escaped character
     */
-   public static String escape(final int ch) {
-      switch(ch) {
+   public static String escape(final int ch){
+      switch(ch){
          case '\'':
             return "\\'";
       }
@@ -51,7 +48,7 @@ public class Literal implements Expression {
     * @param hexValue the hex value
     * @return the code point
     */
-   public static int parseHex(final String hexValue) {
+   public static int parseHex(final String hexValue){
       return Integer.parseInt(hexValue, 16);
    }
 
@@ -60,8 +57,8 @@ public class Literal implements Expression {
     * @param ch the code point
     * @return the escaped character
     */
-   public static String standardEscape(final int ch) {
-      switch(ch) {
+   public static String standardEscape(final int ch){
+      switch(ch){
          case '\n':
             return "\\n";
          case '\t':
@@ -80,7 +77,7 @@ public class Literal implements Expression {
     * Appends a code point to the literal.
     * @param ch the next code point
     */
-   public void append(final int ch) {
+   public void append(final int ch){
       builder.append(Character.toChars(ch));
    }
 
@@ -88,27 +85,27 @@ public class Literal implements Expression {
     * Returns the list of code points.
     * @return the code points
     */
-   public Iterable<Integer> chars() {
-      return new Iterable<Integer>() {
+   public Iterable<Integer> chars(){
+      return new Iterable<Integer>(){
          @Override
-         public Iterator<Integer> iterator() {
-            return new Iterator<Integer>() {
+         public Iterator<Integer> iterator(){
+            return new Iterator<Integer>(){
                private int index;
 
                @Override
-               public boolean hasNext() {
-                  return index < builder.length();
+               public boolean hasNext(){
+                  return index < length();
                }
 
                @Override
-               public Integer next() {
-                  final int ch = builder.codePointAt(index);
+               public Integer next(){
+                  final int ch = codePointAt(index);
                   index += Character.charCount(ch);
                   return ch;
                }
 
                @Override
-               public void remove() {
+               public void remove(){
                   throw new UnsupportedOperationException();
                }
             };
@@ -116,13 +113,21 @@ public class Literal implements Expression {
       };
    }
 
+   int codePointAt(final int index){
+      return builder.codePointAt(index);
+   }
+
+   int length(){
+      return builder.length();
+   }
+
    @Override
-   public String toString() {
+   public String toString(){
       return "'" + builder + "'";
    }
 
    @Override
-   public State transform(final State state) {
+   public State transform(final State state){
       return state.value(builder.toString());
    }
 }
