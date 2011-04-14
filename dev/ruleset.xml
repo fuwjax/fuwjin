@@ -228,7 +228,7 @@
 	<rule ref="rulesets/naming.xml/SuspiciousConstantFieldName" />
 	<rule ref="rulesets/naming.xml/SuspiciousEqualsMethodName" />
 	<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingTypeName" />
-	<rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName" />
+	<!-- <rule ref="rulesets/naming.xml/AvoidFieldNameMatchingMethodName" />-->
 	<rule ref="rulesets/naming.xml/NoPackage" />
 	<rule ref="rulesets/naming.xml/PackageCase" />
 	<rule ref="rulesets/naming.xml/MisleadingVariableName" />
