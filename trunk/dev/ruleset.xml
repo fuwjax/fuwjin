@@ -73,13 +73,13 @@
 	<rule ref="rulesets/design.xml/AvoidProtectedFieldInFinalClass" />
 	<rule ref="rulesets/design.xml/AssignmentToNonFinalStatic" />
 	<rule ref="rulesets/design.xml/MissingStaticMethodInNonInstantiatableClass" />
-	<rule ref="rulesets/design.xml/AvoidSynchronizedAtMethodLevel" />
+<!-- 	<rule ref="rulesets/design.xml/AvoidSynchronizedAtMethodLevel" /> -->
 	<rule ref="rulesets/design.xml/MissingBreakInSwitch" />
 	<rule ref="rulesets/design.xml/UseNotifyAllInsteadOfNotify" />
 	<rule ref="rulesets/design.xml/AvoidInstanceofChecksInCatchClause" />
 	<rule ref="rulesets/design.xml/AbstractClassWithoutAbstractMethod" />
 	<rule ref="rulesets/design.xml/SimplifyConditional" />
-	<rule ref="rulesets/design.xml/CompareObjectsWithEquals" />
+<!-- 	<rule ref="rulesets/design.xml/CompareObjectsWithEquals" /> -->
 	<rule ref="rulesets/design.xml/PositionLiteralsFirstInComparisons" />
 	<rule ref="rulesets/design.xml/UnnecessaryLocalBeforeReturn" />
 	<rule ref="rulesets/design.xml/NonThreadSafeSingleton" />
@@ -139,7 +139,7 @@
 	<rule ref="rulesets/controversial.xml/UnnecessaryParentheses" />
 	<rule ref="rulesets/controversial.xml/DefaultPackage" />
 	<rule ref="rulesets/controversial.xml/BooleanInversion" />
-	<rule ref="rulesets/controversial.xml/AvoidUsingShortType" />
+	<!-- <rule ref="rulesets/controversial.xml/AvoidUsingShortType" /> -->
 	<rule ref="rulesets/controversial.xml/AvoidUsingVolatile" />
 	<rule ref="rulesets/controversial.xml/AvoidUsingNativeCode" />
 	<rule ref="rulesets/controversial.xml/AvoidAccessibilityAlteration" />
