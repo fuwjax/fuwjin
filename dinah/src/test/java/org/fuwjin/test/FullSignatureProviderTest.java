@@ -14,7 +14,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionSignature;
@@ -23,15 +22,25 @@ import org.fuwjin.sample.Sample;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the functionality around the fully specified signatures.
+ */
 public class FullSignatureProviderTest {
    private FunctionProvider provider;
 
+   /**
+    * Initializes the provider.
+    */
    @Before
    public void setup() {
       provider = new ReflectiveFunctionProvider();
       Sample.staticValue = "initial";
    }
 
+   /**
+    * Tests a fully qualified constructor signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testConstructor() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.new")
@@ -40,6 +49,10 @@ public class FullSignatureProviderTest {
       assertThat((Sample)result, is(new Sample("test")));
    }
 
+   /**
+    * Tests a fully qualified field access signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testFieldAccess() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value")
@@ -49,6 +62,10 @@ public class FullSignatureProviderTest {
       assertThat((String)test, is("test"));
    }
 
+   /**
+    * Tests a fully qualified field mutator signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testFieldMutator() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value").addArg(
@@ -58,6 +75,10 @@ public class FullSignatureProviderTest {
       assertThat(sample, is(new Sample("check")));
    }
 
+   /**
+    * Tests a fully qualified instanceof signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testInstanceOf() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.instanceof")
@@ -69,6 +90,10 @@ public class FullSignatureProviderTest {
       assertFalse((Boolean)fail);
    }
 
+   /**
+    * Tests a fully qualified method signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testMethod() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.getValue")
@@ -78,6 +103,10 @@ public class FullSignatureProviderTest {
       assertThat((String)test, is("get:test"));
    }
 
+   /**
+    * Tests a fully qualified static field access signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticFieldAccess() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue"));
@@ -85,6 +114,10 @@ public class FullSignatureProviderTest {
       assertThat((String)test, is("initial"));
    }
 
+   /**
+    * Tests a fully qualified static field mutator signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticFieldMutator() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue")
@@ -93,6 +126,10 @@ public class FullSignatureProviderTest {
       assertThat(Sample.staticValue, is("check"));
    }
 
+   /**
+    * Tests a fully qualified static method signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticMethod() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.doStatic")

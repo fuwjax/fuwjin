@@ -9,60 +9,105 @@ package org.fuwjin.util;
 
 import java.lang.reflect.Type;
 
-public class Adapter{
-   public static class AdaptException extends BusinessException{
+/**
+ * Utility class for adaptation.
+ */
+public final class Adapter {
+   /**
+    * Exception for Adapter methods.
+    */
+   public static class AdaptException extends BusinessException {
       private static final long serialVersionUID = 1L;
 
-      public AdaptException(final String pattern, final Object... args){
+      /**
+       * Creates a new instance.
+       * @param pattern the message pattern
+       * @param args the message arguments
+       */
+      public AdaptException(final String pattern, final Object... args) {
          super(pattern, args);
+      }
+
+      /**
+       * Creates a new instance.
+       * @param cause the exception cause
+       * @param pattern the message pattern
+       * @param args the message arguments
+       */
+      public AdaptException(final Throwable cause, final String pattern, final Object... args) {
+         super(cause, pattern, args);
       }
    }
 
    private static final Object UNSET = new Object();
 
-   public static Object adapt(final Object value, final Type type) throws AdaptException{
-      if(!isSet(value)){
+   /**
+    * Adapts the value to the type.
+    * @param value the value to adapt
+    * @param type the target type
+    * @return the adapted object
+    * @throws AdaptException if the object cannot be adapted
+    */
+   public static Object adapt(final Object value, final Type type) throws AdaptException {
+      if(!isSet(value)) {
          throw new AdaptException("Could not map unset value to %s", type);
-      }else if(value != null && type != null && !TypeUtils.isInstance(type, value)){
-         if(value instanceof Number){
-            if(type == byte.class){
-               return ((Number)value).byteValue();
-            }else if(type == short.class){
-               return ((Number)value).shortValue();
-            }else if(type == int.class){
-               return ((Number)value).intValue();
-            }else if(type == long.class){
-               return ((Number)value).longValue();
-            }else if(type == float.class){
-               return ((Number)value).floatValue();
-            }else if(type == double.class){
-               return ((Number)value).doubleValue();
-            }else{
-               throw new AdaptException("Could not map %s to %s", value.getClass(), type);
-            }
+      }
+      if(value == null || type == null || TypeUtils.isInstance(type, value)) {
+         return value;
+      }
+      if(value instanceof Number) {
+         if(type == byte.class) {
+            return ((Number)value).byteValue();
+         } else if(type == short.class) {
+            return ((Number)value).shortValue();
+         } else if(type == int.class) {
+            return ((Number)value).intValue();
+         } else if(type == long.class) {
+            return ((Number)value).longValue();
+         } else if(type == float.class) {
+            return ((Number)value).floatValue();
+         } else if(type == double.class) {
+            return ((Number)value).doubleValue();
          }
-         throw new AdaptException("Could not map %s to %s", value.getClass(), type);
       }
-      return value;
+      throw new AdaptException("Could not map %s to %s", value.getClass(), type);
    }
 
-   public static Object[] adaptArray(final Object[] array, final Type[] types) throws AdaptException{
-      final Object[] result = new Object[array.length];
-      for(int i = 0; i < array.length; i++){
-         result[i] = Adapter.adapt(array[i], types[i]);
+   /**
+    * Adapts the array in place, adapting each element to the corresponding
+    * element in types.
+    * @param array the values to adapt
+    * @param types the target types
+    * @throws AdaptException if the array elements cannot be adapted, or the
+    *         arrays are not the same size
+    */
+   public static void adaptArray(final Object[] array, final Type[] types) throws AdaptException {
+      if(array.length != types.length) {
+         throw new AdaptException("expected %d args not %d", types.length, array.length);
       }
-      return result;
+      for(int i = 0; i < array.length; ++i) {
+         array[i] = Adapter.adapt(array[i], types[i]);
+      }
    }
 
-   public static boolean isAdaptable(final Object value, final Type type){
-      return isSet(value) && TypeUtils.isInstance(type, value);
+   /**
+    * Returns true if the value is a real value, false if "unset".
+    * @param value the test value
+    * @return false if value equals unset(), true otherwise
+    */
+   public static boolean isSet(final Object value) {
+      return !UNSET.equals(value);
    }
 
-   public static boolean isSet(final Object value){
-      return value != UNSET;
-   }
-
-   public static Object unset(){
+   /**
+    * Returns the unset object.
+    * @return the unset object
+    */
+   public static Object unset() {
       return UNSET;
+   }
+
+   private Adapter() {
+      // utility class
    }
 }

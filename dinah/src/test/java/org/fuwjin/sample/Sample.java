@@ -13,40 +13,59 @@ package org.fuwjin.sample;
 import org.fuwjin.util.ObjectUtils;
 import org.fuwjin.util.ObjectUtils.ObjectHelper;
 
-public class Sample implements ObjectHelper{
+/**
+ * Sample class for Function tests.
+ */
+public class Sample implements ObjectHelper {
+   /**
+    * Sample static field.
+    */
    public static String staticValue;
 
-   public static String doStatic(final String value){
+   /**
+    * Sample static method.
+    * @param value argument
+    * @return string value
+    */
+   public static String doStatic(final String value) {
       return staticValue + ":" + value;
    }
 
    private final String value;
 
-   public Sample(final String value){
+   /**
+    * Sample constructor.
+    * @param value the value
+    */
+   public Sample(final String value) {
       this.value = value;
    }
 
    @Override
-   public boolean equals(final Object obj){
+   public boolean equals(final Object obj) {
       return ObjectUtils.isEqual(this, obj);
    }
 
-   public String getValue(){
+   /**
+    * Sample method.
+    * @return the value
+    */
+   public String getValue() {
       return "get:" + value;
    }
 
    @Override
-   public int hashCode(){
+   public int hashCode() {
       return ObjectUtils.hash(this);
    }
 
    @Override
-   public Object[] identity(){
+   public Object[] identity() {
       return new Object[]{value};
    }
 
    @Override
-   public String toString(){
+   public String toString() {
       return ObjectUtils.toString(this);
    }
 }

@@ -12,21 +12,31 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Member;
 
-public class ConstantFunction extends FixedArgsFunction{
+/**
+ * Always returns the same value instance. Note that while it is not enforced
+ * (or enforcable), it is highly recommended that the value instance be
+ * immutable.
+ */
+public class ConstantFunction extends FixedArgsFunction {
    private final Object value;
 
-   public ConstantFunction(final String name, final Object value){
+   /**
+    * Creates a new instance.
+    * @param name the name of the function
+    * @param value the constant value
+    */
+   public ConstantFunction(final String name, final Object value) {
       super(name);
       this.value = value;
    }
 
    @Override
-   protected Object invokeSafe(final Object... args){
+   protected Object invokeSafe(final Object... args) {
       return value;
    }
 
    @Override
-   protected Member member(){
+   protected Member member() {
       return null;
    }
 }

@@ -14,7 +14,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionSignature;
@@ -23,15 +22,25 @@ import org.fuwjin.sample.Sample;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the functionality around name only signatures.
+ */
 public class NameOnlyProviderTest {
    private FunctionProvider provider;
 
+   /**
+    * Initializes the provider.
+    */
    @Before
    public void setup() {
       provider = new ReflectiveFunctionProvider();
       Sample.staticValue = "initial";
    }
 
+   /**
+    * Tests a name only constructor signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testConstructor() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.new", 1));
@@ -39,6 +48,10 @@ public class NameOnlyProviderTest {
       assertThat((Sample)result, is(new Sample("test")));
    }
 
+   /**
+    * Tests a name only field access signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testFieldAccess() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value", 1));
@@ -47,6 +60,10 @@ public class NameOnlyProviderTest {
       assertThat((String)test, is("test"));
    }
 
+   /**
+    * Tests a name only field mutator signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testFieldMutator() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value", 2));
@@ -55,6 +72,10 @@ public class NameOnlyProviderTest {
       assertThat(sample, is(new Sample("check")));
    }
 
+   /**
+    * Tests a name only instanceof signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testInstanceOf() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.instanceof", 1));
@@ -65,6 +86,10 @@ public class NameOnlyProviderTest {
       assertFalse((Boolean)fail);
    }
 
+   /**
+    * Tests a name only method signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testMethod() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.getValue", 1));
@@ -73,13 +98,21 @@ public class NameOnlyProviderTest {
       assertThat((String)test, is("get:test"));
    }
 
+   /**
+    * Tests a name only static field access signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticFieldAccess() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue"));
+      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue", 0));
       final Object test = function.invoke();
       assertThat((String)test, is("initial"));
    }
 
+   /**
+    * Tests a name only static field mutator signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticFieldMutator() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue", 1));
@@ -87,6 +120,10 @@ public class NameOnlyProviderTest {
       assertThat(Sample.staticValue, is("check"));
    }
 
+   /**
+    * Tests a name only static method signature.
+    * @throws Exception if the test fails
+    */
    @Test
    public void testStaticMethod() throws Exception {
       final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.doStatic", 1));
