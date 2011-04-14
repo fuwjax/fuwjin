@@ -12,32 +12,55 @@ package org.fuwjin.util;
 
 import java.util.Arrays;
 
-public class ObjectUtils{
-   public interface ObjectHelper{
+/**
+ * Utility methods for java.lang.Object methods.
+ */
+public abstract class ObjectUtils {
+   /**
+    * Assistant for overwriting Object methods efficiently.
+    */
+   public interface ObjectHelper {
+      /**
+       * Returns the identity of the object. The array returned must never be
+       * altered.
+       * @return the identity
+       */
       Object[] identity();
    }
 
-   public static int hash(final ObjectHelper obj){
+   /**
+    * Returns a hash code appropriate for obj.
+    * @param obj the object to hash
+    * @return the hash code
+    */
+   public static int hash(final ObjectHelper obj) {
       return Arrays.hashCode(obj.identity());
    }
 
-   public static boolean isEqual(final ObjectHelper obj, final Object other){
-      if(obj == null && other == null){
+   /**
+    * Returns true if obj and other are equal, false otherwise.
+    * @param obj the object
+    * @param other the test object
+    * @return true if obj equals other, false otherwise
+    */
+   public static boolean isEqual(final ObjectHelper obj, final Object other) {
+      if(obj == other) {
          return true;
       }
-      if(obj == null || other == null){
-         return false;
-      }
-      if(obj == other){
-         return true;
-      }
-      if(obj.getClass().equals(other.getClass())){
-         return Arrays.equals(obj.identity(), ((ObjectHelper)other).identity());
-      }
-      return false;
+      return other != null && obj.getClass().equals(other.getClass())
+            && Arrays.equals(obj.identity(), ((ObjectHelper)other).identity());
    }
 
-   public static String toString(final ObjectHelper obj){
+   /**
+    * Returns a String suitable for debugging.
+    * @param obj the object to stringify
+    * @return the string
+    */
+   public static String toString(final ObjectHelper obj) {
       return obj.getClass().getCanonicalName() + Arrays.toString(obj.identity());
+   }
+
+   private ObjectUtils() {
+      // utility class
    }
 }

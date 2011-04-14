@@ -10,11 +10,30 @@
  ******************************************************************************/
 package org.fuwjin.dinah;
 
+import java.lang.reflect.InvocationTargetException;
+import org.fuwjin.util.Adapter.AdaptException;
 
+/**
+ * The reflection abstraction interface. All methods, constructors, virtual
+ * methods, field mutation/access, keywords and other such invocation targets
+ * are exposed through this interface outside of Dinah.
+ */
 public interface Function {
-   Object invoke(Object... args) throws Exception;
+   /**
+    * Invokes this function with the supplied arguments.
+    * @param args the function arguments
+    * @return the function result
+    * @throws AdaptException if the arguments could not be adapted to the
+    *         underlying invocation target
+    * @throws InvocationTargetException if the underlying invocation target
+    *         threw an exception
+    */
+   Object invoke(Object... args) throws AdaptException, InvocationTargetException;
 
+   /**
+    * The name of this function. Note that the exact same underlying executable
+    * target may have multiple names.
+    * @return the name of this function
+    */
    String name();
-
-   Function restrict(FunctionSignature signature);
 }

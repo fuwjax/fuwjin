@@ -12,14 +12,21 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
-
 import org.fuwjin.util.TypeUtils;
 
+/**
+ * Function encapsulating the "instanceof" keyword.
+ */
 public class InstanceOfFunction extends FixedArgsFunction {
    private final Type type;
 
-   public InstanceOfFunction(final String typeName, final Type type) {
-      super(typeName + ".instanceof", new Type[1]);
+   /**
+    * Creates a new instance.
+    * @param category the function category
+    * @param type the expected type
+    */
+   public InstanceOfFunction(final String category, final Type type) {
+      super(category + ".instanceof", new Type[1]);
       this.type = type;
    }
 

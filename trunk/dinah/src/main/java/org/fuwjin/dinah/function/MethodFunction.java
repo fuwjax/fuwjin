@@ -11,27 +11,41 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-
+import org.fuwjin.util.Adapter;
 import org.fuwjin.util.ArrayUtils;
 
-public class MethodFunction extends ReflectiveFunction{
+/**
+ * Function for reflective method invocation.
+ */
+public class MethodFunction extends FixedArgsFunction {
    private final Method method;
 
-   public MethodFunction(final String typeName, final Method method, final Type type){
-      super(typeName + '.' + method.getName(), ArrayUtils.prepend(type, method.getParameterTypes()));
+   /**
+    * Creates a new instance.
+    * @param category the function category
+    * @param method the method to invoke
+    * @param type the host object type
+    */
+   public MethodFunction(final String category, final Method method, final Type type) {
+      super(category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
       this.method = method;
    }
 
    @Override
-   protected Object invokeImpl(final Object[] args) throws InvocationTargetException, Exception{
+   protected Object invokeSafe(final Object... args) throws IllegalArgumentException, IllegalAccessException,
+         InvocationTargetException {
       final Object obj = args[0];
       final Object[] realArgs = new Object[args.length - 1];
       System.arraycopy(args, 1, realArgs, 0, args.length - 1);
-      return method.invoke(obj, realArgs);
+      final Object result = method.invoke(obj, realArgs);
+      if(method.getReturnType().equals(void.class)) {
+         return Adapter.unset();
+      }
+      return result;
    }
 
    @Override
-   protected Member member(){
+   protected Member member() {
       return method;
    }
 }

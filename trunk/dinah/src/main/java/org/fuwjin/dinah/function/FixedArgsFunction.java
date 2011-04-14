@@ -10,43 +10,62 @@
  ******************************************************************************/
 package org.fuwjin.dinah.function;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
-
-import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
+import org.fuwjin.util.Adapter.AdaptException;
 import org.fuwjin.util.TypeUtils;
 
-public abstract class FixedArgsFunction extends AbstractFunction{
-   public FixedArgsFunction(final String name, final Type... argTypes){
+/**
+ * Base class for methods, constructors and anything else with a fixed number of
+ * required arguments.
+ */
+public abstract class FixedArgsFunction extends AbstractFunction {
+   /**
+    * Creates a new instance.
+    * @param name the function name
+    * @param argTypes the set of required argument types
+    */
+   public FixedArgsFunction(final String name, final Type... argTypes) {
       super(name, argTypes);
    }
 
    @Override
-   public Object invoke(final Object... args) throws Exception{
-      if(args.length != argCount()){
-         throw new FunctionInvocationException("%s expects %d args not %d", name(), argCount(), args.length);
+   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+      Adapter.adaptArray(args, argTypes());
+      try {
+         return invokeSafe(args);
+      } catch(final IllegalAccessException e) {
+         throw new AdaptException(e, "%s could not be accessed: %s", name(), e);
+      } catch(final InstantiationException e) {
+         throw new AdaptException(e, "%s could not be instantiated: %s", name(), e);
+      } catch(final IllegalArgumentException e) {
+         throw new AdaptException(e, "%s could not be adapted: %s", name(), e);
       }
-      final Object[] realArgs = new Object[args.length];
-      for(int i = 0; i < args.length; i++){
-         realArgs[i] = Adapter.adapt(args[i], argType(i));
-      }
-      return invokeSafe(realArgs);
    }
 
-   protected abstract Object invokeSafe(Object... args) throws Exception;
+   @Override
+   public AbstractFunction join(final AbstractFunction next) {
+      if(AbstractFunction.NULL.equals(next)) {
+         return this;
+      }
+      return new CompositeFunction(this, next);
+   }
 
    @Override
-   public Function restrict(final FunctionSignature signature){
-      if(signature.argCount() != argCount()){
-         return new FailFunction(name(), "%s expected %d args not %d", name(), argCount(), signature.argCount());
+   public AbstractFunction restrict(final FunctionSignature signature) {
+      if(signature.argCount() != argCount()) {
+         return AbstractFunction.NULL;
       }
-      for(int i = 0; i < argCount(); i++){
-         if(!TypeUtils.isAssignableFrom(argType(i), signature.argType(i))){
-            return new FailFunction(name(), "%s expected arg %d to be %s not %s", name(), i, argType(i),
-                  signature.argType(i));
+      for(int i = 0; i < argCount(); ++i) {
+         if(!TypeUtils.isAssignableFrom(argType(i), signature.argType(i))) {
+            return AbstractFunction.NULL;
          }
       }
       return this;
    }
+
+   protected abstract Object invokeSafe(Object... args) throws AdaptException, InvocationTargetException,
+         IllegalArgumentException, IllegalAccessException, InstantiationException;
 }

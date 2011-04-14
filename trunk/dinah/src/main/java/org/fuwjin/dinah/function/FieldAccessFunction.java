@@ -11,20 +11,28 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
-public class FieldAccessFunction extends ReflectiveFunction {
+/**
+ * Function for reflective field access.
+ */
+public class FieldAccessFunction extends FixedArgsFunction {
    private final Field field;
 
-   public FieldAccessFunction(final String typeName, final Field field, final Type type) {
-      super(typeName + '.' + field.getName(), type);
+   /**
+    * Creates a new instance.
+    * @param category the function category
+    * @param field the field instance
+    * @param type the object type required to access the field
+    */
+   public FieldAccessFunction(final String category, final Field field, final Type type) {
+      super(category + '.' + field.getName(), type);
       this.field = field;
    }
 
    @Override
-   protected Object invokeImpl(final Object[] args) throws InvocationTargetException, Exception {
+   protected Object invokeSafe(final Object... args) throws IllegalAccessException {
       return field.get(args[0]);
    }
 

@@ -11,50 +11,69 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
-
-import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
+import org.fuwjin.util.Adapter.AdaptException;
 import org.fuwjin.util.ArrayUtils;
-import org.fuwjin.util.BusinessException;
 import org.fuwjin.util.TypeUtils;
 
+/**
+ * Function decorator for methods and constructors to handle var args.
+ */
 public class VarArgsFunction extends AbstractFunction {
    private final FixedArgsFunction function;
 
+   /**
+    * Creates a new instance.
+    * @param function the decorated function
+    */
    public VarArgsFunction(final FixedArgsFunction function) {
       super(function.name(), ArrayUtils.slice(function.argTypes(), 0, -1));
       this.function = function;
    }
 
    @Override
-   public Object invoke(final Object... args) throws Exception {
-      if(args.length < argCount()) {
-         throw new FunctionInvocationException("%s expects at least %d args not %d", name(), argCount(), args.length);
-      }
-      final Object[] realArgs = new Object[function.argCount()];
-      for(int i = 0; i < realArgs.length - 1; i++) {
-         realArgs[i] = Adapter.adapt(args[i], argType(i));
-      }
-      final Type type = TypeUtils.getComponentType(function.argType(argCount()));
-      if(args.length == function.argCount()
-            && TypeUtils.isAssignableFrom(type, args[argCount()].getClass().getComponentType())) {
+   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+      if(args.length == function.argCount()) {
          try {
-            realArgs[argCount()] = Adapter.adapt(args[argCount()], function.argType(argCount()));
-            return function.invokeSafe(realArgs);
-         } catch(final BusinessException e) {
+            return function.invoke(args);
+         } catch(final AdaptException e) {
             // continue
          }
       }
+      final Object[] realArgs = new Object[function.argCount()];
+      System.arraycopy(args, 0, realArgs, 0, argCount());
+      final Type type = TypeUtils.getComponentType(function.argType(argCount()));
       final int varArgsLen = args.length - argCount();
       final Object varArgs = TypeUtils.newArrayInstance(type, varArgsLen);
       realArgs[argCount()] = varArgs;
-      for(int i = 0; i < varArgsLen; i++) {
+      for(int i = 0; i < varArgsLen; ++i) {
          Array.set(varArgs, i, Adapter.adapt(args[i + argCount()], type));
       }
-      return function.invokeSafe(realArgs);
+      return function.invoke(realArgs);
+   }
+
+   @Override
+   public AbstractFunction join(final AbstractFunction next) {
+      if(AbstractFunction.NULL.equals(next)) {
+         return this;
+      }
+      return new CompositeFunction(this, next);
+   }
+
+   @Override
+   public AbstractFunction restrict(final FunctionSignature signature) {
+      final AbstractFunction func = function.restrict(signature);
+      if(func != null) {
+         return func;
+      }
+      if(isMatch(signature)) {
+         return this;
+      }
+      return AbstractFunction.NULL;
    }
 
    @Override
@@ -62,26 +81,25 @@ public class VarArgsFunction extends AbstractFunction {
       return function.member();
    }
 
-   @Override
-   public Function restrict(final FunctionSignature signature) {
+   private boolean isMatch(final FunctionSignature signature) {
       if(signature.argCount() < argCount()) {
-         return new FailFunction(name(), "Arg count mismatch");
+         return false;
       }
-      for(int index = 0; index < argCount(); index++) {
+      for(int index = 0; index < argCount(); ++index) {
          if(!TypeUtils.isAssignableFrom(argType(index), signature.argType(index))) {
-            return new FailFunction(name(), "Arg mismatch");
+            return false;
          }
       }
-      if(signature.argCount() == function.argCount()
-            && TypeUtils.isAssignableFrom(function.argType(argCount()), signature.argType(argCount()))) {
-         return this;
-      }
+      return isVarArgsMatch(signature);
+   }
+
+   private boolean isVarArgsMatch(final FunctionSignature signature) {
       final Type componentType = TypeUtils.getComponentType(function.argType(argCount()));
-      for(int index = argCount(); index < signature.argCount(); index++) {
+      for(int index = argCount(); index < signature.argCount(); ++index) {
          if(!TypeUtils.isAssignableFrom(componentType, signature.argType(index))) {
-            return new FailFunction(name(), "Arg mismatch");
+            return false;
          }
       }
-      return this;
+      return true;
    }
 }

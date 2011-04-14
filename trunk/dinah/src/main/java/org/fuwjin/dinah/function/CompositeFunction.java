@@ -7,53 +7,59 @@
  ******************************************************************************/
 package org.fuwjin.dinah.function;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.util.BusinessException;
-import org.fuwjin.util.CompositeException;
+import org.fuwjin.util.Adapter.AdaptException;
 
-public class CompositeFunction extends AbstractFunction{
+/**
+ * A container for Function composition. While it is presumed that all functions
+ * will share the same name, this is not required.
+ */
+public class CompositeFunction extends AbstractFunction {
    private final List<AbstractFunction> functions;
 
-   public CompositeFunction(final AbstractFunction... functions){
+   /**
+    * Creates a new instance. The name of this function will be the name of the
+    * first supplied function.
+    * @param functions the set of functions, must be at least 1
+    */
+   public CompositeFunction(final AbstractFunction... functions) {
       super(functions[0].name());
       this.functions = new ArrayList<AbstractFunction>(Arrays.asList(functions));
    }
 
-   private CompositeFunction(final List<AbstractFunction> functions){
-      super(functions.get(0).name());
-      this.functions = functions;
-   }
-
-   public void add(final AbstractFunction function){
+   /**
+    * Adds a function to this composite.
+    * @param function the new function
+    */
+   public void add(final AbstractFunction function) {
       functions.add(function);
    }
 
    @Override
-   public Object invoke(final Object... args) throws Exception{
-      Exception failure = null;
-      for(final AbstractFunction function: functions){
-         try{
+   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+      AdaptException failure = null;
+      for(final AbstractFunction function: functions) {
+         try {
             return function.invoke(args);
-         }catch(final BusinessException e){
-            failure = CompositeException.compose(failure, e);
+         } catch(final AdaptException e) {
+            failure = e;
          }
       }
-      if(failure == null){
-         throw new FunctionInvocationException("No functions exist for %s", name());
+      if(failure == null) {
+         throw new AdaptException("Impossible Exception: there must always be at least one function");
       }
       throw failure;
    }
 
    @Override
-   public boolean isPrivate(){
-      for(final AbstractFunction function: functions){
-         if(!function.isPrivate()){
+   public boolean isPrivate() {
+      for(final AbstractFunction function: functions) {
+         if(!function.isPrivate()) {
             return false;
          }
       }
@@ -61,40 +67,40 @@ public class CompositeFunction extends AbstractFunction{
    }
 
    @Override
-   protected Member member(){
-      return null;
+   public AbstractFunction join(final AbstractFunction next) {
+      if(!AbstractFunction.NULL.equals(next)) {
+         functions.add(next);
+      }
+      return this;
    }
 
    @Override
-   public Function restrict(final FunctionSignature signature){
-      final List<AbstractFunction> restricted = new ArrayList<AbstractFunction>();
-      for(final AbstractFunction function: functions){
-         final AbstractFunction func = (AbstractFunction)function.restrict(signature);
-         if(!(func instanceof FailFunction)){
-            restricted.add(func);
-         }
+   public AbstractFunction restrict(final FunctionSignature signature) {
+      AbstractFunction accessible = null;
+      AbstractFunction restricted = AbstractFunction.NULL;
+      for(final AbstractFunction function: functions) {
+         final AbstractFunction func = function.restrict(signature);
+         restricted = restricted.join(func);
+         accessible = accessible(accessible, func);
       }
-      if(restricted.size() > 1){
-         Function result = null;
-         for(final AbstractFunction function: restricted){
-            if(!function.isPrivate()){
-               if(result != null){
-                  result = null;
-                  break;
-               }
-               result = function;
-            }
-         }
-         if(result != null){
-            return result;
-         }
+      if(accessible != null && accessible != this) {
+         return accessible;
       }
-      if(restricted.size() == 1){
-         return restricted.get(0);
+      return restricted;
+   }
+
+   @Override
+   protected Member member() {
+      return null;
+   }
+
+   private AbstractFunction accessible(final AbstractFunction current, final AbstractFunction func) {
+      if(func.isPrivate()) {
+         return current;
       }
-      if(restricted.size() == 0){
-         return new FailFunction(name(), "Arg mismatch");
+      if(current == null) {
+         return func;
       }
-      return new CompositeFunction(restricted);
+      return this;
    }
 }

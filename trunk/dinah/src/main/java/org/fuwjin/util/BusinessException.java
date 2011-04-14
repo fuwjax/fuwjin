@@ -10,15 +10,31 @@
  ******************************************************************************/
 package org.fuwjin.util;
 
+/**
+ * Creates an exception that defers as much of the "bad stuff" associated with
+ * exceptions as possible. In particular, there are no stack traces available,
+ * and the message may be deferred until it is requested.
+ */
 public class BusinessException extends Exception {
    private static final long serialVersionUID = 1L;
    private final Object[] args;
 
+   /**
+    * Creates a new instance.
+    * @param pattern the message pattern
+    * @param args the message arguments
+    */
    public BusinessException(final String pattern, final Object... args) {
       super(pattern);
       this.args = args;
    }
 
+   /**
+    * Creates a new instance.
+    * @param cause the exception cause
+    * @param pattern the message pattern
+    * @param args the message arguments
+    */
    public BusinessException(final Throwable cause, final String pattern, final Object... args) {
       super(pattern, cause);
       this.args = args;
@@ -27,10 +43,6 @@ public class BusinessException extends Exception {
    @Override
    public synchronized Throwable fillInStackTrace() {
       return this;
-   }
-
-   protected String format(final Object[] formatArgs) {
-      return String.format(super.getMessage(), formatArgs);
    }
 
    @Override
@@ -47,5 +59,9 @@ public class BusinessException extends Exception {
          return getCause().getStackTrace();
       }
       return new StackTraceElement[0];
+   }
+
+   protected String format(final Object[] formatArgs) {
+      return String.format(super.getMessage(), formatArgs);
    }
 }
