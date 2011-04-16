@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.dinah.function;
 
-import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
@@ -39,7 +37,12 @@ public abstract class AbstractFunction implements Function {
     * @param next the next function in the chain
     * @return the new composite function
     */
-   public abstract AbstractFunction join(AbstractFunction next);
+   public final AbstractFunction join(final AbstractFunction next) {
+      if(AbstractFunction.NULL.equals(next)) {
+         return this;
+      }
+      return joinImpl(next);
+   }
 
    @Override
    public final String name() {
@@ -69,8 +72,10 @@ public abstract class AbstractFunction implements Function {
    }
 
    protected boolean isPrivate() {
-      return member() == null || Modifier.isPrivate(member().getModifiers());
+      return true;
    }
 
-   protected abstract Member member();
+   protected AbstractFunction joinImpl(final AbstractFunction next) {
+      return new CompositeFunction(this, next);
+   }
 }

@@ -1,7 +1,6 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter.AdaptException;
@@ -26,17 +25,12 @@ public class UnsupportedFunction extends AbstractFunction {
    }
 
    @Override
-   public AbstractFunction join(final AbstractFunction next) {
-      return next;
-   }
-
-   @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
       return this;
    }
 
    @Override
-   protected Member member() {
-      return null;
+   protected AbstractFunction joinImpl(final AbstractFunction next) {
+      return next;
    }
 }

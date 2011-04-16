@@ -11,15 +11,12 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 
 /**
  * Function for reflective field access.
  */
-public class FieldAccessFunction extends FixedArgsFunction {
-   private final Field field;
-
+public class FieldAccessFunction extends FixedArgsFunction<Field> {
    /**
     * Creates a new instance.
     * @param category the function category
@@ -27,17 +24,11 @@ public class FieldAccessFunction extends FixedArgsFunction {
     * @param type the object type required to access the field
     */
    public FieldAccessFunction(final String category, final Field field, final Type type) {
-      super(category + '.' + field.getName(), type);
-      this.field = field;
+      super(field, category + '.' + field.getName(), type);
    }
 
    @Override
    protected Object invokeSafe(final Object... args) throws IllegalAccessException {
-      return field.get(args[0]);
-   }
-
-   @Override
-   protected Member member() {
-      return field;
+      return member().get(args[0]);
    }
 }

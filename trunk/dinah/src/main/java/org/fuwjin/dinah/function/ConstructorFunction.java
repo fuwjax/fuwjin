@@ -12,33 +12,24 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * Function for reflective constructor execution.
  */
-public class ConstructorFunction extends FixedArgsFunction {
-   private final Constructor<?> constructor;
-
+public class ConstructorFunction extends FixedArgsFunction<Constructor<?>> {
    /**
     * Creates a new instance.
     * @param category the function category
     * @param constructor the constructor
     */
    public ConstructorFunction(final String category, final Constructor<?> constructor) {
-      super(category + ".new", constructor.getParameterTypes());
-      this.constructor = constructor;
+      super(constructor, category + ".new", constructor.getParameterTypes());
    }
 
    @Override
    protected Object invokeSafe(final Object... args) throws AdaptException, InvocationTargetException,
          IllegalArgumentException, IllegalAccessException, InstantiationException {
-      return constructor.newInstance(args);
-   }
-
-   @Override
-   protected Member member() {
-      return constructor;
+      return member().newInstance(args);
    }
 }

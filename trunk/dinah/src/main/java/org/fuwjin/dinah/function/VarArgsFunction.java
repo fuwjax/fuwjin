@@ -12,7 +12,6 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
@@ -24,13 +23,13 @@ import org.fuwjin.util.TypeUtils;
  * Function decorator for methods and constructors to handle var args.
  */
 public class VarArgsFunction extends AbstractFunction {
-   private final FixedArgsFunction function;
+   private final FixedArgsFunction<?> function;
 
    /**
     * Creates a new instance.
     * @param function the decorated function
     */
-   public VarArgsFunction(final FixedArgsFunction function) {
+   public VarArgsFunction(final FixedArgsFunction<?> function) {
       super(function.name(), ArrayUtils.slice(function.argTypes(), 0, -1));
       this.function = function;
    }
@@ -57,17 +56,9 @@ public class VarArgsFunction extends AbstractFunction {
    }
 
    @Override
-   public AbstractFunction join(final AbstractFunction next) {
-      if(AbstractFunction.NULL.equals(next)) {
-         return this;
-      }
-      return new CompositeFunction(this, next);
-   }
-
-   @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
       final AbstractFunction func = function.restrict(signature);
-      if(func != null) {
+      if(AbstractFunction.NULL != func) {
          return func;
       }
       if(isMatch(signature)) {
@@ -77,8 +68,8 @@ public class VarArgsFunction extends AbstractFunction {
    }
 
    @Override
-   protected Member member() {
-      return function.member();
+   protected boolean isPrivate() {
+      return function.isPrivate();
    }
 
    private boolean isMatch(final FunctionSignature signature) {

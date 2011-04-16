@@ -86,9 +86,6 @@ public class FunctionSignature {
     */
    public String category() {
       final int index = name.lastIndexOf('.');
-      if(index < 0) {
-         throw new IllegalArgumentException(name + " is not a valid function name");
-      }
       return name.substring(0, index);
    }
 
@@ -103,12 +100,17 @@ public class FunctionSignature {
    /**
     * Sets the number of arguments.
     * @param size the new number of arguments
+    * @return this signature
     */
-   public void setArgCount(final int size) {
-      if(args.size() > size) {
-         throw new IllegalArgumentException("count " + size + " must be at least " + args.size());
+   public FunctionSignature setArgCount(final int size) {
+      if(size == argCount()) {
+         return this;
       }
-      count = size;
+      if(count == -1 && args.size() == 0) {
+         count = size;
+         return this;
+      }
+      throw new IllegalArgumentException("could not set argCount to " + size + " already set to " + argCount());
    }
 
    @Override
