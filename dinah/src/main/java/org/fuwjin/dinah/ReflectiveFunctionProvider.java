@@ -111,7 +111,7 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
    }
 
    private void addMethod(final String typeName, final Type type, final Method method, final boolean allowStatic) {
-      FixedArgsFunction func;
+      FixedArgsFunction<?> func;
       if(Modifier.isStatic(method.getModifiers())) {
          if(allowStatic) {
             func = new StaticMethodFunction(typeName, method);

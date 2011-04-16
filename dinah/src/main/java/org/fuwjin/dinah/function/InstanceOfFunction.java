@@ -17,7 +17,7 @@ import org.fuwjin.util.TypeUtils;
 /**
  * Function encapsulating the "instanceof" keyword.
  */
-public class InstanceOfFunction extends FixedArgsFunction {
+public class InstanceOfFunction extends FixedArgsFunction<Member> {
    private final Type type;
 
    /**
@@ -26,7 +26,7 @@ public class InstanceOfFunction extends FixedArgsFunction {
     * @param type the expected type
     */
    public InstanceOfFunction(final String category, final Type type) {
-      super(category + ".instanceof", new Type[1]);
+      super(null, category + ".instanceof", new Type[1]);
       this.type = type;
    }
 
@@ -36,7 +36,7 @@ public class InstanceOfFunction extends FixedArgsFunction {
    }
 
    @Override
-   protected Member member() {
-      return null;
+   protected boolean isPrivate() {
+      return false;
    }
 }

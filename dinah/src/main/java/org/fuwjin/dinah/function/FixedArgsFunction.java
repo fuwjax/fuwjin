@@ -11,6 +11,8 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
@@ -20,15 +22,20 @@ import org.fuwjin.util.TypeUtils;
 /**
  * Base class for methods, constructors and anything else with a fixed number of
  * required arguments.
+ * @param <M> the reflection member type
  */
-public abstract class FixedArgsFunction extends AbstractFunction {
+public abstract class FixedArgsFunction<M extends Member> extends AbstractFunction {
+   private final M member;
+
    /**
     * Creates a new instance.
+    * @param member the reflection member
     * @param name the function name
     * @param argTypes the set of required argument types
     */
-   public FixedArgsFunction(final String name, final Type... argTypes) {
+   public FixedArgsFunction(final M member, final String name, final Type... argTypes) {
       super(name, argTypes);
+      this.member = member;
    }
 
    @Override
@@ -46,14 +53,6 @@ public abstract class FixedArgsFunction extends AbstractFunction {
    }
 
    @Override
-   public AbstractFunction join(final AbstractFunction next) {
-      if(AbstractFunction.NULL.equals(next)) {
-         return this;
-      }
-      return new CompositeFunction(this, next);
-   }
-
-   @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
       if(signature.argCount() != argCount()) {
          return AbstractFunction.NULL;
@@ -68,4 +67,13 @@ public abstract class FixedArgsFunction extends AbstractFunction {
 
    protected abstract Object invokeSafe(Object... args) throws AdaptException, InvocationTargetException,
          IllegalArgumentException, IllegalAccessException, InstantiationException;
+
+   @Override
+   protected boolean isPrivate() {
+      return member() == null || Modifier.isPrivate(member().getModifiers());
+   }
+
+   protected final M member() {
+      return member;
+   }
 }

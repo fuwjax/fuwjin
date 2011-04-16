@@ -8,7 +8,6 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,14 +66,6 @@ public class CompositeFunction extends AbstractFunction {
    }
 
    @Override
-   public AbstractFunction join(final AbstractFunction next) {
-      if(!AbstractFunction.NULL.equals(next)) {
-         functions.add(next);
-      }
-      return this;
-   }
-
-   @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
       AbstractFunction accessible = null;
       AbstractFunction restricted = AbstractFunction.NULL;
@@ -90,8 +81,8 @@ public class CompositeFunction extends AbstractFunction {
    }
 
    @Override
-   protected Member member() {
-      return null;
+   protected AbstractFunction joinImpl(final AbstractFunction next) {
+      return this;
    }
 
    private AbstractFunction accessible(final AbstractFunction current, final AbstractFunction func) {

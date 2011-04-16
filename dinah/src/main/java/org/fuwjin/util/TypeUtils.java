@@ -47,11 +47,14 @@ public final class TypeUtils {
     */
    public static Type forName(final String name) throws ClassNotFoundException {
       try {
+         if(name.endsWith("]")) {
+            return Class.forName(toArray(name));
+         }
          return Class.forName(name);
       } catch(final ClassNotFoundException e) {
          final Class<?> cls = PRIMITIVES.get(name);
          if(cls == null) {
-            throw e;
+            return inner(name);
          }
          return cls;
       }
@@ -170,6 +173,29 @@ public final class TypeUtils {
          cls = WRAPPERS.get(cls);
       }
       return cls;
+   }
+
+   private static Type inner(final String name) throws ClassNotFoundException {
+      final int index = name.lastIndexOf('.');
+      final String value = name.substring(0, index) + '$' + name.substring(index + 1);
+      try {
+         return Class.forName(value);
+      } catch(final ClassNotFoundException e) {
+         if(value.indexOf('.') >= 0) {
+            return inner(value);
+         }
+         throw e;
+      }
+   }
+
+   private static String toArray(final String name) {
+      final StringBuilder builder = new StringBuilder();
+      int index = name.indexOf('[');
+      while(index > -1) {
+         builder.append('[');
+         index = name.indexOf('[', index + 1);
+      }
+      return builder.append('L').append(name.substring(0, name.indexOf('['))).append(';').toString();
    }
 
    /**

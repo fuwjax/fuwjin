@@ -8,16 +8,13 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import org.fuwjin.util.Adapter;
 
 /**
  * Function for reflective field mutation.
  */
-public class FieldMutatorFunction extends FixedArgsFunction {
-   private final Field field;
-
+public class FieldMutatorFunction extends FixedArgsFunction<Field> {
    /**
     * Creates a new instance.
     * @param category the function category
@@ -25,18 +22,12 @@ public class FieldMutatorFunction extends FixedArgsFunction {
     * @param type the type of the host object
     */
    public FieldMutatorFunction(final String category, final Field field, final Type type) {
-      super(category + '.' + field.getName(), type, field.getType());
-      this.field = field;
+      super(field, category + '.' + field.getName(), type, field.getType());
    }
 
    @Override
    protected Object invokeSafe(final Object... args) throws IllegalArgumentException, IllegalAccessException {
-      field.set(args[0], args[1]);
+      member().set(args[0], args[1]);
       return Adapter.unset();
-   }
-
-   @Override
-   protected Member member() {
-      return field;
    }
 }

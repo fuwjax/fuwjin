@@ -48,7 +48,7 @@ public abstract class ObjectUtils {
          return true;
       }
       return other != null && obj.getClass().equals(other.getClass())
-            && Arrays.equals(obj.identity(), ((ObjectHelper)other).identity());
+            && Arrays.deepEquals(obj.identity(), ((ObjectHelper)other).identity());
    }
 
    /**

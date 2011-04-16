@@ -8,7 +8,6 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import org.fuwjin.util.Adapter;
@@ -17,9 +16,7 @@ import org.fuwjin.util.ArrayUtils;
 /**
  * Function for reflective method invocation.
  */
-public class MethodFunction extends FixedArgsFunction {
-   private final Method method;
-
+public class MethodFunction extends FixedArgsFunction<Method> {
    /**
     * Creates a new instance.
     * @param category the function category
@@ -27,8 +24,7 @@ public class MethodFunction extends FixedArgsFunction {
     * @param type the host object type
     */
    public MethodFunction(final String category, final Method method, final Type type) {
-      super(category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
-      this.method = method;
+      super(method, category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
    }
 
    @Override
@@ -37,15 +33,10 @@ public class MethodFunction extends FixedArgsFunction {
       final Object obj = args[0];
       final Object[] realArgs = new Object[args.length - 1];
       System.arraycopy(args, 1, realArgs, 0, args.length - 1);
-      final Object result = method.invoke(obj, realArgs);
-      if(method.getReturnType().equals(void.class)) {
+      final Object result = member().invoke(obj, realArgs);
+      if(member().getReturnType().equals(void.class)) {
          return Adapter.unset();
       }
       return result;
-   }
-
-   @Override
-   protected Member member() {
-      return method;
    }
 }
