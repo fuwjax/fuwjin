@@ -83,6 +83,9 @@ public class Declaration implements Expression {
             result = result.restoreScope(state);
          }
       }
-      return result;
+      if(result.isSuccess()) {
+         return result;
+      }
+      return state.failure(result, "in %s", name);
    }
 }

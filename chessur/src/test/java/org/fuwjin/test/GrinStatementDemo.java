@@ -10,14 +10,13 @@
  ******************************************************************************/
 package org.fuwjin.test;
 
-import static org.fuwjin.chessur.Grin.newGrin;
+import static org.fuwjin.chessur.Catalog.loadCat;
 import static org.fuwjin.chessur.InStream.streamOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
+import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
-import org.fuwjin.chessur.Grin;
 import org.junit.Test;
 
 /**
@@ -30,7 +29,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoAssignment() throws ChessurException {
-      final Grin parser = newGrin("<Root>{either { accept 'a' v = 'yes' } or v = 'no' return v}");
+      final Catalog parser = loadCat("<Root>{either { accept 'a' v = 'yes' } or v = 'no' return v}");
       assertThat((String)parser.transform(streamOf("ab")), is("yes"));
       assertThat((String)parser.transform(streamOf("aabc")), is("yes"));
       assertThat((String)parser.transform(streamOf("c")), is("no"));
@@ -43,7 +42,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoCould() throws ChessurException {
-      final Grin parser = newGrin("<Root>{could accept next return match}");
+      final Catalog parser = loadCat("<Root>{could accept next return match}");
       assertThat((String)parser.transform(streamOf("ab")), is("a"));
       assertThat((String)parser.transform(streamOf("aabc")), is("a"));
       assertThat((String)parser.transform(streamOf("")), is(""));
@@ -55,7 +54,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoEitherOr() throws ChessurException {
-      final Grin parser = newGrin("<Root>{either accept 'a' or accept 'c' return match}");
+      final Catalog parser = loadCat("<Root>{either accept 'a' or accept 'c' return match}");
       assertThat((String)parser.transform(streamOf("ab")), is("a"));
       assertThat((String)parser.transform(streamOf("aabc")), is("a"));
       assertThat((String)parser.transform(streamOf("c")), is("c"));
@@ -77,7 +76,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoEitherOrOr() throws ChessurException {
-      final Grin parser = newGrin("<Root>{either accept 'a' or accept 'c' or accept 'e' return match}");
+      final Catalog parser = loadCat("<Root>{either accept 'a' or accept 'c' or accept 'e' return match}");
       assertThat((String)parser.transform(streamOf("ab")), is("a"));
       assertThat((String)parser.transform(streamOf("eabc")), is("e"));
       assertThat((String)parser.transform(streamOf("c")), is("c"));
@@ -99,7 +98,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoIsIn() throws ChessurException {
-      final Grin parser = newGrin("<Root>{is in a,b,c return 'yes'}");
+      final Catalog parser = loadCat("<Root>{is in a,b,c return 'yes'}");
       assertThat((String)parser.transform(streamOf("a")), is("yes"));
       assertThat((String)parser.transform(streamOf("bc")), is("yes"));
       try {
@@ -125,7 +124,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoIsLiteral() throws ChessurException {
-      final Grin parser = newGrin("<Root>{is 'abc' return 'yes'}");
+      final Catalog parser = loadCat("<Root>{is 'abc' return 'yes'}");
       assertThat((String)parser.transform(streamOf("abc")), is("yes"));
       assertThat((String)parser.transform(streamOf("abcd")), is("yes"));
       try {
@@ -151,7 +150,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoIsNotAccept() throws ChessurException {
-      final Grin parser = newGrin("<Root>{is not accept next return 'yes'}");
+      final Catalog parser = loadCat("<Root>{is not accept next return 'yes'}");
       assertThat((String)parser.transform(streamOf("")), is("yes"));
       try {
          parser.transform(streamOf("a"));
@@ -166,7 +165,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoIsNotLiteral() throws ChessurException {
-      final Grin parser = newGrin("<Root>{is not 'abc' return 'yes'}");
+      final Catalog parser = loadCat("<Root>{is not 'abc' return 'yes'}");
       assertThat((String)parser.transform(streamOf("ab")), is("yes"));
       assertThat((String)parser.transform(streamOf("aabc")), is("yes"));
       assertThat((String)parser.transform(streamOf("")), is("yes"));
@@ -188,7 +187,7 @@ public class GrinStatementDemo {
     */
    @Test
    public void demoRepeat() throws ChessurException {
-      final Grin parser = newGrin("<Root>{repeat accept in a-z return match}");
+      final Catalog parser = loadCat("<Root>{repeat accept in a-z return match}");
       assertThat((String)parser.transform(streamOf("ab")), is("ab"));
       assertThat((String)parser.transform(streamOf("aaBC")), is("aa"));
       assertThat((String)parser.transform(streamOf("c")), is("c"));

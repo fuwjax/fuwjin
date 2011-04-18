@@ -31,14 +31,6 @@ public class CompositeFunction extends AbstractFunction {
       this.functions = new ArrayList<AbstractFunction>(Arrays.asList(functions));
    }
 
-   /**
-    * Adds a function to this composite.
-    * @param function the new function
-    */
-   public void add(final AbstractFunction function) {
-      functions.add(function);
-   }
-
    @Override
    public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
       AdaptException failure = null;
@@ -82,6 +74,7 @@ public class CompositeFunction extends AbstractFunction {
 
    @Override
    protected AbstractFunction joinImpl(final AbstractFunction next) {
+      functions.add(next);
       return this;
    }
 

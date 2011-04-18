@@ -10,17 +10,16 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableCollection;
+import static org.fuwjin.chessur.ChessurInterpreter.interpret;
 import static org.fuwjin.util.StreamUtils.reader;
 import static org.fuwjin.util.StringUtils.readAll;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionSignature;
@@ -29,15 +28,15 @@ import org.fuwjin.dinah.ReflectiveFunctionProvider;
 /**
  * Manages a collection of specificatons.
  */
-public class Grin extends Transformer {
+public class Catalog extends Transformer {
    /**
     * Creates a new instance.
     * @param input the input specification list
     * @return the new collection
     * @throws ChessurException if it fails
     */
-   public static Grin newGrin(final CharSequence input) throws ChessurException {
-      return newGrin(input, new ReflectiveFunctionProvider());
+   public static Catalog loadCat(final CharSequence input) throws ChessurException {
+      return loadCat(input, new ReflectiveFunctionProvider());
    }
 
    /**
@@ -47,14 +46,14 @@ public class Grin extends Transformer {
     * @return the new collection
     * @throws ChessurException if it fails
     */
-   public static Grin newGrin(final CharSequence input, final FunctionProvider postage) throws ChessurException {
-      return (Grin)ChessurInterpreter.interpret(input, Collections.singletonMap("postage", postage));
+   public static Catalog loadCat(final CharSequence input, final FunctionProvider postage) throws ChessurException {
+      return (Catalog)interpret(input, new StringBuilder(), singletonMap("postage", postage));
    }
 
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
    private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
    private final Map<String, Script> scripts = new LinkedHashMap<String, Script>();
-   private final Map<String, Grin> modules = new LinkedHashMap<String, Grin>();
+   private final Map<String, Catalog> modules = new LinkedHashMap<String, Catalog>();
    private Declaration root;
 
    /**
@@ -109,7 +108,7 @@ public class Grin extends Transformer {
     * @return the qualified identifier
     */
    public String encode(final String qualified) {
-      int index = qualified.lastIndexOf('.');
+      int index = qualified.length();
       while(index > -1) {
          final String prefix = qualified.substring(0, index);
          for(final Map.Entry<String, String> entry: aliases.entrySet()) {
@@ -136,21 +135,21 @@ public class Grin extends Transformer {
       return s;
    }
 
-   public Grin getModule(final String name) {
+   public Catalog getModule(final String name) {
       return modules.get(name);
    }
 
    public FunctionSignature getSignature(final String name) {
       final FunctionSignature signature = signatures.get(name);
       if(signature == null) {
-         return new FunctionSignature(name);
+         return new FunctionSignature(name, -1);
       }
       return signature;
    }
 
    public void load(final String path, final String name) throws FileNotFoundException, UnsupportedEncodingException,
          ChessurException, IOException {
-      modules.put(name, newGrin(readAll(reader(path, "UTF-8"))));
+      modules.put(name, loadCat(readAll(reader(path, "UTF-8"))));
    }
 
    public String rootName() {

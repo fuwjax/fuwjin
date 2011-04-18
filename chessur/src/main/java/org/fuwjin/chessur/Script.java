@@ -37,14 +37,6 @@ public class Script extends Transformer {
       return name;
    }
 
-   /**
-    * Sets this specification's declaration.
-    * @param decl the new declaration
-    */
-   protected void setDecl(final Declaration decl) {
-      this.decl = decl;
-   }
-
    @Override
    public String toString() {
       return "<" + name() + ">";
@@ -55,10 +47,14 @@ public class Script extends Transformer {
       if(decl == null) {
          throw new RuntimeException("Undefined script " + name);
       }
-      final State result = decl.transform(state);
-      if(result.isSuccess()) {
-         return result;
-      }
-      return state.failure(result, "failed in %s %s", decl.name(), state);
+      return decl.transform(state);
+   }
+
+   /**
+    * Sets this specification's declaration.
+    * @param decl the new declaration
+    */
+   protected void setDecl(final Declaration decl) {
+      this.decl = decl;
    }
 }

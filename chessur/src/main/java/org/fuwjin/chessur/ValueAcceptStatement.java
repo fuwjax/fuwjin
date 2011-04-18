@@ -51,12 +51,15 @@ public class ValueAcceptStatement implements Expression {
             if(isNot) {
                return state.accept();
             }
-            return state.failure(result.failure("unexpected character"), "failed while matching %s", str);
+            if(result.current() == InStream.EOF) {
+               return state.failure("unexpected EOF");
+            }
+            return state.failure("failed while matching %s", str);
          }
          result = result.accept();
       }
       if(isNot) {
-         return state.failure(result.failure("unexpected match"), "failed while matching %s", str);
+         return state.failure("failed while matching %s", str);
       }
       return result;
    }

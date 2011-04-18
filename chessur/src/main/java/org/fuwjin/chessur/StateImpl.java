@@ -64,8 +64,8 @@ public class StateImpl implements State {
    }
 
    @Override
-   public State failure(final State result, final String message, final Object... args) {
-      return new FailureState(result, message, args);
+   public State failure(final State cause, final String message, final Object... args) {
+      return new FailureState(this, cause, message, args);
    }
 
    @Override
@@ -88,7 +88,7 @@ public class StateImpl implements State {
       if(!Adapter.isSet(value)) {
          return failure("cannot publish unset value");
       }
-      return new StateImpl(input, output.append(value), scope, value);
+      return new StateImpl(input, output.append(value), scope, null);
    }
 
    @Override
@@ -102,8 +102,8 @@ public class StateImpl implements State {
    }
 
    @Override
-   public State restoreIo(final State state) {
-      return new StateImpl(((StateImpl)state).input, ((StateImpl)state).output, scope, value);
+   public State restoreIo(final State in, final State out) {
+      return new StateImpl(((StateImpl)in).input, ((StateImpl)out).output, scope, value);
    }
 
    @Override
@@ -127,7 +127,7 @@ public class StateImpl implements State {
 
    @Override
    public String toString() {
-      return "input:" + input + " output:" + output + " value:" + value;
+      return input + " -> " + output;
    }
 
    @Override

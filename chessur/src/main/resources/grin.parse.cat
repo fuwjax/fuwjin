@@ -18,7 +18,7 @@ alias org.fuwjin.chessur.Declaration as Declaration
 alias org.fuwjin.chessur.EitherOrStatement as EitherOrStatement
 alias org.fuwjin.chessur.Filter as Filter
 alias org.fuwjin.chessur.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.Grin as Grin
+alias org.fuwjin.chessur.Catalog as Catalog
 alias org.fuwjin.chessur.Invocation as Invocation
 alias org.fuwjin.chessur.IsStatement as IsStatement
 alias org.fuwjin.chessur.Literal as Literal
@@ -36,30 +36,29 @@ alias org.fuwjin.chessur.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
 alias org.fuwjin.dinah.FunctionSignature as FunctionSignature
 alias org.fuwjin.dinah.Function as Function
-alias org.fuwjin.util.StringUtils as StringUtils
 
-# Parses a Grin stream and returns the corresponding Grin Object Model.
+# Parses a Grin stream and returns the corresponding Catalog Object Model.
 # << a Grin stream
 # >> nil
 # env
-#   postage: the Postage reflection factory
-# returns the GOM for the Grin stream
-<Grin>{
-  grin = Grin.new()
+#   postage: the dinah reflection factory
+# returns the catalog for the Grin stream
+<Catalog>{
+  cat = Catalog.new()
   <S>
   could repeat 
     either <LoadDeclaration>
     or <AliasDeclaration>
-    or Grin.add(grin, <ScriptDeclaration>)
+    or Catalog.add(cat, <ScriptDeclaration>)
   <EndOfFile>
-  return grin
+  return cat
 }
 
-# Parses a "load path/to/grin/file as name" declaration. The path and name are passed to the Grin.load method.
+# Parses a "load path/to/cat/file as name" declaration. The path and name are passed to the Catalog.load method.
 # << a Grin load statement
 # >> nil
 # env
-#   grin: the GOM
+#   cat: the catalog
 # returns nil
 # fails if the path name does not map to a file
 <LoadDeclaration>{
@@ -69,7 +68,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either accept 'as'
   or abort "load keyword requires as keyword" 
   <Sep>
-  either Grin.load(grin, path, <Name>)
+  either Catalog.load(cat, path, <Name>)
   or abort "load-as keywords require a name"
 }
 
@@ -77,7 +76,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
 # << a Grin alias statement
 # >> nil
 # env
-#   grin: the GOM
+#   cat: the catalog
 # returns nil
 <AliasDeclaration>{
   accept 'alias' <Sep>
@@ -85,11 +84,11 @@ alias org.fuwjin.util.StringUtils as StringUtils
   or abort "alias keyword requires a qualified name"
   either {
     accept 'as' <Sep>
-    either Grin.alias(grin, qname, <Name>)
+    either Catalog.alias(cat, qname, <Name>)
     or abort "alias-as keywords require a name"
   } or {
     accept '(' <S>
-    signature = FunctionSignature.new(qname)
+    signature = FunctionSignature.new(qname, -1)
     could {
       FunctionSignature.addArg(signature, <QualifiedName>)
       could repeat {
@@ -99,7 +98,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
     }
     accept ')' <S>
     accept 'as' <Sep>
-    either Grin.aliasSignature(grin, signature, <Name>)
+    either Catalog.aliasSignature(cat, signature, <Name>)
     or abort "alias-as keywords require a name"
   }  
   or abort "alias keyword requires as keyword" 
@@ -109,7 +108,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
 # << a Grin script declaration
 # >> nil
 # env
-#   grin: the GOM
+#   cat: the catalog
 #   postage: the reflection factory
 # returns the script
 <ScriptDeclaration>{
@@ -255,7 +254,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
 }
 <Invocation>{
   name = <AliasName>
-  signature = Grin.getSignature(grin, name)
+  signature = Catalog.getSignature(cat, name)
   accept '(' <S>
   inv = Invocation.new()
   could{
@@ -269,9 +268,11 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either accept ')'
   or abort "invocation must end with a parenthesis" 
   <S>
-  FunctionSignature.setArgCount(signature, Invocation.paramCount(inv))
-  function = FunctionProvider.getFunction(postage, signature)
-  Invocation.setFunction(inv, function)
+  either{
+    FunctionSignature.setArgCount(signature, Invocation.paramCount(inv))
+    function = FunctionProvider.getFunction(postage, signature)
+    Invocation.setFunction(inv, function)
+  } or abort "Could not get function for 'signature'"
   return inv
 }
 <Script>{
@@ -297,10 +298,10 @@ alias org.fuwjin.util.StringUtils as StringUtils
   either {
     accept ':'
     name = <Identifier>
-    module = Grin.getModule(grin, id)
-    script = Grin.get(module, name)
+    module = Catalog.getModule(cat, id)
+    script = Catalog.get(module, name)
   } or {
-    script = Grin.get(grin, id)
+    script = Catalog.get(cat, id)
   }  
   either accept '>'
   or abort "script identifiers must be normal identifiers in angle brackets"
@@ -463,7 +464,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
 }
 <AliasName> {
   prefix = <Identifier>
-  alias = Grin.alias(grin, prefix)
+  alias = Catalog.alias(cat, prefix)
   either {
     accept '.'
     name = "'alias'.'<QualifiedName>'"

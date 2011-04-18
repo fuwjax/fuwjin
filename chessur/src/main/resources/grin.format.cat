@@ -8,30 +8,12 @@
 # Contributors:
 #     Michael Doberenz - initial API and implementation
 #-------------------------------------------------------------------------------
-alias java.lang.Boolean as Boolean
-alias java.lang.Character as Character
-alias org.fuwjin.chessur.AbortStatement as AbortStatement
-alias org.fuwjin.chessur.Assignment as Assignment
-alias org.fuwjin.chessur.Block as Block
-alias org.fuwjin.chessur.CouldStatement as CouldStatement
-alias org.fuwjin.chessur.Declaration as Declaration
-alias org.fuwjin.chessur.EitherOrStatement as EitherOrStatement
-alias org.fuwjin.chessur.Filter as Filter
-alias org.fuwjin.chessur.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.Grin as Grin
-alias org.fuwjin.chessur.Invocation as Invocation
-alias org.fuwjin.chessur.IsStatement as IsStatement
-alias org.fuwjin.chessur.Literal as Literal
-alias org.fuwjin.chessur.CompositeLiteral as CompositeLiteral
-alias org.fuwjin.chessur.PublishStatement as PublishStatement
-alias org.fuwjin.chessur.RepeatStatement as RepeatStatement
-alias org.fuwjin.chessur.Script as Script
-alias org.fuwjin.chessur.ValueAcceptStatement as ValueAcceptStatement
-alias org.fuwjin.chessur.Variable as Variable
-alias org.fuwjin.util.StringUtils as StringUtils
+alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
+alias org.fuwjin.chessur.Indent as Indent
 
 
-<Grin>{
+<Catalog>{
+  <S>
   could {
     repeat <AliasDeclaration>
     publish "\n"
@@ -51,48 +33,55 @@ alias org.fuwjin.util.StringUtils as StringUtils
   publish "alias 'name' as 'alias'\n"
 }
 <ScriptDeclaration>{
-  <Script>
-  either accept '{'
-  or abort "script declarations must start with a brace"
+  accept '<'
+  either name = <Identifier>
+  or abort "script identifiers must be enclosed in angle brackets"
+  either accept '>'
+  or abort "script identifier 'name' must end with an angle bracket"
   <S>
-  publish " {"
+  either accept '{'
+  or abort "script declaration 'name' must start with a brace"
+  <S>
+  publish "<'name'> {"
   indent = Indent.new()
   could repeat {
-    publish "\n'indent'"
-    <Statement>
+    publish "'indent''<Statement>'"
   }
   could{
     accept 'return' <Sep>
-    publish "\n'indent'return "
-    either <Value>
-    or abort "return keyword requires a value"
+    either publish "'indent'return '<Value>'"
+    or abort "return keyword in script 'name' requires a value"
   }
   either accept '}'
-  or abort "script declarations must end with a brace" 
+  or abort "script declaration 'name' must end with a brace" 
   <S>
   publish "\n}\n"
 }
 
 <Value>{
-  either <Script>
-  or <StaticLiteral>
-  or <DynamicLiteral>
-  or <AcceptStatement>
-  or <Invocation>
-  or publish <Name>
+  either <Script> >> val
+  or <StaticLiteral> >> val
+  or <DynamicLiteral> >> val
+  or <AcceptStatement> >> val
+  or <Invocation> >> val
+  or <Number> >> val
+  or <Object> >> val
+  or val = <Name>
+  return val
 }
 <Statement>{
-  either <IsStatement>
-  or <EitherOrStatement>
-  or <CouldStatement>
-  or <RepeatStatement>
-  or <AcceptStatement>
-  or <PublishStatement>
-  or <AbortStatement>
-  or <Script>
-  or <Block>
-  or <Assignment>
-  or <Invocation>
+  either <IsStatement> >> val
+  or <EitherOrStatement> >> val
+  or <CouldStatement> >> val
+  or <RepeatStatement> >> val
+  or <AcceptStatement> >> val
+  or <PublishStatement> >> val
+  or <AbortStatement> >> val
+  or <Script> >> val
+  or <Block> >> val
+  or <Assignment> >> val
+  or <Invocation> >> val
+  return val
 }
 
 <IsStatement>{
@@ -103,31 +92,27 @@ alias org.fuwjin.util.StringUtils as StringUtils
     publish "not "
   }
   either <InFilter> 
-  or <Value>
+  or publish <Value>
   or abort "is keyword requires value or in keyword"
 }
 <EitherOrStatement>{
   accept 'either' <Sep>
-  publish "either "
-  either <Statement>
+  either publish "either '<Statement>'"
   or abort "either keyword requires a statement"
   either repeat{
     accept 'or' <Sep>
-    publish "\n'indent'or "
-    either <Statement>
+    either publish "'indent'or '<Statement>'"
     or abort "or keyword requires a statement"
   } or abort "either keyword requires at least one or keyword"
 }
 <CouldStatement>{
   accept 'could' <Sep>
-  publish "could "
-  either <Statement>
+  either publish "could '<Statement>'"
   or abort "could keyword requires a statement"
 }
 <RepeatStatement>{
   accept 'repeat' <Sep>
-  publish "repeat "
-  either <Statement>
+  either publish "repeat '<Statement>'"
   or abort "repeat keyword requires a statement"
 }
 <AcceptStatement>{
@@ -138,19 +123,17 @@ alias org.fuwjin.util.StringUtils as StringUtils
     publish "not "
   }
   either <InFilter> 
-  or <Value>
+  or publish <Value>
   or abort "accept keyword requires a value or in keyword"
 }
 <PublishStatement>{
   accept 'publish' <Sep>
-  publish "publish "
-  either <Value>
+  either publish "publish '<Value>'"
   or abort "publish keyword requires a value"
 }
 <AbortStatement>{
   accept 'abort' <Sep>
-  publish "abort "
-  either <Value>
+  either publish "abort '<Value>'"
   or abort "abort keyword requires a value"
 }
 <Block>{
@@ -158,39 +141,80 @@ alias org.fuwjin.util.StringUtils as StringUtils
   publish "{"
   Indent.increase(indent)
   could repeat {
-    publish "\n'indent'"
-    <Statement>
+    publish "'indent''<Statement>'"
   }
   either accept '}'
   or abort "block must end with a brace"
   <S>
   Indent.decrease(indent)
-  publish "\n'indent'} "
+  publish "'indent'} "
 }
 <Assignment>{
   name = <Name>
   accept '=' <S>
-  publish "'name' = "
-  either <Value>
-  or abort "assignment requires a value"
+  either publish "'name' = '<Value>'"
+  or abort "assignment to 'name' requires a value"
 }
 <Invocation>{
   name = <QualifiedName>
   accept '(' <S>
   publish "'name'("
   could{
-    <Value>
+    publish <Value>
     could repeat{
       accept ',' <S>
-      publish ", "
-      either <Value>
-      or abort "invocation parameter must be a value"
+      either publish ", '<Value>'"
+      or abort "invocation parameter for 'name' must be a value"
     }
   }
   either accept ')'
   or abort "invocation must end with a parenthesis" 
   <S>
   publish ")"
+}
+<Script>{
+  accept '<'
+  either id = <Identifier>
+  or abort "scripts must be an identifier enclosed in angle brackets"
+  either accept '>'
+  or abort "script id 'id' must end with an angle bracket" 
+  <S>
+  publish "<'id'>"
+}
+<Object>{
+  accept '('
+  <S>
+  either type = <QualifiedName>
+  or abort "objects must lead with a type cast"
+  either accept ')'
+  or abort "object type cast 'type' must end with a parenthesis"
+  <S>
+  either accept '{'
+  or abort "object data must be enclosed in braces"
+  <S>
+  publish "('type'){"
+  Indent.increase(indent)
+  could {
+    publish "'indent''<Field>'"
+    could repeat {
+      accept ',' <S>
+      either publish ",'indent''<Field>'"
+      or abort "field mapping must follow a comma in a object data"
+    }
+  }
+  either accept '}'
+  or abort "object data must end with a brace"
+  <S>
+  publish "\n}"
+}
+<Field>{
+  name = <Name>
+  either accept ':'
+  or abort "field mappings must be separated by a colon"
+  <S>
+  either value = <Value>
+  or abort "field 'name' must be mapped to a value"
+  return "'name': 'value'"
 }
 
 <InFilter>{
@@ -212,7 +236,8 @@ alias org.fuwjin.util.StringUtils as StringUtils
     accept '-' 
     <S>
     publish '-'
-    <FilterChar>
+    either <FilterChar>
+    or abort "range must have an end character"
     <S>
   }
 }
@@ -226,38 +251,31 @@ alias org.fuwjin.util.StringUtils as StringUtils
 
 <StaticLiteral>{
   accept '\''
-  publish '\''
   could repeat either {
-    publish accept not in \\, ' 
+    accept not in \\, ' 
   } or {
     <Escape>
   }
   either accept '\''
-  or abort "static literals must end with a quote" 
+  or abort "static literals must end with a quote"
+  publish match 
   <S>
-  return lit
 }
 <DynamicLiteral>{
   accept '"'
-  lit = CompositeLiteral.new()
   could repeat either {
     accept '\''
-    CompositeLiteral.append(lit, Variable.new(<Identifier>))
+    <Value>
     accept '\''
   } or {
-    accept '<'
-    CompositeLiteral.append(lit, Grin.get(grin, <Identifier>))
-    accept '>'
+    <Escape>
   } or {
-    CompositeLiteral.append(lit, <Escape>)
-  } or {
-    ch = accept not in \\, "
-    CompositeLiteral.append(lit, ch)
+    accept not in \\, "
   }
   either accept '"'
   or abort "dynamic literals must end with a double quote" 
+  publish match
   <S>
-  return lit
 }
 
 <Escape>{
@@ -266,27 +284,37 @@ alias org.fuwjin.util.StringUtils as StringUtils
     accept 'x'
     <HexDigits>
   } or {
-    ch = accept next
+    accept next
   }
   return match
 }
 <HexDigits>{
   <HexDigit><HexDigit><HexDigit><HexDigit>
-  return match
 }
 <HexDigit>{
   accept in 0-9, a-f, A-F
 }
-
-<Script>{
-  accept '<'
-  either id = <Identifier>
-  or abort "scripts must be an identifier enclosed in angle brackets"
-  either accept '>'
-  or abort "scripts must end with an angle bracket" 
-  <S>
-  return id
+<Number> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could {
+      accept '.'
+      could repeat accept in 0-9
+    }
+  } or {
+    accept '.'
+    repeat accept in 0-9
+  }
+  could {
+    accept in e,E
+    could accept '-'
+    repeat accept in 0-9
+  }
+  publish match
+  <Sep>
 }
+
 <Name>{
   id = <Identifier> <S>
   return id
@@ -316,7 +344,7 @@ alias org.fuwjin.util.StringUtils as StringUtils
   return match
 }
 <IdentifierChar>{
-  is Character.isJavaIdentifierPart(next)
+  is isIdentifierCodepoint(next)
   accept next
 }
 

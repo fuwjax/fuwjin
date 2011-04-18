@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
-import static java.lang.Character.charCount;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -24,9 +22,10 @@ public abstract class InStream {
     * The input stream position.
     */
    public class Position {
-      private final int index;
       private final int line;
       private final int col;
+      private int cp;
+      private Position next;
 
       /**
        * Creates a new position.
@@ -35,9 +34,13 @@ public abstract class InStream {
        * @param col the previous column
        */
       public Position(final int index, final int line, final int col) {
-         this.index = index;
          this.line = line;
          this.col = col;
+         cp = EOF;
+      }
+
+      public char[] chars() {
+         return Character.toChars(codePoint());
       }
 
       /**
@@ -45,13 +48,10 @@ public abstract class InStream {
        * @return the code point
        */
       public int codePoint() {
-         if(index >= buffer.length()) {
-            readTo(index);
-            if(index >= buffer.length()) {
-               return EOF;
-            }
+         if(cp == EOF) {
+            cp = read();
          }
-         return buffer.codePointAt(index);
+         return cp;
       }
 
       /**
@@ -59,11 +59,21 @@ public abstract class InStream {
        * @return the next position
        */
       public Position next() {
-         final int ch = codePoint();
-         if(ch == '\n') {
-            return new Position(index + charCount(ch), line + 1, 1);
+         if(next == null) {
+            final int ch = codePoint();
+            if(ch == EOF) {
+               next = this;
+            } else if(ch == '\n') {
+               next = new Position(index(), line + 1, 1);
+            } else {
+               next = new Position(index(), line, col + 1);
+            }
          }
-         return new Position(index + charCount(ch), line, col + 1);
+         return next;
+      }
+
+      public String str() {
+         return new String(chars());
       }
 
       /**
@@ -72,18 +82,22 @@ public abstract class InStream {
        * @return the substring
        */
       public String substring(final Position mark) {
-         return buffer.substring(mark.index, index);
+         final StringBuilder builder = new StringBuilder();
+         for(Position p = mark; p != this; p = p.next()) {
+            if(p.codePoint() == EOF) {
+               throw new IllegalArgumentException("mark does not precede this position");
+            }
+            builder.append(p.chars());
+         }
+         return builder.toString();
       }
 
       @Override
       public String toString() {
-         if(index >= buffer.length()) {
-            readTo(index);
-            if(index >= buffer.length()) {
-               return "EOF";
-            }
+         if(codePoint() == EOF) {
+            return "[" + line + "," + col + "] EOF";
          }
-         return index + "[" + line + "," + col + "]=" + new String(Character.toChars(codePoint()));
+         return "[" + line + "," + col + "] '" + str() + "'";
       }
    }
 
@@ -100,8 +114,13 @@ public abstract class InStream {
     */
    public static final InStream NONE = new InStream() {
       @Override
-      protected void readTo(final int index) {
-         // do nothing
+      protected int index() {
+         return 0;
+      }
+
+      @Override
+      protected int readChar() {
+         return EOF;
       }
    };
 
@@ -113,18 +132,8 @@ public abstract class InStream {
    public static InStream stream(final InputStream stream) {
       return new InStream() {
          @Override
-         protected void readTo(final int index) {
-            final byte[] buf = new byte[Math.max(index - buffer.length(), 100)];
-            try {
-               if(stream.available() > 0) {
-                  final int c = stream.read(buf);
-                  if(c > -1) {
-                     buffer.append(new String(buf, 0, c));
-                  }
-               }
-            } catch(final IOException e) {
-               // continue
-            }
+         protected int readChar() throws IOException {
+            return stream.read();
          }
       };
    }
@@ -137,16 +146,8 @@ public abstract class InStream {
    public static InStream stream(final Reader reader) {
       return new InStream() {
          @Override
-         protected void readTo(final int index) {
-            final char[] buf = new char[Math.max(index - buffer.length(), 100)];
-            try {
-               final int c = reader.read(buf);
-               if(c > -1) {
-                  buffer.append(buf, 0, c);
-               }
-            } catch(final IOException e) {
-               // continue
-            }
+         protected int readChar() throws IOException {
+            return reader.read();
          }
       };
    }
@@ -158,26 +159,50 @@ public abstract class InStream {
     */
    public static InStream streamOf(final String input) {
       return new InStream() {
-         {
-            buffer.append(input);
-         }
-
          @Override
-         protected void readTo(final int index) {
-            // do nothing
+         protected int readChar() {
+            if(index() >= input.length()) {
+               return EOF;
+            }
+            return input.charAt(index());
          }
       };
    }
 
    protected final StringBuilder buffer = new StringBuilder();
-
-   protected abstract void readTo(final int index);
+   protected final Position start = new Position(0, 1, 1);
+   private int index;
 
    /**
     * Returns the start position.
     * @return the start position
     */
    public Position start() {
-      return new Position(0, 1, 0);
+      return start;
    }
+
+   protected int index() {
+      return index;
+   }
+
+   protected int read() {
+      try {
+         int ch = readChar();
+         index++;
+         if(ch != EOF && Character.isHighSurrogate((char)ch)) {
+            final int low = readChar();
+            index++;
+            if(low == EOF) {
+               ch = EOF;
+            } else {
+               ch = Character.toCodePoint((char)ch, (char)low);
+            }
+         }
+         return ch;
+      } catch(final IOException e) {
+         return EOF;
+      }
+   }
+
+   protected abstract int readChar() throws IOException;
 }

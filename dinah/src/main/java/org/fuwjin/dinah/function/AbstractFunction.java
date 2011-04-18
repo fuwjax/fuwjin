@@ -59,6 +59,11 @@ public abstract class AbstractFunction implements Function {
     */
    public abstract AbstractFunction restrict(FunctionSignature signature);
 
+   @Override
+   public String toString() {
+      return getClass().getSimpleName() + ": " + name();
+   }
+
    protected int argCount() {
       return argTypes.length;
    }

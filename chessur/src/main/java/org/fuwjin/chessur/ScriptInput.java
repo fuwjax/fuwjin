@@ -34,7 +34,7 @@ public class ScriptInput extends Transformer {
       if(!result.isSuccess()) {
          return state.failure(result, "Could not transform state");
       }
-      final State restore = result.restoreIo(state);
+      final State restore = result.restoreIo(valState, result);
       if(!restore.isSuccess()) {
          return state.failure(restore, "Could not restore input");
       }
