@@ -21,7 +21,7 @@ public class UnsupportedFunction extends AbstractFunction {
 
    @Override
    public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
-      throw new UnsupportedOperationException(toString());
+      throw new UnsupportedOperationException(name());
    }
 
    @Override

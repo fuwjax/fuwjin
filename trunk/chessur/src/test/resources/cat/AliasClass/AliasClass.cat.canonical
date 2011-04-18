@@ -1,0 +1,5 @@
+alias java.lang.String as S
+
+<Root> {
+  return S.toUpperCase('value')
+}

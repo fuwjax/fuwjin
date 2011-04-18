@@ -18,7 +18,7 @@ alias org.fuwjin.chessur.Declaration as Declaration
 alias org.fuwjin.chessur.EitherOrStatement as EitherOrStatement
 alias org.fuwjin.chessur.Filter as Filter
 alias org.fuwjin.chessur.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.Grin as Grin
+alias org.fuwjin.chessur.Catalog as Catalog
 alias org.fuwjin.chessur.Invocation as Invocation
 alias org.fuwjin.chessur.IsStatement as IsStatement
 alias org.fuwjin.chessur.Literal as Literal
@@ -36,14 +36,14 @@ alias java.util.Iterator.hasNext as hasNext
 alias java.util.Map$Entry.getKey as key
 alias java.util.Map$Entry.getValue as value
 
-<Grin>{
-  aliases = iterator(Grin.aliases(grin))
+<Catalog>{
+  aliases = iterator(Catalog.aliases(cat))
   could {
     repeat <AliasDeclaration>
     publish '\n'
   }
   is not hasNext(aliases)
-  specs = iterator(Grin.scripts(grin))
+  specs = iterator(Catalog.scripts(cat))
   repeat <ScriptDeclaration>
   is not hasNext(specs)
 }
@@ -200,7 +200,7 @@ alias java.util.Map$Entry.getValue as value
 <Invocation>{
   is Invocation.instanceof(statement)
   name = Invocation.name(statement)
-  alias = Grin.encode(grin, name)
+  alias = Catalog.encode(cat, name)
   publish "'alias'("
   params = iterator(Invocation.params(statement))
   could {

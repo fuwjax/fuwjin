@@ -65,6 +65,14 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
       return this;
    }
 
+   @Override
+   public String toString() {
+      if(member == null) {
+         return super.toString();
+      }
+      return getClass().getSimpleName() + ": " + member;
+   }
+
    protected abstract Object invokeSafe(Object... args) throws AdaptException, InvocationTargetException,
          IllegalArgumentException, IllegalAccessException, InstantiationException;
 

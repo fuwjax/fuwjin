@@ -70,12 +70,12 @@ public interface State {
     * @return the new state
     */
    public abstract State publish();
-
+   
    State redirectInput(InStream newInput);
 
    public abstract State redirectOutput(OutStream newOutput);
 
-   public abstract State restoreIo(State state);
+   public abstract State restoreIo(State in, State out);
 
    /**
     * Restores the scope from an earlier state.

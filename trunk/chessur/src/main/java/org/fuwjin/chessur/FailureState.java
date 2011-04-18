@@ -17,6 +17,14 @@ public class FailureState implements State {
    private final State parent;
    private final String message;
    private final Object[] args;
+   private final State cause;
+
+   public FailureState(final State lastGood, final State cause, final String message, final Object... args) {
+      parent = lastGood;
+      this.cause = cause;
+      this.message = message;
+      this.args = args;
+   }
 
    /**
     * Creates a new instance.
@@ -24,8 +32,9 @@ public class FailureState implements State {
     * @param message the failure message pattern
     * @param args the message args
     */
-   public FailureState(final State parent, final String message, final Object... args) {
-      this.parent = parent;
+   public FailureState(final State lastGood, final String message, final Object... args) {
+      parent = lastGood;
+      cause = null;
       this.message = message;
       this.args = args;
    }
@@ -48,10 +57,6 @@ public class FailureState implements State {
    @Override
    public int current() {
       throw exception();
-   }
-
-   private RuntimeException exception() {
-      return new RuntimeException(toString());
    }
 
    @Override
@@ -90,7 +95,7 @@ public class FailureState implements State {
    }
 
    @Override
-   public State restoreIo(final State state) {
+   public State restoreIo(final State in, final State out) {
       throw exception();
    }
 
@@ -111,7 +116,10 @@ public class FailureState implements State {
 
    @Override
    public String toString() {
-      return parent + "\n" + String.format(message, args);
+      if(cause == null) {
+         return String.format(message, args) + ": " + parent;
+      }
+      return cause + "\n" + String.format(message, args) + ": " + parent;
    }
 
    @Override
@@ -122,5 +130,9 @@ public class FailureState implements State {
    @Override
    public State value(final Object value) {
       throw exception();
+   }
+
+   private RuntimeException exception() {
+      return new RuntimeException(toString());
    }
 }

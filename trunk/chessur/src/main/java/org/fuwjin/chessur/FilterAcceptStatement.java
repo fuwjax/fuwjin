@@ -34,7 +34,16 @@ public class FilterAcceptStatement implements Expression {
 
    @Override
    public State transform(final State state) {
-      if(filter.allow(state.current()) ^ isNot) {
+      if(state.current() == InStream.EOF) {
+         return state.failure("unexpected EOF");
+      }
+      if(isNot) {
+         if(filter.allow(state.current())) {
+            return state.failure("Unexpected match: %s", filter);
+         }
+         return state.accept();
+      }
+      if(filter.allow(state.current())) {
          return state.accept();
       }
       return state.failure("Did not match filter: %s", filter);

@@ -30,11 +30,12 @@ public class ScriptPipe extends Transformer {
       if(!pipe.isSuccess()) {
          return state.failure(pipe, "Could not transform source");
       }
-      final State input = pipe.restoreIo(state).redirectInput(InStream.streamOf(out.toString()));
+      final State first = pipe.restoreIo(pipe, state);
+      final State input = first.redirectInput(InStream.streamOf(out.toString()));
       final State result = sink.transform(input);
       if(!result.isSuccess()) {
          return state.failure(result, "Could not transform sink");
       }
-      return result.restoreIo(state);
+      return result.restoreIo(first, result);
    }
 }

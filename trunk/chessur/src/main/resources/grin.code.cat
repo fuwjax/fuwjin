@@ -22,7 +22,7 @@ alias org.fuwjin.chessur.Declaration as Declaration
 alias org.fuwjin.chessur.EitherOrStatement as EitherOrStatement
 alias org.fuwjin.chessur.Filter as Filter
 alias org.fuwjin.chessur.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.Grin as Grin
+alias org.fuwjin.chessur.Catalog as Catalog
 alias org.fuwjin.chessur.Invocation as Invocation
 alias org.fuwjin.chessur.IsStatement as IsStatement
 alias org.fuwjin.chessur.Literal as Literal
@@ -58,11 +58,11 @@ alias java.util.Arrays.asList as asList
 alias java.util.Map$Entry.getKey as key
 alias java.util.Map$Entry.getValue as value
 
-<Grin>{
+<Catalog>{
   <Preamble>
   varIndex = AtomicInteger.new()
   indexer = NameIndex.new()
-  specs = iterator(Grin.scripts(grin))
+  specs = iterator(Catalog.scripts(cat))
   repeat <ScriptDeclaration>
   is not hasNext(specs)
   <Postscript>
@@ -70,8 +70,8 @@ alias java.util.Map$Entry.getValue as value
 <Postscript>{
   publish "
   
-  public static Object interpret(final CharSequence in, final Map\<String, ?\> environment) throws 'className'Exception {
-    final StringCursor input = new StringCursor(in);"
+  public static Object interpret(final CharSequence in, final Appendable out, final Map\<String, ?\> environment) throws 'className'Exception {
+    final StringCursor input = new StringCursor(in, out);"
   size = NameIndex.size(indexer)
   publish "
     final Object[] env = new Object['size'];"
@@ -81,10 +81,10 @@ alias java.util.Map$Entry.getValue as value
     name = key(entry)
     index = value(entry)
     publish "
-    env['index'] = environment.get(\"'name'\");"
+    env['index'] = environment.containsKey(\"'name'\") ? environment.get(\"'name'\") : UNSET;"
   }
   is not hasNext(entries)
-  rootName = Grin.rootName(grin)
+  rootName = Catalog.rootName(cat)
   publish "
     return 'rootName'(input, env);
   }
@@ -104,9 +104,16 @@ alias java.util.Map$Entry.getValue as value
  ******************************************************************************/
 package 'package';
 
+import java.io.IOException;
 import java.util.Map;
 
 public class 'className'Interpreter {
+  private static final Object UNSET = new Object() {
+    public String toString() {
+      return \"UNSET\";
+    }
+  };
+
   public static class 'className'Exception extends Exception {
     private static final long serialVersionUID = 1; 
     'className'Exception(final String message) {
@@ -125,18 +132,20 @@ public class 'className'Interpreter {
     private final CharSequence seq;
     private final int start;
     private final StringCursor parent;
+    private final Appendable appender;
     
-    public StringCursor(final CharSequence seq) {
-      this(0, 1, 0, seq, null);
+    public StringCursor(final CharSequence seq, final Appendable appender) {
+      this(0, 1, 1, seq, appender, null);
     }
     
-    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent) {
+    public StringCursor(final int start, final int line, final int column, final CharSequence seq, Appendable appender, final StringCursor parent) {
       this.start = start;
       pos = start;
       this.seq = seq;
       this.parent = parent;
       this.line = line;
       this.column = column;
+      this.appender = appender;
     }
     
     public int accept() throws 'className'Exception {
@@ -151,7 +160,7 @@ public class 'className'Interpreter {
       checkBounds(pos + expected.length() - 1);
       final CharSequence sub = seq.subSequence(pos, pos + expected.length());
       if(!sub.equals(expected)) {
-        throw ex(\"unexpected character \"+sub+\"  \"+expected);
+        throw ex(\"failed while matching \"+expected);
       }
       final int stop = pos + expected.length() - 1;
       while(pos < stop) {
@@ -160,10 +169,10 @@ public class 'className'Interpreter {
       return advance();
     }
     
-    public int acceptIn(final String set) throws 'className'Exception {
+    public int acceptIn(final String name, final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) < 0) {
-        throw ex(\"unexpected character\");
+        throw ex(\"Did not match filter: \"+name);
       }
       return advance();
     }
@@ -172,19 +181,36 @@ public class 'className'Interpreter {
       if(expected == null || expected.length() == 0) {
         throw ex(\"UNSET\");
       }
-      checkBounds(pos + expected.length() - 1);
+      if(pos + expected.length() - 1 >= seq.length()) {
+        return accept();
+      }       
       if(seq.subSequence(pos, pos + expected.length()).equals(expected)) {
-        throw ex(\"unexpected character\");
+        throw ex(\"failed while matching \"+expected);
       }
       return advance();
     }
     
-    public int acceptNotIn(final String set) throws 'className'Exception {
+    public int acceptNotIn(final String name, final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) >= 0) {
-        throw ex(\"unexpected character\");
+        throw ex(\"Unexpected match: \"+name);
       }
       return advance();
+    }
+    
+    public void publish(final Object value) throws 'className'Exception {
+      try {
+        appender.append(value.toString());
+      } catch(IOException e) {
+        throw ex(e);
+      }
+    }
+    
+    public Object isSet(final String name, final Object value) throws 'className'Exception {
+      if(UNSET.equals(value)) {
+        throw ex(\"variable \"+name+\" is unset\");
+      }
+      return value;
     }
     
     protected void checkBounds(final int p) throws 'className'Exception {
@@ -200,7 +226,10 @@ public class 'className'Interpreter {
     }
     
     public 'className'Exception ex(final String message) {
-      return new 'className'Exception(\"[\" + line + \",\" + column + \"] \" + message);
+      if(pos >= seq.length()) {
+        return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\");
+      }
+      return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos)+\"' -> [1,0] SOF\");
     }
     
     public 'className'Exception ex(final Throwable cause) {
@@ -211,7 +240,7 @@ public class 'className'Interpreter {
       final char ch = seq.charAt(pos++);
        if(ch == \'\\n\') {
          line++;
-         column = 0;
+         column = 1;
        } else {
          column++;
        }
@@ -224,7 +253,7 @@ public class 'className'Interpreter {
     }
     
     public StringCursor sub() {
-      return new StringCursor(pos, line, column, seq, this);
+      return new StringCursor(pos, line, column, seq, appender, this);
     }
     
     public String match() {
@@ -414,7 +443,7 @@ public class 'className'Interpreter {
     publish "Not"
   }
   filter = FilterAcceptStatement.filter(statement)
-  publish "In(\"'<Filter>'\");"
+  publish "In(\"'filter'\",\"'<Filter>'\");"
 }
 <AcceptValue>{
   either value = <FilterAcceptValue>
@@ -448,13 +477,12 @@ public class 'className'Interpreter {
     notted = ''
   }
   filter = FilterAcceptStatement.filter(statement)
-  return "'input'.accept'notted'In(\"'<Filter>'\")"
+  return "'input'.accept'notted'In(\"'filter'\",\"'<Filter>'\")"
 }
 <PublishStatement>{
   is PublishStatement.instanceof(statement)
-  publish "publish "
   value = PublishStatement.value(statement)
-  <Value>
+  publish "'indent''input'.publish('<Value>');"
 }
 <AbortStatement>{
   is AbortStatement.instanceof(statement)
@@ -521,20 +549,23 @@ public class 'className'Interpreter {
   return render
 }
 <Constructor>{
-  constructor = ConstructorFunction.constructor(function)
+  is ConstructorFunction.instanceof(function)
+  constructor = ConstructorFunction.member(function)
   type = Constructor.getDeclaringClass(constructor)
   publish "new '<Type>'"
   types = iterator(asList(Constructor.getParameterTypes(constructor)))
   <Params>
 }
 <FieldAccess>{
-  field = FieldAccessFunction.field(function)
+  is FieldAccessFunction.instanceof(function)
+  field = FieldAccessFunction.member(function)
   type = Field.getDeclaringClass(field)
   value = getNext(params)
   publish "(('<Type>')'<Value>').'Field.getName(field)'"
 }
 <FieldMutator>{
-  field = FieldMutatorFunction.field(function)
+  is FieldMutatorFunction.instanceof(function)
+  field = FieldMutatorFunction.member(function)
   type = Field.getDeclaringClass(field)
   value = getNext(params)
   publish "(('<Type>')'<Value>').'Field.getName(field)'"
@@ -543,12 +574,14 @@ public class 'className'Interpreter {
   publish " = ('<Type>')'<Value>'"
 }
 <InstanceOf> {
+  is InstanceOfFunction.instanceof(function)
   type = InstanceOfFunction.type(function)
   value = getNext(params)
   publish "'<Value>' instanceof '<Type>'"
 }
 <Method> {
-  method = MethodFunction.method(function)
+  is MethodFunction.instanceof(function)
+  method = MethodFunction.member(function)
   type = Method.getDeclaringClass(method)
   value = getNext(params)
   publish "(('<Type>')'<Value>').'Method.getName(method)'"
@@ -556,12 +589,14 @@ public class 'className'Interpreter {
   <Params>
 }
 <StaticFieldAccess> {
-  field = StaticFieldAccessFunction.field(function)
+  is StaticFieldAccessFunction.instanceof(function)
+  field = StaticFieldAccessFunction.member(function)
   type = Field.getDeclaringClass(field)
   publish "'<Type>'.'Field.getName(field)'"
 }
 <StaticFieldMutator>{
-  field = StaticFieldMutatorFunction.field(function)
+  is StaticFieldMutatorFunction.instanceof(function)
+  field = StaticFieldMutatorFunction.member(function)
   type = Field.getDeclaringClass(field)
   publish "'<Type>'.'Field.getName(field)'"
   type = Field.getType(field)
@@ -569,7 +604,8 @@ public class 'className'Interpreter {
   publish " = ('<Type>')'<Value>'"
 }
 <StaticMethod> {
-  method = StaticMethodFunction.method(function)
+  is StaticMethodFunction.instanceof(function)
+  method = StaticMethodFunction.member(function)
   type = Method.getDeclaringClass(method)
   publish "'<Type>'.'Method.getName(method)'"
   types = iterator(asList(Method.getParameterTypes(method)))
@@ -676,5 +712,5 @@ public class 'className'Interpreter {
   is Variable.instanceof(value)
   name = Variable.name(value)
   index = NameIndex.indexOf(indexer, name)
-  return "env['index']/*'name'*/"
+  return "'input'.isSet(\"'name'\", env['index'])"
 }

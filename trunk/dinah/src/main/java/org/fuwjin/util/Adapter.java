@@ -39,7 +39,12 @@ public final class Adapter {
       }
    }
 
-   private static final Object UNSET = new Object();
+   private static final Object UNSET = new Object() {
+      @Override
+      public String toString() {
+         return "UNSET";
+      };
+   };
 
    /**
     * Adapts the value to the type.
