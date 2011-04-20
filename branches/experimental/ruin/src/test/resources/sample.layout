@@ -1,0 +1,30 @@
+alias javax.swing.JFrame as JFrame
+alias javax.swing.JButton as JButton
+alias javax.swing.JTextField as JTextField
+alias javax.swing.WindowConstants.DISPOSE_ON_CLOSE as DISPOSE_ON_CLOSE
+alias java.awt.FlowLayout as FlowLayout
+alias java.lang.Boolean.TRUE as true
+alias org.fuwjin.ruin.Ruin as Ruin
+alias org.fuwjin.ruin.awt.CloseTarget as CloseTarget
+alias org.fuwjin.ruin.awt.ComponentCenterTarget as ComponentCenterTarget
+
+<Layout> {
+  field = (JTextField){setText:"Hello, world!"} 
+  button = (JButton){setText:"Press me!"}
+  frame = (JFrame){
+    setTitle:"RUIn Demo Application",
+    setDefaultCloseOperation:DISPOSE_ON_CLOSE(),
+    setLayout: (FlowLayout){},
+    add: field,
+    add: button
+  }
+  JFrame.pack(frame)
+  JFrame.setVisible(frame, true())
+  
+  close = CloseTarget.new(frame)
+  Ruin.addTarget(ruin, "close", close)
+  Ruin.addTarget(ruin, "field", ComponentCenterTarget.new(field))
+  Ruin.addTarget(ruin, "button", ComponentCenterTarget.new(button))
+  
+  return close
+}
