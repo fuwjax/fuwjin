@@ -1,0 +1,76 @@
+alias org.fuwjin.ruin.ActionScript as ActionScript
+alias org.fuwjin.ruin.CompositeAction as CompositeAction
+alias org.fuwjin.ruin.DelayAction as DelayAction
+alias org.fuwjin.ruin.MouseButton as MouseButton
+alias org.fuwjin.ruin.Ruin as Ruin
+alias java.util.ArrayList as ArrayList
+alias java.lang.Integer.parseInt as parseInt
+
+<Script> {
+  script = ActionScript.new(300)
+  could repeat {
+    ActionScript.addAction(script, <CompositeAction>)
+  }
+  is not next
+  return script
+}
+<CompositeAction> {
+  action = <Action>
+  either{
+    list = ArrayList.new()
+    ArrayList.add(list, action)
+    repeat{
+      accept 'then' <S>
+      ArrayList.add(list, <Action>)
+    }
+    actions = CompositeAction.newComposite(list)
+  } or {
+    actions = action
+  }
+  return actions
+}
+<Action> {
+  either action = <MoveAction>
+  or action = <ButtonAction>
+  or action = <KeyboardAction>
+  or action = <WaitAction>
+  return action
+}
+<MoveAction> {
+  accept "move" <S>
+  accept "to" <S>
+  name = <String>
+  return Ruin.move(ruin, name)
+}
+<ButtonAction> {
+  accept "left" <S>
+  accept "button" <S>
+  return MouseButton.LEFT()
+}
+<KeyboardAction> {
+  text = <String>
+  return Ruin.key(ruin, text)
+}
+<WaitAction> {
+  accept "wait" <S>
+  return DelayAction.new(<Number>)
+}
+<Number> {
+  repeat accept in 0-9
+  value = match
+  <S>
+  return parseInt(value)
+}
+<String> { 
+  accept '"'
+  value = <StringChars>
+  accept '"' <S>
+  return value
+}
+<StringChars>{
+  could repeat accept not '"'
+  return match
+}
+<S> {
+  repeat accept in \ ,\n,\t,\r
+} 

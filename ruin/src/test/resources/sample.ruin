@@ -1,0 +1,8 @@
+move to "field"
+left button then left button then left button
+"Hi"
+move to "button"
+left button
+wait 2000
+move to "close"
+left button
