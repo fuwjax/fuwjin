@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -156,7 +157,12 @@ public class FormalDemo {
 
    private static Iterable<File> catFiles() {
       final File catPath = new File("src/test/resources/cat");
-      return Arrays.asList(catPath.listFiles());
+      return Arrays.asList(catPath.listFiles(new FilenameFilter() {
+         @Override
+         public boolean accept(final File dir, final String name) {
+            return !name.startsWith(".");
+         }
+      }));
    }
 
    private static Map<String, ? extends Object> environment() {
