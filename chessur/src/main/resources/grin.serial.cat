@@ -105,7 +105,18 @@ alias java.util.Map$Entry.getValue as value
     publish "not "
   }
   value = IsStatement.value(statement)
-  <Value>
+  either {
+    is FilterAcceptStatement.instanceof(value)
+    filter = FilterAcceptStatement.filter(value)
+    publish "in "
+    <Filter>
+  } or {
+    is ValueAcceptStatement.instanceof(value)
+    value = ValueAcceptStatement.value(value)
+    <Value>
+  } or {
+    <Value>
+  }
 }
 <EitherOrStatement>{
   is EitherOrStatement.instanceof(statement)
@@ -117,8 +128,10 @@ alias java.util.Map$Entry.getValue as value
   repeat{
     old = statement
     statement = getNext(statements)
-    either is Block.instanceof(old)
-    or publish "'indent'"
+    either {
+      is Block.instanceof(old)
+      publish ' '
+    } or publish indent
     publish "or "
     <Statement>
   }
@@ -182,13 +195,13 @@ alias java.util.Map$Entry.getValue as value
   statements = iterator(Block.statements(block))
   could repeat {
     statement = getNext(statements)
-    publish "'indent'"
+    publish indent
     <Statement>
   }
   is not hasNext(statements)
   Indent.decrease(indent)
   publish indent
-  publish "'indent'} "
+  publish "}"
 }
 <Assignment>{
   is Assignment.instanceof(statement)

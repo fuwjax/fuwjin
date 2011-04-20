@@ -97,13 +97,23 @@ alias org.fuwjin.chessur.Indent as Indent
 }
 <EitherOrStatement>{
   accept 'either' <Sep>
-  either publish "either '<Statement>'"
-  or abort "either keyword requires a statement"
-  either repeat{
+  publish 'either '
+  prefix = <StatementWithPrefix>
+  either repeat {
     accept 'or' <Sep>
-    either publish "'indent'or '<Statement>'"
-    or abort "or keyword requires a statement"
+    publish "'prefix'or " 
+    prefix = <StatementWithPrefix>
   } or abort "either keyword requires at least one or keyword"
+}
+<StatementWithPrefix> {
+  either {
+    <Block>
+    prefix = ' '
+  } or {
+    publish <Statement>
+    prefix = indent
+  }
+  return prefix
 }
 <CouldStatement>{
   accept 'could' <Sep>
@@ -147,7 +157,7 @@ alias org.fuwjin.chessur.Indent as Indent
   or abort "block must end with a brace"
   <S>
   Indent.decrease(indent)
-  publish "'indent'} "
+  publish "'indent'}"
 }
 <Assignment>{
   name = <Name>
