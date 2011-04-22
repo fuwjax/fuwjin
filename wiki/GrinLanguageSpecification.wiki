@@ -112,7 +112,7 @@ An assignment will set the state "failure" marker if the value cannot be resolve
 
 ====Script====
 
- Script = _!ElevatedNamespaceName_ _!InputValue_? _!ChainedOutput_? !_OutputAssignment_?
+ Script = _!ElevatedNamespaceName_ _!InputValue_? _!ChainedOutput_? _!OutputAssignment_?
 
  !ElevatedNamespaceName = *`<`* _Namespace_? _Name_ *>*
 
@@ -136,6 +136,113 @@ Note that while a Script may be a value, and therefore both "`<`A> >> `<`B>" and
 
 The output of a script may be assigned to a name. As a script may be a value, this means that "result = `<`A> >> output" would map `<`A>'s return value as "result" and the output stream as "output" in the caller's environment.
 
+A script may be used as a value, and it will resolve to the return value of the script. If there is no return statement or if the state "failure" marker is set, then the script will not resolve to a value.
+
 The script redirection will set the state "failure" marker if the call fails or if the input value cannot be resolved.
 
 ====Invocation====
+
+ Invocation = _!QualifiedName_ *(* _Arguments_? *)*
+
+ Arguments = _Value_ (*,* _Value_)*
+
+An Invocation redirects control back to the underlying implementation language, presumably to handle some task which is not expressible in Grin. The details behind mapping a qualified name to an execution target in the underlying language is implementation dependent. However, the initial name of the qualified name may be an alias name regardless of the implementation, and therefore the alias declarations must be referenced when determining the fully qualified name.
+
+An invocation may be used as a value, and it will resolve to the return value of the execution target. If there is no return value (for instance, with void methods) or if the arguments could not be resolved, or if there is no binding for the invocation, or if the execution target fails, then the invocation will not resolve to a value.
+
+An invocation will set the state "failure" marker if the arguments cannot be resolved, or if there is no binding in the underlying implementation for the qualified name with the specified arguments, or if the underlying execution target fails.
+
+
+===Control Flow Statements===
+
+ !ControlFlowStatement = _Block_ | _Is_ | _!EitherOr_ | _Could_ | _Repeat_ | _Abort_
+
+Additionally, the ReturnStatement will be described in this section, although it is formally not treated as a control flow statement.
+
+====Block Statement====
+
+ Block = *{* _Statement_`*` *}*
+
+A block is a set of statements enclosed in curly braces. When the block statement executes, it will execute each of the inner statements in order. If any statement sets the state "failure" marker, the block will not execute any further statements.
+
+The block will set the state "failure" marker if any inner statement sets the state "failure" marker. In particular, the block will *not* set the state "failure" marker if there are no inner statements.
+
+====Is Statement====
+
+ Is = *is* *not*? _Value_
+
+An Is statement is designed to make an assertion without altering the current state. After an Is statement completes, regardless of whether the state "failure" marker is set or not, the input, output and environment should be identical to when the Is statement started execution.
+
+The is statement technically performs two checks. First, it checks that the value can be resolved. Next, it checks that the resolved value is not a "default" value. What constitutes a "default" is subject to the implementation, but in general, false for booleans, zero for numeric types and null for objects is fairly standard.
+
+The Is statement sets the state "failure" marker if the value cannot be resolved, or if the value is a "default" (or the inverse if the "not" keyword is used)
+
+====Either/Or Statement====
+
+ !EitherOr = *either* _Statement_ (*or* _Statement_)+
+
+An either/or statement is an ordered set of optional statements. Each statement will proceed in order until a statement succeeds. If every statement sets the "failure" marker, then the either/or statement will set the marker as well. At each step, if a statement sets the "failure" marker, then the state will be reset to the same state as when the either/or statement started before executing the next option.
+
+The either/or statement sets the state "failure" marker if no option can apply to the current state.
+
+====Could Statement====
+
+ Could = *could* _Statement_
+
+A could statement will attempt to execute the statement. If the statement sets the state "failure" marker, the could statement will clear the marker.
+
+The could statement will *not* set the state "failure" marker.
+
+====Repeat Statement====
+
+ Repeat = *repeat* _Statement_
+
+A repeat statement will attempt to execute the statement at least once. If the statement cannot be executed at least once, then it will set the state "failure" marker. Otherwise the statement will execute until it sets the marker, and the repeat will then clear the marker.
+
+The repeat statement will set the state "failure" marker if the statement cannot be executed at least once.
+
+====Abort Statement====
+
+ Abort = *abort* _Value_
+
+An abort statement completely halts all script execution and returns control immediately to the underlying implementation language. The resolved value may be used as part of the failure information passed to the underlying caller. If the value cannot be resolved, a generic message is supplied instead.
+
+The abort statement will not set the state "failure" marker, instead it will always terminate script execution.
+
+====Return Statement====
+
+ ReturnStatement = *return* _Value_
+
+A return statement returns the resolved value as the value of the enclosing script. It may only be used as the final statement in a script block.
+
+The return statement will set the state "failure" marker if the value cannot be resolved.
+
+==Grin Values==
+
+ Value = _Variable_ | _!RedirectionStatement_ | _Literal_
+
+There are several values in Grin. Variables fetch a bound object from the environment. Redirection statements (scripts and invocations) may also be used as values. Literals are rich ways of specifying interesting objects, but which may still require runtime resolution.
+
+===Variable===
+
+ Variable = _Match_ | _Next_ | _Name_
+
+ Match = *match*
+ 
+ Next = *next*
+
+Variables are named references to environment bindings. There are two in particular, match and next, which are specially defined variables. Other variables such as true, false, or null may be provided by the implementation.
+
+Variables resolve to a value if they have been set to a value in the current environment, or any of its parent environments.
+
+Match is a deprecated keyword which is the same as the invocation "input.buffer()". Next is a deprecated keyword which is the same as "input.next()". These keywords should not be used as they will likely be removed before the official release.
+
+===Literals===
+
+ Literal = _!StaticLiteral_ | _!DynamicLiteral_ | _!NumberLiteral_ | _!ObjectLiteral_
+
+ ====Static Literals====
+
+ !StaticLiteral = *'* .`*` *'*
+
+Static literals are 
