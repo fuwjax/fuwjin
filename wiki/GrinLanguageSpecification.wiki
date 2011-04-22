@@ -211,7 +211,7 @@ The abort statement will not set the state "failure" marker, instead it will alw
 
 ====Return Statement====
 
- ReturnStatement = *return* _Value_
+ !ReturnStatement = *return* _Value_
 
 A return statement returns the resolved value as the value of the enclosing script. It may only be used as the final statement in a script block.
 
@@ -241,8 +241,20 @@ Match is a deprecated keyword which is the same as the invocation "input.buffer(
 
  Literal = _!StaticLiteral_ | _!DynamicLiteral_ | _!NumberLiteral_ | _!ObjectLiteral_
 
- ====Static Literals====
+====Static Literals====
 
  !StaticLiteral = *'* .`*` *'*
 
-Static literals are 
+Static literals are enclosed in single quotes. They resolve to the string value within the quotes. 
+
+====Dynamic Literals====
+  
+ !DynamicLiteral = *"* (*'* _Value_ *'* | .)`*` *"*
+
+Dynamic literals are enclosed in double quotes. The significant difference between these and static literals is that values may be enclosed in single quotes. Then when the dynamic literal is resolved, each of the internal values are resolved and their location within the literal is replaced by the resolved value.
+
+The dynamic literal will fail to resolve if any of the inner values fail to resolve.
+
+====Numeric Literals====
+
+ !NumberLiteral = // standard numeric literal, definition omitted for brevity.
