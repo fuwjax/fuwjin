@@ -132,6 +132,10 @@ The input to a script may be redirected by a caller to a resolved value. This va
 
 The output to a script may be chained or piped as the input to another script. In this case, the output stream of the first is supplied as the input stream to the second. 
 
-Note that while a Script may be a value, and therefore both <A> >> <B> and <B> << <A> are valid statements, they are not equivalent. <A> >> <B> pipes the output stream from <A> into <B> as <B>'s input stream. <B> << <A> first resolves <A> to a value, serializes that value to a temporary stream, and then uses that stream as the input for <B>. While this may seem unnecessarily complex at first, IO redirection was designed to mimic normal basic pipe behavior in common operating system shells and will likely be rarely used in practice.
+Note that while a Script may be a value, and therefore both "`<`A> >> `<`B>" and "`<`B> `<<` `<`A>" are valid statements, they are not equivalent. "`<`A> >> `<`B>" pipes the output stream from `<`A> into `<`B> as `<`B>'s input stream. "`<`B> `<<` `<`A>" first resolves `<`A> to a value, serializes that value to a temporary stream, and then uses that stream as the input for `<`B>. While this may seem unnecessarily complex at first, IO redirection was designed to mimic normal basic pipe behavior in common operating system shells and will likely be rarely used in practice.
 
-The output of a script may be assigned to a name. As a script may be a value, this means that result = <A> >> output would map <A>'s return value as "result" and the output stream as "output" in the caller's environment.
+The output of a script may be assigned to a name. As a script may be a value, this means that "result = `<`A> >> output" would map `<`A>'s return value as "result" and the output stream as "output" in the caller's environment.
+
+The script redirection will set the state "failure" marker if the call fails or if the input value cannot be resolved.
+
+====Invocation====
