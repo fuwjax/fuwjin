@@ -40,7 +40,7 @@ The simple version of an alias binds a qualified name to a simple name. A qualif
 
  Signature = _!QualifiedName_ *(* _Parameters_? *)*
 
- Parameters = _!QualifiedName_ (*,* _!QualifiedName_)*
+ Parameters = _!QualifiedName_ (*,* _!QualifiedName_)`*`
 
 This more complicated version of alias binds a function signature to a simple name. A Signature is a qualified name followed by a comma delimited list of qualified names enclosed in parentheses.
 
