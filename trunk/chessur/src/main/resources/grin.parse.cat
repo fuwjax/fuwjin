@@ -507,7 +507,7 @@ alias org.fuwjin.dinah.Function as Function
 }
 
 <Sep>{
-  is not <IdentifierChar>
+  is not isIdentifierCodepoint(next)
   <S>
 }
 <S>{

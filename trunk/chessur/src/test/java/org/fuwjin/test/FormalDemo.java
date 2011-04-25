@@ -1,5 +1,6 @@
 package org.fuwjin.test;
 
+import static org.fuwjin.chessur.Catalog.loadCat;
 import static org.fuwjin.util.StreamUtils.reader;
 import static org.fuwjin.util.StringUtils.readAll;
 import static org.hamcrest.CoreMatchers.is;
@@ -13,242 +14,86 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import org.fuwjin.chessur.Catalog;
+import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
 import org.fuwjin.chessur.InStream;
 import org.fuwjin.chessur.OutStream;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.fuwjin.util.Parameterized;
+import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
 import org.fuwjin.util.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(Parameterized.class)
 public class FormalDemo {
-   private static final class CatTest implements Iterable<TestCase> {
+   private static final class TestData {
       private final File file;
+      private Catalog cat;
+      private Method interpreter;
 
-      public CatTest(final File file) {
+      public TestData(final File file) {
          this.file = file;
       }
 
-      public String canonical() throws IOException {
-         return readAll(new FileReader(new File(file, name() + ".cat.canonical")));
+      public Catalog cat() throws Exception {
+         if(cat == null) {
+            final Reader reader = new FileReader(new File(file, file.getName() + ".cat"));
+            cat = Catalog.loadCat(StringUtils.readAll(reader));
+         }
+         return cat;
       }
 
-      public Reader catFile() throws FileNotFoundException {
-         return new FileReader(new File(file, name() + ".cat"));
-      }
-
-      @Override
-      public Iterator<TestCase> iterator() {
-         return new Iterator<TestCase>() {
-            private int index = 1;
-            private TestCase current;
-            private TestCase next = new TestCase(file, index);
-
-            @Override
-            public boolean hasNext() {
-               return next.exists();
-            }
-
-            @Override
-            public TestCase next() {
-               if(!hasNext()) {
-                  throw new NoSuchElementException();
-               }
-               current = next;
-               next = new TestCase(file, ++index);
-               return current;
-            }
-
-            @Override
-            public void remove() {
-               throw new UnsupportedOperationException();
-            }
-         };
-      }
-
-      public String name() {
-         return file.getName();
+      public Method interpreter() throws Exception {
+         if(interpreter == null) {
+            interpreter = compile(file.getName(), cat());
+         }
+         return interpreter;
       }
    }
 
-   private static final class TestCase {
-      private final File in;
-      private final File out;
-      private final File err;
-      private final File match;
-      private final String name;
-
-      public TestCase(final File file, final int index) {
-         in = new File(file, file.getName() + ".cat.input." + index);
-         out = new File(file, file.getName() + ".cat.output." + index);
-         err = new File(file, file.getName() + ".cat.error." + index);
-         match = new File(file, file.getName() + ".cat.matcher." + index);
-         name = "case " + index + " of " + file;
-      }
-
-      public String error() throws FileNotFoundException, IOException {
-         if(err.exists()) {
-            return StringUtils.readAll(new FileReader(err));
-         }
-         return "";
-      }
-
-      public boolean exists() {
-         return in.canRead() || out.canRead() || err.canRead() || match.canRead();
-      }
-
-      public String firstError() throws FileNotFoundException, IOException {
-         final String err = error();
-         final int index = err.indexOf('\n');
-         if(index == -1) {
-            return err;
-         }
-         return err.substring(0, index);
-      }
-
-      public Reader input() throws FileNotFoundException {
-         if(in.exists()) {
-            return new FileReader(in);
-         }
-         return new StringReader("");
-      }
-
-      public Matcher<Object> matcher() {
-         if(match.exists()) {
-            return CoreMatchers.notNullValue();
-         }
-         return CoreMatchers.nullValue();
-      }
-
-      public String output() throws FileNotFoundException, IOException {
-         if(out.exists()) {
-            return StringUtils.readAll(new FileReader(out));
-         }
-         return "";
-      }
-
-      @Override
-      public String toString() {
-         return name;
-      }
-   }
-
-   private static Catalog catParser;
-   private static Catalog catFormatter;
-   private static Catalog catSerializer;
    private static Catalog catCodeGenerator;
+   private static RuntimeClassLoader loader;
 
-   @BeforeClass
-   public static void setUp() throws Exception {
-      catParser = Catalog.loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      catFormatter = Catalog.loadCat(readAll(reader("grin.format.cat", "UTF-8")));
-      catSerializer = Catalog.loadCat(readAll(reader("grin.serial.cat", "UTF-8")));
-      catCodeGenerator = Catalog.loadCat(readAll(reader("grin.code.cat", "UTF-8")));
-   }
-
-   private static Iterable<File> catFiles() {
+   @Parameters
+   public static Collection<Object[]> parameters() {
       final File catPath = new File("src/test/resources/cat");
-      return Arrays.asList(catPath.listFiles(new FilenameFilter() {
+      final List<Object[]> list = new ArrayList<Object[]>();
+      for(final File file: catPath.listFiles(new FilenameFilter() {
          @Override
          public boolean accept(final File dir, final String name) {
             return !name.startsWith(".");
          }
-      }));
-   }
-
-   private static Map<String, ? extends Object> environment() {
-      final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("postage", new ReflectiveFunctionProvider());
-      env.put("var", "test");
-      return env;
-   }
-
-   @Test
-   public void testCodeGeneration() throws Exception {
-      for(final File file: catFiles()) {
-         try {
-            final CatTest catTest = new CatTest(file);
-            final Catalog cat = (Catalog)catParser.transform(InStream.stream(catTest.catFile()), environment());
-            final Method interpret = compile(catTest.name(), cat);
-            for(final TestCase test: catTest) {
-               try {
-                  final StringBuilder codeOutput = new StringBuilder();
-                  final Object codeResult = interpret.invoke(null, readAll(test.input()), codeOutput, environment());
-                  final Object result = cat.transform(InStream.stream(test.input()), OutStream.NONE, environment());
-                  assertThat(codeResult, is(result));
-                  assertThat(codeOutput.toString(), is(test.output()));
-               } catch(final InvocationTargetException e) {
-                  assertThat(test.toString(), e.getCause().getMessage(), is(test.firstError()));
-               }
+      })) {
+         for(int index = 1; index < Integer.MAX_VALUE; index++) {
+            final File in = new File(file, file.getName() + ".cat.input." + index);
+            final File out = new File(file, file.getName() + ".cat.output." + index);
+            final File err = new File(file, file.getName() + ".cat.error." + index);
+            final File match = new File(file, file.getName() + ".cat.matcher." + index);
+            if(!in.canRead() && !out.canRead() && !err.canRead() && !match.canRead()) {
+               break;
             }
-         } catch(final Exception e) {
-            throw new RuntimeException("error in file: " + file, e);
+            list.add(new Object[]{file.getName() + " case " + index, file, index, new TestData(file)});
          }
       }
+      return list;
    }
 
-   @Test
-   public void testFormatting() throws Exception {
-      for(final File file: catFiles()) {
-         try {
-            final CatTest catTest = new CatTest(file);
-            final OutStream formatterOutput = OutStream.stream();
-            catFormatter.transform(InStream.stream(catTest.catFile()), formatterOutput,
-                  Collections.<String, Object> emptyMap());
-            assertThat(formatterOutput.toString(), is(catTest.canonical()));
-         } catch(final Exception e) {
-            throw new RuntimeException("error in file: " + file, e);
-         }
-      }
+   @BeforeClass
+   public static void setUp() throws Exception {
+      catCodeGenerator = Catalog.loadCat(readAll(reader("grin.code.cat", "UTF-8")));
+      loader = new RuntimeClassLoader();
    }
 
-   @Test
-   public void testParsing() throws Exception {
-      for(final File file: catFiles()) {
-         try {
-            final CatTest catTest = new CatTest(file);
-            final Catalog cat = (Catalog)catParser.transform(InStream.stream(catTest.catFile()), environment());
-            for(final TestCase test: catTest) {
-               final OutStream output = OutStream.stream();
-               try {
-                  final Object result = cat.transform(InStream.stream(test.input()), output, environment());
-                  assertThat(test.toString(), output.toString(), is(test.output()));
-                  assertThat(test.toString(), result, is(test.matcher()));
-               } catch(final RuntimeException e) {
-                  assertThat(test.toString(), e.getMessage(), is(test.error()));
-               }
-            }
-         } catch(final Exception e) {
-            throw new RuntimeException("error in file: " + file, e);
-         }
-      }
-   }
-
-   @Test
-   public void testSerialization() throws Exception {
-      for(final File file: catFiles()) {
-         try {
-            final CatTest catTest = new CatTest(file);
-            final Catalog cat = (Catalog)catParser.transform(InStream.stream(catTest.catFile()), environment());
-            final OutStream serialOutput = OutStream.stream();
-            catSerializer.transform(InStream.NONE, serialOutput, Collections.singletonMap("cat", cat));
-            assertThat(serialOutput.toString(), is(catTest.canonical()));
-         } catch(final Exception e) {
-            throw new RuntimeException("error in file: " + file, e);
-         }
-      }
-   }
-
-   private Method compile(final String simpleClassName, final Catalog cat) throws SecurityException,
+   private static Method compile(final String simpleClassName, final Catalog cat) throws SecurityException,
          NoSuchMethodException, ClassNotFoundException {
       final OutStream code = OutStream.stream();
       final Map<String, Object> environment = new HashMap<String, Object>();
@@ -256,10 +101,75 @@ public class FormalDemo {
       environment.put("package", "org.fuwjin.internal.generated");
       environment.put("className", simpleClassName);
       catCodeGenerator.transform(InStream.STDIN, code, environment);
-      final RuntimeClassLoader loader = new RuntimeClassLoader();
       final String className = "org.fuwjin.internal.generated." + simpleClassName + "Interpreter";
       loader.compile(className, code.toString());
       final Class<?> parserClass = loader.loadClass(className);
       return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
+   }
+
+   private static Map<String, ? extends Object> environment() {
+      final Map<String, Object> env = new HashMap<String, Object>();
+      env.put("var", "test");
+      return env;
+   }
+
+   private static String firstLine(final String string) {
+      final int index = string.indexOf('\n');
+      if(index == -1) {
+         return string;
+      }
+      return string.substring(0, index);
+   }
+
+   private static Matcher<Object> matcher(final Reader reader) throws ChessurException, IOException {
+      if(reader instanceof StringReader) {
+         return CoreMatchers.nullValue();
+      }
+      return (Matcher<Object>)loadCat(readAll(reader)).transform(InStream.NONE);
+   }
+
+   private final File file;
+   private final int index;
+   private final TestData data;
+
+   public FormalDemo(final String name, final File file, final int index, final TestData data) {
+      this.file = file;
+      this.index = index;
+      this.data = data;
+   }
+
+   @Test
+   public void testCodeGeneration() throws Exception {
+      try {
+         final StringBuilder codeOutput = new StringBuilder();
+         final Object codeResult = data.interpreter().invoke(null, readAll(newReader(".cat.input")), codeOutput,
+               environment());
+         final Object result = data.cat().transform(InStream.stream(newReader(".cat.input")), OutStream.NONE,
+               environment());
+         assertThat(codeResult, is(result));
+         assertThat(codeOutput.toString(), is(StringUtils.readAll(newReader(".cat.output"))));
+      } catch(final InvocationTargetException e) {
+         assertThat(e.getCause().getMessage(), is(firstLine(readAll(newReader(".cat.error")))));
+      }
+   }
+
+   @Test
+   public void testParsing() throws Exception {
+      final OutStream output = OutStream.stream();
+      try {
+         final Object result = data.cat().transform(InStream.stream(newReader(".cat.input")), output, environment());
+         assertThat(output.toString(), is(readAll(newReader(".cat.output"))));
+         assertThat(result, is(matcher(newReader(".cat.matcher"))));
+      } catch(final RuntimeException e) {
+         assertThat(e.getMessage(), is(readAll(newReader(".cat.error"))));
+      }
+   }
+
+   private Reader newReader(final String suffix) throws FileNotFoundException {
+      final File f = new File(file, file.getName() + suffix + "." + index);
+      if(f.exists()) {
+         return new FileReader(f);
+      }
+      return new StringReader("");
    }
 }
