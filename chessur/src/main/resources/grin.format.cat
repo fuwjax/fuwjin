@@ -91,7 +91,7 @@ alias org.fuwjin.chessur.Indent as Indent
     accept 'not' <Sep>
     publish "not "
   }
-  either <InFilter> 
+  either <InFilter>
   or publish <Value>
   or abort "is keyword requires value or in keyword"
 }

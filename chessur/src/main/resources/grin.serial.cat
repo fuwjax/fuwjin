@@ -113,6 +113,7 @@ alias java.util.Map$Entry.getValue as value
   } or {
     is ValueAcceptStatement.instanceof(value)
     value = ValueAcceptStatement.value(value)
+    is Literal.instanceof(value)
     <Value>
   } or {
     <Value>
