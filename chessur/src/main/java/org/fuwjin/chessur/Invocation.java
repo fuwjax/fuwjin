@@ -10,11 +10,15 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Function;
-import org.fuwjin.util.BusinessException;
+import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * 
@@ -39,6 +43,29 @@ public class Invocation implements Expression {
       return params.size();
    }
 
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException, AbortedException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      final Object[] args = new Object[params.size()];
+      int index = 0;
+      for(final Expression param: params) {
+         try {
+            final Object result = param.resolve(input, output, scope);
+            args[index++] = result;
+         } catch(final ResolveException e) {
+            throw e.addStackTrace(snapshot, "Could not resolve %s argument %d", name(), index);
+         }
+      }
+      try {
+         return function.invoke(args);
+      } catch(final InvocationTargetException e) {
+         throw new ResolveException(e.getCause(), snapshot, "Failure in invocation target %s", name());
+      } catch(final AdaptException e) {
+         throw new ResolveException(e, snapshot, "Could not invoke %s", name());
+      }
+   }
+
    public void setFunction(final Function function) {
       this.function = function;
    }
@@ -56,28 +83,5 @@ public class Invocation implements Expression {
          builder.append(param);
       }
       return builder.append(")").toString();
-   }
-
-   @Override
-   public State transform(final State state) {
-      final Object[] args = new Object[params.size()];
-      int index = 0;
-      State result = state;
-      for(final Expression param: params) {
-         result = param.transform(result);
-         if(!result.isSuccess()) {
-            return state.failure(result, "Could not resolve value %d", index);
-         }
-         args[index++] = result.value();
-      }
-      try {
-         final Object ret = function.invoke(args);
-         return result.value(ret);
-      } catch(final Exception e) {
-         if(e instanceof BusinessException) {
-            System.out.println(e);
-         }
-         return state.failure(result.failure("Postage failure: %s", e), "Could not invoke postage function");
-      }
    }
 }

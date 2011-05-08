@@ -12,12 +12,9 @@ package org.fuwjin.test;
 
 import static java.util.Collections.singletonMap;
 import static org.fuwjin.chessur.Catalog.loadCat;
-import static org.fuwjin.chessur.InStream.STDIN;
-import static org.fuwjin.chessur.InStream.stream;
-import static org.fuwjin.chessur.OutStream.STDOUT;
+import static org.fuwjin.util.StreamUtils.readAll;
 import static org.fuwjin.util.StreamUtils.reader;
 import static org.fuwjin.util.StreamUtils.writer;
-import static org.fuwjin.util.StringUtils.readAll;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
@@ -28,8 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
-import org.fuwjin.chessur.InStream;
-import org.fuwjin.chessur.OutStream;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.junit.Test;
 
@@ -42,15 +37,13 @@ public class ChessurDemo {
    }
 
    @Test
-   public void demoForSatish() throws IOException, ChessurException {
+   public void demoForSatish() throws Exception {
       final Catalog parser = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog grin = (Catalog)parser.transform(InStream.stream(reader("satish.cat", "UTF-8")), OutStream.STDOUT,
-            Collections.<String, Object> singletonMap("postage", new ReflectiveFunctionProvider()));
-      final InStream input = STDIN;
-      final OutStream output = STDOUT;
+      final Catalog grin = (Catalog)parser.exec(reader("satish.cat", "UTF-8"), System.out,
+            Collections.singletonMap("postage", new ReflectiveFunctionProvider()));
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("list", Arrays.asList(1, 2, 3));
-      final Object result = grin.transform(input, output, environment);
+      final Object result = grin.exec(System.in, System.out, environment);
       System.out.println("Grin result: " + result);
    }
 
@@ -60,9 +53,9 @@ public class ChessurDemo {
     * @throws ChessurException if it fails
     */
    @Test
-   public void demoGrin() throws IOException, ChessurException {
+   public void demoGrin() throws Exception {
       final Catalog parser = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog grin = (Catalog)parser.transform(stream(reader("grin.parse.cat", "UTF-8")), STDOUT,
+      final Catalog grin = (Catalog)parser.exec(reader("grin.parse.cat", "UTF-8"), System.out,
             singletonMap("postage", new ReflectiveFunctionProvider()));
       assertNotNull(grin.get("EndOfFile"));
    }
@@ -73,10 +66,10 @@ public class ChessurDemo {
     * @throws ChessurException if it fails
     */
    @Test
-   public void demoGrinCode() throws IOException, ChessurException {
+   public void demoGrinCode() throws Exception {
       new File("target/generated/org/fuwjin/test/generated").mkdirs();
       final Catalog cat = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog serial = (Catalog)cat.transform(stream(reader("grin.code.cat", "UTF-8")), STDOUT,
+      final Catalog serial = (Catalog)cat.exec(reader("grin.code.cat", "UTF-8"), System.out,
             singletonMap("postage", new ReflectiveFunctionProvider()));
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
@@ -84,7 +77,7 @@ public class ChessurDemo {
       environment.put("className", "Chessur");
       final Writer writer = writer("target/generated/org/fuwjin/test/generated/ChessurInterpreter.java", "UTF-8");
       try {
-         serial.transform(InStream.NONE, OutStream.stream(writer), environment);
+         serial.exec(writer, environment);
       } finally {
          writer.close();
       }
@@ -96,14 +89,14 @@ public class ChessurDemo {
     * @throws ChessurException if it fails
     */
    @Test
-   public void demoGrinSerial() throws IOException, ChessurException {
+   public void demoGrinSerial() throws Exception {
       new File("target/generated").mkdirs();
       final Catalog cat = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog serial = (Catalog)cat.transform(stream(reader("grin.serial.cat", "UTF-8")), STDOUT,
+      final Catalog serial = (Catalog)cat.exec(reader("grin.serial.cat", "UTF-8"), System.out,
             singletonMap("postage", new ReflectiveFunctionProvider()));
       final Writer writer = writer("target/generated/grin.parse.test.cat", "UTF-8");
       try {
-         serial.transform(InStream.NONE, OutStream.stream(writer), singletonMap("cat", cat));
+         serial.exec(writer, singletonMap("cat", cat));
       } finally {
          writer.close();
       }

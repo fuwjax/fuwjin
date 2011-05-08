@@ -2,16 +2,16 @@ package org.fuwjin.test;
 
 import static org.fuwjin.chessur.Catalog.loadCat;
 import static org.fuwjin.util.StreamUtils.reader;
-import static org.fuwjin.util.StringUtils.readAll;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,14 +19,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
-import org.fuwjin.chessur.InStream;
-import org.fuwjin.chessur.OutStream;
+import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
-import org.fuwjin.util.StringUtils;
+import org.fuwjin.util.StreamUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
@@ -34,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(Parameterized.class)
-public class FormalDemo {
+public class ScriptExecutionDemo {
    private static final class TestData {
       private final File file;
       private Catalog cat;
@@ -47,7 +46,7 @@ public class FormalDemo {
       public Catalog cat() throws Exception {
          if(cat == null) {
             final Reader reader = new FileReader(new File(file, file.getName() + ".cat"));
-            cat = Catalog.loadCat(StringUtils.readAll(reader));
+            cat = Catalog.loadCat(StreamUtils.readAll(reader));
          }
          return cat;
       }
@@ -89,18 +88,17 @@ public class FormalDemo {
 
    @BeforeClass
    public static void setUp() throws Exception {
-      catCodeGenerator = Catalog.loadCat(readAll(reader("grin.code.cat", "UTF-8")));
+      catCodeGenerator = Catalog.loadCat(StreamUtils.readAll(reader("grin.code.cat", "UTF-8")));
       loader = new RuntimeClassLoader();
    }
 
-   private static Method compile(final String simpleClassName, final Catalog cat) throws SecurityException,
-         NoSuchMethodException, ClassNotFoundException {
-      final OutStream code = OutStream.stream();
+   private static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
+      final Writer code = new StringWriter();
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
       environment.put("package", "org.fuwjin.internal.generated");
       environment.put("className", simpleClassName);
-      catCodeGenerator.transform(InStream.STDIN, code, environment);
+      catCodeGenerator.exec(code, environment);
       final String className = "org.fuwjin.internal.generated." + simpleClassName + "Interpreter";
       loader.compile(className, code.toString());
       final Class<?> parserClass = loader.loadClass(className);
@@ -121,18 +119,18 @@ public class FormalDemo {
       return string.substring(0, index);
    }
 
-   private static Matcher<Object> matcher(final Reader reader) throws ChessurException, IOException {
+   private static Matcher<Object> matcher(final Reader reader) throws Exception {
       if(reader instanceof StringReader) {
          return CoreMatchers.nullValue();
       }
-      return (Matcher<Object>)loadCat(readAll(reader)).transform(InStream.NONE);
+      return (Matcher<Object>)loadCat(StreamUtils.readAll(reader)).exec();
    }
 
    private final File file;
    private final int index;
    private final TestData data;
 
-   public FormalDemo(final String name, final File file, final int index, final TestData data) {
+   public ScriptExecutionDemo(final String name, final File file, final int index, final TestData data) {
       this.file = file;
       this.index = index;
       this.data = data;
@@ -142,26 +140,26 @@ public class FormalDemo {
    public void testCodeGeneration() throws Exception {
       try {
          final StringBuilder codeOutput = new StringBuilder();
-         final Object codeResult = data.interpreter().invoke(null, readAll(newReader(".cat.input")), codeOutput,
-               environment());
-         final Object result = data.cat().transform(InStream.stream(newReader(".cat.input")), OutStream.NONE,
-               environment());
-         assertThat(codeResult, is(result));
-         assertThat(codeOutput.toString(), is(StringUtils.readAll(newReader(".cat.output"))));
+         final Object codeResult = data.interpreter().invoke(null, StreamUtils.readAll(newReader(".cat.input")),
+               codeOutput, environment());
+         assertThat(codeOutput.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
+         assertThat(codeResult, is(matcher(newReader(".cat.matcher"))));
       } catch(final InvocationTargetException e) {
-         assertThat(e.getCause().getMessage(), is(firstLine(readAll(newReader(".cat.error")))));
+         assertThat(e.getCause().getMessage(), is(firstLine(StreamUtils.readAll(newReader(".cat.error")))));
       }
    }
 
    @Test
    public void testParsing() throws Exception {
-      final OutStream output = OutStream.stream();
+      final Writer output = new StringWriter();
       try {
-         final Object result = data.cat().transform(InStream.stream(newReader(".cat.input")), output, environment());
-         assertThat(output.toString(), is(readAll(newReader(".cat.output"))));
-         assertThat(result, is(matcher(newReader(".cat.matcher"))));
-      } catch(final RuntimeException e) {
-         assertThat(e.getMessage(), is(readAll(newReader(".cat.error"))));
+         final Object result = data.cat().exec(newReader(".cat.input"), output, environment());
+         assertThat(output.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
+         if(Adapter.isSet(result)) {
+            assertThat(result, is(matcher(newReader(".cat.matcher"))));
+         }
+      } catch(final ExecutionException e) {
+         assertThat(e.getCause().getMessage(), is(StreamUtils.readAll(newReader(".cat.error"))));
       }
    }
 

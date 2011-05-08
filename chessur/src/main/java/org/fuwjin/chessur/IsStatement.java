@@ -11,6 +11,11 @@
 package org.fuwjin.chessur;
 
 import java.lang.reflect.Array;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
 
 /**
  * Allows testing for default values.
@@ -49,19 +54,30 @@ public class IsStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "is " + (isNot ? "not " : "") + value;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException, AbortedException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      if(isNot) {
+         final Object result;
+         try {
+            result = snapshot.resolve(value, false);
+         } catch(final ResolveException e) {
+            return Adapter.unset();
+         }
+         if(isDefault(result)) {
+            return Adapter.unset();
+         }
+         throw new ResolveException(snapshot, "unexpected value", result);
+      }
+      final Object result = snapshot.resolve(value, false);
+      if(isDefault(result)) {
+         throw new ResolveException(snapshot, "Unexpected default", result);
+      }
+      return Adapter.unset();
    }
 
    @Override
-   public State transform(final State state) {
-      final State result = value.transform(state);
-      if(!result.isSuccess()) {
-         return isNot ? state : result;
-      }
-      if(isDefault(result.value()) ^ isNot) {
-         return state.failure(result.failure("unexpected value"), "failed is test");
-      }
-      return state;
+   public String toString() {
+      return "is " + (isNot ? "not " : "") + value;
    }
 }

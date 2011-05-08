@@ -135,17 +135,23 @@ public class 'className'Interpreter {
     private final Appendable appender;
     
     public StringCursor(final CharSequence seq, final Appendable appender) {
-      this(0, 1, 1, seq, appender, null);
+         start = 0;
+         pos = 0;
+         this.seq = seq;
+         parent = null;
+         line = 1;
+         column = 0;
+         this.appender = appender;
     }
     
-    public StringCursor(final int start, final int line, final int column, final CharSequence seq, Appendable appender, final StringCursor parent) {
+    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent) {
       this.start = start;
       pos = start;
       this.seq = seq;
       this.parent = parent;
       this.line = line;
       this.column = column;
-      this.appender = appender;
+      this.appender = new StringBuilder();
     }
     
     public int accept() throws 'className'Exception {
@@ -223,13 +229,21 @@ public class 'className'Interpreter {
       parent.pos = pos;
       parent.line = line;
       parent.column = column;
+      try {
+        parent.appender.append(appender.toString());
+      } catch(final IOException e) {
+        throw new RuntimeException(\"IOException never thrown by StringBuilder\", e);
+      }
     }
     
     public 'className'Exception ex(final String message) {
-      if(pos >= seq.length()) {
+      if(pos == 0) {
+        return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] SOF -> [1,0] SOF\");
+      }
+      if(pos > seq.length()) {
         return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\");
       }
-      return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos)+\"' -> [1,0] SOF\");
+      return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos - 1)+\"' -> [1,0] SOF\");
     }
     
     public 'className'Exception ex(final Throwable cause) {
@@ -253,7 +267,7 @@ public class 'className'Interpreter {
     }
     
     public StringCursor sub() {
-      return new StringCursor(pos, line, column, seq, appender, this);
+      return new StringCursor(pos, line, column, seq, this);
     }
     
     public String match() {
@@ -338,7 +352,7 @@ public class 'className'Interpreter {
     publish "'indent'  b = false;"
     publish "'indent'}"
     publish "'indent'if(b){"
-    publish "'indent'  throw 'input'.ex(\"unexpected value\");"
+    publish "'indent'  throw 'oldInput'.ex(\"unexpected value\");"
     publish "'indent'}"
   } or {
     publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"

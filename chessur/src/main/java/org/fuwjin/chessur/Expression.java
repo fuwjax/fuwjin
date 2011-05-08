@@ -10,14 +10,13 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Transforms a state.
  */
 public interface Expression {
-   /**
-    * Transforms a state.
-    * @param state the input state
-    * @return the output state
-    */
-   State transform(State state);
+   Object resolve(SourceStream input, SinkStream output, Environment scope) throws AbortedException, ResolveException;
 }

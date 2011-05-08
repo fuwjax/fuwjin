@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Accepts based on a filter.
  */
@@ -28,24 +33,23 @@ public class FilterAcceptStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "accept " + (isNot ? "not " : "") + "in " + filter;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      if(isNot) {
+         if(filter.allow((Integer)input.next(snapshot).value())) {
+            throw new ResolveException(snapshot, "Unexpected match: %s", filter);
+         }
+         return input.read(snapshot).value();
+      }
+      if(filter.allow((Integer)input.next(snapshot).value())) {
+         return input.read(snapshot).value();
+      }
+      throw new ResolveException(snapshot, "Did not match filter: %s", filter);
    }
 
    @Override
-   public State transform(final State state) {
-      if(state.current() == InStream.EOF) {
-         return state.failure("unexpected EOF");
-      }
-      if(isNot) {
-         if(filter.allow(state.current())) {
-            return state.failure("Unexpected match: %s", filter);
-         }
-         return state.accept();
-      }
-      if(filter.allow(state.current())) {
-         return state.accept();
-      }
-      return state.failure("Did not match filter: %s", filter);
+   public String toString() {
+      return "accept " + (isNot ? "not " : "") + "in " + filter;
    }
 }

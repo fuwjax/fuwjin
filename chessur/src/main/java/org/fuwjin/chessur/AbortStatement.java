@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Represents an unrecoverable failure.
  */
@@ -25,12 +30,19 @@ public class AbortStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "abort " + value;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      try {
+         final Object val = value.resolve(input, output, scope);
+         throw new AbortedException("%s: %s", val, snapshot);
+      } catch(final Exception e) {
+         throw new AbortedException(e, "Abort string could not be generated: %s", snapshot);
+      }
    }
 
    @Override
-   public State transform(final State state) {
-      throw new RuntimeException(String.valueOf(value.transform(state).value()) + " " + state);
+   public String toString() {
+      return "abort " + value;
    }
 }

@@ -10,10 +10,14 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Represents a Specificaton reference.
  */
-public class Script extends Transformer {
+public class Script extends Executable implements Expression {
    private Declaration decl;
    private final String name;
 
@@ -33,8 +37,18 @@ public class Script extends Transformer {
     * Returns the name.
     * @return the name
     */
+   @Override
    public String name() {
       return name;
+   }
+
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException, AbortedException {
+      if(decl == null) {
+         throw new RuntimeException("Undefined script " + name);
+      }
+      return decl.resolve(input, output, scope);
    }
 
    @Override
@@ -43,11 +57,8 @@ public class Script extends Transformer {
    }
 
    @Override
-   public State transform(final State state) {
-      if(decl == null) {
-         throw new RuntimeException("Undefined script " + name);
-      }
-      return decl.transform(state);
+   protected Expression expression() {
+      return decl;
    }
 
    /**

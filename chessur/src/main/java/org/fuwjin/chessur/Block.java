@@ -11,9 +11,12 @@
 package org.fuwjin.chessur;
 
 import static java.util.Collections.unmodifiableCollection;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
 
 /**
  * Represents a sequence of statements.
@@ -27,6 +30,16 @@ public class Block implements Expression {
     */
    public void add(final Expression statement) {
       statements.add(statement);
+   }
+
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      Object result = Adapter.unset();
+      for(final Expression statement: statements) {
+         result = statement.resolve(input, output, scope);
+      }
+      return result;
    }
 
    /**
@@ -44,17 +57,5 @@ public class Block implements Expression {
          builder.append("\n  ").append(statement);
       }
       return builder.append("\n}").toString();
-   }
-
-   @Override
-   public State transform(final State state) {
-      State s = state;
-      for(final Expression statement: statements) {
-         s = statement.transform(s);
-         if(!s.isSuccess()) {
-            return state.failure(s, "Error in sequence");
-         }
-      }
-      return s;
    }
 }

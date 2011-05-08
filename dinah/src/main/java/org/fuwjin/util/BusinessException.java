@@ -62,6 +62,10 @@ public class BusinessException extends Exception {
    }
 
    protected String format(final Object[] formatArgs) {
-      return String.format(super.getMessage(), formatArgs);
+      return format(super.getMessage(), formatArgs);
+   }
+
+   protected String format(final String pattern, final Object[] formatArgs) {
+      return String.format(pattern, formatArgs);
    }
 }

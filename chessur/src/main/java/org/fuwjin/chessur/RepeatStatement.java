@@ -10,6 +10,12 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
+
 /**
  * Represents a statement that repeats one or more times.
  */
@@ -25,21 +31,23 @@ public class RepeatStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "repeat " + statement;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      Snapshot snapshot = new Snapshot(input, output, scope);
+      statement.resolve(input, output, scope);
+      try {
+         while(true) {
+            snapshot = new Snapshot(input, output, scope);
+            snapshot.resolve(statement, true);
+         }
+      } catch(final ResolveException e) {
+         // continue
+      }
+      return Adapter.unset();
    }
 
    @Override
-   public State transform(final State state) {
-      State result = statement.transform(state);
-      if(!result.isSuccess()) {
-         return result;
-      }
-      State last = state;
-      while(result.isSuccess() && result != last) {
-         last = result;
-         result = statement.transform(result);
-      }
-      return last;
+   public String toString() {
+      return "repeat " + statement;
    }
 }
