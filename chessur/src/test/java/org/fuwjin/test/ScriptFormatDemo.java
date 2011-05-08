@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.chessur.ICatalog;
+import org.fuwjin.chessur.Catalog;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -27,9 +27,9 @@ import org.junit.runner.RunWith;
 @RunWith(Parameterized.class)
 public class ScriptFormatDemo {
    private static CatalogManager manager;
-   private static ICatalog catParser;
-   private static ICatalog catFormatter;
-   private static ICatalog catSerializer;
+   private static Catalog catParser;
+   private static Catalog catFormatter;
+   private static Catalog catSerializer;
 
    @Parameters
    public static Collection<Object[]> parameters() {
@@ -70,7 +70,7 @@ public class ScriptFormatDemo {
    @Ignore
    @Test
    public void testHardSerialization() throws Exception {
-      final ICatalog cat = manager.loadCat(StreamUtils.readAll(newReader(".cat")));
+      final Catalog cat = manager.loadCat(StreamUtils.readAll(newReader(".cat")));
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
       assertThat(serialOutput.toString(), is(StreamUtils.readAll(newReader(".cat.canonical"))));
@@ -79,7 +79,7 @@ public class ScriptFormatDemo {
    @Ignore
    @Test
    public void testSerialization() throws Exception {
-      final ICatalog cat = (ICatalog)catParser.exec(newReader(".cat"),
+      final Catalog cat = (Catalog)catParser.exec(newReader(".cat"),
             Collections.singletonMap("postage", new ReflectiveFunctionProvider()));
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));

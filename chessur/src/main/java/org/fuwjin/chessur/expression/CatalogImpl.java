@@ -17,23 +17,23 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.chessur.ICatalog;
-import org.fuwjin.chessur.IExecutable;
+import org.fuwjin.chessur.Catalog;
+import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.FunctionSignature;
 
 /**
  * Manages a collection of specificatons.
  */
-public class Catalog extends Executable implements ICatalog {
+public class CatalogImpl extends Executable implements Catalog {
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
    private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
-   private final Map<String, Script> scripts = new LinkedHashMap<String, Script>();
-   private final Map<String, ICatalog> modules = new LinkedHashMap<String, ICatalog>();
+   private final Map<String, ScriptImpl> scripts = new LinkedHashMap<String, ScriptImpl>();
+   private final Map<String, Catalog> modules = new LinkedHashMap<String, Catalog>();
    private Declaration root;
    private final CatalogManager manager;
 
-   public Catalog(final String name, final CatalogManager manager) {
+   public CatalogImpl(final String name, final CatalogManager manager) {
       this.manager = manager;
    }
 
@@ -42,7 +42,7 @@ public class Catalog extends Executable implements ICatalog {
     * @param decl the new declaration
     */
    public void add(final Declaration decl) {
-      final Script s = (Script)get(decl.name());
+      final ScriptImpl s = (ScriptImpl)get(decl.name());
       s.setDecl(decl);
       if(root == null) {
          root = decl;
@@ -108,16 +108,16 @@ public class Catalog extends Executable implements ICatalog {
     * @return the specification
     */
    @Override
-   public IExecutable get(final String name) {
-      Script s = scripts.get(name);
+   public Script get(final String name) {
+      ScriptImpl s = scripts.get(name);
       if(s == null) {
-         s = new Script(name);
+         s = new ScriptImpl(name);
          scripts.put(name, s);
       }
       return s;
    }
 
-   public ICatalog getModule(final String name) {
+   public Catalog getModule(final String name) {
       return modules.get(name);
    }
 
@@ -148,7 +148,7 @@ public class Catalog extends Executable implements ICatalog {
     * @return the scripts
     */
    @Override
-   public Iterable<? extends IExecutable> scripts() {
+   public Iterable<? extends Script> scripts() {
       return unmodifiableCollection(scripts.values());
    }
 

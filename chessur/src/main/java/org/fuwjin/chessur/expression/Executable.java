@@ -16,7 +16,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.fuwjin.chessur.IExecutable;
+import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.stream.CodePointInStream;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.ObjectOutStream;
@@ -27,7 +27,7 @@ import org.fuwjin.util.Adapter;
 /**
  * Base utility class for all things transformative.
  */
-public abstract class Executable implements IExecutable {
+public abstract class Executable implements Script {
    @Override
    public Object exec() throws ExecutionException {
       return exec(CodePointInStream.NONE, ObjectOutStream.NONE, Environment.NONE);
@@ -140,5 +140,5 @@ public abstract class Executable implements IExecutable {
       }
    }
 
-   protected abstract Expression expression();
+   protected abstract Expression expression() throws AbortedException;
 }

@@ -18,14 +18,14 @@ alias org.fuwjin.chessur.expression.Declaration as Declaration
 alias org.fuwjin.chessur.expression.EitherOrStatement as EitherOrStatement
 alias org.fuwjin.chessur.expression.Filter as Filter
 alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.expression.Catalog as Catalog
+alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
 alias org.fuwjin.chessur.expression.Invocation as Invocation
 alias org.fuwjin.chessur.expression.IsStatement as IsStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
-alias org.fuwjin.chessur.expression.Script as Script
+alias org.fuwjin.chessur.expression.ScriptImpl as Script
 alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
 alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
 alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
