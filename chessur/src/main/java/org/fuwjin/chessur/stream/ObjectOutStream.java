@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.AbortedException;
+import org.fuwjin.chessur.expression.AbortedException;
 
 public abstract class ObjectOutStream implements SinkStream {
    private class DetachedStream implements SinkStream {

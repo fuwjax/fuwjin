@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Iterator;
-import org.fuwjin.chessur.ResolveException;
+import org.fuwjin.chessur.expression.ResolveException;
 
 public abstract class CodePointInStream implements SourceStream {
    private class DetachedStream implements SourceStream {

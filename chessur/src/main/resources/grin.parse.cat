@@ -10,29 +10,29 @@
 #-------------------------------------------------------------------------------
 alias java.lang.Boolean as Boolean
 alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
-alias org.fuwjin.chessur.AbortStatement as AbortStatement
-alias org.fuwjin.chessur.Assignment as Assignment
-alias org.fuwjin.chessur.Block as Block
-alias org.fuwjin.chessur.CouldStatement as CouldStatement
-alias org.fuwjin.chessur.Declaration as Declaration
-alias org.fuwjin.chessur.EitherOrStatement as EitherOrStatement
-alias org.fuwjin.chessur.Filter as Filter
-alias org.fuwjin.chessur.FilterAcceptStatement as FilterAcceptStatement
-alias org.fuwjin.chessur.Catalog as Catalog
-alias org.fuwjin.chessur.Invocation as Invocation
-alias org.fuwjin.chessur.IsStatement as IsStatement
-alias org.fuwjin.chessur.Literal as Literal
-alias org.fuwjin.chessur.CompositeLiteral as CompositeLiteral
-alias org.fuwjin.chessur.PublishStatement as PublishStatement
-alias org.fuwjin.chessur.RepeatStatement as RepeatStatement
-alias org.fuwjin.chessur.Script as Script
-alias org.fuwjin.chessur.ScriptInput as ScriptInput
-alias org.fuwjin.chessur.ScriptOutput as ScriptOutput
-alias org.fuwjin.chessur.ScriptPipe as ScriptPipe
-alias org.fuwjin.chessur.ValueAcceptStatement as ValueAcceptStatement
-alias org.fuwjin.chessur.Variable as Variable
-alias org.fuwjin.chessur.Number as Number
-alias org.fuwjin.chessur.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.Assignment as Assignment
+alias org.fuwjin.chessur.expression.Block as Block
+alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
+alias org.fuwjin.chessur.expression.Declaration as Declaration
+alias org.fuwjin.chessur.expression.EitherOrStatement as EitherOrStatement
+alias org.fuwjin.chessur.expression.Filter as Filter
+alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
+alias org.fuwjin.chessur.expression.Catalog as Catalog
+alias org.fuwjin.chessur.expression.Invocation as Invocation
+alias org.fuwjin.chessur.expression.IsStatement as IsStatement
+alias org.fuwjin.chessur.expression.Literal as Literal
+alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
+alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
+alias org.fuwjin.chessur.expression.Script as Script
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
+alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
+alias org.fuwjin.chessur.expression.Variable as Variable
+alias org.fuwjin.chessur.expression.Number as Number
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
 alias org.fuwjin.dinah.FunctionSignature as FunctionSignature
 alias org.fuwjin.dinah.Function as Function
@@ -44,7 +44,7 @@ alias org.fuwjin.dinah.Function as Function
 #   postage: the dinah reflection factory
 # returns the catalog for the Grin stream
 <Catalog>{
-  cat = Catalog.new()
+  cat = Catalog.new(name, manager)
   <S>
   could repeat 
     either <LoadDeclaration>

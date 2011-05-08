@@ -4,7 +4,7 @@ import static org.fuwjin.chessur.stream.CodePointInStream.stringOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import org.fuwjin.chessur.ResolveException;
+import org.fuwjin.chessur.expression.ResolveException;
 import org.fuwjin.chessur.stream.CodePointInStream;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.ObjectOutStream;

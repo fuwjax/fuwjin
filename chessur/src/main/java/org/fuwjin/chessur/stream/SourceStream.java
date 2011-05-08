@@ -1,6 +1,6 @@
 package org.fuwjin.chessur.stream;
 
-import org.fuwjin.chessur.ResolveException;
+import org.fuwjin.chessur.expression.ResolveException;
 
 public interface SourceStream {
    void attach(SourceStream stream);

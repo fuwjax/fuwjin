@@ -1,8 +1,8 @@
 package org.fuwjin.chessur.stream;
 
-import org.fuwjin.chessur.AbortedException;
-import org.fuwjin.chessur.Expression;
-import org.fuwjin.chessur.ResolveException;
+import org.fuwjin.chessur.expression.AbortedException;
+import org.fuwjin.chessur.expression.Expression;
+import org.fuwjin.chessur.expression.ResolveException;
 
 public class Snapshot {
    private final Position out;
