@@ -16,10 +16,18 @@ import org.fuwjin.chessur.stream.ObjectOutStream;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
 
+/**
+ * An expression representing redirected script I/O.
+ */
 public class ScriptPipe implements Expression {
    private final Expression sink;
    private final Expression source;
 
+   /**
+    * Creates a new instance.
+    * @param source the source script
+    * @param sink the destination script
+    */
    public ScriptPipe(final Expression source, final Expression sink) {
       this.source = source;
       this.sink = sink;

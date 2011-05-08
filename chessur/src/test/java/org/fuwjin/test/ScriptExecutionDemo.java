@@ -18,8 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Catalog;
+import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -31,11 +32,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+/**
+ * Demonstrates
+ */
 @RunWith(Parameterized.class)
 public class ScriptExecutionDemo {
    private static final class TestData {
       private final File file;
       private Catalog cat;
+      private Catalog modelCat;
       private Method interpreter;
 
       public TestData(final File file) {
@@ -55,12 +60,28 @@ public class ScriptExecutionDemo {
          }
          return interpreter;
       }
+
+      public Catalog modelCat() throws Exception {
+         if(modelCat == null) {
+            final Map<String, Object> env = new HashMap<String, Object>();
+            env.put("postage", new ReflectiveFunctionProvider());
+            env.put("name", file.getName());
+            env.put("manager", manager);
+            modelCat = (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
+         }
+         return modelCat;
+      }
    }
 
    private static CatalogManager manager;
    private static Catalog catCodeGenerator;
+   private static Catalog catParser;
    private static RuntimeClassLoader loader;
 
+   /**
+    * The parameters for the test.
+    * @return the parameters
+    */
    @Parameters
    public static Collection<Object[]> parameters() {
       final File catPath = new File("src/test/resources/cat");
@@ -85,10 +106,15 @@ public class ScriptExecutionDemo {
       return list;
    }
 
+   /**
+    * Initializes the manager and standard catalogs.
+    * @throws Exception if it fails
+    */
    @BeforeClass
    public static void setUp() throws Exception {
       manager = new CatalogManager();
       catCodeGenerator = manager.loadCat("grin.code.cat");
+      catParser = manager.loadCat("grin.parse.cat");
       loader = new RuntimeClassLoader();
    }
 
@@ -130,12 +156,23 @@ public class ScriptExecutionDemo {
    private final int index;
    private final TestData data;
 
+   /**
+    * Creates a new instance.
+    * @param name the name of the test
+    * @param file the test directory
+    * @param index the test case
+    * @param data the test catalogs
+    */
    public ScriptExecutionDemo(final String name, final File file, final int index, final TestData data) {
       this.file = file;
       this.index = index;
       this.data = data;
    }
 
+   /**
+    * Tests that the code generator works for the test case.
+    * @throws Exception if it fails
+    */
    @Test
    public void testCodeGeneration() throws Exception {
       try {
@@ -149,6 +186,28 @@ public class ScriptExecutionDemo {
       }
    }
 
+   /**
+    * Tests that the cat parser works for the test case.
+    * @throws Exception if it fails
+    */
+   @Test
+   public void testModelParsing() throws Exception {
+      final Writer output = new StringWriter();
+      try {
+         final Object result = data.modelCat().exec(newReader(".cat.input"), output, environment());
+         assertThat(output.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
+         if(Adapter.isSet(result)) {
+            assertThat(result, is(matcher(file(".cat.matcher"))));
+         }
+      } catch(final ExecutionException e) {
+         assertThat(e.getCause().getMessage(), is(StreamUtils.readAll(newReader(".cat.error"))));
+      }
+   }
+
+   /**
+    * Tests that the compiled parser works for the test case.
+    * @throws Exception if it fails
+    */
    @Test
    public void testParsing() throws Exception {
       final Writer output = new StringWriter();

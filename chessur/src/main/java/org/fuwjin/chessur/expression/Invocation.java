@@ -35,10 +35,18 @@ public class Invocation implements Expression {
       params.add(value);
    }
 
+   /**
+    * Returns the function name.
+    * @return the function name
+    */
    public String name() {
       return function.name();
    }
 
+   /**
+    * Returns the number of arguments.
+    * @return the number of arguments
+    */
    public int paramCount() {
       return params.size();
    }
@@ -54,18 +62,22 @@ public class Invocation implements Expression {
             final Object result = param.resolve(input, output, scope);
             args[index++] = result;
          } catch(final ResolveException e) {
-            throw e.addStackTrace(snapshot, "Could not resolve %s argument %d", name(), index);
+            throw new ResolveException(e, "Could not resolve %s argument %d: %s", name(), index, snapshot);
          }
       }
       try {
          return function.invoke(args);
       } catch(final InvocationTargetException e) {
-         throw new ResolveException(e.getCause(), snapshot, "Failure in invocation target %s", name());
+         throw new ResolveException(e.getCause(), "Failure in invocation target %s: %s", name(), snapshot);
       } catch(final AdaptException e) {
-         throw new ResolveException(e, snapshot, "Could not invoke %s", name());
+         throw new ResolveException(e, "Could not invoke %s: %s", name(), snapshot);
       }
    }
 
+   /**
+    * Sets the function.
+    * @param function the new function
+    */
    public void setFunction(final Function function) {
       this.function = function;
    }

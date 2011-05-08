@@ -7,6 +7,9 @@ import java.io.Reader;
 import java.util.Iterator;
 import org.fuwjin.chessur.expression.ResolveException;
 
+/**
+ * A source stream for code points.
+ */
 public abstract class CodePointInStream implements SourceStream {
    private class DetachedStream implements SourceStream {
       private final int start;
@@ -98,19 +101,22 @@ public abstract class CodePointInStream implements SourceStream {
       }
    }
 
+   /**
+    * The /dev/null source stream.
+    */
    public static final SourceStream NONE = new CodePointInStream() {
       @Override
       protected int readChar() throws IOException {
          return EOF;
       }
    };
-   public static final SourceStream STDIN = new CodePointInStream() {
-      @Override
-      protected int readChar() throws IOException {
-         return System.in.read();
-      }
-   };
 
+   /**
+    * Creates a new source stream wrapping the input stream. Individual bytes
+    * are rendered as code points.
+    * @param input the input stream
+    * @return the new source stream
+    */
    public static SourceStream stream(final InputStream input) {
       return new CodePointInStream() {
          @Override
@@ -120,6 +126,12 @@ public abstract class CodePointInStream implements SourceStream {
       };
    }
 
+   /**
+    * Creates a new source stream wrapping the reader. Standard Java char's are
+    * converted to code points.
+    * @param reader the reader
+    * @return the new source stream
+    */
    public static SourceStream stream(final Reader reader) {
       return new CodePointInStream() {
          @Override
@@ -129,6 +141,11 @@ public abstract class CodePointInStream implements SourceStream {
       };
    }
 
+   /**
+    * Creates a new source stream using the value as the input.
+    * @param value the input
+    * @return the new source stream
+    */
    public static SourceStream streamOf(final CharSequence value) {
       return new CodePointInStream() {
          private int index = 0;
@@ -143,6 +160,11 @@ public abstract class CodePointInStream implements SourceStream {
       };
    }
 
+   /**
+    * Converts a set of positions to a string.
+    * @param positions the set of positions
+    * @return the resulting string
+    */
    public static String stringOf(final Iterable<? extends Position> positions) {
       final StringBuilder builder = new StringBuilder();
       for(final Position p: positions) {
@@ -188,10 +210,32 @@ public abstract class CodePointInStream implements SourceStream {
       return getImpl(snapshot, current + 1);
    }
 
-   public Iterable<CodePointPosition> positions(final Snapshot snapshot, final int start, final int end)
+   @Override
+   public Position read(final Snapshot snapshot) throws ResolveException {
+      final Position p = getImpl(snapshot, current + 1);
+      current++;
+      return p;
+   }
+
+   protected CodePointPosition get(final int index) {
+      while(index >= count) {
+         add();
+      }
+      return queue[index % queue.length];
+   }
+
+   protected CodePointPosition getImpl(final Snapshot snapshot, final int index) throws ResolveException {
+      final CodePointPosition next = get(index);
+      if(next.isValid()) {
+         return next;
+      }
+      throw new ResolveException("unexpected EOF: %s", snapshot);
+   }
+
+   protected Iterable<CodePointPosition> positions(final Snapshot snapshot, final int start, final int end)
          throws ResolveException {
       if(end >= count || start < count - queue.length || get(start) == null) {
-         throw new ResolveException(snapshot, "Could not iterate over %d to %d", start, end);
+         throw new ResolveException("Could not iterate over %d to %d: %s", start, end, snapshot);
       }
       return new Iterable<CodePointPosition>() {
          @Override
@@ -216,28 +260,6 @@ public abstract class CodePointInStream implements SourceStream {
             };
          }
       };
-   }
-
-   @Override
-   public Position read(final Snapshot snapshot) throws ResolveException {
-      final Position p = getImpl(snapshot, current + 1);
-      current++;
-      return p;
-   }
-
-   protected CodePointPosition get(final int index) {
-      while(index >= count) {
-         add();
-      }
-      return queue[index % queue.length];
-   }
-
-   protected CodePointPosition getImpl(final Snapshot snapshot, final int index) throws ResolveException {
-      final CodePointPosition next = get(index);
-      if(next.isValid()) {
-         return next;
-      }
-      throw new ResolveException(snapshot, "unexpected EOF");
    }
 
    protected abstract int readChar() throws IOException;

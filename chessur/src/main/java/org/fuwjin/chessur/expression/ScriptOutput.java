@@ -15,10 +15,18 @@ import org.fuwjin.chessur.stream.ObjectOutStream;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
 
+/**
+ * An expression representing redirected script output.
+ */
 public class ScriptOutput implements Expression {
    private final Expression spec;
    private final String name;
 
+   /**
+    * Creates a new instance.
+    * @param spec the script
+    * @param name the variable set to the output stream
+    */
    public ScriptOutput(final Expression spec, final String name) {
       this.spec = spec;
       this.name = name;

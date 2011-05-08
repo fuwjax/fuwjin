@@ -58,7 +58,7 @@ public class Variable implements Expression {
       if(Adapter.isSet(value)) {
          return value;
       }
-      throw new ResolveException(new Snapshot(input, output, scope), "variable %s is unset", name);
+      throw new ResolveException("variable %s is unset: %s", name, new Snapshot(input, output, scope));
    }
 
    @Override

@@ -2,6 +2,9 @@ package org.fuwjin.chessur.stream;
 
 import org.fuwjin.util.UnicodeUtils;
 
+/**
+ * A string based position.
+ */
 public class StringPosition implements Position {
    private final int pos;
    private final int line;
@@ -9,6 +12,9 @@ public class StringPosition implements Position {
    private final String string;
    private final Object value;
 
+   /**
+    * Creates a new instance.
+    */
    public StringPosition() {
       pos = 0;
       line = 1;
@@ -45,6 +51,11 @@ public class StringPosition implements Position {
       return line;
    }
 
+   /**
+    * Returns the next position from this one.
+    * @param v the value of the next position
+    * @return the next position
+    */
    public StringPosition newPosition(final Object v) {
       final String next = String.valueOf(v);
       int index = next.lastIndexOf('\n');

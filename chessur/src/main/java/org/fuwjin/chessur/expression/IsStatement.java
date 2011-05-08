@@ -67,11 +67,11 @@ public class IsStatement implements Expression {
          if(isDefault(result)) {
             return Adapter.unset();
          }
-         throw new ResolveException(snapshot, "unexpected value", result);
+         throw new ResolveException("unexpected value: %s", snapshot);
       }
       final Object result = snapshot.resolve(value, false);
       if(isDefault(result)) {
-         throw new ResolveException(snapshot, "Unexpected default", result);
+         throw new ResolveException("Unexpected default: %s", snapshot);
       }
       return Adapter.unset();
    }

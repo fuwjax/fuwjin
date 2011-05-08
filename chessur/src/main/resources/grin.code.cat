@@ -102,7 +102,6 @@ alias java.util.Map$Entry.getValue as value
  * Contributors:
  *     Michael Doberenz - initial API and implementation
  ******************************************************************************/
-// @formatter:off
 package 'package';
 
 import java.io.IOException;

@@ -42,7 +42,7 @@ public class Assignment implements Expression {
          scope.assign(name, result);
          return Adapter.unset();
       } catch(final ResolveException e) {
-         throw e.addStackTrace(snapshot, "could not assign to %s", name);
+         throw new ResolveException(e, "could not assign to %s: %s", name, snapshot);
       }
    }
 

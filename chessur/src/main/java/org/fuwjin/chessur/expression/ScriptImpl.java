@@ -21,6 +21,10 @@ public class ScriptImpl extends Executable implements Expression {
    private Declaration decl;
    private final String name;
 
+   /**
+    * Creates a new instance.
+    * @param name the name of the script
+    */
    public ScriptImpl(final String name) {
       this.name = name;
    }

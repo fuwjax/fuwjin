@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.fuwjin.sample;
 
+/**
+ * A sample class for object templating.
+ */
 public class SingleField {
    private int value;
 
+   /**
+    * Returns the value.
+    * @return the value
+    */
    public int value() {
       return value;
    }

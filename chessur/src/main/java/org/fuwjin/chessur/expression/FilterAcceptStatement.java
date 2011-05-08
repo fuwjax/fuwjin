@@ -38,14 +38,14 @@ public class FilterAcceptStatement implements Expression {
       final Snapshot snapshot = new Snapshot(input, output, scope);
       if(isNot) {
          if(filter.allow((Integer)input.next(snapshot).value())) {
-            throw new ResolveException(snapshot, "Unexpected match: %s", filter);
+            throw new ResolveException("Unexpected match: %s: %s", filter, snapshot);
          }
          return input.read(snapshot).value();
       }
       if(filter.allow((Integer)input.next(snapshot).value())) {
          return input.read(snapshot).value();
       }
-      throw new ResolveException(snapshot, "Did not match filter: %s", filter);
+      throw new ResolveException("Did not match filter: %s: %s", filter, snapshot);
    }
 
    @Override

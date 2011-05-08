@@ -58,13 +58,13 @@ public class ValueAcceptStatement implements Expression {
                return input.read(snapshot).value();
             }
          }
-         throw new ResolveException(snapshot, "failed while matching %s", str);
+         throw new ResolveException("failed while matching %s: %s", str, snapshot);
       }
       int codePoint;
       for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
          codePoint = str.codePointAt(index);
          if(codePoint != ((Integer)input.read(snapshot).value()).intValue()) {
-            throw new ResolveException(snapshot, "failed while matching %s", str);
+            throw new ResolveException("failed while matching %s: %s", str, snapshot);
          }
       }
       return str.codePointBefore(str.length());

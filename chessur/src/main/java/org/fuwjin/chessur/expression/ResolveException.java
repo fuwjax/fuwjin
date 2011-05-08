@@ -1,36 +1,45 @@
 package org.fuwjin.chessur.expression;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.util.BusinessException;
-import org.fuwjin.util.StringUtils;
 
+/**
+ * Thrown when a script cannot continue.
+ */
 public class ResolveException extends BusinessException {
-   private final List<Object> stack = new ArrayList();
+   private static final long serialVersionUID = 1L;
 
-   public ResolveException(final Snapshot snapshot, final String pattern, final Object... args) {
+   /**
+    * Creates a new instance.
+    * @param pattern the message pattern
+    * @param args the message arguments
+    */
+   public ResolveException(final String pattern, final Object... args) {
       super(pattern, args);
-      addStackTrace(snapshot, "");
    }
 
-   public ResolveException(final Throwable cause, final Snapshot snapshot, final String pattern, final Object... args) {
+   /**
+    * Creates a new instance.
+    * @param cause the cause
+    * @param pattern the message pattern
+    * @param args the message arguments
+    */
+   public ResolveException(final Throwable cause, final String pattern, final Object... args) {
       super(cause, pattern, args);
-      addStackTrace(snapshot, "");
    }
 
-   public ResolveException addStackTrace(final Snapshot snapshot, final String pattern, final Object... args) {
-      stack.add(new Object() {
-         @Override
-         public String toString() {
-            return format(pattern, args) + ": " + snapshot;
-         }
-      });
-      return this;
+   @Override
+   public Throwable getCause() {
+      if(super.getCause() instanceof ResolveException) {
+         return super.getCause().getCause();
+      }
+      return super.getCause();
    }
 
    @Override
    public String getMessage() {
-      return super.getMessage() + StringUtils.join("\n", stack);
+      if(super.getCause() instanceof ResolveException) {
+         return super.getCause().getMessage() + "\n" + super.getMessage();
+      }
+      return super.getMessage();
    }
 }

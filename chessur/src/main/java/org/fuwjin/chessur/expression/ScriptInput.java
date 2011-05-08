@@ -15,12 +15,20 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
 
+/**
+ * An expression representing redirected script input.
+ */
 public class ScriptInput implements Expression {
    private final Expression spec;
    private final Expression value;
 
-   public ScriptInput(final Expression spec, final Expression value) {
-      this.spec = spec;
+   /**
+    * Creates a new instance.
+    * @param script the script
+    * @param value the redirected input
+    */
+   public ScriptInput(final Expression script, final Expression value) {
+      spec = script;
       this.value = value;
    }
 
