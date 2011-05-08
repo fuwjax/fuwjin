@@ -10,6 +10,13 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.CodePointInStream;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
+
 /**
  * Represents a variable in the current scope.
  */
@@ -19,8 +26,9 @@ public class Variable implements Expression {
     */
    public static final Variable MATCH = new Variable("match") {
       @Override
-      public State transform(final State state) {
-         return state.substring();
+      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+            throws AbortedException, ResolveException {
+         return CodePointInStream.stringOf(input.buffer(new Snapshot(input, output, scope)));
       }
    };
    /**
@@ -28,11 +36,9 @@ public class Variable implements Expression {
     */
    public static final Variable NEXT = new Variable("next") {
       @Override
-      public State transform(final State state) {
-         if(state.current() == InStream.EOF) {
-            return state.failure("unexpected EOF");
-         }
-         return state.value(state.current());
+      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+            throws AbortedException, ResolveException {
+         return input.next(new Snapshot(input, output, scope)).value();
       }
    };
    private final String name;
@@ -46,12 +52,17 @@ public class Variable implements Expression {
    }
 
    @Override
-   public String toString() {
-      return name;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Object value = scope.retrieve(name);
+      if(Adapter.isSet(value)) {
+         return value;
+      }
+      throw new ResolveException(new Snapshot(input, output, scope), "variable %s is unset", name);
    }
 
    @Override
-   public State transform(final State state) {
-      return state.retrieve(name);
+   public String toString() {
+      return name;
    }
 }

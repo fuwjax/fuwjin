@@ -12,6 +12,9 @@ package org.fuwjin.chessur;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
 
 /**
  * Represents a composite or dynamic literal.
@@ -24,12 +27,12 @@ public class CompositeLiteral implements Expression {
     */
    public static String escape(final int ch) {
       switch(ch) {
-         case '\'':
-            return "\\'";
-         case '"':
-            return "\\\"";
-         case '<':
-            return "\\<";
+      case '\'':
+         return "\\'";
+      case '"':
+         return "\\\"";
+      case '<':
+         return "\\<";
       }
       return Literal.standardEscape(ch);
    }
@@ -68,8 +71,15 @@ public class CompositeLiteral implements Expression {
       appendChar(codepoint.codePointAt(0));
    }
 
-   protected Expression last() {
-      return values.size() == 0 ? null : values.get(values.size() - 1);
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final StringBuilder builder = new StringBuilder();
+      for(final Expression value: values) {
+         final Object result = value.resolve(input, output, scope);
+         builder.append(result);
+      }
+      return builder.toString();
    }
 
    @Override
@@ -81,17 +91,7 @@ public class CompositeLiteral implements Expression {
       return builder.append("\"").toString();
    }
 
-   @Override
-   public State transform(final State state) {
-      final StringBuilder builder = new StringBuilder();
-      State result = state;
-      for(final Expression value: values) {
-         result = value.transform(result);
-         if(!result.isSuccess()) {
-            return result;
-         }
-         builder.append(result.value());
-      }
-      return result.value(builder.toString());
+   protected Expression last() {
+      return values.size() == 0 ? null : values.get(values.size() - 1);
    }
 }

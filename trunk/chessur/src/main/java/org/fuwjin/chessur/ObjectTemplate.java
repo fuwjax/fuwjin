@@ -9,10 +9,14 @@ package org.fuwjin.chessur;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Function;
 
 public class ObjectTemplate implements Expression {
-   private static class FieldTemplate {
+   private static class FieldTemplate implements Expression {
       private final Function setter;
       private final Expression value;
 
@@ -25,8 +29,14 @@ public class ObjectTemplate implements Expression {
          return setter.invoke(object, val);
       }
 
-      public State transform(final State result) {
-         return value.transform(result);
+      @Override
+      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+            throws AbortedException, ResolveException {
+         return value.resolve(input, output, scope);
+      }
+
+      String name() {
+         return setter.name();
       }
    }
 
@@ -37,31 +47,32 @@ public class ObjectTemplate implements Expression {
       this.constructor = constructor;
    }
 
-   public void set(final Function setter, final Expression object) {
-      setters.add(new FieldTemplate(setter, object));
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException, AbortedException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      final Object object;
+      try {
+         object = constructor.invoke();
+      } catch(final Exception e) {
+         throw new ResolveException(e, snapshot, "Could not construct object from template: %s", constructor.name());
+      }
+      for(final FieldTemplate field: setters) {
+         try {
+            final Object result = field.resolve(input, output, scope);
+            field.invoke(object, result);
+         } catch(final ResolveException e) {
+            throw e.addStackTrace(snapshot, "could not resolve value for %s", field.name());
+         } catch(final AbortedException e) {
+            throw e;
+         } catch(final Exception e) {
+            throw new ResolveException(e, snapshot, "could not inject value for %s", field.name());
+         }
+      }
+      return object;
    }
 
-   @Override
-   public State transform(final State state) {
-      try {
-         final Object object = constructor.invoke();
-         State result = state;
-         for(final FieldTemplate field: setters) {
-            result = field.transform(result);
-            if(!result.isSuccess()) {
-               return state.failure(result.failure("Could not transform field value"),
-                     "Could not build object from template");
-            }
-            try {
-               field.invoke(object, result.value());
-            } catch(final Exception e) {
-               return state.failure(result.failure("Could not set field value: %s", e),
-                     "Could not build object from template");
-            }
-         }
-         return state.value(object);
-      } catch(final Exception e) {
-         return state.failure("Could not construct object from template: %s", e);
-      }
+   public void set(final Function setter, final Expression object) {
+      setters.add(new FieldTemplate(setter, object));
    }
 }

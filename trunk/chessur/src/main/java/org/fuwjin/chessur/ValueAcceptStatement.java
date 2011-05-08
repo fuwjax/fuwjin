@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Represents a value based accept statement.
  */
@@ -28,39 +33,45 @@ public class ValueAcceptStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "accept " + (isNot ? "not " : "") + value;
-   }
-
-   @Override
-   public State transform(final State state) {
-      State result = value.transform(state);
-      if(!result.isSuccess()) {
-         return result;
-      }
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      final Object result = value.resolve(input, output, scope);
       final String str;
-      if(result.value() instanceof Integer) {
-         str = new String(Character.toChars((Integer)result.value()));
+      if(result instanceof Integer) {
+         str = new String(Character.toChars((Integer)result));
       } else {
-         str = String.valueOf(result.value());
+         str = String.valueOf(result);
+      }
+      if(isNot) {
+         final SourceStream sub = input.detach();
+         int codePoint;
+         for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
+            codePoint = str.codePointAt(index);
+            int cp;
+            try {
+               cp = ((Integer)sub.read(snapshot).value()).intValue();
+            } catch(final ResolveException e) {
+               return input.read(snapshot).value();
+            }
+            if(codePoint != cp) {
+               return input.read(snapshot).value();
+            }
+         }
+         throw new ResolveException(snapshot, "failed while matching %s", str);
       }
       int codePoint;
       for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
          codePoint = str.codePointAt(index);
-         if(codePoint != result.current()) {
-            if(isNot) {
-               return state.accept();
-            }
-            if(result.current() == InStream.EOF) {
-               return state.failure("unexpected EOF");
-            }
-            return state.failure("failed while matching %s", str);
+         if(codePoint != ((Integer)input.read(snapshot).value()).intValue()) {
+            throw new ResolveException(snapshot, "failed while matching %s", str);
          }
-         result = result.accept();
       }
-      if(isNot) {
-         return state.failure("failed while matching %s", str);
-      }
-      return result;
+      return str.codePointBefore(str.length());
+   }
+
+   @Override
+   public String toString() {
+      return "accept " + (isNot ? "not " : "") + value;
    }
 }

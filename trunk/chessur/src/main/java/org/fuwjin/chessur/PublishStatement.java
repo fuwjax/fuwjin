@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
+
 /**
  * Publishes a value to an outstream.
  */
@@ -25,16 +30,15 @@ public class PublishStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "publish " + value;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Object result = value.resolve(input, output, scope);
+      output.append(result);
+      return Adapter.unset();
    }
 
    @Override
-   public State transform(final State state) {
-      final State result = value.transform(state);
-      if(!result.isSuccess()) {
-         return result;
-      }
-      return result.publish();
+   public String toString() {
+      return "publish " + value;
    }
 }

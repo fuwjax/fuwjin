@@ -10,32 +10,27 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
-public class ScriptPipe extends Transformer {
-   private final Transformer sink;
-   private final Transformer source;
+import org.fuwjin.chessur.stream.CodePointInStream;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.ObjectOutStream;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
 
-   public ScriptPipe(final Transformer source, final Transformer sink) {
+public class ScriptPipe implements Expression {
+   private final Expression sink;
+   private final Expression source;
+
+   public ScriptPipe(final Expression source, final Expression sink) {
       this.source = source;
       this.sink = sink;
    }
 
    @Override
-   public State transform(final State state) {
-      final OutStream out = OutStream.stream();
-      final State output = state.redirectOutput(out);
-      if(!output.isSuccess()) {
-         return state.failure(output, "Could not redirect output");
-      }
-      final State pipe = source.transform(output);
-      if(!pipe.isSuccess()) {
-         return state.failure(pipe, "Could not transform source");
-      }
-      final State first = pipe.restoreIo(pipe, state);
-      final State input = first.redirectInput(InStream.streamOf(out.toString()));
-      final State result = sink.transform(input);
-      if(!result.isSuccess()) {
-         return state.failure(result, "Could not transform sink");
-      }
-      return result.restoreIo(first, result);
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final SinkStream out = ObjectOutStream.stream();
+      source.resolve(input, out, scope);
+      final SourceStream in = CodePointInStream.streamOf(out.toString());
+      return sink.resolve(in, output, scope);
    }
 }

@@ -14,7 +14,6 @@ import static java.util.Collections.singletonMap;
 import static java.util.Collections.unmodifiableCollection;
 import static org.fuwjin.chessur.ChessurInterpreter.interpret;
 import static org.fuwjin.util.StreamUtils.reader;
-import static org.fuwjin.util.StringUtils.readAll;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,11 +23,12 @@ import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.fuwjin.util.StreamUtils;
 
 /**
  * Manages a collection of specificatons.
  */
-public class Catalog extends Transformer {
+public class Catalog extends Executable {
    /**
     * Creates a new instance.
     * @param input the input specification list
@@ -149,7 +149,12 @@ public class Catalog extends Transformer {
 
    public void load(final String path, final String name) throws FileNotFoundException, UnsupportedEncodingException,
          ChessurException, IOException {
-      modules.put(name, loadCat(readAll(reader(path, "UTF-8"))));
+      modules.put(name, loadCat(StreamUtils.readAll(reader(path, "UTF-8"))));
+   }
+
+   @Override
+   public String name() {
+      return root.name();
    }
 
    public String rootName() {
@@ -165,7 +170,7 @@ public class Catalog extends Transformer {
    }
 
    @Override
-   public State transform(final State state) {
-      return root.transform(state);
+   protected Expression expression() {
+      return root;
    }
 }

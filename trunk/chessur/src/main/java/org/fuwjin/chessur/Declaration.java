@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+
 /**
  * Represents a Specification declaration.
  */
@@ -43,6 +48,25 @@ public class Declaration implements Expression {
       return name;
    }
 
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws ResolveException, AbortedException {
+      final SourceStream in = input.mark();
+      final Snapshot snapshot = new Snapshot(in, output, scope);
+      final Environment env = scope.newScope();
+      try {
+         Object result = block.resolve(in, output, env);
+         if(returns != null) {
+            result = returns.resolve(in, output, env);
+         }
+         return result;
+      } catch(final AbortedException e) {
+         throw e.addStackTrace(snapshot, "in %s", name);
+      } catch(final ResolveException e) {
+         throw e.addStackTrace(snapshot, "in %s", name);
+      }
+   }
+
    /**
     * Returns the declaration return value, or null if there is none.
     * @return the return value
@@ -70,22 +94,5 @@ public class Declaration implements Expression {
    @Override
    public String toString() {
       return "<" + name + ">" + block + " return " + returns;
-   }
-
-   @Override
-   public State transform(final State state) {
-      State result = block.transform(state.mark());
-      if(result.isSuccess()) {
-         if(returns != null) {
-            result = returns.transform(result);
-         }
-         if(result.isSuccess()) {
-            result = result.restoreScope(state);
-         }
-      }
-      if(result.isSuccess()) {
-         return result;
-      }
-      return state.failure(result, "in %s", name);
    }
 }

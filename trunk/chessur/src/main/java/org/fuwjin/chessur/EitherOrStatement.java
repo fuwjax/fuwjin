@@ -11,9 +11,13 @@
 package org.fuwjin.chessur;
 
 import static java.util.Collections.unmodifiableCollection;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
 
 /**
  * Represents a set of ordered options.
@@ -39,6 +43,24 @@ public class EitherOrStatement implements Expression {
       return this;
    }
 
+   @Override
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      int index = statements.size();
+      for(final Expression statement: statements) {
+         if(--index == 0) {
+            return statement.resolve(input, output, scope);
+         }
+         try {
+            return snapshot.resolve(statement, true);
+         } catch(final ResolveException e) {
+            // continue
+         }
+      }
+      return Adapter.unset();
+   }
+
    /**
     * Returns the list of options.
     * @return the options
@@ -54,18 +76,5 @@ public class EitherOrStatement implements Expression {
          builder.append("\nor ").append(statement);
       }
       return builder.toString();
-   }
-
-   @Override
-   public State transform(final State state) {
-      State failure = null;
-      for(final Expression statement: statements) {
-         final State result = statement.transform(state);
-         if(result.isSuccess()) {
-            return result;
-         }
-         failure = result;
-      }
-      return state.failure(failure, "No valid option");
    }
 }

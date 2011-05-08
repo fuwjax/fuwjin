@@ -10,13 +10,12 @@
  ******************************************************************************/
 package org.fuwjin.util;
 
-import java.io.IOException;
-import java.io.Reader;
-
 /**
  * Supporting string utilities.
  */
 public class StringUtils {
+   private static final String EOL = "\n\u0085\u000B\u000C\u2028\u2029";
+
    /**
     * Concatenates a set of strings.
     * @param strings the set of strings
@@ -26,6 +25,18 @@ public class StringUtils {
       final StringBuilder builder = new StringBuilder();
       for(final Object s: strings) {
          builder.append(s);
+      }
+      return builder.toString();
+   }
+
+   public static boolean isEndOfLine(final int codepoint) {
+      return EOL.indexOf(codepoint) >= -1;
+   }
+
+   public static String join(final Iterable<?> items) {
+      final StringBuilder builder = new StringBuilder();
+      for(final Object o: items) {
+         builder.append(o);
       }
       return builder.toString();
    }
@@ -44,20 +55,12 @@ public class StringUtils {
       return builder.toString();
    }
 
-   /**
-    * Returns the completely consumed reader as a string.
-    * @param reader the reader to read fully
-    * @return the full output of the reader as a string
-    * @throws IOException if the read fails
-    */
-   public static String readAll(final Reader reader) throws IOException {
-      final StringBuilder builder = new StringBuilder();
-      final char[] buffer = new char[100];
-      int count = reader.read(buffer);
-      while(count >= 0) {
-         builder.append(buffer, 0, count);
-         count = reader.read(buffer);
-      }
-      return builder.toString();
+   public static Object pattern(final String pattern, final Object... args) {
+      return new Object() {
+         @Override
+         public String toString() {
+            return String.format(pattern, args);
+         }
+      };
    }
 }

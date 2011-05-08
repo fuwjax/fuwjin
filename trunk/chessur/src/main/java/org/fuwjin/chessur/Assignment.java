@@ -10,6 +10,12 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
+
 /**
  * Represents an assignment.
  */
@@ -28,16 +34,20 @@ public class Assignment implements Expression {
    }
 
    @Override
-   public String toString() {
-      return name + " = " + value;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException, ResolveException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      try {
+         final Object result = value.resolve(input, output, scope);
+         scope.assign(name, result);
+         return Adapter.unset();
+      } catch(final ResolveException e) {
+         throw e.addStackTrace(snapshot, "could not assign to %s", name);
+      }
    }
 
    @Override
-   public State transform(final State state) {
-      final State result = value.transform(state);
-      if(!result.isSuccess()) {
-         return state.failure(result, "could not assign to %s", name);
-      }
-      return result.assign(name);
+   public String toString() {
+      return name + " = " + value;
    }
 }

@@ -10,41 +10,45 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
-public class Number extends java.lang.Number implements Expression{
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.SourceStream;
+
+public class Number extends java.lang.Number implements Expression {
    private static final long serialVersionUID = 1L;
    private final String value;
 
-   public Number(final String value){
+   public Number(final String value) {
       this.value = value;
    }
 
    @Override
-   public double doubleValue(){
+   public double doubleValue() {
       return Double.parseDouble(value);
    }
 
    @Override
-   public float floatValue(){
+   public float floatValue() {
       return Float.parseFloat(value);
    }
 
    @Override
-   public int intValue(){
+   public int intValue() {
       return Integer.parseInt(value);
    }
 
    @Override
-   public long longValue(){
+   public long longValue() {
       return Long.parseLong(value);
    }
 
    @Override
-   public String toString(){
-      return value;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope) {
+      return this;
    }
 
    @Override
-   public State transform(final State state){
-      return state.value(this);
+   public String toString() {
+      return value;
    }
 }

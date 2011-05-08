@@ -10,6 +10,12 @@
  ******************************************************************************/
 package org.fuwjin.chessur;
 
+import org.fuwjin.chessur.stream.Environment;
+import org.fuwjin.chessur.stream.SinkStream;
+import org.fuwjin.chessur.stream.Snapshot;
+import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.util.Adapter;
+
 /**
  * Represents a statement that always succeeds.
  */
@@ -25,16 +31,18 @@ public class CouldStatement implements Expression {
    }
 
    @Override
-   public String toString() {
-      return "could " + statement;
+   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+         throws AbortedException {
+      final Snapshot snapshot = new Snapshot(input, output, scope);
+      try {
+         return snapshot.resolve(statement, true);
+      } catch(final ResolveException e) {
+         return Adapter.unset();
+      }
    }
 
    @Override
-   public State transform(final State state) {
-      final State result = statement.transform(state);
-      if(result.isSuccess()) {
-         return result;
-      }
-      return state;
+   public String toString() {
+      return "could " + statement;
    }
 }
