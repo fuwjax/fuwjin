@@ -10,6 +10,7 @@
 #-------------------------------------------------------------------------------
 alias java.lang.Boolean as Boolean
 alias java.lang.Character as Character
+alias java.lang.Object.equals as eq
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
@@ -114,6 +115,10 @@ alias java.util.Map$Entry.getValue as value
     is ValueAcceptStatement.instanceof(value)
     value = ValueAcceptStatement.value(value)
     is Literal.instanceof(value)
+    <Value>
+  } or {
+    is eq(Variable.NEXT(), value)
+    publish "accept "
     <Value>
   } or {
     <Value>

@@ -15,8 +15,17 @@ import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
 
 /**
- * Transforms a state.
+ * Resolves an input stream and scope to an output stream and return value.
  */
 public interface Expression {
+   /**
+    * Resolves an input stream and scope to an output stream and return value.
+    * @param input the input source
+    * @param output the output destination
+    * @param scope the variable environment
+    * @return the resolved value
+    * @throws AbortedException if the script intentionally aborts
+    * @throws ResolveException if the script fails
+    */
    Object resolve(SourceStream input, SinkStream output, Environment scope) throws AbortedException, ResolveException;
 }

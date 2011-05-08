@@ -2,14 +2,26 @@ package org.fuwjin.chessur.stream;
 
 import org.fuwjin.util.UnicodeUtils;
 
+/**
+ * A codepoint based position.
+ */
 public class CodePointPosition implements Position {
+   /**
+    * The end of file marker.
+    */
    public static final int EOF = -1;
+   /**
+    * The start of file marker.
+    */
    public static final int SOF = -2;
    private final int pos;
    private final int line;
    private final int column;
    private final int codePoint;
 
+   /**
+    * Creates a new instance.
+    */
    public CodePointPosition() {
       pos = 0;
       line = 1;

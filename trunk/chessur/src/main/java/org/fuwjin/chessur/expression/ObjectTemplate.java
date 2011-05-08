@@ -15,6 +15,9 @@ import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Function;
 
+/**
+ * An expression representing a serialized object.
+ */
 public class ObjectTemplate implements Expression {
    private static class FieldTemplate implements Expression {
       private final Function setter;
@@ -43,6 +46,10 @@ public class ObjectTemplate implements Expression {
    private final List<FieldTemplate> setters = new ArrayList<FieldTemplate>();
    private final Function constructor;
 
+   /**
+    * Creates a new instance.
+    * @param constructor the constructor function
+    */
    public ObjectTemplate(final Function constructor) {
       this.constructor = constructor;
    }
@@ -55,23 +62,28 @@ public class ObjectTemplate implements Expression {
       try {
          object = constructor.invoke();
       } catch(final Exception e) {
-         throw new ResolveException(e, snapshot, "Could not construct object from template: %s", constructor.name());
+         throw new ResolveException(e, "Could not construct object from template: %s: %s", constructor.name(), snapshot);
       }
       for(final FieldTemplate field: setters) {
          try {
             final Object result = field.resolve(input, output, scope);
             field.invoke(object, result);
          } catch(final ResolveException e) {
-            throw e.addStackTrace(snapshot, "could not resolve value for %s", field.name());
+            throw new ResolveException(e, "could not resolve value for %s: %s", field.name(), snapshot);
          } catch(final AbortedException e) {
             throw e;
          } catch(final Exception e) {
-            throw new ResolveException(e, snapshot, "could not inject value for %s", field.name());
+            throw new ResolveException(e, "could not inject value for %s: %s", field.name(), snapshot);
          }
       }
       return object;
    }
 
+   /**
+    * Adds a field to this template.
+    * @param setter the field setter
+    * @param object the value
+    */
    public void set(final Function setter, final Expression object) {
       setters.add(new FieldTemplate(setter, object));
    }

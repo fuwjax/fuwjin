@@ -16,8 +16,17 @@ import org.fuwjin.chessur.stream.SourceStream;
  * Represents a static string value.
  */
 public class Literal implements Expression {
+   /**
+    * Constant for the new line character.
+    */
    public static final int NEW_LINE = '\n';
+   /**
+    * Constant for the tab character.
+    */
    public static final int TAB = '\t';
+   /**
+    * Constant for the carriage return character.
+    */
    public static final int RETURN = '\r';
 
    /**

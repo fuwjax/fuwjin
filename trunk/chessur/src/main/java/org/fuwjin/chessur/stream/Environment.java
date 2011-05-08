@@ -4,7 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.fuwjin.util.Adapter;
 
+/**
+ * The scoped variable mapping.
+ */
 public class Environment {
+   /**
+    * Constant for no initial environment.
+    */
    public static final Environment NONE = new Environment() {
       @Override
       protected boolean contains(final String name) {
@@ -18,8 +24,11 @@ public class Environment {
    };
    private final Map<String, Object> map = new HashMap<String, Object>();
    private final Environment parent;
-   private int version = 0;
 
+   /**
+    * Creates a new initial environment from the map.
+    * @param map the initial environment mapping.
+    */
    public Environment(final Map<String, ? extends Object> map) {
       this(NONE);
       this.map.putAll(map);
@@ -33,15 +42,29 @@ public class Environment {
       this.parent = parent;
    }
 
+   /**
+    * Assigns the value to the variable name in this scope.
+    * @param name the variable name
+    * @param value the value
+    */
    public void assign(final String name, final Object value) {
       map.put(name, value);
-      version++;
    }
 
+   /**
+    * Returns a new sub-environment.
+    * @return the new environment
+    */
    public Environment newScope() {
       return new Environment(this);
    }
 
+   /**
+    * Returns the value of the variable in this scope. Returns UNSET if not yet
+    * defined.
+    * @param name the variable name
+    * @return the value of the variable, or UNSET if not yet set
+    */
    public Object retrieve(final String name) {
       Environment env = this;
       while(!env.contains(name)) {
@@ -52,10 +75,6 @@ public class Environment {
          map.put(name, value);
       }
       return value;
-   }
-
-   public int version() {
-      return version;
    }
 
    protected boolean contains(final String name) {

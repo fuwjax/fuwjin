@@ -61,9 +61,9 @@ public class Declaration implements Expression {
          }
          return result;
       } catch(final AbortedException e) {
-         throw e.addStackTrace(snapshot, "in %s", name);
+         throw new AbortedException(e, "in %s: %s", name, snapshot);
       } catch(final ResolveException e) {
-         throw e.addStackTrace(snapshot, "in %s", name);
+         throw new ResolveException(e, "in %s: %s", name, snapshot);
       }
    }
 

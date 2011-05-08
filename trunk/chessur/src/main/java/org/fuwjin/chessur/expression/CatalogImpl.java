@@ -11,13 +11,11 @@
 package org.fuwjin.chessur.expression;
 
 import static java.util.Collections.unmodifiableCollection;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Catalog;
+import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.FunctionSignature;
@@ -33,6 +31,11 @@ public class CatalogImpl extends Executable implements Catalog {
    private Declaration root;
    private final CatalogManager manager;
 
+   /**
+    * Creates a new instance.
+    * @param name the name of the catalog
+    * @param manager the manager for loading referenced catalogs
+    */
    public CatalogImpl(final String name, final CatalogManager manager) {
       this.manager = manager;
    }
@@ -79,6 +82,11 @@ public class CatalogImpl extends Executable implements Catalog {
       return unmodifiableCollection(aliases.entrySet());
    }
 
+   /**
+    * Creates an alias for a signature.
+    * @param signature the signature to alias
+    * @param name the alias
+    */
    public void aliasSignature(final FunctionSignature signature, final String name) {
       signatures.put(name, signature);
    }
@@ -117,10 +125,20 @@ public class CatalogImpl extends Executable implements Catalog {
       return s;
    }
 
+   /**
+    * Returns a referenced catalog.
+    * @param name the name of the catalog
+    * @return the catalog
+    */
    public Catalog getModule(final String name) {
       return modules.get(name);
    }
 
+   /**
+    * Returns a referenced signature.
+    * @param name the name of the signature
+    * @return the signature
+    */
    public FunctionSignature getSignature(final String name) {
       final FunctionSignature signature = signatures.get(name);
       if(signature == null) {
@@ -129,8 +147,14 @@ public class CatalogImpl extends Executable implements Catalog {
       return signature;
    }
 
-   public void load(final String path, final String name) throws FileNotFoundException, UnsupportedEncodingException,
-         ChessurException, IOException {
+   /**
+    * Loads a catalog.
+    * @param path the path to the catalog
+    * @param name the name of the catalog
+    * @throws ChessurException if the catalog cannot be loaded
+    * @throws IOException if the path does not refer to a file
+    */
+   public void load(final String path, final String name) throws ChessurException, IOException {
       modules.put(name, manager.loadCat(path));
    }
 
@@ -139,6 +163,10 @@ public class CatalogImpl extends Executable implements Catalog {
       return root.name();
    }
 
+   /**
+    * Returns the name of the primary script.
+    * @return the primary script name
+    */
    public String rootName() {
       return root.name();
    }

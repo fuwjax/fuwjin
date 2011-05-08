@@ -35,6 +35,10 @@ public class CodePointSet {
          isRange = start != end;
       }
 
+      /**
+       * Provides an iterator over the characters in the range.
+       * @return the iterator provider.
+       */
       public Iterable<Integer> chars() {
          return new Iterable<Integer>() {
             @Override

@@ -15,14 +15,12 @@ import static org.fuwjin.util.StreamUtils.reader;
 import static org.fuwjin.util.StreamUtils.writer;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
+import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +29,10 @@ import org.junit.Test;
  * Demos parsing a file.
  */
 public class ChessurDemo {
+   /**
+    * Sample method for Satish's demo.
+    * @param message the argument
+    */
    public static void echo(final String message) {
       System.out.println("echoing " + message);
    }
@@ -38,6 +40,10 @@ public class ChessurDemo {
    private CatalogManager manager;
    private Map<String, Object> env;
 
+   /**
+    * Demo showing Grin off for Satish.
+    * @throws Exception if it fails
+    */
    @Test
    public void demoForSatish() throws Exception {
       final Catalog parser = manager.loadCat("grin.parse.cat");
@@ -50,8 +56,7 @@ public class ChessurDemo {
 
    /**
     * Demo parsing the grin grammar.
-    * @throws IOException if it fails
-    * @throws ChessurException if it fails
+    * @throws Exception if it fails
     */
    @Test
    public void demoGrin() throws Exception {
@@ -62,8 +67,7 @@ public class ChessurDemo {
 
    /**
     * Demo source code for the grin grammar.
-    * @throws IOException if it fails
-    * @throws ChessurException if it fails
+    * @throws Exception if it fails
     */
    @Test
    public void demoGrinCode() throws Exception {
@@ -84,8 +88,7 @@ public class ChessurDemo {
 
    /**
     * Demo serializing the grin grammar.
-    * @throws IOException if it fails
-    * @throws ChessurException if it fails
+    * @throws Exception if it fails
     */
    @Test
    public void demoGrinSerial() throws Exception {
@@ -100,6 +103,9 @@ public class ChessurDemo {
       }
    }
 
+   /**
+    * Sets up the test.
+    */
    @Before
    public void setup() {
       manager = new CatalogManager();

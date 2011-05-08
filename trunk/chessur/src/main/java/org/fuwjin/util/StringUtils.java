@@ -14,8 +14,6 @@ package org.fuwjin.util;
  * Supporting string utilities.
  */
 public class StringUtils {
-   private static final String EOL = "\n\u0085\u000B\u000C\u2028\u2029";
-
    /**
     * Concatenates a set of strings.
     * @param strings the set of strings
@@ -29,10 +27,11 @@ public class StringUtils {
       return builder.toString();
    }
 
-   public static boolean isEndOfLine(final int codepoint) {
-      return EOL.indexOf(codepoint) >= -1;
-   }
-
+   /**
+    * Joins the string values of a set of items.
+    * @param items the set of items to join
+    * @return the joined string
+    */
    public static String join(final Iterable<?> items) {
       final StringBuilder builder = new StringBuilder();
       for(final Object o: items) {
@@ -41,6 +40,12 @@ public class StringUtils {
       return builder.toString();
    }
 
+   /**
+    * Joins the string values of a set of items separated by a delimiter.
+    * @param delim the delimiter
+    * @param items the set of items to join
+    * @return the joined string
+    */
    public static String join(final String delim, final Iterable<?> items) {
       final StringBuilder builder = new StringBuilder();
       boolean first = true;
@@ -53,14 +58,5 @@ public class StringUtils {
          builder.append(item);
       }
       return builder.toString();
-   }
-
-   public static Object pattern(final String pattern, final Object... args) {
-      return new Object() {
-         @Override
-         public String toString() {
-            return String.format(pattern, args);
-         }
-      };
    }
 }

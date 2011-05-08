@@ -14,10 +14,17 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
 
+/**
+ * An expression representing an untyped number.
+ */
 public class Number extends java.lang.Number implements Expression {
    private static final long serialVersionUID = 1L;
    private final String value;
 
+   /**
+    * Creates a new instance.
+    * @param value the string value of the number
+    */
    public Number(final String value) {
       this.value = value;
    }

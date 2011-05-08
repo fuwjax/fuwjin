@@ -14,7 +14,14 @@ import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
 import org.junit.Test;
 
+/**
+ * Unit test for stream behavior.
+ */
 public class StreamDemo {
+   /**
+    * Tests the output stream.
+    * @throws Exception if it fails
+    */
    @Test
    public void testOutStream() throws Exception {
       final SinkStream stream = ObjectOutStream.stream();
@@ -33,6 +40,10 @@ public class StreamDemo {
       assertThat(p3.toString(), is("[2,1] 'x'"));
    }
 
+   /**
+    * Tests the input stream.
+    * @throws Exception if it fails
+    */
    @Test
    public void testRead() throws Exception {
       final SourceStream stream = CodePointInStream.streamOf("test\nx").detach();
@@ -69,6 +80,10 @@ public class StreamDemo {
       }
    }
 
+   /**
+    * Tests the buffered input.
+    * @throws Exception if it fails
+    */
    @Test
    public void testReadBuffer() throws Exception {
       final SourceStream stream = CodePointInStream.streamOf("test\nx").detach();
@@ -118,6 +133,10 @@ public class StreamDemo {
       }
    }
 
+   /**
+    * Tests marking the input.
+    * @throws Exception if it fails
+    */
    @Test
    public void testReadMark() throws Exception {
       final SourceStream stream = CodePointInStream.streamOf("test\nx");

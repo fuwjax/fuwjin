@@ -9,38 +9,38 @@ import org.fuwjin.chessur.expression.AbortedException;
 
 public abstract class ObjectOutStream implements SinkStream {
    private class DetachedStream implements SinkStream {
-      private int pos;
-      private StringPosition current;
+      private int index;
+      private StringPosition pos;
 
       public DetachedStream(final int i, final StringPosition current) {
-         pos = i;
-         this.current = current;
+         index = i;
+         this.pos = current;
       }
 
       @Override
       public void append(final Object value) {
-         current = current.newPosition(value);
-         if(pos == buffer.size()) {
-            buffer.add(current);
+         pos = pos.newPosition(value);
+         if(index == buffer.size()) {
+            buffer.add(pos);
          } else {
-            buffer.set(pos, current);
+            buffer.set(index, pos);
          }
-         pos++;
+         index++;
       }
 
       @Override
       public void attach(final SinkStream stream) {
-         pos = ((DetachedStream)stream).pos;
+         index = ((DetachedStream)stream).index;
       }
 
       @Override
       public Position current() {
-         return current;
+         return pos;
       }
 
       @Override
       public SinkStream detach() {
-         return new DetachedStream(pos, current);
+         return new DetachedStream(index, pos);
       }
    }
 
@@ -107,7 +107,7 @@ public abstract class ObjectOutStream implements SinkStream {
    @Override
    public void attach(final SinkStream stream) throws AbortedException {
       try {
-         for(int i = 0; i < ((DetachedStream)stream).pos; i++) {
+         for(int i = 0; i < ((DetachedStream)stream).index; i++) {
             appendImpl(buffer.get(i).valueString());
          }
          buffer.clear();
