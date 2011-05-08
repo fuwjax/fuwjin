@@ -17,11 +17,11 @@ import org.fuwjin.chessur.stream.SourceStream;
 /**
  * Represents a Specificaton reference.
  */
-public class Script extends Executable implements Expression {
+public class ScriptImpl extends Executable implements Expression {
    private Declaration decl;
    private final String name;
 
-   public Script(final String name) {
+   public ScriptImpl(final String name) {
       this.name = name;
    }
 
@@ -54,9 +54,9 @@ public class Script extends Executable implements Expression {
    }
 
    @Override
-   protected Expression expression() {
+   protected Expression expression() throws AbortedException {
       if(decl == null) {
-         throw new RuntimeException("Undefined script " + name);
+         throw new AbortedException("Undefined script " + name);
       }
       return decl;
    }

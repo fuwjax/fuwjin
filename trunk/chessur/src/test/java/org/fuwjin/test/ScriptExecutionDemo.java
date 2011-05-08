@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.chessur.ICatalog;
+import org.fuwjin.chessur.Catalog;
 import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -35,14 +35,14 @@ import org.junit.runner.RunWith;
 public class ScriptExecutionDemo {
    private static final class TestData {
       private final File file;
-      private ICatalog cat;
+      private Catalog cat;
       private Method interpreter;
 
       public TestData(final File file) {
          this.file = file;
       }
 
-      public ICatalog cat() throws Exception {
+      public Catalog cat() throws Exception {
          if(cat == null) {
             cat = manager.loadCat(new File(file, file.getName() + ".cat"));
          }
@@ -58,7 +58,7 @@ public class ScriptExecutionDemo {
    }
 
    private static CatalogManager manager;
-   private static ICatalog catCodeGenerator;
+   private static Catalog catCodeGenerator;
    private static RuntimeClassLoader loader;
 
    @Parameters
@@ -92,7 +92,7 @@ public class ScriptExecutionDemo {
       loader = new RuntimeClassLoader();
    }
 
-   private static Method compile(final String simpleClassName, final ICatalog cat) throws Exception {
+   private static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
       final Writer code = new StringWriter();
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);

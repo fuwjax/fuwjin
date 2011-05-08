@@ -20,7 +20,7 @@ import org.fuwjin.dinah.ReflectiveFunctionProvider;
  * Manages catalogs
  */
 public class CatalogManager {
-   private final ConcurrentMap<String, ICatalog> catalogs = new ConcurrentHashMap<String, ICatalog>();
+   private final ConcurrentMap<String, Catalog> catalogs = new ConcurrentHashMap<String, Catalog>();
    private final FunctionProvider provider;
 
    /**
@@ -45,7 +45,7 @@ public class CatalogManager {
     * @throws ChessurException if it fails
     * @throws IOException
     */
-   public ICatalog loadCat(final File file) throws ChessurException, IOException {
+   public Catalog loadCat(final File file) throws ChessurException, IOException {
       return loadCat(file.getAbsolutePath(), new FileReader(file));
    }
 
@@ -56,19 +56,19 @@ public class CatalogManager {
     * @throws ChessurException if it fails
     * @throws IOException
     */
-   public ICatalog loadCat(final String path) throws ChessurException, IOException {
+   public Catalog loadCat(final String path) throws ChessurException, IOException {
       return loadCat(path, reader(inputStream(path), "UTF-8"));
    }
 
-   protected ICatalog loadCat(final String name, final Reader reader) throws IOException, ChessurException {
-      ICatalog cat = catalogs.get(name);
+   protected Catalog loadCat(final String name, final Reader reader) throws IOException, ChessurException {
+      Catalog cat = catalogs.get(name);
       if(cat == null) {
          final Map<String, Object> map = new HashMap<String, Object>();
          map.put("postage", provider);
          map.put("name", name);
          map.put("manager", this);
-         cat = (ICatalog)interpret(readAll(reader), new StringBuilder(), map);
-         final ICatalog old = catalogs.putIfAbsent(name, cat);
+         cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);
+         final Catalog old = catalogs.putIfAbsent(name, cat);
          if(old != null) {
             cat = old;
          }
