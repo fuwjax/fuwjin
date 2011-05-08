@@ -9,7 +9,7 @@
 #     Michael Doberenz - initial API and implementation
 #-------------------------------------------------------------------------------
 alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
-alias org.fuwjin.chessur.Indent as Indent
+alias org.fuwjin.util.Indent as Indent
 
 
 <Catalog>{

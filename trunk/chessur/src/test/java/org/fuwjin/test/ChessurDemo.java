@@ -11,8 +11,6 @@
 package org.fuwjin.test;
 
 import static java.util.Collections.singletonMap;
-import static org.fuwjin.chessur.Catalog.loadCat;
-import static org.fuwjin.util.StreamUtils.readAll;
 import static org.fuwjin.util.StreamUtils.reader;
 import static org.fuwjin.util.StreamUtils.writer;
 import static org.junit.Assert.assertNotNull;
@@ -20,12 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.ChessurInterpreter.ChessurException;
+import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.ICatalog;
+import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,11 +35,13 @@ public class ChessurDemo {
       System.out.println("echoing " + message);
    }
 
+   private CatalogManager manager;
+   private Map<String, Object> env;
+
    @Test
    public void demoForSatish() throws Exception {
-      final Catalog parser = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog grin = (Catalog)parser.exec(reader("satish.cat", "UTF-8"), System.out,
-            Collections.singletonMap("postage", new ReflectiveFunctionProvider()));
+      final ICatalog parser = manager.loadCat("grin.parse.cat");
+      final ICatalog grin = (ICatalog)parser.exec(reader("satish.cat", "UTF-8"), System.out, env);
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("list", Arrays.asList(1, 2, 3));
       final Object result = grin.exec(System.in, System.out, environment);
@@ -54,9 +55,8 @@ public class ChessurDemo {
     */
    @Test
    public void demoGrin() throws Exception {
-      final Catalog parser = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog grin = (Catalog)parser.exec(reader("grin.parse.cat", "UTF-8"), System.out,
-            singletonMap("postage", new ReflectiveFunctionProvider()));
+      final ICatalog parser = manager.loadCat("grin.parse.cat");
+      final ICatalog grin = (ICatalog)parser.exec(reader("grin.parse.cat", "UTF-8"), System.out, env);
       assertNotNull(grin.get("EndOfFile"));
    }
 
@@ -67,15 +67,14 @@ public class ChessurDemo {
     */
    @Test
    public void demoGrinCode() throws Exception {
-      new File("target/generated/org/fuwjin/test/generated").mkdirs();
-      final Catalog cat = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog serial = (Catalog)cat.exec(reader("grin.code.cat", "UTF-8"), System.out,
-            singletonMap("postage", new ReflectiveFunctionProvider()));
+      new File("target/generated/org/fuwjin/chessur/generated").mkdirs();
+      final ICatalog cat = manager.loadCat("grin.parse.cat");
+      final ICatalog serial = (ICatalog)cat.exec(reader("grin.code.cat", "UTF-8"), System.out, env);
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
-      environment.put("package", "org.fuwjin.test.generated");
+      environment.put("package", "org.fuwjin.chessur.generated");
       environment.put("className", "Chessur");
-      final Writer writer = writer("target/generated/org/fuwjin/test/generated/ChessurInterpreter.java", "UTF-8");
+      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurInterpreter.java", "UTF-8");
       try {
          serial.exec(writer, environment);
       } finally {
@@ -91,14 +90,22 @@ public class ChessurDemo {
    @Test
    public void demoGrinSerial() throws Exception {
       new File("target/generated").mkdirs();
-      final Catalog cat = loadCat(readAll(reader("grin.parse.cat", "UTF-8")));
-      final Catalog serial = (Catalog)cat.exec(reader("grin.serial.cat", "UTF-8"), System.out,
-            singletonMap("postage", new ReflectiveFunctionProvider()));
+      final ICatalog cat = manager.loadCat("grin.parse.cat");
+      final ICatalog serial = (ICatalog)cat.exec(reader("grin.serial.cat", "UTF-8"), System.out, env);
       final Writer writer = writer("target/generated/grin.parse.test.cat", "UTF-8");
       try {
          serial.exec(writer, singletonMap("cat", cat));
       } finally {
          writer.close();
       }
+   }
+
+   @Before
+   public void setup() {
+      manager = new CatalogManager();
+      env = new HashMap<String, Object>();
+      env.put("postage", new ReflectiveFunctionProvider());
+      env.put("name", "test");
+      env.put("manager", manager);
    }
 }
