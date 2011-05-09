@@ -1,0 +1,4 @@
+<Root> {
+  is 'abc'
+  return 'yes'
+}
