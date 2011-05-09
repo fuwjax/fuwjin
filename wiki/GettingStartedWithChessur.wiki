@@ -1,0 +1,20 @@
+#summary Getting Started with Chessur
+
+= Chessur =
+
+Chessur is the Java reference implementation for Grin. Designed to be as simple as Grin itself, it defers much of the complexity of function binding to Dinah.
+
+Chessur is a composite of three main offerings. It is an API for loading Grin Catalogs and executing Grin Scripts, an Executable Object Model (ExecOM), and a set of 4 Catalogs which provide the following reference transformations:
+  * grin.parse.cat: transforms .cat files into ExecOM Catalogs
+  * grin.serial.cat: transforms ExecOM Catalogs into canonical .cat files
+  * grin.format.cat: transforms .cat files into canonical .cat files
+  * grin.code.cat: transforms ExecOM Catalogs into Chessur-free Java code.
+Before we look at the API, let's get a Chessur build. If you're using a dependency management tool, you can find information on the latest public release at [http://mvnrepository.com/artifact/org.fuwjin/chessur MvnRepository]. Otherwise, you can download public releases from the [https://oss.sonatype.org/content/repositories/releases/org/fuwjin/chessur Sonatype Open Source Releases repository] or if you're feeling particularly brave, the latest snapshot release from the [https://oss.sonatype.org/content/repositories/snapshots/org/fuwjin/chessur Sonatype Open Source Snapshots repository].
+
+== Chessur API ==
+
+The API is relatively straightforward and follows these steps:
+  # Create a CatalogManager
+  # Load a Catalog through CatalogManager.loadCat
+  # Get a Script from the Catalog
+  # Execute the Script
