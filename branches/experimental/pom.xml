@@ -16,19 +16,23 @@
     <version>4</version>
   </parent>
     <groupId>org.fuwjin</groupId>
-    <artifactId>fuwjin</artifactId>
+    <artifactId>experimental</artifactId>
     <packaging>pom</packaging>
     <version>0.9.4-SNAPSHOT</version>
-    <name>Fuwjin</name>
+    <name>Fuwjin Experimental</name>
     <description>
-                The central management site for Postage, Pogo, and JON as well as host
-                to several smaller utilities such as EnumBundle, Lifeguard, and dbConfig.
+                The incubator for stuff so crazy it can't even be in the Fuwjin Suite.
     </description>
     <modules>
-       <module>postage</module>
-        <module>jon</module>
-        <module>jon-sample</module>
-        <module>pogo</module>
+       <module>bespect</module>
+        <module>chrona</module>
+        <module>drift</module>
+        <module>gravitas</module>
+		<module>lifeguard</module>
+		<module>milik-dev</module>
+		<module>minesweeper</module>
+		<module>xuter</module>
+		<module>ruin</module>
     </modules>
    <url>http://fuwjin.org</url>
    <scm>
