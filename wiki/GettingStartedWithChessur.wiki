@@ -14,7 +14,7 @@ Before we look at the API, let's get a Chessur build. If you're using a dependen
 == Chessur API ==
 
 The API is relatively straightforward and follows these steps:
-  # Create a CatalogManager
-  # Load a Catalog through CatalogManager.loadCat
+  # Create a !CatalogManager
+  # Load a Catalog through !CatalogManager.loadCat
   # Get a Script from the Catalog
   # Execute the Script
