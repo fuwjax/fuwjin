@@ -2,7 +2,7 @@
 
 =Getting started with Grin=
 
-"Anything is better than nothing, but less is better than more."
+_"A grin without a cat! It's the most curious thing I ever saw in all my life!"_
 
 Grin represents a fundamental paradigm shift in language design, part string manipulation, part shell scripting language. In a strong sense it's the language born of the same motivation as the original wiki, the simplest possible thing that might just work.
 
@@ -185,17 +185,4 @@ Finally the "is". The "is" keyword is tricky, and in general it's use might be a
 
 The "is" statement has an additional useful feature. The state of a Grin script is 3 pieces, the current input position, the current output buffer, and the current environment. Whether an "is" succeeds or fails, the state of all three of these pieces is restored to their original state before the "is" executed. What this means is that there is no impact to the Grin state during an "is" statement, even if input is consumed or output is published or assignments are made. Note that invocations are not rolled back, so there may be side effects in the underlying language model that are outside the control of Grin.
 
-That's it. That's not just Grin in a nutshell, that's all of Grin. I'll leave you with one more example, see if you can guess it's meaning
-
-{{{
-alias java.lang.Iterable.iterator as iterator
-alias java.util.Iterator as Iterator
-<MysteryInAnEnigma> {
-  values = iterator(list)
-  could repeat {
-    value = Iterator.next(values)
-    publish "value = 'value'"
-  }
-  is not Iterator.hasNext(values)
-}
-}}}
+Grin has a few more [AdvancedGrin advanced features], but for the most part, this is everything you need to start Grinning right away. See [GettingStartedWithChessur Chessur] for more information on downloading the reference implementation in Java.
