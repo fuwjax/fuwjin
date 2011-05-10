@@ -14,6 +14,7 @@ alias java.lang.Character as Character
 alias java.lang.Object as Object
 alias java.util.ArrayList as ArrayList
 alias java.util.concurrent.atomic.AtomicInteger as AtomicInteger
+alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
@@ -30,6 +31,7 @@ alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.expression.ScriptImpl as Script
+alias org.fuwjin.chessur.expression.ScriptProxy as ScriptProxy
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.util.CodePointSet$Range as Range
@@ -60,6 +62,15 @@ alias java.util.Map$Entry.getValue as value
 
 <Catalog>{
   <Preamble>
+  varIndex = AtomicInteger.new()
+  indexer = NameIndex.new()
+  specs = iterator(Catalog.scripts(cat))
+  repeat <ScriptDeclaration>
+  is not hasNext(specs)
+  <Postscript>
+}
+<Module>{
+  <ModulePreamble>
   varIndex = AtomicInteger.new()
   indexer = NameIndex.new()
   specs = iterator(Catalog.scripts(cat))
@@ -108,7 +119,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class 'className'Interpreter {
-  private static final Object UNSET = new Object() {
+  static final Object UNSET = new Object() {
     public String toString() {
       return \"UNSET\";
     }
@@ -125,7 +136,7 @@ public class 'className'Interpreter {
     }
   }
   
-  private static class StringCursor {
+  static class StringCursor {
     private int pos;
     private int line;
     private int column;
@@ -237,13 +248,17 @@ public class 'className'Interpreter {
     }
     
     public 'className'Exception ex(final String message) {
+      return new 'className'Exception(message + context());
+    }
+    
+    public String context() {
       if(pos == 0) {
-        return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] SOF -> [1,0] SOF\");
+        return \": [\" + line + \",\" + column + \"] SOF -> [1,0] SOF\";
       }
       if(pos > seq.length()) {
-        return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\");
+        return \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\";
       }
-      return new 'className'Exception(message+ \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos - 1)+\"' -> [1,0] SOF\");
+      return \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos - 1)+\"' -> [1,0] SOF\";
     }
     
     public 'className'Exception ex(final Throwable cause) {
@@ -254,7 +269,7 @@ public class 'className'Interpreter {
       final char ch = seq.charAt(pos++);
        if(ch == \'\\n\') {
          line++;
-         column = 1;
+         column = 0;
        } else {
          column++;
        }
@@ -275,12 +290,34 @@ public class 'className'Interpreter {
     }
   }"   
 }
+<ModulePreamble>{
+  publish "/*******************************************************************************
+ * Copyright (c) 2011 Michael Doberenz.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Michael Doberenz - initial API and implementation
+ ******************************************************************************/
+package 'package';
+
+import java.io.IOException;
+import java.util.Map;
+import static 'package'.'className'Interpreter.UNSET;
+import 'package'.'className'Interpreter.'className'Exception;
+import 'package'.'className'Interpreter.StringCursor;
+
+public class 'moduleName'Interpreter {
+"
+}
 <ScriptDeclaration>{
   spec = Script.declaration(getNext(specs))
   name = Declaration.name(spec)
   value = Declaration.returns(spec)
   indent = Indent.new()
-  publish "\n'indent'private static Object 'name'(final StringCursor input, final Object... parentEnv) throws 'className'Exception {
+  publish "\n'indent'static Object 'name'(final StringCursor input, final Object... parentEnv) throws 'className'Exception {
     final Object[] env = new Object[parentEnv.length];
     System.arraycopy(parentEnv, 0, env, 0, env.length);"
   Indent.increase(indent)
@@ -501,7 +538,7 @@ public class 'className'Interpreter {
 <AbortStatement>{
   is AbortStatement.instanceof(statement)
   value = AbortStatement.value(statement)
-  publish "'indent'throw new RuntimeException('<Value>'"
+  publish "'indent'throw new RuntimeException('<Value>' + 'input'.context()"
   could publish ", 'exception'"
   publish ');'
 }
@@ -713,14 +750,29 @@ public class 'className'Interpreter {
 }
 
 <ScriptStatement>{
-  is Script.instanceof(statement)
-  name = Script.name(statement)
-  publish "'indent''name'('input', env);"
+  either { 
+    is Script.instanceof(statement)
+    name = Script.name(statement)
+    publish "'indent''name'('input', env);"
+  } or {
+    is ScriptProxy.instanceof(statement)
+    module = Module.name(ScriptProxy.module(statement))
+    name = Script.name(ScriptProxy.script(statement))
+    publish "'indent''package'.'module'Interpreter.'name'('input', env);"
+  }
 }
 <Script>{
-  is Script.instanceof(statement)
-  name = Script.name(statement)
-  return "'name'('input', env)"
+  either {
+      is Script.instanceof(statement)
+      name = Script.name(statement)
+      result = "'name'('input', env)"
+  } or {
+      is ScriptProxy.instanceof(statement)
+      module = Module.name(ScriptProxy.module(statement))
+      name = Script.name(ScriptProxy.script(statement))
+      result = "'package'.'module'Interpreter.'name'('input', env)"
+  }
+  return result
 }
 <Variable>{
   is Variable.instanceof(value)

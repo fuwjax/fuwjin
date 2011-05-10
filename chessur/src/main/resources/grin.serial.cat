@@ -11,6 +11,7 @@
 alias java.lang.Boolean as Boolean
 alias java.lang.Character as Character
 alias java.lang.Object.equals as eq
+alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
@@ -26,7 +27,8 @@ alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
-alias org.fuwjin.chessur.expression.ScriptImpl as Script
+alias org.fuwjin.chessur.Script as Script
+alias org.fuwjin.chessur.expression.ScriptImpl as ScriptImpl
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.util.CodePointSet$Range as Range
@@ -38,6 +40,12 @@ alias java.util.Map$Entry.getKey as key
 alias java.util.Map$Entry.getValue as value
 
 <Catalog>{
+  modules = iterator(Catalog.modules(cat))
+  could {
+    repeat <LoadDeclaration>
+    publish '\n'
+  }
+  is not hasNext(modules)
   aliases = iterator(Catalog.aliases(cat))
   could {
     repeat <AliasDeclaration>
@@ -48,6 +56,12 @@ alias java.util.Map$Entry.getValue as value
   repeat <ScriptDeclaration>
   is not hasNext(specs)
 }
+<LoadDeclaration>{
+    module = getNext(modules)
+    path = Module.source(module)
+    name = Module.name(module)
+    publish "load 'path' as 'name'\n"
+}
 <AliasDeclaration>{
     entry = getNext(aliases)
     name = key(entry)
@@ -55,7 +69,7 @@ alias java.util.Map$Entry.getValue as value
     publish "alias 'alias' as 'name'\n"
 }
 <ScriptDeclaration>{
-  spec = Script.declaration(getNext(specs))
+  spec = ScriptImpl.declaration(getNext(specs))
   name = Declaration.name(spec)
   publish "\<'name'> {"
   indent = Indent.new()

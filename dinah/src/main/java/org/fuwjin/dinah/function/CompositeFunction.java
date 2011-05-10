@@ -64,7 +64,7 @@ public class CompositeFunction extends AbstractFunction {
       for(final AbstractFunction function: functions) {
          final AbstractFunction func = function.restrict(signature);
          restricted = restricted.join(func);
-         accessible = accessible(accessible, func);
+         accessible = moreAccessible(accessible, func);
       }
       if(accessible != null && accessible != this) {
          return accessible;
@@ -78,12 +78,25 @@ public class CompositeFunction extends AbstractFunction {
       return this;
    }
 
-   private AbstractFunction accessible(final AbstractFunction current, final AbstractFunction func) {
+   private AbstractFunction moreAccessible(final AbstractFunction current, final AbstractFunction func) {
       if(func.isPrivate()) {
          return current;
       }
       if(current == null) {
          return func;
+      }
+      if(func instanceof FixedArgsFunction && current instanceof FixedArgsFunction) {
+         final FixedArgsFunction<?> c = (FixedArgsFunction<?>)current;
+         final FixedArgsFunction<?> f = (FixedArgsFunction<?>)func;
+         if(f.member() != null && c.member() != null
+               && !c.member().getDeclaringClass().equals(f.member().getDeclaringClass())) {
+            if(c.member().getDeclaringClass().isAssignableFrom(f.member().getDeclaringClass())) {
+               return func;
+            }
+            if(f.member().getDeclaringClass().isAssignableFrom(c.member().getDeclaringClass())) {
+               return current;
+            }
+         }
       }
       return this;
    }

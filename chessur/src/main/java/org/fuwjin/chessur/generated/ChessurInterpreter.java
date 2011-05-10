@@ -1537,13 +1537,13 @@ public class ChessurInterpreter {
          env[4] /* name */= Identifier(sub218, env);
          env[24] /* module */= ((org.fuwjin.chessur.expression.CatalogImpl)sub218.isSet("cat", env[1]))
                .getModule((java.lang.String)sub218.isSet("id", env[7]));
-         env[5] /* script */= ((org.fuwjin.chessur.expression.CatalogImpl)sub218.isSet("module", env[24]))
-               .get((java.lang.String)sub218.isSet("name", env[4]));
+         env[5] /* script */= ((org.fuwjin.chessur.Module)sub218.isSet("module", env[24])).get((java.lang.String)sub218
+               .isSet("name", env[4]));
          sub218.commit();
       } catch(final ChessurException e219) {
          final StringCursor sub220 = sub216.sub();
-         env[5] /* script */= ((org.fuwjin.chessur.expression.CatalogImpl)sub220.isSet("cat", env[1]))
-               .get((java.lang.String)sub220.isSet("id", env[7]));
+         env[5] /* script */= ((org.fuwjin.chessur.Module)sub220.isSet("cat", env[1])).get((java.lang.String)sub220
+               .isSet("id", env[7]));
          sub220.commit();
       }
       try {

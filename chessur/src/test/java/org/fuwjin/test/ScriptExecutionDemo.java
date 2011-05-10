@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.expression.CatalogImpl;
+import org.fuwjin.chessur.expression.CatalogProxy;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Parameterized;
@@ -118,15 +120,31 @@ public class ScriptExecutionDemo {
       loader = new RuntimeClassLoader();
    }
 
-   private static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
+   private static String addSource(final Map<String, String> sources, final String simpleName, final Catalog cat,
+         final String mainName) throws ExecutionException {
+      for(final CatalogProxy module: ((CatalogImpl)cat).modules()) {
+         addSource(sources, module.name(), module.catalog(), mainName);
+      }
+      final String className = "org.fuwjin.internal.generated." + simpleName + "Interpreter";
       final Writer code = new StringWriter();
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
       environment.put("package", "org.fuwjin.internal.generated");
-      environment.put("className", simpleClassName);
-      catCodeGenerator.exec(code, environment);
-      final String className = "org.fuwjin.internal.generated." + simpleClassName + "Interpreter";
-      loader.compile(className, code.toString());
+      environment.put("className", mainName);
+      environment.put("moduleName", simpleName);
+      if(mainName.equals(simpleName)) {
+         catCodeGenerator.exec(code, environment);
+      } else {
+         catCodeGenerator.get("Module").exec(code, environment);
+      }
+      sources.put(className, code.toString());
+      return className;
+   }
+
+   private static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
+      final Map<String, String> sources = new HashMap<String, String>();
+      final String className = addSource(sources, simpleClassName, cat, simpleClassName);
+      loader.compile(sources);
       final Class<?> parserClass = loader.loadClass(className);
       return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
    }
