@@ -17,7 +17,7 @@ import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 
 /**
- * Manages catalogs
+ * Manages catalogs.
  */
 public class CatalogManager {
    private final ConcurrentMap<String, Catalog> catalogs = new ConcurrentHashMap<String, Catalog>();

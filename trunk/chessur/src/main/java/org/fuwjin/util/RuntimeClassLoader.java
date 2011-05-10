@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.util;
 
-import static java.util.Collections.singleton;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -40,12 +41,14 @@ public class RuntimeClassLoader extends ClassLoader {
 
    /**
     * Compiles the {@code source} java code into the class {@code name}.
-    * @param name the fully qualified class name
-    * @param source the java source code
+    * @param sources the java source code
     * @return true if the source code compiled, false otherwise
     */
-   public boolean compile(final String name, final String source) {
-      final Set<BufferedFileObject> compUnit = singleton(new BufferedFileObject(name, source));
+   public boolean compile(final Map<String, String> sources) {
+      final Set<BufferedFileObject> compUnit = new HashSet<BufferedFileObject>();
+      for(final Map.Entry<String, String> entry: sources.entrySet()) {
+         compUnit.add(new BufferedFileObject(entry.getKey(), entry.getValue()));
+      }
       final JavaCompiler compiler = getSystemJavaCompiler();
       final OutputStreamWriter log = new OutputStreamWriter(System.err);
       return compiler.getTask(log, manager, null, null, null, compUnit).call();

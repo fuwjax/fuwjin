@@ -15,11 +15,26 @@ alias org.fuwjin.util.Indent as Indent
 <Catalog>{
   <S>
   could {
+    repeat <LoadDeclaration>
+    publish "\n"
+  }
+  could {
     repeat <AliasDeclaration>
     publish "\n"
   }
   repeat <ScriptDeclaration>
   <EndOfFile>
+}
+<LoadDeclaration>{
+  accept 'load' <Sep>
+  either path = <PathName>
+  or abort "load keyword requires a file path"
+  either accept 'as'
+  or abort "load keyword requires as keyword" 
+  <Sep>
+  either alias = <Name>
+  or abort "load-as keywords require a name"
+  publish "load 'path' as 'alias'\n"
 }
 <AliasDeclaration>{
   accept 'alias' <Sep>
@@ -186,6 +201,11 @@ alias org.fuwjin.util.Indent as Indent
   accept '<'
   either id = <Identifier>
   or abort "scripts must be an identifier enclosed in angle brackets"
+  could {
+    accept ':'
+    either id = "'id':'<Identifier>'"
+    or abort "namespaced script ideitifiers must have a valid name"
+  }
   either accept '>'
   or abort "script id 'id' must end with an angle bracket" 
   <S>
@@ -325,6 +345,18 @@ alias org.fuwjin.util.Indent as Indent
   <Sep>
 }
 
+<Path>{
+  repeat {
+    could accept '/'
+    <QualifiedIdentifier>
+  }
+  could accept '/'
+  return match
+}
+<PathName>{
+  path = <Path> <S>
+  return path
+}
 <Name>{
   id = <Identifier> <S>
   return id

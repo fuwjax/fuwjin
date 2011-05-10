@@ -36,7 +36,7 @@ public class AbortStatement implements Expression {
       try {
          final Object val = value.resolve(input, output, scope);
          throw new AbortedException("%s: %s", val, snapshot);
-      } catch(final Exception e) {
+      } catch(final ResolveException e) {
          throw new AbortedException(e, "Abort string could not be generated: %s", snapshot);
       }
    }

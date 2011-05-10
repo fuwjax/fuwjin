@@ -63,6 +63,12 @@ public class CodePointPosition implements Position {
          return "[" + line + "," + column + "] SOF";
       case EOF:
          return "[" + line + "," + column + "] EOF";
+      case '\n':
+         return "[" + line + "," + column + "] '\\n'";
+      case '\r':
+         return "[" + line + "," + column + "] '\\r'";
+      case '\t':
+         return "[" + line + "," + column + "] '\\t'";
       default:
          return "[" + line + "," + column + "] '" + valueString() + "'";
       }

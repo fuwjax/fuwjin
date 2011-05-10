@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.FunctionSignature;
@@ -27,16 +28,19 @@ public class CatalogImpl extends Executable implements Catalog {
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
    private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
    private final Map<String, ScriptImpl> scripts = new LinkedHashMap<String, ScriptImpl>();
-   private final Map<String, Catalog> modules = new LinkedHashMap<String, Catalog>();
+   private final Map<String, ScriptImpl> referenced = new LinkedHashMap<String, ScriptImpl>();
+   private final Map<String, CatalogProxy> modules = new LinkedHashMap<String, CatalogProxy>();
    private Declaration root;
    private final CatalogManager manager;
+   private final String source;
 
    /**
     * Creates a new instance.
-    * @param name the name of the catalog
+    * @param source the source of the catalog
     * @param manager the manager for loading referenced catalogs
     */
-   public CatalogImpl(final String name, final CatalogManager manager) {
+   public CatalogImpl(final String source, final CatalogManager manager) {
+      this.source = source;
       this.manager = manager;
    }
 
@@ -47,6 +51,7 @@ public class CatalogImpl extends Executable implements Catalog {
    public void add(final Declaration decl) {
       final ScriptImpl s = (ScriptImpl)get(decl.name());
       s.setDecl(decl);
+      scripts.put(decl.name(), s);
       if(root == null) {
          root = decl;
       }
@@ -119,8 +124,11 @@ public class CatalogImpl extends Executable implements Catalog {
    public Script get(final String name) {
       ScriptImpl s = scripts.get(name);
       if(s == null) {
-         s = new ScriptImpl(name);
-         scripts.put(name, s);
+         s = referenced.get(name);
+         if(s == null) {
+            s = new ScriptImpl(name);
+            referenced.put(name, s);
+         }
       }
       return s;
    }
@@ -130,7 +138,7 @@ public class CatalogImpl extends Executable implements Catalog {
     * @param name the name of the catalog
     * @return the catalog
     */
-   public Catalog getModule(final String name) {
+   public Module getModule(final String name) {
       return modules.get(name);
    }
 
@@ -155,7 +163,15 @@ public class CatalogImpl extends Executable implements Catalog {
     * @throws IOException if the path does not refer to a file
     */
    public void load(final String path, final String name) throws ChessurException, IOException {
-      modules.put(name, manager.loadCat(path));
+      modules.put(name, new CatalogProxy(name, manager.loadCat(path)));
+   }
+
+   /**
+    * Returns the set of loaded modules.
+    * @return the modules
+    */
+   public Iterable<CatalogProxy> modules() {
+      return unmodifiableCollection(modules.values());
    }
 
    @Override
@@ -178,6 +194,11 @@ public class CatalogImpl extends Executable implements Catalog {
    @Override
    public Iterable<? extends Script> scripts() {
       return unmodifiableCollection(scripts.values());
+   }
+
+   @Override
+   public String source() {
+      return source;
    }
 
    @Override

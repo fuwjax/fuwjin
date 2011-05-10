@@ -67,7 +67,7 @@ public class StreamDemo {
       final Position p4 = stream.read(snapshot);
       assertThat((Integer)p4.value(), is((int)'\n'));
       assertThat(stringOf(stream.buffer(snapshot)), is("test\n"));
-      assertThat(p4.toString(), is("[1,5] '\n'"));
+      assertThat(p4.toString(), is("[1,5] '\\n'"));
       final Position p5 = stream.read(snapshot);
       assertThat((Integer)p5.value(), is((int)'x'));
       assertThat(stringOf(stream.buffer(snapshot)), is("test\nx"));
@@ -101,7 +101,7 @@ public class StreamDemo {
       assertThat((Integer)p4.value(), is((int)'\n'));
       assertThat(stringOf(stream.buffer(snapshot)), is("tes"));
       assertThat(stringOf(buffer.buffer(snapshot)), is("test\n"));
-      assertThat(p4.toString(), is("[1,5] '\n'"));
+      assertThat(p4.toString(), is("[1,5] '\\n'"));
       final Position p5 = buffer.read(snapshot);
       assertThat((Integer)p5.value(), is((int)'x'));
       assertThat(stringOf(stream.buffer(snapshot)), is("tes"));
@@ -120,7 +120,7 @@ public class StreamDemo {
       final Position p42 = stream.read(snapshot);
       assertThat((Integer)p42.value(), is((int)'\n'));
       assertThat(stringOf(stream.buffer(snapshot)), is("test\n"));
-      assertThat(p42.toString(), is("[1,5] '\n'"));
+      assertThat(p42.toString(), is("[1,5] '\\n'"));
       final Position p52 = stream.read(snapshot);
       assertThat((Integer)p52.value(), is((int)'x'));
       assertThat(stringOf(stream.buffer(snapshot)), is("test\nx"));
@@ -153,7 +153,7 @@ public class StreamDemo {
       final Position p4 = mark.read(snapshot);
       assertThat((Integer)p4.value(), is((int)'\n'));
       assertThat(stringOf(mark.buffer(snapshot)), is("t\n"));
-      assertThat(p4.toString(), is("[1,5] '\n'"));
+      assertThat(p4.toString(), is("[1,5] '\\n'"));
       final Position p5 = mark.read(snapshot);
       assertThat((Integer)p5.value(), is((int)'x'));
       assertThat(stringOf(mark.buffer(snapshot)), is("t\nx"));

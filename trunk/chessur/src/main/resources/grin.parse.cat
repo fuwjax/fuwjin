@@ -10,6 +10,7 @@
 #-------------------------------------------------------------------------------
 alias java.lang.Boolean as Boolean
 alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
+alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
@@ -297,11 +298,13 @@ alias org.fuwjin.dinah.Function as Function
   or abort "script identifiers must be enclosed in angle brackets"
   either {
     accept ':'
-    name = <Identifier>
-    module = Catalog.getModule(cat, id)
-    script = Catalog.get(module, name)
+    either {
+        name = <Identifier>
+        module = Catalog.getModule(cat, id)
+        script = Module.get(module, name)
+    } or abort "namespaced script 'id': could not be resolved"
   } or {
-    script = Catalog.get(cat, id)
+    script = Module.get(cat, id)
   }  
   either accept '>'
   or abort "script identifiers must be normal identifiers in angle brackets"
