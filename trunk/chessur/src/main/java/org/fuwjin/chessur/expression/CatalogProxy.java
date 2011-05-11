@@ -5,15 +5,27 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
 
+/**
+ * Represents a loaded module in a Catalog.
+ */
 public class CatalogProxy implements Module {
    private final Catalog module;
    private final String name;
 
+   /**
+    * Creates a new instance.
+    * @param name the loaded name
+    * @param module the catalog
+    */
    public CatalogProxy(final String name, final Catalog module) {
       this.name = name;
       this.module = module;
    }
 
+   /**
+    * Returns the catalog.
+    * @return the catalog
+    */
    public Catalog catalog() {
       return module;
    }

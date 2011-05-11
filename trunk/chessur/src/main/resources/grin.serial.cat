@@ -29,6 +29,9 @@ alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.Script as Script
 alias org.fuwjin.chessur.expression.ScriptImpl as ScriptImpl
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.util.CodePointSet$Range as Range
@@ -312,10 +315,35 @@ alias java.util.Map$Entry.getValue as value
 }
 
 <Script>{
-  is Script.instanceof(statement)
-  name = Script.name(statement)
-  publish "\<'name'\>"
+  either {
+    is Script.instanceof(statement)
+    name = Script.name(statement)
+    publish "\<'name'\>"
+  } or {
+    is ScriptOutput.instanceof(statement)
+    name = ScriptOutput.name(statement)
+    statement = ScriptOutput.spec(statement)
+    <Script>
+    publish " >> 'name'"
+  } or {
+    is ScriptPipe.instanceof(statement)
+    pipe = statement
+    statement = ScriptPipe.source(pipe)
+    <Script>
+    publish " >> "
+    statement = ScriptPipe.sink(pipe)
+    <Script>
+  } or {
+    is ScriptInput.instanceof(statement)
+    input = statement
+    statement = ScriptInput.spec(input)
+    <Script>
+    publish " << "
+    value = ScriptInput.value(input)
+    <Value>
+  }
 }
+
 <Variable>{
   is Variable.instanceof(value)
   publish Variable.name(value)

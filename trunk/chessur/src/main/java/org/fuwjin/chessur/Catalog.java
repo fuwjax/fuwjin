@@ -5,4 +5,5 @@ package org.fuwjin.chessur;
  * a proxy for the first Script of the Catalog.
  */
 public interface Catalog extends Script, Module {
+   // a catalog is a module that can be treated like a script
 }

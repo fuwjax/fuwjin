@@ -2,6 +2,9 @@ package org.fuwjin.chessur;
 
 import java.util.Map;
 
+/**
+ * The command line runner for chessur.
+ */
 public class ChessurMain {
    /**
     * The Catalog/Script runner.

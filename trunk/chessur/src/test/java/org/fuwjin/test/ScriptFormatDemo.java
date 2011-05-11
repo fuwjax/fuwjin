@@ -1,7 +1,6 @@
 package org.fuwjin.test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -85,7 +84,7 @@ public class ScriptFormatDemo {
    public void testFormatting() throws Exception {
       final Writer formatterOutput = new StringWriter();
       catFormatter.exec(newReader(".cat"), formatterOutput);
-      assertThat(formatterOutput.toString(), is(StreamUtils.readAll(newReader(".cat.canonical"))));
+      assertEquals(formatterOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
    }
 
    /**
@@ -98,7 +97,7 @@ public class ScriptFormatDemo {
       final Catalog cat = manager.loadCat(file(".cat"));
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
-      assertThat(serialOutput.toString(), is(StreamUtils.readAll(newReader(".cat.canonical"))));
+      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
    }
 
    /**
@@ -114,7 +113,7 @@ public class ScriptFormatDemo {
       final Catalog cat = (Catalog)catParser.exec(newReader(".cat"), env);
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
-      assertThat(serialOutput.toString(), is(StreamUtils.readAll(newReader(".cat.canonical"))));
+      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
    }
 
    private File file(final String suffix) throws FileNotFoundException {

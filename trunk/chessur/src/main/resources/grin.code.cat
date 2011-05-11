@@ -31,6 +31,9 @@ alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.expression.ScriptImpl as Script
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
 alias org.fuwjin.chessur.expression.ScriptProxy as ScriptProxy
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
@@ -237,11 +240,23 @@ public class 'className'Interpreter {
     }
     
     public void commit() {
+      commitInput();
+      commitOutput();
+    }
+    
+    void commitInput() {
       parent.pos = pos;
       parent.line = line;
       parent.column = column;
+    }
+    
+    void commitOutput() {
+      appendTo(parent.appender);
+    }
+    
+    void appendTo(final Appendable dest) {
       try {
-        parent.appender.append(appender.toString());
+        dest.append(appender.toString());
       } catch(final IOException e) {
         throw new RuntimeException(\"IOException never thrown by StringBuilder\", e);
       }
@@ -283,6 +298,23 @@ public class 'className'Interpreter {
     
     public StringCursor sub() {
       return new StringCursor(pos, line, column, seq, this);
+    }
+    
+    public StringCursor subOutput(final StringBuilder newOutput) {
+      return new StringCursor(pos, line, column, seq, this) {
+        public void commit() {
+          commitInput();
+          appendTo(newOutput);
+        }
+      };
+    }
+    
+    public StringCursor subInput(final CharSequence newInput) {
+      return new StringCursor(0, 1, 0, newInput, this) {
+        public void commit() {
+          commitOutput();
+        }
+      };
     }
     
     public String match() {
@@ -750,15 +782,52 @@ public class 'moduleName'Interpreter {
 }
 
 <ScriptStatement>{
-  either { 
-    is Script.instanceof(statement)
-    name = Script.name(statement)
-    publish "'indent''name'('input', env);"
+  either publish "'indent''<Script>';"
+  or {
+     is ScriptOutput.instanceof(statement)
+     name = ScriptOutput.name(statement)
+     statement = ScriptOutput.spec(statement)
+     bIndex = AtomicInteger.incrementAndGet(varIndex)
+     builder = "builder'bIndex'"
+     publish "'indent'final StringBuilder 'builder' = new StringBuilder();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subOutput('builder');"
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+     index = NameIndex.indexOf(indexer, name)
+     publish "'indent'env['index'] /*'name'*/= 'builder'.toString();"
   } or {
-    is ScriptProxy.instanceof(statement)
-    module = Module.name(ScriptProxy.module(statement))
-    name = Script.name(ScriptProxy.script(statement))
-    publish "'indent''package'.'module'Interpreter.'name'('input', env);"
+     is ScriptInput.instanceof(statement)
+     value = ScriptInput.value(statement)
+     statement = ScriptInput.spec(statement)
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subInput(String.valueOf('<Value>'));"
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+  } or {
+     is ScriptPipe.instanceof(statement)
+     source = ScriptPipe.source(statement)
+     sink = ScriptPipe.sink(statement)
+     bIndex = AtomicInteger.incrementAndGet(varIndex)
+     builder = "builder'bIndex'"
+     publish "'indent'final StringBuilder 'builder' = new StringBuilder();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subOutput('builder');"
+     statement = source
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subInput('builder');"
+     statement = sink 
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
   }
 }
 <Script>{
