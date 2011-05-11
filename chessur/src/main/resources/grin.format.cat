@@ -198,6 +198,22 @@ alias org.fuwjin.util.Indent as Indent
   publish ")"
 }
 <Script>{
+  <ScriptIdent>
+  could{
+    accept '<<' <S>
+    publish " << '<Value>'"
+  }
+  could repeat {
+    accept '>>' <S>
+    publish ' >> '
+    <ScriptIdent>
+  }
+  could {
+    accept '>>' <S>
+    publish " >> '<Name>'"
+  }
+}
+<ScriptIdent>{
   accept '<'
   either id = <Identifier>
   or abort "scripts must be an identifier enclosed in angle brackets"

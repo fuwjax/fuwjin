@@ -1,6 +1,7 @@
 package org.fuwjin.test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +24,6 @@ import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
-import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
@@ -197,10 +197,10 @@ public class ScriptExecutionDemo {
          final StringBuilder codeOutput = new StringBuilder();
          final Object codeResult = data.interpreter().invoke(null, StreamUtils.readAll(newReader(".cat.input")),
                codeOutput, environment());
-         assertThat(codeOutput.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
+         assertEquals(codeOutput.toString(), StreamUtils.readAll(newReader(".cat.output")));
          assertThat(codeResult, is(matcher(file(".cat.matcher"))));
       } catch(final InvocationTargetException e) {
-         assertThat(e.getCause().getMessage(), is(firstLine(StreamUtils.readAll(newReader(".cat.error")))));
+         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader(".cat.error"))));
       }
    }
 
@@ -213,12 +213,10 @@ public class ScriptExecutionDemo {
       final Writer output = new StringWriter();
       try {
          final Object result = data.modelCat().exec(newReader(".cat.input"), output, environment());
-         assertThat(output.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
-         if(Adapter.isSet(result)) {
-            assertThat(result, is(matcher(file(".cat.matcher"))));
-         }
+         assertEquals(output.toString(), StreamUtils.readAll(newReader(".cat.output")));
+         assertThat(result, is(matcher(file(".cat.matcher"))));
       } catch(final ExecutionException e) {
-         assertThat(e.getCause().getMessage(), is(StreamUtils.readAll(newReader(".cat.error"))));
+         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader(".cat.error")));
       }
    }
 
@@ -231,12 +229,10 @@ public class ScriptExecutionDemo {
       final Writer output = new StringWriter();
       try {
          final Object result = data.cat().exec(newReader(".cat.input"), output, environment());
-         assertThat(output.toString(), is(StreamUtils.readAll(newReader(".cat.output"))));
-         if(Adapter.isSet(result)) {
-            assertThat(result, is(matcher(file(".cat.matcher"))));
-         }
+         assertEquals(output.toString(), StreamUtils.readAll(newReader(".cat.output")));
+         assertThat(result, is(matcher(file(".cat.matcher"))));
       } catch(final ExecutionException e) {
-         assertThat(e.getCause().getMessage(), is(StreamUtils.readAll(newReader(".cat.error"))));
+         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader(".cat.error")));
       }
    }
 
