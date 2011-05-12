@@ -116,7 +116,7 @@ public class ScriptFormatDemo {
       assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
    }
 
-   private File file(final String suffix) throws FileNotFoundException {
+   private File file(final String suffix) {
       return new File(path, path.getName() + suffix);
    }
 

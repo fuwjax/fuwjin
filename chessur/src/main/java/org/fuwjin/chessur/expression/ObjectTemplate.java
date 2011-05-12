@@ -25,6 +25,7 @@ public class ObjectTemplate implements Expression {
 
    /**
     * Creates a new instance.
+    * @param type the object type
     * @param constructor the constructor function
     */
    public ObjectTemplate(final String type, final Function constructor) {
@@ -59,6 +60,7 @@ public class ObjectTemplate implements Expression {
 
    /**
     * Adds a field to this template.
+    * @param name the name of the field
     * @param setter the field setter
     * @param object the value
     */
@@ -66,6 +68,10 @@ public class ObjectTemplate implements Expression {
       setters.add(new FieldTemplate(name, setter, object));
    }
 
+   /**
+    * Returns the type.
+    * @return the type
+    */
    public String type() {
       return type;
    }

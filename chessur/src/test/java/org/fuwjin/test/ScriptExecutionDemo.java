@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -23,6 +24,7 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
+import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -51,7 +53,7 @@ public class ScriptExecutionDemo {
 
       public Catalog cat() throws Exception {
          if(cat == null) {
-            cat = manager.loadCat(new File(file, file.getName() + ".cat"));
+            cat = loadCatalog(file);
          }
          return cat;
       }
@@ -65,11 +67,7 @@ public class ScriptExecutionDemo {
 
       public Catalog modelCat() throws Exception {
          if(modelCat == null) {
-            final Map<String, Object> env = new HashMap<String, Object>();
-            env.put("postage", new ReflectiveFunctionProvider());
-            env.put("name", file.getName());
-            env.put("manager", manager);
-            modelCat = (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
+            modelCat = parseModel(file);
          }
          return modelCat;
       }
@@ -120,6 +118,26 @@ public class ScriptExecutionDemo {
       loader = new RuntimeClassLoader();
    }
 
+   static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
+      final Map<String, String> sources = new HashMap<String, String>();
+      final String className = addSource(sources, simpleClassName, cat, simpleClassName);
+      loader.compile(sources);
+      final Class<?> parserClass = loader.loadClass(className);
+      return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
+   }
+
+   static Catalog loadCatalog(final File file) throws ChessurException, IOException {
+      return manager.loadCat(new File(file, file.getName() + ".cat"));
+   }
+
+   static Catalog parseModel(final File file) throws FileNotFoundException, ExecutionException {
+      final Map<String, Object> env = new HashMap<String, Object>();
+      env.put("postage", new ReflectiveFunctionProvider());
+      env.put("name", file.getName());
+      env.put("manager", manager);
+      return (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
+   }
+
    private static String addSource(final Map<String, String> sources, final String simpleName, final Catalog cat,
          final String mainName) throws ExecutionException {
       for(final CatalogProxy module: ((CatalogImpl)cat).modules()) {
@@ -140,14 +158,6 @@ public class ScriptExecutionDemo {
       sources.put(className, code.toString());
       System.out.println(code);
       return className;
-   }
-
-   private static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
-      final Map<String, String> sources = new HashMap<String, String>();
-      final String className = addSource(sources, simpleClassName, cat, simpleClassName);
-      loader.compile(sources);
-      final Class<?> parserClass = loader.loadClass(className);
-      return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
    }
 
    private static Map<String, ? extends Object> environment() {

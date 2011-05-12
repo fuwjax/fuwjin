@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fuwjin.chessur.expression.AbortedException;
 
+/**
+ * The default output stream implementation.
+ */
 public abstract class ObjectOutStream implements SinkStream {
    private class DetachedStream implements SinkStream {
       private int index;
@@ -14,23 +17,18 @@ public abstract class ObjectOutStream implements SinkStream {
 
       public DetachedStream(final int i, final StringPosition current) {
          index = i;
-         this.pos = current;
+         pos = current;
       }
 
       @Override
       public void append(final Object value) {
-         pos = pos.newPosition(value);
-         if(index == buffer.size()) {
-            buffer.add(pos);
-         } else {
-            buffer.set(index, pos);
-         }
+         pos = add(index, pos, value);
          index++;
       }
 
       @Override
       public void attach(final SinkStream stream) {
-         index = ((DetachedStream)stream).index;
+         index = ((DetachedStream)stream).index();
       }
 
       @Override
@@ -42,14 +40,24 @@ public abstract class ObjectOutStream implements SinkStream {
       public SinkStream detach() {
          return new DetachedStream(index, pos);
       }
+
+      protected int index() {
+         return index;
+      }
    }
 
+   /**
+    * The /dev/null output stream.
+    */
    public static final SinkStream NONE = new ObjectOutStream() {
       @Override
       protected void appendImpl(final String value) throws IOException {
          // do nothing
       }
    };
+   /**
+    * The standard output stream.
+    */
    public static final SinkStream STDOUT = new ObjectOutStream() {
       @Override
       protected void appendImpl(final String value) throws IOException {
@@ -57,6 +65,11 @@ public abstract class ObjectOutStream implements SinkStream {
       }
    };
 
+   /**
+    * Returns the standard internal output stream. The toString() of this stream
+    * will return the serialized stream.
+    * @return the standard internal output stream
+    */
    public static SinkStream stream() {
       return new ObjectOutStream() {
          private final StringBuilder builder = new StringBuilder();
@@ -73,6 +86,11 @@ public abstract class ObjectOutStream implements SinkStream {
       };
    }
 
+   /**
+    * A output stream wrapper for a PrintStream.
+    * @param output the destination stream
+    * @return the wrapped stream
+    */
    public static SinkStream stream(final PrintStream output) {
       return new ObjectOutStream() {
          @Override
@@ -82,6 +100,11 @@ public abstract class ObjectOutStream implements SinkStream {
       };
    }
 
+   /**
+    * An output stream for a Writer.
+    * @param writer the destination writer
+    * @return the wrapped stream
+    */
    public static SinkStream stream(final Writer writer) {
       return new ObjectOutStream() {
          @Override
@@ -107,7 +130,7 @@ public abstract class ObjectOutStream implements SinkStream {
    @Override
    public void attach(final SinkStream stream) throws AbortedException {
       try {
-         for(int i = 0; i < ((DetachedStream)stream).index; i++) {
+         for(int i = 0; i < ((DetachedStream)stream).index(); i++) {
             appendImpl(buffer.get(i).valueString());
          }
          buffer.clear();
@@ -125,6 +148,16 @@ public abstract class ObjectOutStream implements SinkStream {
    @Override
    public SinkStream detach() {
       return new DetachedStream(0, current);
+   }
+
+   protected StringPosition add(final int index, final StringPosition pos, final Object value) {
+      final StringPosition p = pos.newPosition(value);
+      if(index == buffer.size()) {
+         buffer.add(p);
+      } else {
+         buffer.set(index, p);
+      }
+      return p;
    }
 
    protected abstract void appendImpl(String value) throws IOException;

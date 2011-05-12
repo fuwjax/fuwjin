@@ -146,6 +146,7 @@ public class CatalogImpl extends Executable implements Catalog {
    /**
     * Returns a referenced signature.
     * @param name the name of the signature
+    * @param paramCount the parameter count
     * @return the signature
     */
    public FunctionSignature getSignature(final String name, final int paramCount) {

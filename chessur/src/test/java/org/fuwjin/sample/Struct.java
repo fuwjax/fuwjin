@@ -14,12 +14,20 @@ package org.fuwjin.sample;
  * A sample class for object templating.
  */
 public class Struct {
+   /**
+    * Creates a new instance directly for the matcher.
+    * @param value the struct value
+    * @return the new struct
+    */
    public static Struct newInstance(final int value) {
       final Struct field = new Struct();
       field.value = value;
       return field;
    }
 
+   /**
+    * The int field.
+    */
    public int value;
 
    @Override

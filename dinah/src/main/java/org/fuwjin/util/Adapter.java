@@ -43,7 +43,7 @@ public final class Adapter {
       @Override
       public String toString() {
          return "UNSET";
-      };
+      }
    };
 
    /**
