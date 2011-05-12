@@ -26,7 +26,7 @@ public class ChessurInterpreter {
       }
    }
 
-   private static class StringCursor {
+   static class StringCursor {
       private int pos;
       private int line;
       private int column;
@@ -107,25 +107,22 @@ public class ChessurInterpreter {
       }
 
       public void commit() {
-         parent.pos = pos;
-         parent.line = line;
-         parent.column = column;
-         try {
-            parent.appender.append(appender.toString());
-         } catch(final IOException e) {
-            throw new RuntimeException("IOException never thrown by StringBuilder", e);
+         commitInput();
+         commitOutput();
+      }
+
+      public String context() {
+         if(pos == 0) {
+            return ": [" + line + "," + column + "] SOF -> [1,0] SOF";
          }
+         if(pos > seq.length()) {
+            return ": [" + line + "," + column + "] EOF -> [1,0] SOF";
+         }
+         return ": [" + line + "," + column + "] '" + seq.charAt(pos - 1) + "' -> [1,0] SOF";
       }
 
       public ChessurException ex(final String message) {
-         if(pos == 0) {
-            return new ChessurException(message + ": [" + line + "," + column + "] SOF -> [1,0] SOF");
-         }
-         if(pos > seq.length()) {
-            return new ChessurException(message + ": [" + line + "," + column + "] EOF -> [1,0] SOF");
-         }
-         return new ChessurException(message + ": [" + line + "," + column + "] '" + seq.charAt(pos - 1)
-               + "' -> [1,0] SOF");
+         return new ChessurException(message + context());
       }
 
       public ChessurException ex(final Throwable cause) {
@@ -148,8 +145,35 @@ public class ChessurInterpreter {
          return seq.charAt(pos);
       }
 
+      public void publish(final Object value) throws ChessurException {
+         try {
+            appender.append(value.toString());
+         } catch(final IOException e) {
+            throw ex(e);
+         }
+      }
+
       public StringCursor sub() {
          return new StringCursor(pos, line, column, seq, this);
+      }
+
+      public StringCursor subInput(final CharSequence newInput) {
+         return new StringCursor(0, 1, 0, newInput, this) {
+            @Override
+            public void commit() {
+               commitOutput();
+            }
+         };
+      }
+
+      public StringCursor subOutput(final StringBuilder newOutput) {
+         return new StringCursor(pos, line, column, seq, this) {
+            @Override
+            public void commit() {
+               commitInput();
+               appendTo(newOutput);
+            }
+         };
       }
 
       protected void checkBounds(final int p) throws ChessurException {
@@ -158,11 +182,29 @@ public class ChessurInterpreter {
          }
       }
 
+      void appendTo(final Appendable dest) {
+         try {
+            dest.append(appender.toString());
+         } catch(final IOException e) {
+            throw new RuntimeException("IOException never thrown by StringBuilder", e);
+         }
+      }
+
+      void commitInput() {
+         parent.pos = pos;
+         parent.line = line;
+         parent.column = column;
+      }
+
+      void commitOutput() {
+         appendTo(parent.appender);
+      }
+
       private int advance() {
          final char ch = seq.charAt(pos++);
          if(ch == '\n') {
             line++;
-            column = 1;
+            column = 0;
          } else {
             column++;
          }
@@ -170,7 +212,7 @@ public class ChessurInterpreter {
       }
    }
 
-   private static final Object UNSET = new Object() {
+   static final Object UNSET = new Object() {
       @Override
       public String toString() {
          return "UNSET";
@@ -181,281 +223,471 @@ public class ChessurInterpreter {
          throws ChessurException {
       final StringCursor input = new StringCursor(in, out);
       final Object[] env = new Object[27];
-      env[0] = environment.containsKey("path") ? environment.get("path") : UNSET;
-      env[1] = environment.containsKey("cat") ? environment.get("cat") : UNSET;
-      env[2] = environment.containsKey("qname") ? environment.get("qname") : UNSET;
-      env[3] = environment.containsKey("signature") ? environment.get("signature") : UNSET;
-      env[4] = environment.containsKey("name") ? environment.get("name") : UNSET;
-      env[5] = environment.containsKey("script") ? environment.get("script") : UNSET;
-      env[6] = environment.containsKey("manager") ? environment.get("manager") : UNSET;
-      env[7] = environment.containsKey("id") ? environment.get("id") : UNSET;
+      env[0] = environment.containsKey("cat") ? environment.get("cat") : UNSET;
+      env[1] = environment.containsKey("name") ? environment.get("name") : UNSET;
+      env[2] = environment.containsKey("manager") ? environment.get("manager") : UNSET;
+      env[3] = environment.containsKey("path") ? environment.get("path") : UNSET;
+      env[4] = environment.containsKey("qname") ? environment.get("qname") : UNSET;
+      env[5] = environment.containsKey("signature") ? environment.get("signature") : UNSET;
+      env[6] = environment.containsKey("script") ? environment.get("script") : UNSET;
+      env[7] = environment.containsKey("val") ? environment.get("val") : UNSET;
       env[8] = environment.containsKey("stmt") ? environment.get("stmt") : UNSET;
-      env[9] = environment.containsKey("val") ? environment.get("val") : UNSET;
-      env[10] = environment.containsKey("lit") ? environment.get("lit") : UNSET;
-      env[11] = environment.containsKey("ch") ? environment.get("ch") : UNSET;
-      env[12] = environment.containsKey("notted") ? environment.get("notted") : UNSET;
-      env[13] = environment.containsKey("inv") ? environment.get("inv") : UNSET;
-      env[14] = environment.containsKey("function") ? environment.get("function") : UNSET;
-      env[15] = environment.containsKey("postage") ? environment.get("postage") : UNSET;
-      env[16] = environment.containsKey("num") ? environment.get("num") : UNSET;
-      env[17] = environment.containsKey("type") ? environment.get("type") : UNSET;
-      env[18] = environment.containsKey("constructor") ? environment.get("constructor") : UNSET;
-      env[19] = environment.containsKey("object") ? environment.get("object") : UNSET;
-      env[20] = environment.containsKey("block") ? environment.get("block") : UNSET;
-      env[21] = environment.containsKey("filter") ? environment.get("filter") : UNSET;
-      env[22] = environment.containsKey("prefix") ? environment.get("prefix") : UNSET;
-      env[23] = environment.containsKey("alias") ? environment.get("alias") : UNSET;
-      env[24] = environment.containsKey("module") ? environment.get("module") : UNSET;
-      env[25] = environment.containsKey("setter") ? environment.get("setter") : UNSET;
-      env[26] = environment.containsKey("start") ? environment.get("start") : UNSET;
+      env[9] = environment.containsKey("notted") ? environment.get("notted") : UNSET;
+      env[10] = environment.containsKey("block") ? environment.get("block") : UNSET;
+      env[11] = environment.containsKey("inv") ? environment.get("inv") : UNSET;
+      env[12] = environment.containsKey("function") ? environment.get("function") : UNSET;
+      env[13] = environment.containsKey("postage") ? environment.get("postage") : UNSET;
+      env[14] = environment.containsKey("id") ? environment.get("id") : UNSET;
+      env[15] = environment.containsKey("module") ? environment.get("module") : UNSET;
+      env[16] = environment.containsKey("type") ? environment.get("type") : UNSET;
+      env[17] = environment.containsKey("constructor") ? environment.get("constructor") : UNSET;
+      env[18] = environment.containsKey("object") ? environment.get("object") : UNSET;
+      env[19] = environment.containsKey("setter") ? environment.get("setter") : UNSET;
+      env[20] = environment.containsKey("filter") ? environment.get("filter") : UNSET;
+      env[21] = environment.containsKey("start") ? environment.get("start") : UNSET;
+      env[22] = environment.containsKey("ch") ? environment.get("ch") : UNSET;
+      env[23] = environment.containsKey("lit") ? environment.get("lit") : UNSET;
+      env[24] = environment.containsKey("num") ? environment.get("num") : UNSET;
+      env[25] = environment.containsKey("prefix") ? environment.get("prefix") : UNSET;
+      env[26] = environment.containsKey("alias") ? environment.get("alias") : UNSET;
       return Catalog(input, env);
    }
 
-   private static Object AbortStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object AbortStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub194 = input.sub();
-      sub194.accept("abort");
-      Sep(sub194, env);
+      final StringCursor sub97 = input.sub();
+      sub97.accept("abort");
+      Sep(sub97, env);
       try {
          env[8] /* stmt */= new org.fuwjin.chessur.expression.AbortStatement(
-               (org.fuwjin.chessur.expression.Expression)Value(sub194, env));
-      } catch(final ChessurException e195) {
-         throw new RuntimeException("abort keyword requires a value", e195);
+               (org.fuwjin.chessur.expression.Expression)Value(sub97, env));
+      } catch(final ChessurException e98) {
+         throw new RuntimeException("abort keyword requires a value" + sub97.context(), e98);
       }
-      sub194.commit();
-      return sub194.isSet("stmt", env[8]);
+      sub97.commit();
+      return sub97.isSet("stmt", env[8]);
    }
 
-   private static Object AcceptStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object AcceptStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub124 = input.sub();
-      sub124.accept("accept");
-      Sep(sub124, env);
+      final StringCursor sub89 = input.sub();
+      sub89.accept("accept");
+      Sep(sub89, env);
       try {
-         final StringCursor sub125 = sub124.sub();
-         sub125.accept("not");
-         Sep(sub125, env);
-         env[12] /* notted */= java.lang.Boolean.TRUE;
-         sub125.commit();
-      } catch(final ChessurException e126) {
-         final StringCursor sub127 = sub124.sub();
-         env[12] /* notted */= java.lang.Boolean.FALSE;
-         sub127.commit();
+         final StringCursor sub90 = sub89.sub();
+         sub90.accept("not");
+         Sep(sub90, env);
+         env[9] /* notted */= java.lang.Boolean.TRUE;
+         sub90.commit();
+      } catch(final ChessurException e91) {
+         final StringCursor sub92 = sub89.sub();
+         env[9] /* notted */= java.lang.Boolean.FALSE;
+         sub92.commit();
       }
       try {
-         env[8] /* stmt */= new org.fuwjin.chessur.expression.FilterAcceptStatement((java.lang.Boolean)sub124.isSet(
-               "notted", env[12]), (org.fuwjin.chessur.expression.Filter)InFilter(sub124, env));
-      } catch(final ChessurException e128) {
+         env[8] /* stmt */= new org.fuwjin.chessur.expression.FilterAcceptStatement((java.lang.Boolean)sub89.isSet(
+               "notted", env[9]), (org.fuwjin.chessur.expression.Filter)InFilter(sub89, env));
+      } catch(final ChessurException e93) {
          try {
-            env[8] /* stmt */= new org.fuwjin.chessur.expression.ValueAcceptStatement((java.lang.Boolean)sub124.isSet(
-                  "notted", env[12]), (org.fuwjin.chessur.expression.Expression)Value(sub124, env));
-         } catch(final ChessurException e129) {
-            throw new RuntimeException("accept keyword requires a value or in keyword", e129);
+            env[8] /* stmt */= new org.fuwjin.chessur.expression.ValueAcceptStatement((java.lang.Boolean)sub89.isSet(
+                  "notted", env[9]), (org.fuwjin.chessur.expression.Expression)Value(sub89, env));
+         } catch(final ChessurException e94) {
+            throw new RuntimeException("accept keyword requires a value or in keyword" + sub89.context(), e94);
          }
       }
-      sub124.commit();
-      return sub124.isSet("stmt", env[8]);
+      sub89.commit();
+      return sub89.isSet("stmt", env[8]);
    }
 
-   private static Object AliasDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object AliasDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub8 = input.sub();
-      sub8.accept("alias");
-      Sep(sub8, env);
+      final StringCursor sub15 = input.sub();
+      sub15.accept("alias");
+      Sep(sub15, env);
       try {
-         env[2] /* qname */= QualifiedName(sub8, env);
-      } catch(final ChessurException e9) {
-         throw new RuntimeException("alias keyword requires a qualified name", e9);
+         env[4] /* qname */= QualifiedName(sub15, env);
+      } catch(final ChessurException e16) {
+         throw new RuntimeException("alias keyword requires a qualified name" + sub15.context(), e16);
       }
       try {
-         final StringCursor sub10 = sub8.sub();
-         sub10.accept("as");
-         Sep(sub10, env);
+         final StringCursor sub17 = sub15.sub();
+         sub17.accept("as");
+         Sep(sub17, env);
          try {
             try {
-               ((org.fuwjin.chessur.expression.CatalogImpl)sub10.isSet("cat", env[1])).alias(
-                     (java.lang.String)sub10.isSet("qname", env[2]), (java.lang.String)Name(sub10, env));
-            } catch(final Exception e11) {
-               throw sub10.ex(e11);
+               ((org.fuwjin.chessur.expression.CatalogImpl)sub17.isSet("cat", env[0])).alias(
+                     (java.lang.String)sub17.isSet("qname", env[4]), (java.lang.String)Name(sub17, env));
+            } catch(final Exception e18) {
+               throw sub17.ex(e18);
             }
-         } catch(final ChessurException e12) {
-            throw new RuntimeException("alias-as keywords require a name", e12);
+         } catch(final ChessurException e19) {
+            throw new RuntimeException("alias-as keywords require a name" + sub17.context(), e19);
          }
-         sub10.commit();
-      } catch(final ChessurException e13) {
+         sub17.commit();
+      } catch(final ChessurException e20) {
          try {
-            final StringCursor sub14 = sub8.sub();
-            sub14.accept("(");
-            S(sub14, env);
-            env[3] /* signature */= new org.fuwjin.dinah.FunctionSignature((java.lang.String)sub14.isSet("qname",
-                  env[2]));
+            final StringCursor sub21 = sub15.sub();
+            sub21.accept("(");
+            S(sub21, env);
+            env[5] /* signature */= new org.fuwjin.dinah.TypedArgsSignature((java.lang.String)sub21.isSet("qname",
+                  env[4]));
             try {
-               final StringCursor sub15 = sub14.sub();
+               final StringCursor sub22 = sub21.sub();
                try {
-                  ((org.fuwjin.dinah.FunctionSignature)sub15.isSet("signature", env[3]))
-                        .addArg((java.lang.String)QualifiedName(sub15, env));
-               } catch(final Exception e16) {
-                  throw sub15.ex(e16);
+                  ((org.fuwjin.dinah.TypedArgsSignature)sub22.isSet("signature", env[5]))
+                        .addArg((java.lang.String)QualifiedName(sub22, env));
+               } catch(final Exception e23) {
+                  throw sub22.ex(e23);
                }
                try {
-                  final StringCursor sub17 = sub15.sub();
-                  sub17.accept(",");
-                  S(sub17, env);
+                  final StringCursor sub24 = sub22.sub();
+                  sub24.accept(",");
+                  S(sub24, env);
                   try {
-                     ((org.fuwjin.dinah.FunctionSignature)sub17.isSet("signature", env[3]))
-                           .addArg((java.lang.String)QualifiedName(sub17, env));
-                  } catch(final Exception e18) {
-                     throw sub17.ex(e18);
+                     ((org.fuwjin.dinah.TypedArgsSignature)sub24.isSet("signature", env[5]))
+                           .addArg((java.lang.String)QualifiedName(sub24, env));
+                  } catch(final Exception e25) {
+                     throw sub24.ex(e25);
                   }
-                  sub17.commit();
+                  sub24.commit();
                   try {
                      while(true) {
-                        final StringCursor sub19 = sub15.sub();
-                        sub19.accept(",");
-                        S(sub19, env);
+                        final StringCursor sub26 = sub22.sub();
+                        sub26.accept(",");
+                        S(sub26, env);
                         try {
-                           ((org.fuwjin.dinah.FunctionSignature)sub19.isSet("signature", env[3]))
-                                 .addArg((java.lang.String)QualifiedName(sub19, env));
-                        } catch(final Exception e20) {
-                           throw sub19.ex(e20);
+                           ((org.fuwjin.dinah.TypedArgsSignature)sub26.isSet("signature", env[5]))
+                                 .addArg((java.lang.String)QualifiedName(sub26, env));
+                        } catch(final Exception e27) {
+                           throw sub26.ex(e27);
                         }
-                        sub19.commit();
+                        sub26.commit();
                      }
-                  } catch(final ChessurException e21) {
+                  } catch(final ChessurException e28) {
                      //continue
                   }
-               } catch(final ChessurException e22) {
+               } catch(final ChessurException e29) {
                   //continue
                }
-               sub15.commit();
-            } catch(final ChessurException e23) {
+               sub22.commit();
+            } catch(final ChessurException e30) {
                //continue
             }
-            sub14.accept(")");
-            S(sub14, env);
-            sub14.accept("as");
-            Sep(sub14, env);
+            sub21.accept(")");
+            S(sub21, env);
+            sub21.accept("as");
+            Sep(sub21, env);
             try {
                try {
-                  ((org.fuwjin.chessur.expression.CatalogImpl)sub14.isSet("cat", env[1])).aliasSignature(
-                        (org.fuwjin.dinah.FunctionSignature)sub14.isSet("signature", env[3]),
-                        (java.lang.String)Name(sub14, env));
-               } catch(final Exception e24) {
-                  throw sub14.ex(e24);
+                  ((org.fuwjin.chessur.expression.CatalogImpl)sub21.isSet("cat", env[0])).aliasSignature(
+                        (org.fuwjin.dinah.FunctionSignature)sub21.isSet("signature", env[5]),
+                        (java.lang.String)Name(sub21, env));
+               } catch(final Exception e31) {
+                  throw sub21.ex(e31);
                }
-            } catch(final ChessurException e25) {
-               throw new RuntimeException("alias-as keywords require a name", e25);
+            } catch(final ChessurException e32) {
+               throw new RuntimeException("alias-as keywords require a name" + sub21.context(), e32);
             }
-            sub14.commit();
-         } catch(final ChessurException e26) {
-            throw new RuntimeException("alias keyword requires as keyword", e26);
+            sub21.commit();
+         } catch(final ChessurException e33) {
+            throw new RuntimeException("alias keyword requires as keyword" + sub15.context(), e33);
          }
       }
-      sub8.commit();
+      sub15.commit();
       return null;
    }
 
-   private static Object AliasName(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object AliasName(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub212 = input.sub();
-      env[22] /* prefix */= Identifier(sub212, env);
-      env[23] /* alias */= ((org.fuwjin.chessur.expression.CatalogImpl)sub212.isSet("cat", env[1]))
-            .alias((java.lang.String)sub212.isSet("prefix", env[22]));
+      final StringCursor sub237 = input.sub();
+      env[25] /* prefix */= Identifier(sub237, env);
+      env[26] /* alias */= ((org.fuwjin.chessur.expression.CatalogImpl)sub237.isSet("cat", env[0]))
+            .alias((java.lang.String)sub237.isSet("prefix", env[25]));
       try {
-         final StringCursor sub213 = sub212.sub();
-         sub213.accept(".");
-         env[4] /* name */= sub213.isSet("alias", env[23]) + "." + QualifiedName(sub213, env);
-         sub213.commit();
-      } catch(final ChessurException e214) {
-         final StringCursor sub215 = sub212.sub();
-         env[4] /* name */= sub215.isSet("alias", env[23]);
-         sub215.commit();
+         final StringCursor sub238 = sub237.sub();
+         sub238.accept(".");
+         env[1] /* name */= sub238.isSet("alias", env[26]) + "." + QualifiedName(sub238, env);
+         sub238.commit();
+      } catch(final ChessurException e239) {
+         final StringCursor sub240 = sub237.sub();
+         env[1] /* name */= sub240.isSet("alias", env[26]);
+         sub240.commit();
       }
-      sub212.commit();
-      return sub212.isSet("name", env[4]);
+      sub237.commit();
+      return sub237.isSet("name", env[1]);
    }
 
-   private static Object AnnotatedIdentifier(final StringCursor input, final Object... parentEnv)
-         throws ChessurException {
+   static Object AnnotatedIdentifier(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub257 = input.sub();
-      Identifier(sub257, env);
+      final StringCursor sub248 = input.sub();
+      Identifier(sub248, env);
       try {
-         final StringCursor sub258 = sub257.sub();
-         sub258.accept("[");
+         final StringCursor sub249 = sub248.sub();
+         sub249.accept("[");
          try {
-            Identifier(sub258, env);
-         } catch(final ChessurException e259) {
+            Identifier(sub249, env);
+         } catch(final ChessurException e250) {
             //continue
          }
-         sub258.accept("]");
-         sub258.commit();
+         sub249.accept("]");
+         sub249.commit();
          try {
             while(true) {
-               final StringCursor sub260 = sub257.sub();
-               sub260.accept("[");
+               final StringCursor sub251 = sub248.sub();
+               sub251.accept("[");
                try {
-                  Identifier(sub260, env);
-               } catch(final ChessurException e261) {
+                  Identifier(sub251, env);
+               } catch(final ChessurException e252) {
                   //continue
                }
-               sub260.accept("]");
-               sub260.commit();
+               sub251.accept("]");
+               sub251.commit();
             }
-         } catch(final ChessurException e262) {
+         } catch(final ChessurException e253) {
             //continue
          }
-      } catch(final ChessurException e263) {
+      } catch(final ChessurException e254) {
          //continue
       }
-      sub257.commit();
+      sub248.commit();
       return null;
    }
 
-   private static Object Assignment(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Assignment(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub202 = input.sub();
-      env[4] /* name */= Name(sub202, env);
-      sub202.accept("=");
-      S(sub202, env);
+      final StringCursor sub105 = input.sub();
+      env[1] /* name */= Name(sub105, env);
+      sub105.accept("=");
+      S(sub105, env);
       try {
          env[8] /* stmt */= new org.fuwjin.chessur.expression.Assignment(
-               (java.lang.String)sub202.isSet("name", env[4]), (org.fuwjin.chessur.expression.Expression)Value(sub202,
+               (java.lang.String)sub105.isSet("name", env[1]), (org.fuwjin.chessur.expression.Expression)Value(sub105,
                      env));
-      } catch(final ChessurException e203) {
-         throw new RuntimeException("assignment requires a value", e203);
+      } catch(final ChessurException e106) {
+         throw new RuntimeException("assignment requires a value" + sub105.context(), e106);
       }
-      sub202.commit();
-      return sub202.isSet("stmt", env[8]);
+      sub105.commit();
+      return sub105.isSet("stmt", env[8]);
    }
 
-   private static Object Block(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Block(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub196 = input.sub();
-      sub196.accept("{");
-      S(sub196, env);
-      env[20] /* block */= new org.fuwjin.chessur.expression.Block();
+      final StringCursor sub99 = input.sub();
+      sub99.accept("{");
+      S(sub99, env);
+      env[10] /* block */= new org.fuwjin.chessur.expression.Block();
       try {
          try {
-            ((org.fuwjin.chessur.expression.Block)sub196.isSet("block", env[20]))
-                  .add((org.fuwjin.chessur.expression.Expression)Statement(sub196, env));
-         } catch(final Exception e197) {
-            throw sub196.ex(e197);
+            ((org.fuwjin.chessur.expression.Block)sub99.isSet("block", env[10]))
+                  .add((org.fuwjin.chessur.expression.Expression)Statement(sub99, env));
+         } catch(final Exception e100) {
+            throw sub99.ex(e100);
          }
          try {
             while(true) {
                try {
-                  ((org.fuwjin.chessur.expression.Block)sub196.isSet("block", env[20]))
-                        .add((org.fuwjin.chessur.expression.Expression)Statement(sub196, env));
-               } catch(final Exception e198) {
-                  throw sub196.ex(e198);
+                  ((org.fuwjin.chessur.expression.Block)sub99.isSet("block", env[10]))
+                        .add((org.fuwjin.chessur.expression.Expression)Statement(sub99, env));
+               } catch(final Exception e101) {
+                  throw sub99.ex(e101);
+               }
+            }
+         } catch(final ChessurException e102) {
+            //continue
+         }
+      } catch(final ChessurException e103) {
+         //continue
+      }
+      try {
+         sub99.accept("}");
+      } catch(final ChessurException e104) {
+         throw new RuntimeException("block must end with a brace" + sub99.context(), e104);
+      }
+      S(sub99, env);
+      sub99.commit();
+      return sub99.isSet("block", env[10]);
+   }
+
+   static Object Catalog(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub1 = input.sub();
+      env[0] /* cat */= new org.fuwjin.chessur.expression.CatalogImpl((java.lang.String)sub1.isSet("name", env[1]),
+            (org.fuwjin.chessur.CatalogManager)sub1.isSet("manager", env[2]));
+      S(sub1, env);
+      try {
+         try {
+            LoadDeclaration(sub1, env);
+         } catch(final ChessurException e2) {
+            try {
+               AliasDeclaration(sub1, env);
+            } catch(final ChessurException e3) {
+               try {
+                  ((org.fuwjin.chessur.expression.CatalogImpl)sub1.isSet("cat", env[0]))
+                        .add((org.fuwjin.chessur.expression.Declaration)ScriptDeclaration(sub1, env));
+               } catch(final Exception e4) {
+                  throw sub1.ex(e4);
+               }
+            }
+         }
+         try {
+            while(true) {
+               try {
+                  LoadDeclaration(sub1, env);
+               } catch(final ChessurException e5) {
+                  try {
+                     AliasDeclaration(sub1, env);
+                  } catch(final ChessurException e6) {
+                     try {
+                        ((org.fuwjin.chessur.expression.CatalogImpl)sub1.isSet("cat", env[0]))
+                              .add((org.fuwjin.chessur.expression.Declaration)ScriptDeclaration(sub1, env));
+                     } catch(final Exception e7) {
+                        throw sub1.ex(e7);
+                     }
+                  }
+               }
+            }
+         } catch(final ChessurException e8) {
+            //continue
+         }
+      } catch(final ChessurException e9) {
+         //continue
+      }
+      EndOfFile(sub1, env);
+      sub1.commit();
+      return sub1.isSet("cat", env[0]);
+   }
+
+   static Object Comment(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub268 = input.sub();
+      sub268.accept("#");
+      try {
+         sub268.acceptNotIn("\n\r", "\n\r");
+         try {
+            while(true) {
+               sub268.acceptNotIn("\n\r", "\n\r");
+            }
+         } catch(final ChessurException e269) {
+            //continue
+         }
+      } catch(final ChessurException e270) {
+         //continue
+      }
+      try {
+         sub268.accept("\r");
+      } catch(final ChessurException e271) {
+         //continue
+      }
+      try {
+         sub268.accept("\n");
+      } catch(final ChessurException e272) {
+         EndOfFile(sub268, env);
+      }
+      sub268.commit();
+      return null;
+   }
+
+   static Object CouldStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub85 = input.sub();
+      sub85.accept("could");
+      Sep(sub85, env);
+      try {
+         env[8] /* stmt */= new org.fuwjin.chessur.expression.CouldStatement(
+               (org.fuwjin.chessur.expression.Expression)Statement(sub85, env));
+      } catch(final ChessurException e86) {
+         throw new RuntimeException("could keyword requires a statement" + sub85.context(), e86);
+      }
+      sub85.commit();
+      return sub85.isSet("stmt", env[8]);
+   }
+
+   static Object DynamicLiteral(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub182 = input.sub();
+      sub182.accept("\"");
+      env[23] /* lit */= new org.fuwjin.chessur.expression.CompositeLiteral();
+      try {
+         try {
+            final StringCursor sub183 = sub182.sub();
+            sub183.accept("'");
+            S(sub183, env);
+            try {
+               ((org.fuwjin.chessur.expression.CompositeLiteral)sub183.isSet("lit", env[23]))
+                     .append((org.fuwjin.chessur.expression.Expression)Value(sub183, env));
+            } catch(final Exception e184) {
+               throw sub183.ex(e184);
+            }
+            sub183.accept("'");
+            sub183.commit();
+         } catch(final ChessurException e185) {
+            try {
+               final StringCursor sub186 = sub182.sub();
+               try {
+                  ((org.fuwjin.chessur.expression.CompositeLiteral)sub186.isSet("lit", env[23]))
+                        .appendChar((java.lang.Integer)Escape(sub186, env));
+               } catch(final Exception e187) {
+                  throw sub186.ex(e187);
+               }
+               sub186.commit();
+            } catch(final ChessurException e188) {
+               final StringCursor sub189 = sub182.sub();
+               env[22] /* ch */= sub189.acceptNotIn("\"\\", "\"\\");
+               try {
+                  ((org.fuwjin.chessur.expression.CompositeLiteral)sub189.isSet("lit", env[23]))
+                        .appendChar((java.lang.Integer)sub189.isSet("ch", env[22]));
+               } catch(final Exception e190) {
+                  throw sub189.ex(e190);
+               }
+               sub189.commit();
+            }
+         }
+         try {
+            while(true) {
+               try {
+                  final StringCursor sub191 = sub182.sub();
+                  sub191.accept("'");
+                  S(sub191, env);
+                  try {
+                     ((org.fuwjin.chessur.expression.CompositeLiteral)sub191.isSet("lit", env[23]))
+                           .append((org.fuwjin.chessur.expression.Expression)Value(sub191, env));
+                  } catch(final Exception e192) {
+                     throw sub191.ex(e192);
+                  }
+                  sub191.accept("'");
+                  sub191.commit();
+               } catch(final ChessurException e193) {
+                  try {
+                     final StringCursor sub194 = sub182.sub();
+                     try {
+                        ((org.fuwjin.chessur.expression.CompositeLiteral)sub194.isSet("lit", env[23]))
+                              .appendChar((java.lang.Integer)Escape(sub194, env));
+                     } catch(final Exception e195) {
+                        throw sub194.ex(e195);
+                     }
+                     sub194.commit();
+                  } catch(final ChessurException e196) {
+                     final StringCursor sub197 = sub182.sub();
+                     env[22] /* ch */= sub197.acceptNotIn("\"\\", "\"\\");
+                     try {
+                        ((org.fuwjin.chessur.expression.CompositeLiteral)sub197.isSet("lit", env[23]))
+                              .appendChar((java.lang.Integer)sub197.isSet("ch", env[22]));
+                     } catch(final Exception e198) {
+                        throw sub197.ex(e198);
+                     }
+                     sub197.commit();
+                  }
                }
             }
          } catch(final ChessurException e199) {
@@ -465,1177 +697,989 @@ public class ChessurInterpreter {
          //continue
       }
       try {
-         sub196.accept("}");
+         sub182.accept("\"");
       } catch(final ChessurException e201) {
-         throw new RuntimeException("block must end with a brace", e201);
+         throw new RuntimeException("dynamic literals must end with a double quote" + sub182.context(), e201);
       }
-      S(sub196, env);
-      sub196.commit();
-      return sub196.isSet("block", env[20]);
+      S(sub182, env);
+      sub182.commit();
+      return sub182.isSet("lit", env[23]);
    }
 
-   private static Object Catalog(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object EitherOrStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub43 = input.sub();
-      env[1] /* cat */= new org.fuwjin.chessur.expression.CatalogImpl((java.lang.String)sub43.isSet("name", env[4]),
-            (org.fuwjin.chessur.CatalogManager)sub43.isSet("manager", env[6]));
-      S(sub43, env);
-      try {
-         try {
-            LoadDeclaration(sub43, env);
-         } catch(final ChessurException e44) {
-            try {
-               AliasDeclaration(sub43, env);
-            } catch(final ChessurException e45) {
-               try {
-                  ((org.fuwjin.chessur.expression.CatalogImpl)sub43.isSet("cat", env[1]))
-                        .add((org.fuwjin.chessur.expression.Declaration)ScriptDeclaration(sub43, env));
-               } catch(final Exception e46) {
-                  throw sub43.ex(e46);
-               }
-            }
-         }
-         try {
-            while(true) {
-               try {
-                  LoadDeclaration(sub43, env);
-               } catch(final ChessurException e47) {
-                  try {
-                     AliasDeclaration(sub43, env);
-                  } catch(final ChessurException e48) {
-                     try {
-                        ((org.fuwjin.chessur.expression.CatalogImpl)sub43.isSet("cat", env[1]))
-                              .add((org.fuwjin.chessur.expression.Declaration)ScriptDeclaration(sub43, env));
-                     } catch(final Exception e49) {
-                        throw sub43.ex(e49);
-                     }
-                  }
-               }
-            }
-         } catch(final ChessurException e50) {
-            //continue
-         }
-      } catch(final ChessurException e51) {
-         //continue
-      }
-      EndOfFile(sub43, env);
-      sub43.commit();
-      return sub43.isSet("cat", env[1]);
-   }
-
-   private static Object Comment(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub270 = input.sub();
-      sub270.accept("#");
-      try {
-         sub270.acceptNotIn("\n\r", "\n\r");
-         try {
-            while(true) {
-               sub270.acceptNotIn("\n\r", "\n\r");
-            }
-         } catch(final ChessurException e271) {
-            //continue
-         }
-      } catch(final ChessurException e272) {
-         //continue
-      }
-      try {
-         sub270.accept("\r");
-      } catch(final ChessurException e273) {
-         //continue
-      }
-      try {
-         sub270.accept("\n");
-      } catch(final ChessurException e274) {
-         EndOfFile(sub270, env);
-      }
-      sub270.commit();
-      return null;
-   }
-
-   private static Object CouldStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub188 = input.sub();
-      sub188.accept("could");
-      Sep(sub188, env);
-      try {
-         env[8] /* stmt */= new org.fuwjin.chessur.expression.CouldStatement(
-               (org.fuwjin.chessur.expression.Expression)Statement(sub188, env));
-      } catch(final ChessurException e189) {
-         throw new RuntimeException("could keyword requires a statement", e189);
-      }
-      sub188.commit();
-      return sub188.isSet("stmt", env[8]);
-   }
-
-   private static Object DynamicLiteral(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub95 = input.sub();
-      sub95.accept("\"");
-      env[10] /* lit */= new org.fuwjin.chessur.expression.CompositeLiteral();
-      try {
-         try {
-            final StringCursor sub96 = sub95.sub();
-            sub96.accept("'");
-            S(sub96, env);
-            try {
-               ((org.fuwjin.chessur.expression.CompositeLiteral)sub96.isSet("lit", env[10]))
-                     .append((org.fuwjin.chessur.expression.Expression)Value(sub96, env));
-            } catch(final Exception e97) {
-               throw sub96.ex(e97);
-            }
-            sub96.accept("'");
-            sub96.commit();
-         } catch(final ChessurException e98) {
-            try {
-               final StringCursor sub99 = sub95.sub();
-               try {
-                  ((org.fuwjin.chessur.expression.CompositeLiteral)sub99.isSet("lit", env[10]))
-                        .appendChar((java.lang.Integer)Escape(sub99, env));
-               } catch(final Exception e100) {
-                  throw sub99.ex(e100);
-               }
-               sub99.commit();
-            } catch(final ChessurException e101) {
-               final StringCursor sub102 = sub95.sub();
-               env[11] /* ch */= sub102.acceptNotIn("\"\\", "\"\\");
-               try {
-                  ((org.fuwjin.chessur.expression.CompositeLiteral)sub102.isSet("lit", env[10]))
-                        .appendChar((java.lang.Integer)sub102.isSet("ch", env[11]));
-               } catch(final Exception e103) {
-                  throw sub102.ex(e103);
-               }
-               sub102.commit();
-            }
-         }
-         try {
-            while(true) {
-               try {
-                  final StringCursor sub104 = sub95.sub();
-                  sub104.accept("'");
-                  S(sub104, env);
-                  try {
-                     ((org.fuwjin.chessur.expression.CompositeLiteral)sub104.isSet("lit", env[10]))
-                           .append((org.fuwjin.chessur.expression.Expression)Value(sub104, env));
-                  } catch(final Exception e105) {
-                     throw sub104.ex(e105);
-                  }
-                  sub104.accept("'");
-                  sub104.commit();
-               } catch(final ChessurException e106) {
-                  try {
-                     final StringCursor sub107 = sub95.sub();
-                     try {
-                        ((org.fuwjin.chessur.expression.CompositeLiteral)sub107.isSet("lit", env[10]))
-                              .appendChar((java.lang.Integer)Escape(sub107, env));
-                     } catch(final Exception e108) {
-                        throw sub107.ex(e108);
-                     }
-                     sub107.commit();
-                  } catch(final ChessurException e109) {
-                     final StringCursor sub110 = sub95.sub();
-                     env[11] /* ch */= sub110.acceptNotIn("\"\\", "\"\\");
-                     try {
-                        ((org.fuwjin.chessur.expression.CompositeLiteral)sub110.isSet("lit", env[10]))
-                              .appendChar((java.lang.Integer)sub110.isSet("ch", env[11]));
-                     } catch(final Exception e111) {
-                        throw sub110.ex(e111);
-                     }
-                     sub110.commit();
-                  }
-               }
-            }
-         } catch(final ChessurException e112) {
-            //continue
-         }
-      } catch(final ChessurException e113) {
-         //continue
-      }
-      try {
-         sub95.accept("\"");
-      } catch(final ChessurException e114) {
-         throw new RuntimeException("dynamic literals must end with a double quote", e114);
-      }
-      S(sub95, env);
-      sub95.commit();
-      return sub95.isSet("lit", env[10]);
-   }
-
-   private static Object EitherOrStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub178 = input.sub();
-      sub178.accept("either");
-      Sep(sub178, env);
+      final StringCursor sub75 = input.sub();
+      sub75.accept("either");
+      Sep(sub75, env);
       try {
          env[8] /* stmt */= new org.fuwjin.chessur.expression.EitherOrStatement(
-               (org.fuwjin.chessur.expression.Expression)Statement(sub178, env));
-      } catch(final ChessurException e179) {
-         throw new RuntimeException("either keyword requires a statement", e179);
+               (org.fuwjin.chessur.expression.Expression)Statement(sub75, env));
+      } catch(final ChessurException e76) {
+         throw new RuntimeException("either keyword requires a statement" + sub75.context(), e76);
       }
       try {
-         final StringCursor sub180 = sub178.sub();
-         sub180.accept("or");
-         Sep(sub180, env);
+         final StringCursor sub77 = sub75.sub();
+         sub77.accept("or");
+         Sep(sub77, env);
          try {
             try {
-               ((org.fuwjin.chessur.expression.EitherOrStatement)sub180.isSet("stmt", env[8]))
-                     .or((org.fuwjin.chessur.expression.Expression)Statement(sub180, env));
-            } catch(final Exception e181) {
-               throw sub180.ex(e181);
+               ((org.fuwjin.chessur.expression.EitherOrStatement)sub77.isSet("stmt", env[8]))
+                     .or((org.fuwjin.chessur.expression.Expression)Statement(sub77, env));
+            } catch(final Exception e78) {
+               throw sub77.ex(e78);
             }
-         } catch(final ChessurException e182) {
-            throw new RuntimeException("or keyword requires a statement", e182);
+         } catch(final ChessurException e79) {
+            throw new RuntimeException("or keyword requires a statement" + sub77.context(), e79);
          }
-         sub180.commit();
+         sub77.commit();
          try {
             while(true) {
-               final StringCursor sub183 = sub178.sub();
-               sub183.accept("or");
-               Sep(sub183, env);
+               final StringCursor sub80 = sub75.sub();
+               sub80.accept("or");
+               Sep(sub80, env);
                try {
                   try {
-                     ((org.fuwjin.chessur.expression.EitherOrStatement)sub183.isSet("stmt", env[8]))
-                           .or((org.fuwjin.chessur.expression.Expression)Statement(sub183, env));
-                  } catch(final Exception e184) {
-                     throw sub183.ex(e184);
+                     ((org.fuwjin.chessur.expression.EitherOrStatement)sub80.isSet("stmt", env[8]))
+                           .or((org.fuwjin.chessur.expression.Expression)Statement(sub80, env));
+                  } catch(final Exception e81) {
+                     throw sub80.ex(e81);
                   }
-               } catch(final ChessurException e185) {
-                  throw new RuntimeException("or keyword requires a statement", e185);
+               } catch(final ChessurException e82) {
+                  throw new RuntimeException("or keyword requires a statement" + sub80.context(), e82);
                }
-               sub183.commit();
+               sub80.commit();
             }
-         } catch(final ChessurException e186) {
+         } catch(final ChessurException e83) {
             //continue
          }
-      } catch(final ChessurException e187) {
-         throw new RuntimeException("either keyword requires at least one or keyword", e187);
+      } catch(final ChessurException e84) {
+         throw new RuntimeException("either keyword requires at least one or keyword" + sub75.context(), e84);
       }
-      sub178.commit();
-      return sub178.isSet("stmt", env[8]);
+      sub75.commit();
+      return sub75.isSet("stmt", env[8]);
    }
 
-   private static Object EndOfFile(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object EndOfFile(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub40 = input.sub();
-      final StringCursor sub41 = sub40.sub();
+      final StringCursor sub273 = input.sub();
+      final StringCursor sub274 = sub273.sub();
       boolean b = true;
       try {
-         if((Object)sub41.next() == Boolean.FALSE) {
+         if((Object)sub274.next() == Boolean.FALSE) {
             b = false;
          }
-      } catch(final ChessurException e42) {
+      } catch(final ChessurException e275) {
          b = false;
       }
       if(b) {
-         throw sub40.ex("unexpected value");
+         throw sub273.ex("unexpected value");
       }
-      sub40.commit();
+      sub273.commit();
       return null;
    }
 
-   private static Object Escape(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Escape(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub233 = input.sub();
-      sub233.accept("\\");
+      final StringCursor sub202 = input.sub();
+      sub202.accept("\\");
       try {
-         final StringCursor sub234 = sub233.sub();
-         sub234.accept("n");
-         env[11] /* ch */= org.fuwjin.chessur.expression.Literal.NEW_LINE;
-         sub234.commit();
-      } catch(final ChessurException e235) {
+         final StringCursor sub203 = sub202.sub();
+         sub203.accept("n");
+         env[22] /* ch */= org.fuwjin.chessur.expression.Literal.NEW_LINE;
+         sub203.commit();
+      } catch(final ChessurException e204) {
          try {
-            final StringCursor sub236 = sub233.sub();
-            sub236.accept("t");
-            env[11] /* ch */= org.fuwjin.chessur.expression.Literal.TAB;
-            sub236.commit();
-         } catch(final ChessurException e237) {
+            final StringCursor sub205 = sub202.sub();
+            sub205.accept("t");
+            env[22] /* ch */= org.fuwjin.chessur.expression.Literal.TAB;
+            sub205.commit();
+         } catch(final ChessurException e206) {
             try {
-               final StringCursor sub238 = sub233.sub();
-               sub238.accept("r");
-               env[11] /* ch */= org.fuwjin.chessur.expression.Literal.RETURN;
-               sub238.commit();
-            } catch(final ChessurException e239) {
+               final StringCursor sub207 = sub202.sub();
+               sub207.accept("r");
+               env[22] /* ch */= org.fuwjin.chessur.expression.Literal.RETURN;
+               sub207.commit();
+            } catch(final ChessurException e208) {
                try {
-                  final StringCursor sub240 = sub233.sub();
-                  sub240.accept("x");
-                  env[11] /* ch */= org.fuwjin.chessur.expression.Literal.parseHex((java.lang.String)HexDigits(sub240,
+                  final StringCursor sub209 = sub202.sub();
+                  sub209.accept("x");
+                  env[22] /* ch */= org.fuwjin.chessur.expression.Literal.parseHex((java.lang.String)HexDigits(sub209,
                         env));
-                  sub240.commit();
-               } catch(final ChessurException e241) {
-                  final StringCursor sub242 = sub233.sub();
-                  env[11] /* ch */= sub242.accept();
-                  sub242.commit();
+                  sub209.commit();
+               } catch(final ChessurException e210) {
+                  final StringCursor sub211 = sub202.sub();
+                  env[22] /* ch */= sub211.accept();
+                  sub211.commit();
                }
             }
          }
       }
-      sub233.commit();
-      return sub233.isSet("ch", env[11]);
+      sub202.commit();
+      return sub202.isSet("ch", env[22]);
    }
 
-   private static Object Field(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub222 = input.sub();
-      env[4] /* name */= Name(sub222, env);
-      env[25] /* setter */= ((org.fuwjin.dinah.FunctionProvider)sub222.isSet("postage", env[15]))
-            .getFunction((org.fuwjin.dinah.FunctionSignature)new org.fuwjin.dinah.FunctionSignature(
-                  (java.lang.String)sub222.isSet("type", env[17]) + "." + sub222.isSet("name", env[4])));
-      sub222.accept(":");
-      S(sub222, env);
-      try {
-         ((org.fuwjin.chessur.expression.ObjectTemplate)sub222.isSet("object", env[19])).set(
-               (org.fuwjin.dinah.Function)sub222.isSet("setter", env[25]),
-               (org.fuwjin.chessur.expression.Expression)Value(sub222, env));
-      } catch(final Exception e223) {
-         throw sub222.ex(e223);
-      }
-      sub222.commit();
-      return null;
-   }
-
-   private static Object FilterChar(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub230 = input.sub();
-      try {
-         final StringCursor sub231 = sub230.sub();
-         env[11] /* ch */= Escape(sub231, env);
-         sub231.commit();
-      } catch(final ChessurException e232) {
-         env[11] /* ch */= sub230.acceptNot("\\");
-      }
-      sub230.commit();
-      return sub230.isSet("ch", env[11]);
-   }
-
-   private static Object FilterRange(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub224 = input.sub();
-      env[26] /* start */= FilterChar(sub224, env);
-      S(sub224, env);
-      try {
-         final StringCursor sub225 = sub224.sub();
-         sub225.accept("-");
-         S(sub225, env);
-         try {
-            ((org.fuwjin.chessur.expression.Filter)sub225.isSet("filter", env[21])).addRange(
-                  (java.lang.Integer)sub225.isSet("start", env[26]), (java.lang.Integer)FilterChar(sub225, env));
-         } catch(final Exception e226) {
-            throw sub225.ex(e226);
-         }
-         S(sub225, env);
-         sub225.commit();
-      } catch(final ChessurException e227) {
-         final StringCursor sub228 = sub224.sub();
-         try {
-            ((org.fuwjin.chessur.expression.Filter)sub228.isSet("filter", env[21])).addChar((java.lang.Integer)sub228
-                  .isSet("start", env[26]));
-         } catch(final Exception e229) {
-            throw sub228.ex(e229);
-         }
-         sub228.commit();
-      }
-      sub224.commit();
-      return null;
-   }
-
-   private static Object HexDigit(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub244 = input.sub();
-      sub244.acceptIn("0-9A-Fa-f", "0123456789ABCDEFabcdef");
-      sub244.commit();
-      return null;
-   }
-
-   private static Object HexDigits(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub243 = input.sub();
-      HexDigit(sub243, env);
-      HexDigit(sub243, env);
-      HexDigit(sub243, env);
-      HexDigit(sub243, env);
-      sub243.commit();
-      return sub243.match();
-   }
-
-   private static Object Identifier(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub58 = input.sub();
-      IdentifierChar(sub58, env);
-      try {
-         while(true) {
-            IdentifierChar(sub58, env);
-         }
-      } catch(final ChessurException e59) {
-         //continue
-      }
-      sub58.commit();
-      return sub58.match();
-   }
-
-   private static Object IdentifierChar(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub264 = input.sub();
-      final StringCursor sub265 = sub264.sub();
-      if((Object)java.lang.Character.isJavaIdentifierPart((java.lang.Integer)sub265.next()) == Boolean.FALSE) {
-         throw sub265.ex("check failed");
-      }
-      sub264.accept();
-      sub264.commit();
-      return null;
-   }
-
-   private static Object InFilter(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub204 = input.sub();
-      sub204.accept("in");
-      Sep(sub204, env);
-      env[21] /* filter */= new org.fuwjin.chessur.expression.Filter();
-      try {
-         FilterRange(sub204, env);
-      } catch(final ChessurException e205) {
-         throw new RuntimeException("in keyword requires at least one filter", e205);
-      }
-      try {
-         final StringCursor sub206 = sub204.sub();
-         sub206.accept(",");
-         S(sub206, env);
-         try {
-            FilterRange(sub206, env);
-         } catch(final ChessurException e207) {
-            throw new RuntimeException("in keyword requires a filter after a comma", e207);
-         }
-         sub206.commit();
-         try {
-            while(true) {
-               final StringCursor sub208 = sub204.sub();
-               sub208.accept(",");
-               S(sub208, env);
-               try {
-                  FilterRange(sub208, env);
-               } catch(final ChessurException e209) {
-                  throw new RuntimeException("in keyword requires a filter after a comma", e209);
-               }
-               sub208.commit();
-            }
-         } catch(final ChessurException e210) {
-            //continue
-         }
-      } catch(final ChessurException e211) {
-         //continue
-      }
-      sub204.commit();
-      return sub204.isSet("filter", env[21]);
-   }
-
-   private static Object Invocation(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub130 = input.sub();
-      env[4] /* name */= AliasName(sub130, env);
-      env[3] /* signature */= ((org.fuwjin.chessur.expression.CatalogImpl)sub130.isSet("cat", env[1]))
-            .getSignature((java.lang.String)sub130.isSet("name", env[4]));
-      sub130.accept("(");
-      S(sub130, env);
-      env[13] /* inv */= new org.fuwjin.chessur.expression.Invocation();
-      try {
-         final StringCursor sub131 = sub130.sub();
-         try {
-            ((org.fuwjin.chessur.expression.Invocation)sub131.isSet("inv", env[13]))
-                  .addParam((org.fuwjin.chessur.expression.Expression)Value(sub131, env));
-         } catch(final Exception e132) {
-            throw sub131.ex(e132);
-         }
-         try {
-            final StringCursor sub133 = sub131.sub();
-            sub133.accept(",");
-            S(sub133, env);
-            try {
-               try {
-                  ((org.fuwjin.chessur.expression.Invocation)sub133.isSet("inv", env[13]))
-                        .addParam((org.fuwjin.chessur.expression.Expression)Value(sub133, env));
-               } catch(final Exception e134) {
-                  throw sub133.ex(e134);
-               }
-            } catch(final ChessurException e135) {
-               throw new RuntimeException("invocation parameter must be a value", e135);
-            }
-            sub133.commit();
-            try {
-               while(true) {
-                  final StringCursor sub136 = sub131.sub();
-                  sub136.accept(",");
-                  S(sub136, env);
-                  try {
-                     try {
-                        ((org.fuwjin.chessur.expression.Invocation)sub136.isSet("inv", env[13]))
-                              .addParam((org.fuwjin.chessur.expression.Expression)Value(sub136, env));
-                     } catch(final Exception e137) {
-                        throw sub136.ex(e137);
-                     }
-                  } catch(final ChessurException e138) {
-                     throw new RuntimeException("invocation parameter must be a value", e138);
-                  }
-                  sub136.commit();
-               }
-            } catch(final ChessurException e139) {
-               //continue
-            }
-         } catch(final ChessurException e140) {
-            //continue
-         }
-         sub131.commit();
-      } catch(final ChessurException e141) {
-         //continue
-      }
-      try {
-         sub130.accept(")");
-      } catch(final ChessurException e142) {
-         throw new RuntimeException("invocation must end with a parenthesis", e142);
-      }
-      S(sub130, env);
-      try {
-         final StringCursor sub143 = sub130.sub();
-         try {
-            ((org.fuwjin.dinah.FunctionSignature)sub143.isSet("signature", env[3]))
-                  .setArgCount((java.lang.Integer)((org.fuwjin.chessur.expression.Invocation)sub143.isSet("inv",
-                        env[13])).paramCount());
-         } catch(final Exception e144) {
-            throw sub143.ex(e144);
-         }
-         env[14] /* function */= ((org.fuwjin.dinah.FunctionProvider)sub143.isSet("postage", env[15]))
-               .getFunction((org.fuwjin.dinah.FunctionSignature)sub143.isSet("signature", env[3]));
-         try {
-            ((org.fuwjin.chessur.expression.Invocation)sub143.isSet("inv", env[13]))
-                  .setFunction((org.fuwjin.dinah.Function)sub143.isSet("function", env[14]));
-         } catch(final Exception e145) {
-            throw sub143.ex(e145);
-         }
-         sub143.commit();
-      } catch(final ChessurException e146) {
-         throw new RuntimeException("Could not get function for " + sub130.isSet("signature", env[3]), e146);
-      }
-      sub130.commit();
-      return sub130.isSet("inv", env[13]);
-   }
-
-   private static Object IsStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub171 = input.sub();
-      sub171.accept("is");
-      Sep(sub171, env);
-      try {
-         final StringCursor sub172 = sub171.sub();
-         sub172.accept("not");
-         Sep(sub172, env);
-         env[12] /* notted */= java.lang.Boolean.TRUE;
-         sub172.commit();
-      } catch(final ChessurException e173) {
-         final StringCursor sub174 = sub171.sub();
-         env[12] /* notted */= java.lang.Boolean.FALSE;
-         sub174.commit();
-      }
-      try {
-         env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub171.isSet("notted",
-               env[12]),
-               (org.fuwjin.chessur.expression.Expression)new org.fuwjin.chessur.expression.FilterAcceptStatement(
-                     (java.lang.Boolean)java.lang.Boolean.FALSE, (org.fuwjin.chessur.expression.Filter)InFilter(sub171,
-                           env)));
-      } catch(final ChessurException e175) {
-         try {
-            env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub171.isSet("notted",
-                  env[12]),
-                  (org.fuwjin.chessur.expression.Expression)new org.fuwjin.chessur.expression.ValueAcceptStatement(
-                        (java.lang.Boolean)java.lang.Boolean.FALSE,
-                        (org.fuwjin.chessur.expression.Expression)StaticLiteral(sub171, env)));
-         } catch(final ChessurException e176) {
-            try {
-               env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub171.isSet(
-                     "notted", env[12]), (org.fuwjin.chessur.expression.Expression)Value(sub171, env));
-            } catch(final ChessurException e177) {
-               throw new RuntimeException("is keyword requires value or in keyword", e177);
-            }
-         }
-      }
-      sub171.commit();
-      return sub171.isSet("stmt", env[8]);
-   }
-
-   private static Object LoadDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub3 = input.sub();
-      sub3.accept("load");
-      Sep(sub3, env);
-      try {
-         env[0] /* path */= PathName(sub3, env);
-      } catch(final ChessurException e4) {
-         throw new RuntimeException("load keyword requires a file path", e4);
-      }
-      try {
-         sub3.accept("as");
-      } catch(final ChessurException e5) {
-         throw new RuntimeException("load keyword requires as keyword", e5);
-      }
-      Sep(sub3, env);
-      try {
-         try {
-            ((org.fuwjin.chessur.expression.CatalogImpl)sub3.isSet("cat", env[1])).load(
-                  (java.lang.String)sub3.isSet("path", env[0]), (java.lang.String)Name(sub3, env));
-         } catch(final Exception e6) {
-            throw sub3.ex(e6);
-         }
-      } catch(final ChessurException e7) {
-         throw new RuntimeException("load-as keywords require a name", e7);
-      }
-      sub3.commit();
-      return null;
-   }
-
-   private static Object MatchValue(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub169 = input.sub();
-      sub169.accept("match");
-      Sep(sub169, env);
-      sub169.commit();
-      return org.fuwjin.chessur.expression.Variable.MATCH;
-   }
-
-   private static Object Name(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub56 = input.sub();
-      env[7] /* id */= Identifier(sub56, env);
-      S(sub56, env);
-      sub56.commit();
-      return sub56.isSet("id", env[7]);
-   }
-
-   private static Object NextValue(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub170 = input.sub();
-      sub170.accept("next");
-      Sep(sub170, env);
-      sub170.commit();
-      return org.fuwjin.chessur.expression.Variable.NEXT;
-   }
-
-   private static Object Number(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Field(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
       final StringCursor sub147 = input.sub();
+      env[1] /* name */= Name(sub147, env);
+      env[19] /* setter */= ((org.fuwjin.dinah.FunctionProvider)sub147.isSet("postage", env[13]))
+            .getFunction((org.fuwjin.dinah.FunctionSignature)new org.fuwjin.dinah.ArgCountSignature(
+                  (java.lang.String)sub147.isSet("type", env[16]) + "." + sub147.isSet("name", env[1]),
+                  (java.lang.Integer)2));
+      sub147.accept(":");
+      S(sub147, env);
       try {
-         sub147.accept("-");
-      } catch(final ChessurException e148) {
+         ((org.fuwjin.chessur.expression.ObjectTemplate)sub147.isSet("object", env[18])).set(
+               (java.lang.String)sub147.isSet("name", env[1]),
+               (org.fuwjin.dinah.Function)sub147.isSet("setter", env[19]),
+               (org.fuwjin.chessur.expression.Expression)Value(sub147, env));
+      } catch(final Exception e148) {
+         throw sub147.ex(e148);
+      }
+      sub147.commit();
+      return null;
+   }
+
+   static Object FilterChar(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub165 = input.sub();
+      try {
+         final StringCursor sub166 = sub165.sub();
+         env[22] /* ch */= Escape(sub166, env);
+         sub166.commit();
+      } catch(final ChessurException e167) {
+         env[22] /* ch */= sub165.acceptNot("\\");
+      }
+      sub165.commit();
+      return sub165.isSet("ch", env[22]);
+   }
+
+   static Object FilterRange(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub159 = input.sub();
+      env[21] /* start */= FilterChar(sub159, env);
+      S(sub159, env);
+      try {
+         final StringCursor sub160 = sub159.sub();
+         sub160.accept("-");
+         S(sub160, env);
+         try {
+            ((org.fuwjin.chessur.expression.Filter)sub160.isSet("filter", env[20])).addRange(
+                  (java.lang.Integer)sub160.isSet("start", env[21]), (java.lang.Integer)FilterChar(sub160, env));
+         } catch(final Exception e161) {
+            throw sub160.ex(e161);
+         }
+         S(sub160, env);
+         sub160.commit();
+      } catch(final ChessurException e162) {
+         final StringCursor sub163 = sub159.sub();
+         try {
+            ((org.fuwjin.chessur.expression.Filter)sub163.isSet("filter", env[20])).addChar((java.lang.Integer)sub163
+                  .isSet("start", env[21]));
+         } catch(final Exception e164) {
+            throw sub163.ex(e164);
+         }
+         sub163.commit();
+      }
+      sub159.commit();
+      return null;
+   }
+
+   static Object HexDigit(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub213 = input.sub();
+      sub213.acceptIn("0-9A-Fa-f", "0123456789ABCDEFabcdef");
+      sub213.commit();
+      return null;
+   }
+
+   static Object HexDigits(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub212 = input.sub();
+      HexDigit(sub212, env);
+      HexDigit(sub212, env);
+      HexDigit(sub212, env);
+      HexDigit(sub212, env);
+      sub212.commit();
+      return sub212.match();
+   }
+
+   static Object Identifier(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub255 = input.sub();
+      IdentifierChar(sub255, env);
+      try {
+         while(true) {
+            IdentifierChar(sub255, env);
+         }
+      } catch(final ChessurException e256) {
          //continue
       }
+      sub255.commit();
+      return sub255.match();
+   }
+
+   static Object IdentifierChar(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub257 = input.sub();
+      final StringCursor sub258 = sub257.sub();
+      if((Object)java.lang.Character.isJavaIdentifierPart((java.lang.Integer)sub258.next()) == Boolean.FALSE) {
+         throw sub258.ex("check failed");
+      }
+      sub257.accept();
+      sub257.commit();
+      return null;
+   }
+
+   static Object InFilter(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub151 = input.sub();
+      sub151.accept("in");
+      Sep(sub151, env);
+      env[20] /* filter */= new org.fuwjin.chessur.expression.Filter();
       try {
-         final StringCursor sub149 = sub147.sub();
-         sub149.acceptIn("0-9", "0123456789");
+         FilterRange(sub151, env);
+      } catch(final ChessurException e152) {
+         throw new RuntimeException("in keyword requires at least one filter" + sub151.context(), e152);
+      }
+      try {
+         final StringCursor sub153 = sub151.sub();
+         sub153.accept(",");
+         S(sub153, env);
          try {
-            while(true) {
-               sub149.acceptIn("0-9", "0123456789");
-            }
-         } catch(final ChessurException e150) {
-            //continue
-         }
-         try {
-            final StringCursor sub151 = sub149.sub();
-            sub151.accept(".");
-            try {
-               sub151.acceptIn("0-9", "0123456789");
-               try {
-                  while(true) {
-                     sub151.acceptIn("0-9", "0123456789");
-                  }
-               } catch(final ChessurException e152) {
-                  //continue
-               }
-            } catch(final ChessurException e153) {
-               //continue
-            }
-            sub151.commit();
+            FilterRange(sub153, env);
          } catch(final ChessurException e154) {
-            //continue
+            throw new RuntimeException("in keyword requires a filter after a comma" + sub153.context(), e154);
          }
-         sub149.commit();
-      } catch(final ChessurException e155) {
-         final StringCursor sub156 = sub147.sub();
-         sub156.accept(".");
-         sub156.acceptIn("0-9", "0123456789");
+         sub153.commit();
          try {
             while(true) {
-               sub156.acceptIn("0-9", "0123456789");
+               final StringCursor sub155 = sub151.sub();
+               sub155.accept(",");
+               S(sub155, env);
+               try {
+                  FilterRange(sub155, env);
+               } catch(final ChessurException e156) {
+                  throw new RuntimeException("in keyword requires a filter after a comma" + sub155.context(), e156);
+               }
+               sub155.commit();
             }
          } catch(final ChessurException e157) {
             //continue
          }
-         sub156.commit();
-      }
-      try {
-         final StringCursor sub158 = sub147.sub();
-         sub158.acceptIn("Ee", "Ee");
-         try {
-            sub158.accept("-");
-         } catch(final ChessurException e159) {
-            //continue
-         }
-         sub158.acceptIn("0-9", "0123456789");
-         try {
-            while(true) {
-               sub158.acceptIn("0-9", "0123456789");
-            }
-         } catch(final ChessurException e160) {
-            //continue
-         }
-         sub158.commit();
-      } catch(final ChessurException e161) {
+      } catch(final ChessurException e158) {
          //continue
       }
-      env[16] /* num */= new org.fuwjin.chessur.expression.Number((java.lang.String)sub147.match());
-      Sep(sub147, env);
-      sub147.commit();
-      return sub147.isSet("num", env[16]);
+      sub151.commit();
+      return sub151.isSet("filter", env[20]);
    }
 
-   private static Object Object(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Invocation(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub162 = input.sub();
-      sub162.accept("(");
-      S(sub162, env);
-      env[17] /* type */= AliasName(sub162, env);
-      env[18] /* constructor */= ((org.fuwjin.dinah.FunctionProvider)sub162.isSet("postage", env[15]))
-            .getFunction((org.fuwjin.dinah.FunctionSignature)new org.fuwjin.dinah.FunctionSignature(
-                  (java.lang.String)sub162.isSet("type", env[17]) + ".new"));
-      env[19] /* object */= new org.fuwjin.chessur.expression.ObjectTemplate((org.fuwjin.dinah.Function)sub162.isSet(
-            "constructor", env[18]));
-      sub162.accept(")");
-      S(sub162, env);
-      sub162.accept("{");
-      S(sub162, env);
+      final StringCursor sub107 = input.sub();
+      env[1] /* name */= AliasName(sub107, env);
+      sub107.accept("(");
+      S(sub107, env);
+      env[11] /* inv */= new org.fuwjin.chessur.expression.Invocation();
       try {
-         final StringCursor sub163 = sub162.sub();
-         Field(sub163, env);
+         final StringCursor sub108 = sub107.sub();
          try {
-            final StringCursor sub164 = sub163.sub();
-            sub164.accept(",");
-            S(sub164, env);
-            Field(sub164, env);
-            sub164.commit();
+            ((org.fuwjin.chessur.expression.Invocation)sub108.isSet("inv", env[11]))
+                  .addParam((org.fuwjin.chessur.expression.Expression)Value(sub108, env));
+         } catch(final Exception e109) {
+            throw sub108.ex(e109);
+         }
+         try {
+            final StringCursor sub110 = sub108.sub();
+            sub110.accept(",");
+            S(sub110, env);
+            try {
+               try {
+                  ((org.fuwjin.chessur.expression.Invocation)sub110.isSet("inv", env[11]))
+                        .addParam((org.fuwjin.chessur.expression.Expression)Value(sub110, env));
+               } catch(final Exception e111) {
+                  throw sub110.ex(e111);
+               }
+            } catch(final ChessurException e112) {
+               throw new RuntimeException("invocation parameter must be a value" + sub110.context(), e112);
+            }
+            sub110.commit();
             try {
                while(true) {
-                  final StringCursor sub165 = sub163.sub();
-                  sub165.accept(",");
-                  S(sub165, env);
-                  Field(sub165, env);
-                  sub165.commit();
+                  final StringCursor sub113 = sub108.sub();
+                  sub113.accept(",");
+                  S(sub113, env);
+                  try {
+                     try {
+                        ((org.fuwjin.chessur.expression.Invocation)sub113.isSet("inv", env[11]))
+                              .addParam((org.fuwjin.chessur.expression.Expression)Value(sub113, env));
+                     } catch(final Exception e114) {
+                        throw sub113.ex(e114);
+                     }
+                  } catch(final ChessurException e115) {
+                     throw new RuntimeException("invocation parameter must be a value" + sub113.context(), e115);
+                  }
+                  sub113.commit();
                }
-            } catch(final ChessurException e166) {
+            } catch(final ChessurException e116) {
                //continue
             }
-         } catch(final ChessurException e167) {
+         } catch(final ChessurException e117) {
             //continue
          }
-         sub163.commit();
-      } catch(final ChessurException e168) {
-         //continue
-      }
-      sub162.accept("}");
-      S(sub162, env);
-      sub162.commit();
-      return sub162.isSet("object", env[19]);
-   }
-
-   private static Object Path(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub250 = input.sub();
-      final StringCursor sub251 = sub250.sub();
-      try {
-         sub251.accept("/");
-      } catch(final ChessurException e252) {
-         //continue
-      }
-      QualifiedIdentifier(sub251, env);
-      sub251.commit();
-      try {
-         while(true) {
-            final StringCursor sub253 = sub250.sub();
-            try {
-               sub253.accept("/");
-            } catch(final ChessurException e254) {
-               //continue
-            }
-            QualifiedIdentifier(sub253, env);
-            sub253.commit();
-         }
-      } catch(final ChessurException e255) {
+         sub108.commit();
+      } catch(final ChessurException e118) {
          //continue
       }
       try {
-         sub250.accept("/");
-      } catch(final ChessurException e256) {
-         //continue
+         sub107.accept(")");
+      } catch(final ChessurException e119) {
+         throw new RuntimeException("invocation must end with a parenthesis" + sub107.context(), e119);
       }
-      sub250.commit();
-      return sub250.match();
-   }
-
-   private static Object PathName(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub55 = input.sub();
-      env[0] /* path */= Path(sub55, env);
-      S(sub55, env);
-      sub55.commit();
-      return sub55.isSet("path", env[0]);
-   }
-
-   private static Object PublishStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub192 = input.sub();
-      sub192.accept("publish");
-      Sep(sub192, env);
+      S(sub107, env);
       try {
-         env[8] /* stmt */= new org.fuwjin.chessur.expression.PublishStatement(
-               (org.fuwjin.chessur.expression.Expression)Value(sub192, env));
-      } catch(final ChessurException e193) {
-         throw new RuntimeException("publish keyword requires a value", e193);
-      }
-      sub192.commit();
-      return sub192.isSet("stmt", env[8]);
-   }
-
-   private static Object QualifiedIdentifier(final StringCursor input, final Object... parentEnv)
-         throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub245 = input.sub();
-      AnnotatedIdentifier(sub245, env);
-      try {
-         final StringCursor sub246 = sub245.sub();
-         sub246.accept(".");
-         AnnotatedIdentifier(sub246, env);
-         sub246.commit();
+         final StringCursor sub120 = sub107.sub();
+         env[5] /* signature */= ((org.fuwjin.chessur.expression.CatalogImpl)sub120.isSet("cat", env[0]))
+               .getSignature((java.lang.String)sub120.isSet("name", env[1]),
+                     (java.lang.Integer)((org.fuwjin.chessur.expression.Invocation)sub120.isSet("inv", env[11]))
+                           .paramCount());
+         env[12] /* function */= ((org.fuwjin.dinah.FunctionProvider)sub120.isSet("postage", env[13]))
+               .getFunction((org.fuwjin.dinah.FunctionSignature)sub120.isSet("signature", env[5]));
          try {
-            while(true) {
-               final StringCursor sub247 = sub245.sub();
-               sub247.accept(".");
-               AnnotatedIdentifier(sub247, env);
-               sub247.commit();
-            }
-         } catch(final ChessurException e248) {
-            //continue
+            ((org.fuwjin.chessur.expression.Invocation)sub120.isSet("inv", env[11]))
+                  .setFunction((org.fuwjin.dinah.Function)sub120.isSet("function", env[12]));
+         } catch(final Exception e121) {
+            throw sub120.ex(e121);
          }
-      } catch(final ChessurException e249) {
-         //continue
+         sub120.commit();
+      } catch(final ChessurException e122) {
+         throw new RuntimeException("Could not get function for " + sub107.isSet("name", env[1]) + sub107.context(),
+               e122);
       }
-      sub245.commit();
-      return sub245.match();
+      sub107.commit();
+      return sub107.isSet("inv", env[11]);
    }
 
-   private static Object QualifiedName(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object IsStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub57 = input.sub();
-      env[7] /* id */= QualifiedIdentifier(sub57, env);
-      S(sub57, env);
-      sub57.commit();
-      return sub57.isSet("id", env[7]);
-   }
-
-   private static Object RepeatStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
-      final Object[] env = new Object[parentEnv.length];
-      System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub190 = input.sub();
-      sub190.accept("repeat");
-      Sep(sub190, env);
+      final StringCursor sub68 = input.sub();
+      sub68.accept("is");
+      Sep(sub68, env);
       try {
-         env[8] /* stmt */= new org.fuwjin.chessur.expression.RepeatStatement(
-               (org.fuwjin.chessur.expression.Expression)Statement(sub190, env));
-      } catch(final ChessurException e191) {
-         throw new RuntimeException("repeat keyword requires a statement", e191);
+         final StringCursor sub69 = sub68.sub();
+         sub69.accept("not");
+         Sep(sub69, env);
+         env[9] /* notted */= java.lang.Boolean.TRUE;
+         sub69.commit();
+      } catch(final ChessurException e70) {
+         final StringCursor sub71 = sub68.sub();
+         env[9] /* notted */= java.lang.Boolean.FALSE;
+         sub71.commit();
       }
-      sub190.commit();
-      return sub190.isSet("stmt", env[8]);
+      try {
+         env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub68.isSet("notted",
+               env[9]),
+               (org.fuwjin.chessur.expression.Expression)new org.fuwjin.chessur.expression.FilterAcceptStatement(
+                     java.lang.Boolean.FALSE, (org.fuwjin.chessur.expression.Filter)InFilter(sub68, env)));
+      } catch(final ChessurException e72) {
+         try {
+            env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub68.isSet("notted",
+                  env[9]),
+                  (org.fuwjin.chessur.expression.Expression)new org.fuwjin.chessur.expression.ValueAcceptStatement(
+                        java.lang.Boolean.FALSE, (org.fuwjin.chessur.expression.Expression)StaticLiteral(sub68, env)));
+         } catch(final ChessurException e73) {
+            try {
+               env[8] /* stmt */= new org.fuwjin.chessur.expression.IsStatement((java.lang.Boolean)sub68.isSet(
+                     "notted", env[9]), (org.fuwjin.chessur.expression.Expression)Value(sub68, env));
+            } catch(final ChessurException e74) {
+               throw new RuntimeException("is keyword requires value or in keyword" + sub68.context(), e74);
+            }
+         }
+      }
+      sub68.commit();
+      return sub68.isSet("stmt", env[8]);
    }
 
-   private static Object S(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object LoadDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub1 = input.sub();
+      final StringCursor sub10 = input.sub();
+      sub10.accept("load");
+      Sep(sub10, env);
       try {
-         Space(sub1, env);
-      } catch(final ChessurException e2) {
-         //continue
+         env[3] /* path */= PathName(sub10, env);
+      } catch(final ChessurException e11) {
+         throw new RuntimeException("load keyword requires a file path" + sub10.context(), e11);
       }
-      sub1.commit();
+      try {
+         sub10.accept("as");
+      } catch(final ChessurException e12) {
+         throw new RuntimeException("load keyword requires as keyword" + sub10.context(), e12);
+      }
+      Sep(sub10, env);
+      try {
+         try {
+            ((org.fuwjin.chessur.expression.CatalogImpl)sub10.isSet("cat", env[0])).load(
+                  (java.lang.String)sub10.isSet("path", env[3]), (java.lang.String)Name(sub10, env));
+         } catch(final Exception e13) {
+            throw sub10.ex(e13);
+         }
+      } catch(final ChessurException e14) {
+         throw new RuntimeException("load-as keywords require a name" + sub10.context(), e14);
+      }
+      sub10.commit();
       return null;
    }
 
-   private static Object Script(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object MatchValue(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub115 = input.sub();
-      env[5] /* script */= ScriptIdent(sub115, env);
-      try {
-         final StringCursor sub116 = sub115.sub();
-         sub116.accept("<<");
-         S(sub116, env);
-         env[5] /* script */= new org.fuwjin.chessur.expression.ScriptInput(
-               (org.fuwjin.chessur.expression.Expression)sub116.isSet("script", env[5]),
-               (org.fuwjin.chessur.expression.Expression)Value(sub116, env));
-         sub116.commit();
-      } catch(final ChessurException e117) {
-         //continue
-      }
-      try {
-         final StringCursor sub118 = sub115.sub();
-         sub118.accept(">>");
-         S(sub118, env);
-         env[5] /* script */= new org.fuwjin.chessur.expression.ScriptPipe(
-               (org.fuwjin.chessur.expression.Expression)sub118.isSet("script", env[5]),
-               (org.fuwjin.chessur.expression.Expression)ScriptIdent(sub118, env));
-         sub118.commit();
-         try {
-            while(true) {
-               final StringCursor sub119 = sub115.sub();
-               sub119.accept(">>");
-               S(sub119, env);
-               env[5] /* script */= new org.fuwjin.chessur.expression.ScriptPipe(
-                     (org.fuwjin.chessur.expression.Expression)sub119.isSet("script", env[5]),
-                     (org.fuwjin.chessur.expression.Expression)ScriptIdent(sub119, env));
-               sub119.commit();
-            }
-         } catch(final ChessurException e120) {
-            //continue
-         }
-      } catch(final ChessurException e121) {
-         //continue
-      }
-      try {
-         final StringCursor sub122 = sub115.sub();
-         sub122.accept(">>");
-         S(sub122, env);
-         env[5] /* script */= new org.fuwjin.chessur.expression.ScriptOutput(
-               (org.fuwjin.chessur.expression.Expression)sub122.isSet("script", env[5]), (java.lang.String)Name(sub122,
-                     env));
-         sub122.commit();
-      } catch(final ChessurException e123) {
-         //continue
-      }
-      sub115.commit();
-      return sub115.isSet("script", env[5]);
+      final StringCursor sub149 = input.sub();
+      sub149.accept("match");
+      Sep(sub149, env);
+      sub149.commit();
+      return org.fuwjin.chessur.expression.Variable.MATCH;
    }
 
-   private static Object ScriptDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Name(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub27 = input.sub();
-      sub27.accept("<");
+      final StringCursor sub241 = input.sub();
+      env[14] /* id */= Identifier(sub241, env);
+      S(sub241, env);
+      sub241.commit();
+      return sub241.isSet("id", env[14]);
+   }
+
+   static Object NextValue(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub150 = input.sub();
+      sub150.accept("next");
+      Sep(sub150, env);
+      sub150.commit();
+      return org.fuwjin.chessur.expression.Variable.NEXT;
+   }
+
+   static Object Number(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub214 = input.sub();
       try {
-         env[4] /* name */= Identifier(sub27, env);
-      } catch(final ChessurException e28) {
-         throw new RuntimeException("script identifiers must be enclosed in angle brackets", e28);
+         sub214.accept("-");
+      } catch(final ChessurException e215) {
+         //continue
       }
       try {
-         sub27.accept(">");
-      } catch(final ChessurException e29) {
-         throw new RuntimeException("script identifiers must end with an angle bracket", e29);
+         final StringCursor sub216 = sub214.sub();
+         sub216.acceptIn("0-9", "0123456789");
+         try {
+            while(true) {
+               sub216.acceptIn("0-9", "0123456789");
+            }
+         } catch(final ChessurException e217) {
+            //continue
+         }
+         try {
+            final StringCursor sub218 = sub216.sub();
+            sub218.accept(".");
+            try {
+               sub218.acceptIn("0-9", "0123456789");
+               try {
+                  while(true) {
+                     sub218.acceptIn("0-9", "0123456789");
+                  }
+               } catch(final ChessurException e219) {
+                  //continue
+               }
+            } catch(final ChessurException e220) {
+               //continue
+            }
+            sub218.commit();
+         } catch(final ChessurException e221) {
+            //continue
+         }
+         sub216.commit();
+      } catch(final ChessurException e222) {
+         final StringCursor sub223 = sub214.sub();
+         sub223.accept(".");
+         sub223.acceptIn("0-9", "0123456789");
+         try {
+            while(true) {
+               sub223.acceptIn("0-9", "0123456789");
+            }
+         } catch(final ChessurException e224) {
+            //continue
+         }
+         sub223.commit();
       }
-      S(sub27, env);
       try {
-         sub27.accept("{");
-      } catch(final ChessurException e30) {
-         throw new RuntimeException("script declarations must start with a brace", e30);
+         final StringCursor sub225 = sub214.sub();
+         sub225.acceptIn("Ee", "Ee");
+         try {
+            sub225.accept("-");
+         } catch(final ChessurException e226) {
+            //continue
+         }
+         sub225.acceptIn("0-9", "0123456789");
+         try {
+            while(true) {
+               sub225.acceptIn("0-9", "0123456789");
+            }
+         } catch(final ChessurException e227) {
+            //continue
+         }
+         sub225.commit();
+      } catch(final ChessurException e228) {
+         //continue
       }
-      S(sub27, env);
-      env[5] /* script */= new org.fuwjin.chessur.expression.Declaration((java.lang.String)sub27.isSet("name", env[4]));
+      env[24] /* num */= new org.fuwjin.chessur.expression.Number((java.lang.String)sub214.match());
+      Sep(sub214, env);
+      sub214.commit();
+      return sub214.isSet("num", env[24]);
+   }
+
+   static Object Object(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub140 = input.sub();
+      sub140.accept("(");
+      S(sub140, env);
+      env[16] /* type */= AliasName(sub140, env);
+      env[17] /* constructor */= ((org.fuwjin.dinah.FunctionProvider)sub140.isSet("postage", env[13]))
+            .getFunction((org.fuwjin.dinah.FunctionSignature)new org.fuwjin.dinah.ArgCountSignature(
+                  (java.lang.String)sub140.isSet("type", env[16]) + ".new", (java.lang.Integer)0));
+      env[18] /* object */= new org.fuwjin.chessur.expression.ObjectTemplate((java.lang.String)sub140.isSet("type",
+            env[16]), (org.fuwjin.dinah.Function)sub140.isSet("constructor", env[17]));
+      sub140.accept(")");
+      S(sub140, env);
+      sub140.accept("{");
+      S(sub140, env);
+      try {
+         final StringCursor sub141 = sub140.sub();
+         Field(sub141, env);
+         try {
+            final StringCursor sub142 = sub141.sub();
+            sub142.accept(",");
+            S(sub142, env);
+            Field(sub142, env);
+            sub142.commit();
+            try {
+               while(true) {
+                  final StringCursor sub143 = sub141.sub();
+                  sub143.accept(",");
+                  S(sub143, env);
+                  Field(sub143, env);
+                  sub143.commit();
+               }
+            } catch(final ChessurException e144) {
+               //continue
+            }
+         } catch(final ChessurException e145) {
+            //continue
+         }
+         sub141.commit();
+      } catch(final ChessurException e146) {
+         //continue
+      }
+      sub140.accept("}");
+      S(sub140, env);
+      sub140.commit();
+      return sub140.isSet("object", env[18]);
+   }
+
+   static Object Path(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub229 = input.sub();
+      final StringCursor sub230 = sub229.sub();
+      try {
+         sub230.accept("/");
+      } catch(final ChessurException e231) {
+         //continue
+      }
+      QualifiedIdentifier(sub230, env);
+      sub230.commit();
+      try {
+         while(true) {
+            final StringCursor sub232 = sub229.sub();
+            try {
+               sub232.accept("/");
+            } catch(final ChessurException e233) {
+               //continue
+            }
+            QualifiedIdentifier(sub232, env);
+            sub232.commit();
+         }
+      } catch(final ChessurException e234) {
+         //continue
+      }
+      try {
+         sub229.accept("/");
+      } catch(final ChessurException e235) {
+         //continue
+      }
+      sub229.commit();
+      return sub229.match();
+   }
+
+   static Object PathName(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub236 = input.sub();
+      env[3] /* path */= Path(sub236, env);
+      S(sub236, env);
+      sub236.commit();
+      return sub236.isSet("path", env[3]);
+   }
+
+   static Object PublishStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub95 = input.sub();
+      sub95.accept("publish");
+      Sep(sub95, env);
+      try {
+         env[8] /* stmt */= new org.fuwjin.chessur.expression.PublishStatement(
+               (org.fuwjin.chessur.expression.Expression)Value(sub95, env));
+      } catch(final ChessurException e96) {
+         throw new RuntimeException("publish keyword requires a value" + sub95.context(), e96);
+      }
+      sub95.commit();
+      return sub95.isSet("stmt", env[8]);
+   }
+
+   static Object QualifiedIdentifier(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub243 = input.sub();
+      AnnotatedIdentifier(sub243, env);
+      try {
+         final StringCursor sub244 = sub243.sub();
+         sub244.accept(".");
+         AnnotatedIdentifier(sub244, env);
+         sub244.commit();
+         try {
+            while(true) {
+               final StringCursor sub245 = sub243.sub();
+               sub245.accept(".");
+               AnnotatedIdentifier(sub245, env);
+               sub245.commit();
+            }
+         } catch(final ChessurException e246) {
+            //continue
+         }
+      } catch(final ChessurException e247) {
+         //continue
+      }
+      sub243.commit();
+      return sub243.match();
+   }
+
+   static Object QualifiedName(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub242 = input.sub();
+      env[14] /* id */= QualifiedIdentifier(sub242, env);
+      S(sub242, env);
+      sub242.commit();
+      return sub242.isSet("id", env[14]);
+   }
+
+   static Object RepeatStatement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub87 = input.sub();
+      sub87.accept("repeat");
+      Sep(sub87, env);
+      try {
+         env[8] /* stmt */= new org.fuwjin.chessur.expression.RepeatStatement(
+               (org.fuwjin.chessur.expression.Expression)Statement(sub87, env));
+      } catch(final ChessurException e88) {
+         throw new RuntimeException("repeat keyword requires a statement" + sub87.context(), e88);
+      }
+      sub87.commit();
+      return sub87.isSet("stmt", env[8]);
+   }
+
+   static Object S(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub262 = input.sub();
+      try {
+         Space(sub262, env);
+      } catch(final ChessurException e263) {
+         //continue
+      }
+      sub262.commit();
+      return null;
+   }
+
+   static Object Script(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub123 = input.sub();
+      env[6] /* script */= ScriptIdent(sub123, env);
+      try {
+         final StringCursor sub124 = sub123.sub();
+         sub124.accept("<<");
+         S(sub124, env);
+         env[6] /* script */= new org.fuwjin.chessur.expression.ScriptInput(
+               (org.fuwjin.chessur.expression.Expression)sub124.isSet("script", env[6]),
+               (org.fuwjin.chessur.expression.Expression)Value(sub124, env));
+         sub124.commit();
+      } catch(final ChessurException e125) {
+         //continue
+      }
+      try {
+         final StringCursor sub126 = sub123.sub();
+         sub126.accept(">>");
+         S(sub126, env);
+         env[6] /* script */= new org.fuwjin.chessur.expression.ScriptPipe(
+               (org.fuwjin.chessur.expression.Expression)sub126.isSet("script", env[6]),
+               (org.fuwjin.chessur.expression.Expression)ScriptIdent(sub126, env));
+         sub126.commit();
+         try {
+            while(true) {
+               final StringCursor sub127 = sub123.sub();
+               sub127.accept(">>");
+               S(sub127, env);
+               env[6] /* script */= new org.fuwjin.chessur.expression.ScriptPipe(
+                     (org.fuwjin.chessur.expression.Expression)sub127.isSet("script", env[6]),
+                     (org.fuwjin.chessur.expression.Expression)ScriptIdent(sub127, env));
+               sub127.commit();
+            }
+         } catch(final ChessurException e128) {
+            //continue
+         }
+      } catch(final ChessurException e129) {
+         //continue
+      }
+      try {
+         final StringCursor sub130 = sub123.sub();
+         sub130.accept(">>");
+         S(sub130, env);
+         env[6] /* script */= new org.fuwjin.chessur.expression.ScriptOutput(
+               (org.fuwjin.chessur.expression.Expression)sub130.isSet("script", env[6]), (java.lang.String)Name(sub130,
+                     env));
+         sub130.commit();
+      } catch(final ChessurException e131) {
+         //continue
+      }
+      sub123.commit();
+      return sub123.isSet("script", env[6]);
+   }
+
+   static Object ScriptDeclaration(final StringCursor input, final Object... parentEnv) throws ChessurException {
+      final Object[] env = new Object[parentEnv.length];
+      System.arraycopy(parentEnv, 0, env, 0, env.length);
+      final StringCursor sub34 = input.sub();
+      sub34.accept("<");
+      try {
+         env[1] /* name */= Identifier(sub34, env);
+      } catch(final ChessurException e35) {
+         throw new RuntimeException("script identifiers must be enclosed in angle brackets" + sub34.context(), e35);
+      }
+      try {
+         sub34.accept(">");
+      } catch(final ChessurException e36) {
+         throw new RuntimeException("script identifiers must end with an angle bracket" + sub34.context(), e36);
+      }
+      S(sub34, env);
+      try {
+         sub34.accept("{");
+      } catch(final ChessurException e37) {
+         throw new RuntimeException("script declarations must start with a brace" + sub34.context(), e37);
+      }
+      S(sub34, env);
+      env[6] /* script */= new org.fuwjin.chessur.expression.Declaration((java.lang.String)sub34.isSet("name", env[1]));
       try {
          try {
-            ((org.fuwjin.chessur.expression.Declaration)sub27.isSet("script", env[5]))
-                  .add((org.fuwjin.chessur.expression.Expression)Statement(sub27, env));
-         } catch(final Exception e31) {
-            throw sub27.ex(e31);
+            ((org.fuwjin.chessur.expression.Declaration)sub34.isSet("script", env[6]))
+                  .add((org.fuwjin.chessur.expression.Expression)Statement(sub34, env));
+         } catch(final Exception e38) {
+            throw sub34.ex(e38);
          }
          try {
             while(true) {
                try {
-                  ((org.fuwjin.chessur.expression.Declaration)sub27.isSet("script", env[5]))
-                        .add((org.fuwjin.chessur.expression.Expression)Statement(sub27, env));
-               } catch(final Exception e32) {
-                  throw sub27.ex(e32);
+                  ((org.fuwjin.chessur.expression.Declaration)sub34.isSet("script", env[6]))
+                        .add((org.fuwjin.chessur.expression.Expression)Statement(sub34, env));
+               } catch(final Exception e39) {
+                  throw sub34.ex(e39);
                }
             }
-         } catch(final ChessurException e33) {
+         } catch(final ChessurException e40) {
             //continue
          }
-      } catch(final ChessurException e34) {
+      } catch(final ChessurException e41) {
          //continue
       }
       try {
-         final StringCursor sub35 = sub27.sub();
-         sub35.accept("return");
-         Sep(sub35, env);
+         final StringCursor sub42 = sub34.sub();
+         sub42.accept("return");
+         Sep(sub42, env);
          try {
             try {
-               ((org.fuwjin.chessur.expression.Declaration)sub35.isSet("script", env[5]))
-                     .returns((org.fuwjin.chessur.expression.Expression)Value(sub35, env));
-            } catch(final Exception e36) {
-               throw sub35.ex(e36);
+               ((org.fuwjin.chessur.expression.Declaration)sub42.isSet("script", env[6]))
+                     .returns((org.fuwjin.chessur.expression.Expression)Value(sub42, env));
+            } catch(final Exception e43) {
+               throw sub42.ex(e43);
             }
-         } catch(final ChessurException e37) {
-            throw new RuntimeException("return keyword requires a value", e37);
+         } catch(final ChessurException e44) {
+            throw new RuntimeException("return keyword requires a value" + sub42.context(), e44);
          }
-         sub35.commit();
-      } catch(final ChessurException e38) {
+         sub42.commit();
+      } catch(final ChessurException e45) {
          //continue
       }
       try {
-         sub27.accept("}");
-      } catch(final ChessurException e39) {
-         throw new RuntimeException("script declaration for " + sub27.isSet("name", env[4]) + " must end with a brace",
-               e39);
+         sub34.accept("}");
+      } catch(final ChessurException e46) {
+         throw new RuntimeException("script declaration for " + sub34.isSet("name", env[1]) + " must end with a brace"
+               + sub34.context(), e46);
       }
-      S(sub27, env);
-      sub27.commit();
-      return sub27.isSet("script", env[5]);
+      S(sub34, env);
+      sub34.commit();
+      return sub34.isSet("script", env[6]);
    }
 
-   private static Object ScriptIdent(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object ScriptIdent(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub216 = input.sub();
-      sub216.accept("<");
+      final StringCursor sub132 = input.sub();
+      sub132.accept("<");
       try {
-         env[7] /* id */= Identifier(sub216, env);
-      } catch(final ChessurException e217) {
-         throw new RuntimeException("script identifiers must be enclosed in angle brackets", e217);
+         env[14] /* id */= Identifier(sub132, env);
+      } catch(final ChessurException e133) {
+         throw new RuntimeException("script identifiers must be enclosed in angle brackets" + sub132.context(), e133);
       }
       try {
-         final StringCursor sub218 = sub216.sub();
-         sub218.accept(":");
-         env[4] /* name */= Identifier(sub218, env);
-         env[24] /* module */= ((org.fuwjin.chessur.expression.CatalogImpl)sub218.isSet("cat", env[1]))
-               .getModule((java.lang.String)sub218.isSet("id", env[7]));
-         env[5] /* script */= ((org.fuwjin.chessur.Module)sub218.isSet("module", env[24])).get((java.lang.String)sub218
-               .isSet("name", env[4]));
-         sub218.commit();
-      } catch(final ChessurException e219) {
-         final StringCursor sub220 = sub216.sub();
-         env[5] /* script */= ((org.fuwjin.chessur.Module)sub220.isSet("cat", env[1])).get((java.lang.String)sub220
-               .isSet("id", env[7]));
-         sub220.commit();
+         final StringCursor sub134 = sub132.sub();
+         sub134.accept(":");
+         try {
+            final StringCursor sub135 = sub134.sub();
+            env[1] /* name */= Identifier(sub135, env);
+            env[15] /* module */= ((org.fuwjin.chessur.expression.CatalogImpl)sub135.isSet("cat", env[0]))
+                  .getModule((java.lang.String)sub135.isSet("id", env[14]));
+            env[6] /* script */= ((org.fuwjin.chessur.Module)sub135.isSet("module", env[15]))
+                  .get((java.lang.String)sub135.isSet("name", env[1]));
+            sub135.commit();
+         } catch(final ChessurException e136) {
+            throw new RuntimeException("namespaced script " + sub134.isSet("id", env[14]) + ": could not be resolved"
+                  + sub134.context(), e136);
+         }
+         sub134.commit();
+      } catch(final ChessurException e137) {
+         final StringCursor sub138 = sub132.sub();
+         env[6] /* script */= ((org.fuwjin.chessur.Module)sub138.isSet("cat", env[0])).get((java.lang.String)sub138
+               .isSet("id", env[14]));
+         sub138.commit();
       }
       try {
-         sub216.accept(">");
-      } catch(final ChessurException e221) {
-         throw new RuntimeException("script identifiers must be normal identifiers in angle brackets", e221);
+         sub132.accept(">");
+      } catch(final ChessurException e139) {
+         throw new RuntimeException("script identifiers must be normal identifiers in angle brackets"
+               + sub132.context(), e139);
       }
-      S(sub216, env);
-      sub216.commit();
-      return sub216.isSet("script", env[5]);
+      S(sub132, env);
+      sub132.commit();
+      return sub132.isSet("script", env[6]);
    }
 
-   private static Object Sep(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Sep(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub52 = input.sub();
-      final StringCursor sub53 = sub52.sub();
+      final StringCursor sub259 = input.sub();
+      final StringCursor sub260 = sub259.sub();
       boolean b = true;
       try {
-         if(java.lang.Character.isJavaIdentifierPart(sub53.next()) == Boolean.FALSE) {
+         if((Object)java.lang.Character.isJavaIdentifierPart((java.lang.Integer)sub260.next()) == Boolean.FALSE) {
             b = false;
          }
-      } catch(final ChessurException e54) {
+      } catch(final ChessurException e261) {
          b = false;
       }
       if(b) {
-         throw sub52.ex("unexpected value");
+         throw sub259.ex("unexpected value");
       }
-      S(sub52, env);
-      sub52.commit();
+      S(sub259, env);
+      sub259.commit();
       return null;
    }
 
-   private static Object Space(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Space(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub266 = input.sub();
+      final StringCursor sub264 = input.sub();
       try {
-         sub266.acceptIn("\t-\n\r ", "\t\n\r ");
-      } catch(final ChessurException e267) {
-         Comment(sub266, env);
+         sub264.acceptIn("\t-\n\r ", "\t\n\r ");
+      } catch(final ChessurException e265) {
+         Comment(sub264, env);
       }
       try {
          while(true) {
             try {
-               sub266.acceptIn("\t-\n\r ", "\t\n\r ");
-            } catch(final ChessurException e268) {
-               Comment(sub266, env);
+               sub264.acceptIn("\t-\n\r ", "\t\n\r ");
+            } catch(final ChessurException e266) {
+               Comment(sub264, env);
             }
          }
-      } catch(final ChessurException e269) {
+      } catch(final ChessurException e267) {
          //continue
       }
-      sub266.commit();
+      sub264.commit();
       return null;
    }
 
-   private static Object Statement(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Statement(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub60 = input.sub();
+      final StringCursor sub57 = input.sub();
       try {
-         env[8] /* stmt */= IsStatement(sub60, env);
-      } catch(final ChessurException e61) {
+         env[8] /* stmt */= IsStatement(sub57, env);
+      } catch(final ChessurException e58) {
          try {
-            env[8] /* stmt */= EitherOrStatement(sub60, env);
-         } catch(final ChessurException e62) {
+            env[8] /* stmt */= EitherOrStatement(sub57, env);
+         } catch(final ChessurException e59) {
             try {
-               env[8] /* stmt */= CouldStatement(sub60, env);
-            } catch(final ChessurException e63) {
+               env[8] /* stmt */= CouldStatement(sub57, env);
+            } catch(final ChessurException e60) {
                try {
-                  env[8] /* stmt */= RepeatStatement(sub60, env);
-               } catch(final ChessurException e64) {
+                  env[8] /* stmt */= RepeatStatement(sub57, env);
+               } catch(final ChessurException e61) {
                   try {
-                     env[8] /* stmt */= AcceptStatement(sub60, env);
-                  } catch(final ChessurException e65) {
+                     env[8] /* stmt */= AcceptStatement(sub57, env);
+                  } catch(final ChessurException e62) {
                      try {
-                        env[8] /* stmt */= PublishStatement(sub60, env);
-                     } catch(final ChessurException e66) {
+                        env[8] /* stmt */= PublishStatement(sub57, env);
+                     } catch(final ChessurException e63) {
                         try {
-                           env[8] /* stmt */= AbortStatement(sub60, env);
-                        } catch(final ChessurException e67) {
+                           env[8] /* stmt */= AbortStatement(sub57, env);
+                        } catch(final ChessurException e64) {
                            try {
-                              env[8] /* stmt */= Script(sub60, env);
-                           } catch(final ChessurException e68) {
+                              env[8] /* stmt */= Script(sub57, env);
+                           } catch(final ChessurException e65) {
                               try {
-                                 env[8] /* stmt */= Block(sub60, env);
-                              } catch(final ChessurException e69) {
+                                 env[8] /* stmt */= Block(sub57, env);
+                              } catch(final ChessurException e66) {
                                  try {
-                                    env[8] /* stmt */= Assignment(sub60, env);
-                                 } catch(final ChessurException e70) {
-                                    env[8] /* stmt */= Invocation(sub60, env);
+                                    env[8] /* stmt */= Assignment(sub57, env);
+                                 } catch(final ChessurException e67) {
+                                    env[8] /* stmt */= Invocation(sub57, env);
                                  }
                               }
                            }
@@ -1646,109 +1690,109 @@ public class ChessurInterpreter {
             }
          }
       }
-      sub60.commit();
-      return sub60.isSet("stmt", env[8]);
+      sub57.commit();
+      return sub57.isSet("stmt", env[8]);
    }
 
-   private static Object StaticLiteral(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object StaticLiteral(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub81 = input.sub();
-      sub81.accept("'");
-      env[10] /* lit */= new org.fuwjin.chessur.expression.Literal();
+      final StringCursor sub168 = input.sub();
+      sub168.accept("'");
+      env[23] /* lit */= new org.fuwjin.chessur.expression.Literal();
       try {
          try {
-            final StringCursor sub82 = sub81.sub();
-            env[11] /* ch */= sub82.acceptNotIn("'\\", "'\\");
+            final StringCursor sub169 = sub168.sub();
+            env[22] /* ch */= sub169.acceptNotIn("'\\", "'\\");
             try {
-               ((org.fuwjin.chessur.expression.Literal)sub82.isSet("lit", env[10])).append((java.lang.Integer)sub82
-                     .isSet("ch", env[11]));
-            } catch(final Exception e83) {
-               throw sub82.ex(e83);
+               ((org.fuwjin.chessur.expression.Literal)sub169.isSet("lit", env[23])).append((java.lang.Integer)sub169
+                     .isSet("ch", env[22]));
+            } catch(final Exception e170) {
+               throw sub169.ex(e170);
             }
-            sub82.commit();
-         } catch(final ChessurException e84) {
-            final StringCursor sub85 = sub81.sub();
+            sub169.commit();
+         } catch(final ChessurException e171) {
+            final StringCursor sub172 = sub168.sub();
             try {
-               ((org.fuwjin.chessur.expression.Literal)sub85.isSet("lit", env[10])).append((java.lang.Integer)Escape(
-                     sub85, env));
-            } catch(final Exception e86) {
-               throw sub85.ex(e86);
+               ((org.fuwjin.chessur.expression.Literal)sub172.isSet("lit", env[23])).append((java.lang.Integer)Escape(
+                     sub172, env));
+            } catch(final Exception e173) {
+               throw sub172.ex(e173);
             }
-            sub85.commit();
+            sub172.commit();
          }
          try {
             while(true) {
                try {
-                  final StringCursor sub87 = sub81.sub();
-                  env[11] /* ch */= sub87.acceptNotIn("'\\", "'\\");
+                  final StringCursor sub174 = sub168.sub();
+                  env[22] /* ch */= sub174.acceptNotIn("'\\", "'\\");
                   try {
-                     ((org.fuwjin.chessur.expression.Literal)sub87.isSet("lit", env[10]))
-                           .append((java.lang.Integer)sub87.isSet("ch", env[11]));
-                  } catch(final Exception e88) {
-                     throw sub87.ex(e88);
+                     ((org.fuwjin.chessur.expression.Literal)sub174.isSet("lit", env[23]))
+                           .append((java.lang.Integer)sub174.isSet("ch", env[22]));
+                  } catch(final Exception e175) {
+                     throw sub174.ex(e175);
                   }
-                  sub87.commit();
-               } catch(final ChessurException e89) {
-                  final StringCursor sub90 = sub81.sub();
+                  sub174.commit();
+               } catch(final ChessurException e176) {
+                  final StringCursor sub177 = sub168.sub();
                   try {
-                     ((org.fuwjin.chessur.expression.Literal)sub90.isSet("lit", env[10]))
-                           .append((java.lang.Integer)Escape(sub90, env));
-                  } catch(final Exception e91) {
-                     throw sub90.ex(e91);
+                     ((org.fuwjin.chessur.expression.Literal)sub177.isSet("lit", env[23]))
+                           .append((java.lang.Integer)Escape(sub177, env));
+                  } catch(final Exception e178) {
+                     throw sub177.ex(e178);
                   }
-                  sub90.commit();
+                  sub177.commit();
                }
             }
-         } catch(final ChessurException e92) {
+         } catch(final ChessurException e179) {
             //continue
          }
-      } catch(final ChessurException e93) {
+      } catch(final ChessurException e180) {
          //continue
       }
       try {
-         sub81.accept("'");
-      } catch(final ChessurException e94) {
-         throw new RuntimeException("static literals must end with a quote", e94);
+         sub168.accept("'");
+      } catch(final ChessurException e181) {
+         throw new RuntimeException("static literals must end with a quote" + sub168.context(), e181);
       }
-      S(sub81, env);
-      sub81.commit();
-      return sub81.isSet("lit", env[10]);
+      S(sub168, env);
+      sub168.commit();
+      return sub168.isSet("lit", env[23]);
    }
 
-   private static Object Value(final StringCursor input, final Object... parentEnv) throws ChessurException {
+   static Object Value(final StringCursor input, final Object... parentEnv) throws ChessurException {
       final Object[] env = new Object[parentEnv.length];
       System.arraycopy(parentEnv, 0, env, 0, env.length);
-      final StringCursor sub71 = input.sub();
+      final StringCursor sub47 = input.sub();
       try {
-         env[9] /* val */= StaticLiteral(sub71, env);
-      } catch(final ChessurException e72) {
+         env[7] /* val */= StaticLiteral(sub47, env);
+      } catch(final ChessurException e48) {
          try {
-            env[9] /* val */= DynamicLiteral(sub71, env);
-         } catch(final ChessurException e73) {
+            env[7] /* val */= DynamicLiteral(sub47, env);
+         } catch(final ChessurException e49) {
             try {
-               env[9] /* val */= Script(sub71, env);
-            } catch(final ChessurException e74) {
+               env[7] /* val */= Script(sub47, env);
+            } catch(final ChessurException e50) {
                try {
-                  env[9] /* val */= AcceptStatement(sub71, env);
-               } catch(final ChessurException e75) {
+                  env[7] /* val */= AcceptStatement(sub47, env);
+               } catch(final ChessurException e51) {
                   try {
-                     env[9] /* val */= Invocation(sub71, env);
-                  } catch(final ChessurException e76) {
+                     env[7] /* val */= Invocation(sub47, env);
+                  } catch(final ChessurException e52) {
                      try {
-                        env[9] /* val */= Number(sub71, env);
-                     } catch(final ChessurException e77) {
+                        env[7] /* val */= Number(sub47, env);
+                     } catch(final ChessurException e53) {
                         try {
-                           env[9] /* val */= Object(sub71, env);
-                        } catch(final ChessurException e78) {
+                           env[7] /* val */= Object(sub47, env);
+                        } catch(final ChessurException e54) {
                            try {
-                              env[9] /* val */= MatchValue(sub71, env);
-                           } catch(final ChessurException e79) {
+                              env[7] /* val */= MatchValue(sub47, env);
+                           } catch(final ChessurException e55) {
                               try {
-                                 env[9] /* val */= NextValue(sub71, env);
-                              } catch(final ChessurException e80) {
-                                 env[9] /* val */= new org.fuwjin.chessur.expression.Variable((java.lang.String)Name(
-                                       sub71, env));
+                                 env[7] /* val */= NextValue(sub47, env);
+                              } catch(final ChessurException e56) {
+                                 env[7] /* val */= new org.fuwjin.chessur.expression.Variable((java.lang.String)Name(
+                                       sub47, env));
                               }
                            }
                         }
@@ -1758,7 +1802,7 @@ public class ChessurInterpreter {
             }
          }
       }
-      sub71.commit();
-      return sub71.isSet("val", env[9]);
+      sub47.commit();
+      return sub47.isSet("val", env[7]);
    }
 }

@@ -61,7 +61,7 @@ public class VarArgsFunction extends AbstractFunction {
       if(AbstractFunction.NULL != func) {
          return func;
       }
-      if(isMatch(signature)) {
+      if(signature.matchesVarArgs(function.argTypes())) {
          return this;
       }
       return AbstractFunction.NULL;
@@ -70,27 +70,5 @@ public class VarArgsFunction extends AbstractFunction {
    @Override
    protected boolean isPrivate() {
       return function.isPrivate();
-   }
-
-   private boolean isMatch(final FunctionSignature signature) {
-      if(signature.argCount() < argCount()) {
-         return false;
-      }
-      for(int index = 0; index < argCount(); ++index) {
-         if(!TypeUtils.isAssignableFrom(argType(index), signature.argType(index))) {
-            return false;
-         }
-      }
-      return isVarArgsMatch(signature);
-   }
-
-   private boolean isVarArgsMatch(final FunctionSignature signature) {
-      final Type componentType = TypeUtils.getComponentType(function.argType(argCount()));
-      for(int index = argCount(); index < signature.argCount(); ++index) {
-         if(!TypeUtils.isAssignableFrom(componentType, signature.argType(index))) {
-            return false;
-         }
-      }
-      return true;
    }
 }
