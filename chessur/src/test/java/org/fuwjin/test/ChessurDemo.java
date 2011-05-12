@@ -16,7 +16,6 @@ import static org.fuwjin.util.StreamUtils.writer;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
@@ -39,20 +38,6 @@ public class ChessurDemo {
 
    private CatalogManager manager;
    private Map<String, Object> env;
-
-   /**
-    * Demo showing Grin off for Satish.
-    * @throws Exception if it fails
-    */
-   @Test
-   public void demoForSatish() throws Exception {
-      final Catalog parser = manager.loadCat("grin.parse.cat");
-      final Catalog grin = (Catalog)parser.exec(reader("satish.cat", "UTF-8"), System.out, env);
-      final Map<String, Object> environment = new HashMap<String, Object>();
-      environment.put("list", Arrays.asList(1, 2, 3));
-      final Object result = grin.exec(System.in, System.out, environment);
-      System.out.println("Grin result: " + result);
-   }
 
    /**
     * Demo parsing the grin grammar.
