@@ -1,0 +1,5 @@
+<Root> {
+  return (org.fuwjin.sample.Struct){
+    value: 100
+  }
+}
