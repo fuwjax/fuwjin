@@ -61,6 +61,7 @@ public class Parameterized extends Suite {
    @Retention(RetentionPolicy.RUNTIME)
    @Target(ElementType.METHOD)
    public static @interface Parameters {
+      // marker
    }
 
    private class TestClassRunnerForParameters extends BlockJUnit4ClassRunner {
@@ -104,7 +105,9 @@ public class Parameterized extends Suite {
    private final ArrayList<Runner> runners = new ArrayList<Runner>();
 
    /**
-    * Only called reflectively. Do not use programmatically.
+    * Only called reflectively. Do not call directly.
+    * @param klass the unit test class
+    * @throws Throwable if the test class cannot be parameterized
     */
    public Parameterized(final Class<?> klass) throws Throwable {
       super(klass, Collections.<Runner> emptyList());
