@@ -156,7 +156,6 @@ public class ScriptExecutionDemo {
          catCodeGenerator.get("Module").exec(code, environment);
       }
       sources.put(className, code.toString());
-      System.out.println(code);
       return className;
    }
 
