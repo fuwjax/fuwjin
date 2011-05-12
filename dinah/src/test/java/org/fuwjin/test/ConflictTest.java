@@ -4,8 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.fuwjin.dinah.TypedArgsSignature;
 import org.fuwjin.sample.SameName;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
@@ -33,7 +33,7 @@ public class ConflictTest {
     */
    @Test
    public void testOverlap() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.SameName.name").addArg(
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.SameName.name").addArg(
             "org.fuwjin.sample.SameName").addArg("java.lang.String"));
       final SameName name = new SameName();
       function.invoke(name, "test");

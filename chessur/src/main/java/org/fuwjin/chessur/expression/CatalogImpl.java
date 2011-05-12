@@ -12,13 +12,17 @@ package org.fuwjin.chessur.expression;
 
 import static java.util.Collections.unmodifiableCollection;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
+import org.fuwjin.dinah.ArgCountSignature;
 import org.fuwjin.dinah.FunctionSignature;
 
 /**
@@ -27,8 +31,8 @@ import org.fuwjin.dinah.FunctionSignature;
 public class CatalogImpl extends Executable implements Catalog {
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
    private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
-   private final Map<String, ScriptImpl> scripts = new LinkedHashMap<String, ScriptImpl>();
-   private final Map<String, ScriptImpl> referenced = new LinkedHashMap<String, ScriptImpl>();
+   private final Map<String, ScriptImpl> scripts = new HashMap<String, ScriptImpl>();
+   private final List<ScriptImpl> orderedScripts = new ArrayList<ScriptImpl>();
    private final Map<String, CatalogProxy> modules = new LinkedHashMap<String, CatalogProxy>();
    private Declaration root;
    private final CatalogManager manager;
@@ -51,7 +55,7 @@ public class CatalogImpl extends Executable implements Catalog {
    public void add(final Declaration decl) {
       final ScriptImpl s = (ScriptImpl)get(decl.name());
       s.setDecl(decl);
-      scripts.put(decl.name(), s);
+      orderedScripts.add(s);
       if(root == null) {
          root = decl;
       }
@@ -124,11 +128,8 @@ public class CatalogImpl extends Executable implements Catalog {
    public Script get(final String name) {
       ScriptImpl s = scripts.get(name);
       if(s == null) {
-         s = referenced.get(name);
-         if(s == null) {
-            s = new ScriptImpl(name);
-            referenced.put(name, s);
-         }
+         s = new ScriptImpl(name);
+         scripts.put(name, s);
       }
       return s;
    }
@@ -147,12 +148,12 @@ public class CatalogImpl extends Executable implements Catalog {
     * @param name the name of the signature
     * @return the signature
     */
-   public FunctionSignature getSignature(final String name) {
+   public FunctionSignature getSignature(final String name, final int paramCount) {
       final FunctionSignature signature = signatures.get(name);
       if(signature == null) {
-         return new FunctionSignature(name, -1);
+         return new ArgCountSignature(name, paramCount);
       }
-      return signature;
+      return signature.accept(paramCount);
    }
 
    /**
@@ -193,7 +194,7 @@ public class CatalogImpl extends Executable implements Catalog {
     */
    @Override
    public Iterable<? extends Script> scripts() {
-      return unmodifiableCollection(scripts.values());
+      return unmodifiableCollection(orderedScripts);
    }
 
    @Override

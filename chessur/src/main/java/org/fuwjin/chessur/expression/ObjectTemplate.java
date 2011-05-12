@@ -19,38 +19,16 @@ import org.fuwjin.dinah.Function;
  * An expression representing a serialized object.
  */
 public class ObjectTemplate implements Expression {
-   private static class FieldTemplate implements Expression {
-      private final Function setter;
-      private final Expression value;
-
-      public FieldTemplate(final Function setter, final Expression value) {
-         this.setter = setter;
-         this.value = value;
-      }
-
-      public Object invoke(final Object object, final Object val) throws Exception {
-         return setter.invoke(object, val);
-      }
-
-      @Override
-      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-            throws AbortedException, ResolveException {
-         return value.resolve(input, output, scope);
-      }
-
-      String name() {
-         return setter.name();
-      }
-   }
-
    private final List<FieldTemplate> setters = new ArrayList<FieldTemplate>();
    private final Function constructor;
+   private final String type;
 
    /**
     * Creates a new instance.
     * @param constructor the constructor function
     */
-   public ObjectTemplate(final Function constructor) {
+   public ObjectTemplate(final String type, final Function constructor) {
+      this.type = type;
       this.constructor = constructor;
    }
 
@@ -62,7 +40,7 @@ public class ObjectTemplate implements Expression {
       try {
          object = constructor.invoke();
       } catch(final Exception e) {
-         throw new ResolveException(e, "Could not construct object from template: %s: %s", constructor.name(), snapshot);
+         throw new ResolveException(e, "Could not construct object from template: %s: %s", type, snapshot);
       }
       for(final FieldTemplate field: setters) {
          try {
@@ -84,7 +62,11 @@ public class ObjectTemplate implements Expression {
     * @param setter the field setter
     * @param object the value
     */
-   public void set(final Function setter, final Expression object) {
-      setters.add(new FieldTemplate(setter, object));
+   public void set(final String name, final Function setter, final Expression object) {
+      setters.add(new FieldTemplate(name, setter, object));
+   }
+
+   public String type() {
+      return type;
    }
 }

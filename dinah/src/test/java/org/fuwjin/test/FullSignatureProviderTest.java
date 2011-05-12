@@ -16,8 +16,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.fuwjin.dinah.TypedArgsSignature;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testConstructor() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.new")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.new")
             .addArg("java.lang.String"));
       final Object result = function.invoke("test");
       assertThat((Sample)result, is(new Sample("test")));
@@ -55,7 +55,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testFieldAccess() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.value")
             .addArg("org.fuwjin.sample.Sample"));
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
@@ -68,7 +68,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testFieldMutator() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.value").addArg(
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.value").addArg(
             "org.fuwjin.sample.Sample").addArg("java.lang.String"));
       final Sample sample = new Sample("test");
       function.invoke(sample, "check");
@@ -81,7 +81,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testInstanceOf() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.instanceof")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.instanceof")
             .addArg("java.lang.Object"));
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
@@ -96,7 +96,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testMethod() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.getValue")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.getValue")
             .addArg("org.fuwjin.sample.Sample"));
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
@@ -109,7 +109,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testStaticFieldAccess() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue"));
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.staticValue"));
       final Object test = function.invoke();
       assertThat((String)test, is("initial"));
    }
@@ -120,7 +120,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testStaticFieldMutator() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.staticValue")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.staticValue")
             .addArg("java.lang.String"));
       function.invoke("check");
       assertThat(Sample.staticValue, is("check"));
@@ -132,7 +132,7 @@ public class FullSignatureProviderTest {
     */
    @Test
    public void testStaticMethod() throws Exception {
-      final Function function = provider.getFunction(new FunctionSignature("org.fuwjin.sample.Sample.doStatic")
+      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.Sample.doStatic")
             .addArg("java.lang.String"));
       final Object test = function.invoke("test");
       assertThat((String)test, is("initial:test"));

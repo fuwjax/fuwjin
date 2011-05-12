@@ -27,6 +27,9 @@ alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
+alias org.fuwjin.chessur.expression.Number as Number
 alias org.fuwjin.chessur.Script as Script
 alias org.fuwjin.chessur.expression.ScriptImpl as ScriptImpl
 alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
@@ -99,6 +102,8 @@ alias java.util.Map$Entry.getValue as value
   or <DynamicLiteral>
   or <AcceptStatement>
   or <Invocation>
+  or <Object>
+  or <Number>
   or <Variable>
 }
 <Statement>{
@@ -343,7 +348,31 @@ alias java.util.Map$Entry.getValue as value
     <Value>
   }
 }
-
+<Object> {
+  is ObjectTemplate.instanceof(value)
+  name = ObjectTemplate.type(value)
+  alias = Catalog.encode(cat, name)
+  publish "('alias')"
+  Indent.increase(indent) 
+  setters = iterator(ObjectTemplate.setters(value))
+  delim = '{'
+  repeat {
+    publish delim
+    delim = ','
+    setter = getNext(setters)
+    name = FieldTemplate.name(setter)
+    publish "'indent''name': "
+    value = FieldTemplate.value(setter)
+    <Value>
+  }
+  is not hasNext(setters)
+  Indent.decrease(indent) 
+  publish "'indent'}"
+}
+<Number>{
+  is Number.instanceof(value)
+  publish Number.toString(value)
+}
 <Variable>{
   is Variable.instanceof(value)
   publish Variable.name(value)

@@ -35,7 +35,8 @@ alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.chessur.expression.Number as Number
 alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
-alias org.fuwjin.dinah.FunctionSignature as FunctionSignature
+alias org.fuwjin.dinah.TypedArgsSignature as TypedArgsSignature
+alias org.fuwjin.dinah.ArgCountSignature as ArgCountSignature
 alias org.fuwjin.dinah.Function as Function
 
 # Parses a Grin stream and returns the corresponding Catalog Object Model.
@@ -89,12 +90,12 @@ alias org.fuwjin.dinah.Function as Function
     or abort "alias-as keywords require a name"
   } or {
     accept '(' <S>
-    signature = FunctionSignature.new(qname, -1)
+    signature = TypedArgsSignature.new(qname)
     could {
-      FunctionSignature.addArg(signature, <QualifiedName>)
+      TypedArgsSignature.addArg(signature, <QualifiedName>)
       could repeat {
         accept ',' <S>
-        FunctionSignature.addArg(signature, <QualifiedName>)
+        TypedArgsSignature.addArg(signature, <QualifiedName>)
       }      
     }
     accept ')' <S>
@@ -255,7 +256,6 @@ alias org.fuwjin.dinah.Function as Function
 }
 <Invocation>{
   name = <AliasName>
-  signature = Catalog.getSignature(cat, name)
   accept '(' <S>
   inv = Invocation.new()
   could{
@@ -270,10 +270,10 @@ alias org.fuwjin.dinah.Function as Function
   or abort "invocation must end with a parenthesis" 
   <S>
   either{
-    FunctionSignature.setArgCount(signature, Invocation.paramCount(inv))
+    signature = Catalog.getSignature(cat, name, Invocation.paramCount(inv))
     function = FunctionProvider.getFunction(postage, signature)
     Invocation.setFunction(inv, function)
-  } or abort "Could not get function for 'signature'"
+  } or abort "Could not get function for 'name'"
   return inv
 }
 <Script>{
@@ -314,8 +314,8 @@ alias org.fuwjin.dinah.Function as Function
 <Object>{
   accept '(' <S>
   type = <AliasName>
-  constructor = FunctionProvider.getFunction(postage,FunctionSignature.new("'type'.new",0))
-  object = ObjectTemplate.new(constructor)
+  constructor = FunctionProvider.getFunction(postage,ArgCountSignature.new("'type'.new",0))
+  object = ObjectTemplate.new(type, constructor)
   accept ')' <S>
   accept '{' <S>
   could {
@@ -330,9 +330,9 @@ alias org.fuwjin.dinah.Function as Function
 }
 <Field>{
   name = <Name>
-  setter = FunctionProvider.getFunction(postage, FunctionSignature.new("'type'.'name'",2))
+  setter = FunctionProvider.getFunction(postage, ArgCountSignature.new("'type'.'name'",2))
   accept ':' <S>
-  ObjectTemplate.set(object, setter, <Value>)
+  ObjectTemplate.set(object, name, setter, <Value>)
 }
 <MatchValue>{
   accept 'match' <Sep>

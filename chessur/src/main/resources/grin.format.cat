@@ -181,6 +181,7 @@ alias org.fuwjin.util.Indent as Indent
   or abort "assignment to 'name' requires a value"
 }
 <Invocation>{
+  is not accept 'return'
   name = <QualifiedName>
   accept '(' <S>
   publish "'name'("
@@ -251,7 +252,8 @@ alias org.fuwjin.util.Indent as Indent
   either accept '}'
   or abort "object data must end with a brace"
   <S>
-  publish "\n}"
+  Indent.decrease(indent)
+  publish "'indent'}"
 }
 <Field>{
   name = <Name>

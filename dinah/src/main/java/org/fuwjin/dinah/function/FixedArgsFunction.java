@@ -17,7 +17,6 @@ import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.util.Adapter;
 import org.fuwjin.util.Adapter.AdaptException;
-import org.fuwjin.util.TypeUtils;
 
 /**
  * Base class for methods, constructors and anything else with a fixed number of
@@ -54,15 +53,10 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
 
    @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
-      if(signature.argCount() != argCount()) {
-         return AbstractFunction.NULL;
+      if(signature.matchesFixed(argTypes())) {
+         return this;
       }
-      for(int i = 0; i < argCount(); ++i) {
-         if(!TypeUtils.isAssignableFrom(argType(i), signature.argType(i))) {
-            return AbstractFunction.NULL;
-         }
-      }
-      return this;
+      return AbstractFunction.NULL;
    }
 
    @Override

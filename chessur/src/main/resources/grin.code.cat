@@ -13,6 +13,7 @@ alias java.lang.Boolean as Boolean
 alias java.lang.Character as Character
 alias java.lang.Object as Object
 alias java.util.ArrayList as ArrayList
+alias java.util.Collections as Collections
 alias java.util.concurrent.atomic.AtomicInteger as AtomicInteger
 alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
@@ -37,6 +38,9 @@ alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
 alias org.fuwjin.chessur.expression.ScriptProxy as ScriptProxy
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
+alias org.fuwjin.chessur.expression.Number as Number
 alias org.fuwjin.util.CodePointSet$Range as Range
 alias org.fuwjin.util.StringUtils as StringUtils
 alias org.fuwjin.util.Indent as Indent
@@ -381,6 +385,8 @@ public class 'moduleName'Interpreter {
   or result = <AcceptValue>
   or result = <NextValue>
   or result = <MatchValue>
+  or <Object> >> result
+  or result = <Number>
   or result = <Invocation>
   or result = <Variable>
   return result
@@ -617,6 +623,53 @@ public class 'moduleName'Interpreter {
   function = Invocation.function(statement)
   params = iterator(Invocation.params(statement))
   return <RenderFunction>
+}
+<Number>{
+  is Number.instanceof(value)
+  return Number.value(value)
+}
+<Object>{
+  is ObjectTemplate.instanceof(value)
+  publish "new Object() {"
+  Indent.increase(indent)
+  publish "'indent'public Object value() {"
+  Indent.increase(indent)
+  function = ObjectTemplate.constructor(value)
+  constructor = ConstructorFunction.member(function)
+  type = Constructor.getDeclaringClass(constructor)
+  publish "'indent''<Type>' value = "
+  params = iterator(Collections.emptySet())
+  <Constructor>
+  publish ";"
+  setters = iterator(ObjectTemplate.setters(value))
+  could repeat{
+    field = getNext(setters)
+    function = FieldTemplate.setter(field)
+    value = FieldTemplate.value(field)
+    either <MemberFieldMutator>
+    or <MemberMethod>
+    or <VarArgs>
+  }
+  is not hasNext(setters)
+  publish "'indent'return value;"
+  Indent.decrease(indent)
+  publish "'indent'}"
+  Indent.decrease(indent)
+  publish "'indent'}.value()"
+}
+<MemberFieldMutator>{
+  is FieldMutatorFunction.instanceof(function)
+  field = FieldMutatorFunction.member(function)
+  type = Field.getType(field)
+  publish "'indent'value.'Field.getName(field)' = ('<Type>')'<Value>';"
+}
+<MemberMethod> {
+  is MethodFunction.instanceof(function)
+  method = MethodFunction.member(function)
+  types = iterator(asList(Method.getParameterTypes(method)))
+  type = getNext(types)
+  is not hasNext(types)
+  publish "'indent'value.'Method.getName(method)'(('<Type>')'<Value>');"
 }
 <RenderFunction>{
   either <Constructor> >> render
