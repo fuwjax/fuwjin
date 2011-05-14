@@ -2,13 +2,16 @@ package org.fuwjin.test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.dinah.TypedArgsSignature;
+import org.fuwjin.dinah.function.MethodFunction;
 import org.fuwjin.sample.SameName;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -24,6 +27,14 @@ public class ConflictTest {
    public void setup() {
       provider = new ReflectiveFunctionProvider();
       Sample.staticValue = "initial";
+   }
+
+   @Test
+   @Ignore
+   public void testAppendOverlap() throws Exception {
+      final Function function = provider.getFunction(new TypedArgsSignature("java.lang.StringBuilder.append").addArg(
+            "java.lang.StringBuilder").addArg("java.lang.Object"));
+      assertTrue(function.getClass().getCanonicalName(), function instanceof MethodFunction);
    }
 
    /**

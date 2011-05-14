@@ -308,9 +308,11 @@ alias java.util.Map$Entry.getValue as value
       }
       is not hasNext(chars)
     }or{
-      publish "\'"
-      <Value>
-      publish "\'"
+      is Variable.instanceof(value)
+      name = Variable.name(value)
+      publish "\''name'\'"
+    }or{
+      <Script>
     }
   }
   is not hasNext(values)

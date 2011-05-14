@@ -35,10 +35,14 @@ public class StreamUtils {
     */
    public static InputStream inputStream(final String path) throws FileNotFoundException {
       InputStream stream = ClassLoader.getSystemResourceAsStream(path);
-      if(stream == null) {
-         stream = new FileInputStream(path);
+      if(stream != null) {
+         return stream;
       }
-      return stream;
+      stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+      if(stream != null) {
+         return stream;
+      }
+      return new FileInputStream(path);
    }
 
    /**

@@ -72,6 +72,27 @@ public class ChessurDemo {
    }
 
    /**
+    * Demo source code for the grin code generator.
+    * @throws Exception if it fails
+    */
+   @Test
+   public void demoGrinCodeCode() throws Exception {
+      new File("target/generated/org/fuwjin/chessur/generated").mkdirs();
+      final Catalog serial = manager.loadCat("grin.code.cat");
+      final Map<String, Object> environment = new HashMap<String, Object>();
+      environment.put("cat", serial);
+      environment.put("package", "org.fuwjin.chessur.generated");
+      environment.put("className", "ChessurCodeGen");
+      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurCodeGenInterpreter.java",
+            "UTF-8");
+      try {
+         serial.exec(writer, environment);
+      } finally {
+         writer.close();
+      }
+   }
+
+   /**
     * Demo serializing the grin grammar.
     * @throws Exception if it fails
     */
