@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Demonstrates
+ * Demonstrates Grin Script execution.
  */
 @RunWith(Parameterized.class)
 public class ScriptExecutionDemo {

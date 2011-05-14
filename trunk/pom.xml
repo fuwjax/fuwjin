@@ -1,9 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2010 Michael Doberenz. All rights reserved. This program 
 	and the accompanying materials are made available under the terms of the 
 	Eclipse Public License v1.0 which accompanies this distribution, and is available 
 	at http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz 
 	- initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -23,6 +25,7 @@
 	<modules>
 		<module>chessur</module>
 		<module>dinah</module>
+		<module>chessur-maven-plugin</module>
 	</modules>
 	<url>http://fuwjin.googlecode.com</url>
 	<scm>
@@ -86,6 +89,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>2.0</version>
+			</dependency>
+			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.8.2</version>
@@ -124,7 +132,7 @@
 				<configuration>
 					<includes>
 						<include>**/*Test.java</include>
-                        <include>**/*Demo.java</include>
+						<include>**/*Demo.java</include>
 						<include>**/When*.java</include>
 					</includes>
 				</configuration>
