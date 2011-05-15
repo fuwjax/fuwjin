@@ -1,0 +1,4 @@
+<Root> {
+  is not accept next
+  return 'yes'
+}
