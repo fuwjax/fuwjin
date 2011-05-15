@@ -415,19 +415,20 @@ public class 'moduleName'Interpreter {
   publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
   either {
     is IsStatement.isNot(statement)
-    publish "'indent'boolean b = true;"
+    bIndex = AtomicInteger.incrementAndGet(varIndex)
+    publish "'indent'boolean b'bIndex' = true;"
     publish "'indent'try {"
     Indent.increase(indent)
     publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"
-    publish "'indent'  b = false;"
+    publish "'indent'  b'bIndex' = false;"
     publish "'indent'}"
     Indent.decrease(indent)
     exIndex = AtomicInteger.incrementAndGet(varIndex)
     exception = "e'exIndex'"
     publish "'indent'} catch(final 'className'Exception 'exception') {"
-    publish "'indent'  b = false;"
+    publish "'indent'  b'bIndex' = false;"
     publish "'indent'}"
-    publish "'indent'if(b){"
+    publish "'indent'if(b'bIndex'){"
     publish "'indent'  throw 'oldInput'.ex(\"unexpected value\");"
     publish "'indent'}"
   } or {
