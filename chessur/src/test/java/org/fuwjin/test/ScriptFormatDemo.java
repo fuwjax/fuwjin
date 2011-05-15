@@ -60,9 +60,9 @@ public class ScriptFormatDemo {
    @BeforeClass
    public static void setUp() throws Exception {
       manager = new CatalogManager();
-      catParser = manager.loadCat("grin.parse.cat");
-      catFormatter = manager.loadCat("grin.format.cat");
-      catSerializer = manager.loadCat("grin.serial.cat");
+      catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      catFormatter = manager.loadCat("org/fuwjin/chessur/generated/GrinFormatter.cat");
+      catSerializer = manager.loadCat("org/fuwjin/chessur/generated/GrinSerializer.cat");
    }
 
    private final File path;

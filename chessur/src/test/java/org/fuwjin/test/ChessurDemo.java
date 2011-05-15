@@ -45,8 +45,9 @@ public class ChessurDemo {
     */
    @Test
    public void demoGrin() throws Exception {
-      final Catalog parser = manager.loadCat("grin.parse.cat");
-      final Catalog grin = (Catalog)parser.exec(reader("grin.parse.cat", "UTF-8"), System.out, env);
+      final Catalog parser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      final Catalog grin = (Catalog)parser.exec(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"),
+            System.out, env);
       assertNotNull(grin.get("EndOfFile"));
    }
 
@@ -57,8 +58,9 @@ public class ChessurDemo {
    @Test
    public void demoGrinCode() throws Exception {
       new File("target/generated/org/fuwjin/chessur/generated").mkdirs();
-      final Catalog cat = manager.loadCat("grin.parse.cat");
-      final Catalog serial = (Catalog)cat.exec(reader("grin.code.cat", "UTF-8"), System.out, env);
+      final Catalog cat = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      final Catalog serial = (Catalog)cat.exec(reader("org/fuwjin/chessur/generated/GrinCodeGenerator.cat", "UTF-8"),
+            System.out, env);
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
       environment.put("package", "org.fuwjin.chessur.generated");
@@ -78,7 +80,7 @@ public class ChessurDemo {
    @Test
    public void demoGrinCodeCode() throws Exception {
       new File("target/generated/org/fuwjin/chessur/generated").mkdirs();
-      final Catalog serial = manager.loadCat("grin.code.cat");
+      final Catalog serial = manager.loadCat("org/fuwjin/chessur/generated/GrinCodeGenerator.cat");
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", serial);
       environment.put("package", "org.fuwjin.chessur.generated");
@@ -99,8 +101,9 @@ public class ChessurDemo {
    @Test
    public void demoGrinSerial() throws Exception {
       new File("target/generated").mkdirs();
-      final Catalog cat = manager.loadCat("grin.parse.cat");
-      final Catalog serial = (Catalog)cat.exec(reader("grin.serial.cat", "UTF-8"), System.out, env);
+      final Catalog cat = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      final Catalog serial = (Catalog)cat.exec(reader("org/fuwjin/chessur/generated/GrinSerializer.cat", "UTF-8"),
+            System.out, env);
       final Writer writer = writer("target/generated/grin.parse.test.cat", "UTF-8");
       try {
          serial.exec(writer, singletonMap("cat", cat));

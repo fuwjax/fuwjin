@@ -113,8 +113,8 @@ public class ScriptExecutionDemo {
    @BeforeClass
    public static void setUp() throws Exception {
       manager = new CatalogManager();
-      catCodeGenerator = manager.loadCat("grin.code.cat");
-      catParser = manager.loadCat("grin.parse.cat");
+      catCodeGenerator = manager.loadCat("org/fuwjin/chessur/generated/GrinCodeGenerator.cat");
+      catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
       loader = new RuntimeClassLoader();
    }
 

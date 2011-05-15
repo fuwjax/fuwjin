@@ -41,4 +41,12 @@ public class ScriptPipe implements Expression {
       final SourceStream in = CodePointInStream.streamOf(out.toString());
       return sink.resolve(in, output, scope);
    }
+
+   public Expression sink() {
+      return sink;
+   }
+
+   public Expression source() {
+      return source;
+   }
 }

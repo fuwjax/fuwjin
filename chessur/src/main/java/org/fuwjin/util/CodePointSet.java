@@ -68,6 +68,18 @@ public class CodePointSet {
          };
       }
 
+      public int end() {
+         return end;
+      }
+
+      public boolean isRange() {
+         return isRange;
+      }
+
+      public int start() {
+         return start;
+      }
+
       @Override
       public String toString() {
          return new String(Character.toChars(start)) + "-" + new String(Character.toChars(end));

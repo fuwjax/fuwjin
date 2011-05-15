@@ -53,6 +53,10 @@ public class IsStatement implements Expression {
       this.value = value;
    }
 
+   public boolean isNot() {
+      return isNot;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws ResolveException, AbortedException {
@@ -79,5 +83,9 @@ public class IsStatement implements Expression {
    @Override
    public String toString() {
       return "is " + (isNot ? "not " : "") + value;
+   }
+
+   public Expression value() {
+      return value;
    }
 }

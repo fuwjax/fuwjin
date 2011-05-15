@@ -33,6 +33,10 @@ public class Assignment implements Expression {
       this.value = value;
    }
 
+   public String name() {
+      return name;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
@@ -49,5 +53,9 @@ public class Assignment implements Expression {
    @Override
    public String toString() {
       return name + " = " + value;
+   }
+
+   public Expression value() {
+      return value;
    }
 }

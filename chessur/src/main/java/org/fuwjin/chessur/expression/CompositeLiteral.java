@@ -91,6 +91,10 @@ public class CompositeLiteral implements Expression {
       return builder.append("\"").toString();
    }
 
+   public Iterable<Expression> values() {
+      return values;
+   }
+
    protected Expression last() {
       return values.size() == 0 ? null : values.get(values.size() - 1);
    }

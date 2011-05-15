@@ -68,6 +68,10 @@ public class ObjectTemplate implements Expression {
       setters.add(new FieldTemplate(name, setter, object));
    }
 
+   public Iterable<FieldTemplate> setters() {
+      return setters;
+   }
+
    /**
     * Returns the type.
     * @return the type

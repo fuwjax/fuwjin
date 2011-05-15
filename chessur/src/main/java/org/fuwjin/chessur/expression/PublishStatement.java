@@ -41,4 +41,8 @@ public class PublishStatement implements Expression {
    public String toString() {
       return "publish " + value;
    }
+
+   public Expression value() {
+      return value;
+   }
 }
