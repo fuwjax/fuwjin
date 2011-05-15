@@ -45,4 +45,8 @@ public class AbortStatement implements Expression {
    public String toString() {
       return "abort " + value;
    }
+
+   public Expression value() {
+      return value;
+   }
 }

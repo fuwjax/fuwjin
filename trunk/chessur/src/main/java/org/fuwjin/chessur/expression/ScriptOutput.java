@@ -32,6 +32,10 @@ public class ScriptOutput implements Expression {
       this.name = name;
    }
 
+   public String name() {
+      return name;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
@@ -39,5 +43,9 @@ public class ScriptOutput implements Expression {
       final Object result = spec.resolve(input, out, scope);
       scope.assign(name, out.toString());
       return result;
+   }
+
+   public Expression spec() {
+      return spec;
    }
 }

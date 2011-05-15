@@ -39,4 +39,12 @@ public class ScriptInput implements Expression {
       final SourceStream in = CodePointInStream.streamOf(String.valueOf(val));
       return spec.resolve(in, output, scope);
    }
+
+   public Expression spec() {
+      return spec;
+   }
+
+   public Expression value() {
+      return value;
+   }
 }

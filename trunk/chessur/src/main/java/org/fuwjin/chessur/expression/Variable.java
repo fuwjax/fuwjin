@@ -51,6 +51,10 @@ public class Variable implements Expression {
       this.name = name;
    }
 
+   public String name() {
+      return name;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {

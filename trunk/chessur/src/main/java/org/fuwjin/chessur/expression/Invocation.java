@@ -51,6 +51,10 @@ public class Invocation implements Expression {
       return params.size();
    }
 
+   public Iterable<Expression> params() {
+      return params;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws ResolveException, AbortedException {

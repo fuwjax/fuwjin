@@ -47,6 +47,10 @@ public class RepeatStatement implements Expression {
       return Adapter.unset();
    }
 
+   public Expression statement() {
+      return statement;
+   }
+
    @Override
    public String toString() {
       return "repeat " + statement;

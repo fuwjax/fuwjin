@@ -32,6 +32,10 @@ public class FilterAcceptStatement implements Expression {
       this.filter = filter;
    }
 
+   public Filter filter() {
+      return filter;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws ResolveException {

@@ -41,6 +41,10 @@ public class CouldStatement implements Expression {
       }
    }
 
+   public Expression statement() {
+      return statement;
+   }
+
    @Override
    public String toString() {
       return "could " + statement;
