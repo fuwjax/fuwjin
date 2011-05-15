@@ -1,0 +1,14 @@
+load grin.parse.cat as Parse
+load grin.code.cat as Gen
+alias org.fuwjin.dinah.ReflectiveFunctionProvider as FunctionProvider
+alias java.io.File as File
+alias org.fuwjin.chessur.CatalogManager as CatalogManager
+alias java.lang.String as String
+
+<Compile> {
+  postage = FunctionProvider.new()
+  manager = CatalogManager.new()
+  cat = <Parse:Catalog>
+  className = name
+  <Gen:Catalog>
+}
