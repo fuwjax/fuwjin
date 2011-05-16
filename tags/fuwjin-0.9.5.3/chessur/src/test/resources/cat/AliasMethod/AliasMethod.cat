@@ -1,0 +1,1 @@
+alias java.lang.String.toUpperCase as upper <Root>{return upper('value')}
