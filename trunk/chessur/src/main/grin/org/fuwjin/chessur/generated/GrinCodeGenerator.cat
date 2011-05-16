@@ -628,7 +628,7 @@ public class 'moduleName'Interpreter {
 }
 <Number>{
   is Number.instanceof(value)
-  return Number.value(value)
+  return Number.toString(value)
 }
 <Object>{
   is ObjectTemplate.instanceof(value)

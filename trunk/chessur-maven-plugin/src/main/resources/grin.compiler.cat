@@ -1,3 +1,5 @@
+#load org/fuwjin/chessur/generated/GrinParser.cat as Parse
+#load org/fuwjin/chessur/generated/GrinCodeGenerator.cat as Gen
 load grin.parse.cat as Parse
 load grin.code.cat as Gen
 alias org.fuwjin.dinah.ReflectiveFunctionProvider as FunctionProvider

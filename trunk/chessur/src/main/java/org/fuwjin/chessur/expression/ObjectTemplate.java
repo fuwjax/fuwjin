@@ -33,6 +33,10 @@ public class ObjectTemplate implements Expression {
       this.constructor = constructor;
    }
 
+   public Function constructor() {
+      return constructor;
+   }
+
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws ResolveException, AbortedException {

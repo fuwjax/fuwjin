@@ -46,6 +46,10 @@ public class FieldTemplate implements Expression {
       return value.resolve(input, output, scope);
    }
 
+   public Function setter() {
+      return setter;
+   }
+
    public Expression value() {
       return value;
    }
