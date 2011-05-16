@@ -21,7 +21,7 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
-import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
+import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.ArgCountSignature;
 import org.fuwjin.dinah.FunctionSignature;
 
@@ -161,10 +161,10 @@ public class CatalogImpl extends Executable implements Catalog {
     * Loads a catalog.
     * @param path the path to the catalog
     * @param name the name of the catalog
-    * @throws ChessurException if the catalog cannot be loaded
+    * @throws GrinParserException if the catalog cannot be loaded
     * @throws IOException if the path does not refer to a file
     */
-   public void load(final String path, final String name) throws ChessurException, IOException {
+   public void load(final String path, final String name) throws GrinParserException, IOException {
       modules.put(name, new CatalogProxy(name, manager.loadCat(path)));
    }
 

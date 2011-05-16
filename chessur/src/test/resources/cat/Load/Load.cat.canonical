@@ -1,5 +1,0 @@
-load cat/Load/include.cat as I
-
-<Root> {
-  <I:Root>
-}

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,6 +17,7 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
+import org.fuwjin.util.UserFiles;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.StreamUtils;
 import org.junit.BeforeClass;
@@ -40,14 +40,9 @@ public class ScriptFormatDemo {
     */
    @Parameters
    public static Collection<Object[]> parameters() {
-      final File catPath = new File("src/test/resources/cat");
+      final File catPath = new File("src/test/demo");
       final List<Object[]> list = new ArrayList<Object[]>();
-      for(final File file: catPath.listFiles(new FilenameFilter() {
-         @Override
-         public boolean accept(final File dir, final String name) {
-            return !name.startsWith(".");
-         }
-      })) {
+      for(final File file: catPath.listFiles(new UserFiles())) {
          list.add(new Object[]{file.getName(), file});
       }
       return list;
@@ -84,7 +79,7 @@ public class ScriptFormatDemo {
    public void testFormatting() throws Exception {
       final Writer formatterOutput = new StringWriter();
       catFormatter.exec(newReader(".cat"), formatterOutput);
-      assertEquals(formatterOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
+      assertEquals(formatterOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
    /**
@@ -97,7 +92,7 @@ public class ScriptFormatDemo {
       final Catalog cat = manager.loadCat(file(".cat"));
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
-      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
+      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
    /**
@@ -113,7 +108,7 @@ public class ScriptFormatDemo {
       final Catalog cat = (Catalog)catParser.exec(newReader(".cat"), env);
       final Writer serialOutput = new StringWriter();
       catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
-      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".cat.canonical")));
+      assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
    private File file(final String suffix) {
