@@ -8,11 +8,11 @@
 	<parent>
 		<artifactId>fuwjin</artifactId>
 		<groupId>org.fuwjin</groupId>
-		<version>0.9.5.3-SNAPSHOT</version>
+		<version>0.9.5.3</version>
 	</parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>chessur</artifactId>
-	<version>0.9.5.3-SNAPSHOT</version>
+	<version>0.9.5.3</version>
 	<name>Chessur</name>
 	<description>Chessur is a Java implementation of Grin, a scripting language</description>
 	<dependencies>
@@ -23,7 +23,7 @@
 		<dependency>
 			<groupId>org.fuwjin</groupId>
 			<artifactId>dinah</artifactId>
-			<version>0.9.5.3-SNAPSHOT</version>
+			<version>0.9.5.3</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -36,7 +36,7 @@
 			<plugin>
 				<groupId>org.fuwjin</groupId>
 				<artifactId>chessur-maven-plugin</artifactId>
-				<version>0.9.5.3-SNAPSHOT</version>
+				<version>0.9.5.3</version>
 				<executions>
 					<execution>
 						<goals>
