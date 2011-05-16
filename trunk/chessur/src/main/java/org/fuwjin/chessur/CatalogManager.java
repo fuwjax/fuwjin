@@ -1,6 +1,6 @@
 package org.fuwjin.chessur;
 
-import static org.fuwjin.chessur.generated.ChessurInterpreter.interpret;
+import static org.fuwjin.chessur.generated.GrinParser.interpret;
 import static org.fuwjin.util.StreamUtils.inputStream;
 import static org.fuwjin.util.StreamUtils.readAll;
 import static org.fuwjin.util.StreamUtils.reader;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
+import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 
@@ -45,7 +45,7 @@ public class CatalogManager {
     * @throws ChessurException if it fails
     * @throws IOException
     */
-   public Catalog loadCat(final File file) throws ChessurException, IOException {
+   public Catalog loadCat(final File file) throws GrinParserException, IOException {
       return loadCat(file.getAbsolutePath(), new FileReader(file));
    }
 
@@ -56,11 +56,11 @@ public class CatalogManager {
     * @throws ChessurException if it fails
     * @throws IOException
     */
-   public Catalog loadCat(final String path) throws ChessurException, IOException {
+   public Catalog loadCat(final String path) throws GrinParserException, IOException {
       return loadCat(path, reader(inputStream(path), "UTF-8"));
    }
 
-   protected Catalog loadCat(final String name, final Reader reader) throws IOException, ChessurException {
+   protected Catalog loadCat(final String name, final Reader reader) throws IOException, GrinParserException {
       Catalog cat = catalogs.get(name);
       if(cat == null) {
          final Map<String, Object> map = new HashMap<String, Object>();

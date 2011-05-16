@@ -15,9 +15,9 @@ import java.util.concurrent.ExecutionException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
 
 /**
  * Goal which runs a Grin Catalog against every file in a fileset.
@@ -59,9 +59,15 @@ public class ChessurExecuteMojo extends AbstractMojo {
    /**
     * Extension of destination files.
     * @parameter expression="${chessur.build.outputExtension}"
-    *            default-value="Interpreter.java"
+    *            default-value=".java"
     */
    private String outputExtension;
+   /**
+    * @parameter expression="${project}"
+    * @required
+    * @readonly
+    */
+   private MavenProject project;
 
    public ChessurExecuteMojo() {
       // normal constructor
@@ -80,12 +86,15 @@ public class ChessurExecuteMojo extends AbstractMojo {
    public void execute() throws MojoExecutionException, MojoFailureException {
       try {
          getLog().info("Transforming " + sourceDirectory + " to " + outputDirectory);
-         final CatalogManager manager = new BetterCatalogManager();
+         final CatalogManager manager = new CatalogManager();
          final Catalog cat = manager.loadCat(catFile);
          transform(cat, sourceDirectory, null);
+         if(project != null) {
+            project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
+         }
       } catch(final IOException e) {
          throw new MojoExecutionException("Error loading catalog " + catFile, e);
-      } catch(final ChessurException e) {
+      } catch(final Exception e) {
          throw new MojoExecutionException("Syntax error in " + catFile, e);
       }
    }

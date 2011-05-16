@@ -65,7 +65,7 @@ public class ChessurDemo {
       environment.put("cat", cat);
       environment.put("package", "org.fuwjin.chessur.generated");
       environment.put("className", "Chessur");
-      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurInterpreter.java", "UTF-8");
+      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/Chessur.java", "UTF-8");
       try {
          serial.exec(writer, environment);
       } finally {
@@ -85,8 +85,7 @@ public class ChessurDemo {
       environment.put("cat", serial);
       environment.put("package", "org.fuwjin.chessur.generated");
       environment.put("className", "ChessurCodeGen");
-      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurCodeGenInterpreter.java",
-            "UTF-8");
+      final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurCodeGen.java", "UTF-8");
       try {
          serial.exec(writer, environment);
       } finally {

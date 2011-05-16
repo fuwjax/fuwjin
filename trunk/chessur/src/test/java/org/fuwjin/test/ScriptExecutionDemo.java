@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -24,12 +23,13 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
-import org.fuwjin.chessur.generated.ChessurInterpreter.ChessurException;
+import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
 import org.fuwjin.util.StreamUtils;
+import org.fuwjin.util.UserFiles;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
@@ -84,23 +84,14 @@ public class ScriptExecutionDemo {
     */
    @Parameters
    public static Collection<Object[]> parameters() {
-      final File catPath = new File("src/test/resources/cat");
+      final File catPath = new File("src/test/demo");
       final List<Object[]> list = new ArrayList<Object[]>();
-      for(final File file: catPath.listFiles(new FilenameFilter() {
-         @Override
-         public boolean accept(final File dir, final String name) {
-            return !name.startsWith(".");
-         }
-      })) {
-         for(int index = 1; index < Integer.MAX_VALUE; index++) {
-            final File in = new File(file, file.getName() + ".cat.input." + index);
-            final File out = new File(file, file.getName() + ".cat.output." + index);
-            final File err = new File(file, file.getName() + ".cat.error." + index);
-            final File match = new File(file, file.getName() + ".cat.matcher." + index);
-            if(!in.canRead() && !out.canRead() && !err.canRead() && !match.canRead()) {
-               break;
+      for(final File file: catPath.listFiles(new UserFiles())) {
+         for(final File caseFolder: file.listFiles(new UserFiles())) {
+            if(caseFolder.isDirectory()) {
+               list.add(new Object[]{file.getName() + " case " + caseFolder.getName(), file, caseFolder,
+                     new TestData(file)});
             }
-            list.add(new Object[]{file.getName() + " case " + index, file, index, new TestData(file)});
          }
       }
       return list;
@@ -126,7 +117,7 @@ public class ScriptExecutionDemo {
       return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
    }
 
-   static Catalog loadCatalog(final File file) throws ChessurException, IOException {
+   static Catalog loadCatalog(final File file) throws GrinParserException, IOException {
       return manager.loadCat(new File(file, file.getName() + ".cat"));
    }
 
@@ -143,7 +134,7 @@ public class ScriptExecutionDemo {
       for(final CatalogProxy module: ((CatalogImpl)cat).modules()) {
          addSource(sources, module.name(), module.catalog(), mainName);
       }
-      final String className = "org.fuwjin.internal.generated." + simpleName + "Interpreter";
+      final String className = "org.fuwjin.internal.generated." + simpleName;
       final Writer code = new StringWriter();
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
@@ -180,8 +171,7 @@ public class ScriptExecutionDemo {
       return CoreMatchers.nullValue();
    }
 
-   private final File file;
-   private final int index;
+   private final File caseFolder;
    private final TestData data;
 
    /**
@@ -191,9 +181,8 @@ public class ScriptExecutionDemo {
     * @param index the test case
     * @param data the test catalogs
     */
-   public ScriptExecutionDemo(final String name, final File file, final int index, final TestData data) {
-      this.file = file;
-      this.index = index;
+   public ScriptExecutionDemo(final String name, final File file, final File caseFolder, final TestData data) {
+      this.caseFolder = caseFolder;
       this.data = data;
    }
 
@@ -205,12 +194,12 @@ public class ScriptExecutionDemo {
    public void testCodeGeneration() throws Exception {
       try {
          final StringBuilder codeOutput = new StringBuilder();
-         final Object codeResult = data.interpreter().invoke(null, StreamUtils.readAll(newReader(".cat.input")),
+         final Object codeResult = data.interpreter().invoke(null, StreamUtils.readAll(newReader("input.txt")),
                codeOutput, environment());
-         assertEquals(codeOutput.toString(), StreamUtils.readAll(newReader(".cat.output")));
-         assertThat(codeResult, is(matcher(file(".cat.matcher"))));
+         assertEquals(codeOutput.toString(), StreamUtils.readAll(newReader("output.txt")));
+         assertThat(codeResult, is(matcher(file("matcher.cat"))));
       } catch(final InvocationTargetException e) {
-         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader(".cat.error"))));
+         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader("error.txt"))));
       }
    }
 
@@ -222,11 +211,11 @@ public class ScriptExecutionDemo {
    public void testModelParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.modelCat().exec(newReader(".cat.input"), output, environment());
-         assertEquals(output.toString(), StreamUtils.readAll(newReader(".cat.output")));
-         assertThat(result, is(matcher(file(".cat.matcher"))));
+         final Object result = data.modelCat().exec(newReader("input.txt"), output, environment());
+         assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
+         assertThat(result, is(matcher(file("matcher.cat"))));
       } catch(final ExecutionException e) {
-         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader(".cat.error")));
+         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
    }
 
@@ -238,16 +227,16 @@ public class ScriptExecutionDemo {
    public void testParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.cat().exec(newReader(".cat.input"), output, environment());
-         assertEquals(output.toString(), StreamUtils.readAll(newReader(".cat.output")));
-         assertThat(result, is(matcher(file(".cat.matcher"))));
+         final Object result = data.cat().exec(newReader("input.txt"), output, environment());
+         assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
+         assertThat(result, is(matcher(file("matcher.cat"))));
       } catch(final ExecutionException e) {
-         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader(".cat.error")));
+         assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
    }
 
    private File file(final String suffix) {
-      return new File(file, file.getName() + suffix + "." + index);
+      return new File(caseFolder, suffix);
    }
 
    private Reader newReader(final String suffix) throws FileNotFoundException {

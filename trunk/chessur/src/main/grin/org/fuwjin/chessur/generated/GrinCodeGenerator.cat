@@ -9,7 +9,7 @@
 #     Michael Doberenz - initial API and implementation
 #-------------------------------------------------------------------------------
 alias java.lang.StringBuilder as StringBuilder
-alias java.lang.AbstractStringBuilder.append(java.lang.AbstractStringBuilder, java.lang.Object) as append
+alias java.lang.Appendable.append(java.lang.Appendable, java.lang.CharSequence) as append
 alias java.lang.Boolean as Boolean
 alias java.lang.Character as Character
 alias java.lang.Object as Object
@@ -126,7 +126,7 @@ package 'package';
 import java.io.IOException;
 import java.util.Map;
 
-public class 'className'Interpreter {
+public class 'className' {
   static final Object UNSET = new Object() {
     public String toString() {
       return \"UNSET\";
@@ -282,7 +282,15 @@ public class 'className'Interpreter {
     }
     
     public 'className'Exception ex(final Throwable cause) {
-      return new 'className'Exception(\"[\" + line + \",\" + column + \"]\", cause);
+      return new 'className'Exception(context(), cause);
+    }
+    
+    public void abort(final Object message) {
+      throw new RuntimeException(message + context());
+    }
+      
+    public void abort(final Object message, final Throwable cause) {
+      throw new RuntimeException(message + context(), cause);
     }
     
     private int advance() {
@@ -342,11 +350,11 @@ package 'package';
 
 import java.io.IOException;
 import java.util.Map;
-import static 'package'.'className'Interpreter.UNSET;
-import 'package'.'className'Interpreter.'className'Exception;
-import 'package'.'className'Interpreter.StringCursor;
+import static 'package'.'className'.UNSET;
+import 'package'.'className'.'className'Exception;
+import 'package'.'className'.StringCursor;
 
-public class 'moduleName'Interpreter {
+public class 'moduleName' {
 "
 }
 <ScriptDeclaration>{
@@ -578,7 +586,7 @@ public class 'moduleName'Interpreter {
 <AbortStatement>{
   is AbortStatement.instanceof(statement)
   value = AbortStatement.value(statement)
-  publish "'indent'throw new RuntimeException('<Value>' + 'input'.context()"
+  publish "'indent''input'.abort('<Value>'"
   could publish ", 'exception'"
   publish ');'
 }
@@ -894,7 +902,7 @@ public class 'moduleName'Interpreter {
       is ScriptProxy.instanceof(statement)
       module = Module.name(ScriptProxy.module(statement))
       name = Script.name(ScriptProxy.script(statement))
-      result = "'package'.'module'Interpreter.'name'('input', env)"
+      result = "'package'.'module'.'name'('input', env)"
   }
   return result
 }
