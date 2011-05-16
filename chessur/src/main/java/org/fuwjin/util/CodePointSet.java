@@ -20,9 +20,9 @@ public class CodePointSet {
     * Represents a range or a single character.
     */
    public static class Range {
-      final int start;
-      final int end;
-      final boolean isRange;
+      private final int start;
+      private final int end;
+      private final boolean isRange;
 
       /**
        * Creates a new instance.
@@ -44,11 +44,11 @@ public class CodePointSet {
             @Override
             public Iterator<Integer> iterator() {
                return new Iterator<Integer>() {
-                  private int index = start;
+                  private int index = start();
 
                   @Override
                   public boolean hasNext() {
-                     return index <= end;
+                     return index <= end();
                   }
 
                   @Override

@@ -51,6 +51,10 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
       }
    }
 
+   public final M member() {
+      return member;
+   }
+
    @Override
    public AbstractFunction restrict(final FunctionSignature signature) {
       if(signature.matchesFixed(argTypes())) {
@@ -73,9 +77,5 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
    @Override
    protected boolean isPrivate() {
       return member() == null || Modifier.isPrivate(member().getModifiers());
-   }
-
-   protected final M member() {
-      return member;
    }
 }

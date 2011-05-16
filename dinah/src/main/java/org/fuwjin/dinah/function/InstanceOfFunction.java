@@ -35,6 +35,10 @@ public class InstanceOfFunction extends FixedArgsFunction<Member> {
       return TypeUtils.isInstance(type, args[0]);
    }
 
+   public Type type() {
+      return type;
+   }
+
    @Override
    protected boolean isPrivate() {
       return false;

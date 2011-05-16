@@ -22,6 +22,10 @@ public class ScriptProxy extends Executable implements Expression {
       this.script = script;
    }
 
+   public Module module() {
+      return module;
+   }
+
    @Override
    public String name() {
       return module.name() + ":" + script.name();
@@ -31,6 +35,10 @@ public class ScriptProxy extends Executable implements Expression {
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
       return expression().resolve(input, output, scope);
+   }
+
+   public Executable script() {
+      return script;
    }
 
    @Override

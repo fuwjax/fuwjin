@@ -35,6 +35,10 @@ public class Invocation implements Expression {
       params.add(value);
    }
 
+   public Function function() {
+      return function;
+   }
+
    /**
     * Returns the function name.
     * @return the function name
