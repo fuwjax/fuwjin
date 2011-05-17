@@ -35,8 +35,8 @@ alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.chessur.expression.Number as Number
 alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
-alias org.fuwjin.dinah.TypedArgsSignature as TypedArgsSignature
-alias org.fuwjin.dinah.ArgCountSignature as ArgCountSignature
+alias org.fuwjin.dinah.signature.TypedArgsSignature as TypedArgsSignature
+alias org.fuwjin.dinah.signature.ArgCountSignature as ArgCountSignature
 alias org.fuwjin.dinah.Function as Function
 
 # Parses a Grin stream and returns the corresponding Catalog Object Model.

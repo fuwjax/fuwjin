@@ -8,7 +8,7 @@
  * Contributors:
  *     Michael Doberenz - initial API and implementation
  ******************************************************************************/
-package org.fuwjin.dinah;
+package org.fuwjin.dinah.signature;
 
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;

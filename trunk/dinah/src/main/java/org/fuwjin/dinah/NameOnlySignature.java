@@ -11,6 +11,7 @@
 package org.fuwjin.dinah;
 
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.FunctionSignature;
 
 /**
  * Abstraction over a Function's name and argument types.
@@ -55,6 +56,6 @@ public class NameOnlySignature implements FunctionSignature {
 
    @Override
    public String toString() {
-      return name;
+      return name() + "(*)";
    }
 }

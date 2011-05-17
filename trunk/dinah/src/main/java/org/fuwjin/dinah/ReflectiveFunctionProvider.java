@@ -40,7 +40,7 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
    private final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
 
    @Override
-   public Function getFunction(final FunctionSignature signature) {
+   public Function getFunction(final FunctionSignature signature) throws NoSuchFunctionException {
       AbstractFunction function = functions.get(signature.name());
       if(function == null) {
          try {
@@ -48,14 +48,18 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
             final Type type = TypeUtils.forName(typeName);
             addType(typeName, type);
          } catch(final ClassNotFoundException e) {
-            throw new IllegalArgumentException("No category found for " + signature.name(), e);
+            throw new NoSuchFunctionException(e, "No category found for %s", signature);
          }
          function = functions.get(signature.name());
          if(function == null) {
-            throw new IllegalArgumentException("No function found for " + signature.name());
+            throw new NoSuchFunctionException("No function found for %s", signature);
          }
       }
-      return function.restrict(signature);
+      function = function.restrict(signature);
+      if(AbstractFunction.NULL.equals(function)) {
+         throw new NoSuchFunctionException("No function matches arguments for %s", signature);
+      }
+      return function;
    }
 
    private boolean access(final AccessibleObject obj) {

@@ -22,8 +22,8 @@ import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
-import org.fuwjin.dinah.ArgCountSignature;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.signature.ArgCountSignature;
 
 /**
  * Manages a collection of specificatons.

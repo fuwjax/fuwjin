@@ -20,8 +20,8 @@ public interface FunctionProvider {
     * Returns the function corresponding to the signature.
     * @param signature the required function signature
     * @return the corresponding function
-    * @throws IllegalArgumentException if the signature cannot be mapped to a
+    * @throws NoSuchFunctionException if the signature cannot be mapped to a
     *         function on this provider
     */
-   Function getFunction(FunctionSignature signature);
+   Function getFunction(FunctionSignature signature) throws NoSuchFunctionException;
 }
