@@ -15,7 +15,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Allows testing for default values.
@@ -66,10 +66,10 @@ public class IsStatement implements Expression {
          try {
             result = snapshot.resolve(value, false);
          } catch(final ResolveException e) {
-            return Adapter.unset();
+            return Adapter.UNSET;
          }
          if(isDefault(result)) {
-            return Adapter.unset();
+            return Adapter.UNSET;
          }
          throw new ResolveException("unexpected value: %s", snapshot);
       }
@@ -77,7 +77,7 @@ public class IsStatement implements Expression {
       if(isDefault(result)) {
          throw new ResolveException("Unexpected default: %s", snapshot);
       }
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 
    @Override

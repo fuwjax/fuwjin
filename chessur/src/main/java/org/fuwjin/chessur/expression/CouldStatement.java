@@ -14,7 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a statement that always succeeds.
@@ -37,7 +37,7 @@ public class CouldStatement implements Expression {
       try {
          return snapshot.resolve(statement, true);
       } catch(final ResolveException e) {
-         return Adapter.unset();
+         return Adapter.UNSET;
       }
    }
 

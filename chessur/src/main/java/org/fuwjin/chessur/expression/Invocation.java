@@ -17,8 +17,8 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
-import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * 

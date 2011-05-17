@@ -10,7 +10,7 @@ package org.fuwjin.dinah.function;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 import org.fuwjin.util.ArrayUtils;
 
 /**
@@ -23,8 +23,8 @@ public class MethodFunction extends FixedArgsFunction<Method> {
     * @param method the method to invoke
     * @param type the host object type
     */
-   public MethodFunction(final String category, final Method method, final Type type) {
-      super(method, category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
+   public MethodFunction(final Adapter adapter, final String category, final Method method, final Type type) {
+      super(adapter, method, category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
    }
 
    @Override
@@ -35,7 +35,7 @@ public class MethodFunction extends FixedArgsFunction<Method> {
       System.arraycopy(args, 1, realArgs, 0, args.length - 1);
       final Object result = member().invoke(obj, realArgs);
       if(member().getReturnType().equals(void.class)) {
-         return Adapter.unset();
+         return Adapter.UNSET;
       }
       return result;
    }

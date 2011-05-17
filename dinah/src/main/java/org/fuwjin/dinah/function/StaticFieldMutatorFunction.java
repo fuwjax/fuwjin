@@ -11,7 +11,7 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Function for reflective static field mutation.
@@ -22,13 +22,13 @@ public class StaticFieldMutatorFunction extends FixedArgsFunction<Field> {
     * @param category the function category
     * @param field the field to mutate
     */
-   public StaticFieldMutatorFunction(final String category, final Field field) {
-      super(field, category + '.' + field.getName(), field.getType());
+   public StaticFieldMutatorFunction(final Adapter adapter, final String category, final Field field) {
+      super(adapter, field, category + '.' + field.getName(), field.getType());
    }
 
    @Override
    protected Object invokeSafe(final Object... args) throws IllegalArgumentException, IllegalAccessException {
       member().set(null, args[0]);
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 }

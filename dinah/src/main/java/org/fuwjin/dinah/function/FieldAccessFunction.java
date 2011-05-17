@@ -12,6 +12,7 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Function for reflective field access.
@@ -23,8 +24,8 @@ public class FieldAccessFunction extends FixedArgsFunction<Field> {
     * @param field the field instance
     * @param type the object type required to access the field
     */
-   public FieldAccessFunction(final String category, final Field field, final Type type) {
-      super(field, category + '.' + field.getName(), type);
+   public FieldAccessFunction(final Adapter adapter, final String category, final Field field, final Type type) {
+      super(adapter, field, category + '.' + field.getName(), type);
    }
 
    @Override

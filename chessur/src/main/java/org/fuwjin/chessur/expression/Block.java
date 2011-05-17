@@ -16,7 +16,7 @@ import java.util.List;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a sequence of statements.
@@ -35,11 +35,10 @@ public class Block implements Expression {
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
-      Object result = Adapter.unset();
       for(final Expression statement: statements) {
-         result = statement.resolve(input, output, scope);
+         statement.resolve(input, output, scope);
       }
-      return result;
+      return Adapter.UNSET;
    }
 
    /**

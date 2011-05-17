@@ -11,7 +11,7 @@
 package org.fuwjin.dinah;
 
 import java.lang.reflect.InvocationTargetException;
-import org.fuwjin.util.Adapter.AdaptException;
+import org.fuwjin.dinah.Adapter.AdaptException;
 
 /**
  * The reflection abstraction interface. All methods, constructors, virtual

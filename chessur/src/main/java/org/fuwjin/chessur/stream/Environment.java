@@ -2,7 +2,8 @@ package org.fuwjin.chessur.stream;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 
 /**
  * The scoped variable mapping.
@@ -19,7 +20,7 @@ public class Environment {
 
       @Override
       protected Object get(final String name) {
-         return Adapter.unset();
+         return Adapter.UNSET;
       }
    };
    private final Map<String, Object> map = new HashMap<String, Object>();
@@ -71,7 +72,7 @@ public class Environment {
          env = env.parent;
       }
       final Object value = env.get(name);
-      if(this != env && Adapter.isSet(value)) {
+      if(this != env && StandardAdapter.isSet(value)) {
          map.put(name, value);
       }
       return value;

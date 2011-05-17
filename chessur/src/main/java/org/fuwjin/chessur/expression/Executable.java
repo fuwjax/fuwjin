@@ -22,7 +22,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.ObjectOutStream;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 
 /**
  * Base utility class for all things transformative.
@@ -129,7 +129,7 @@ public abstract class Executable implements Script {
          throws ExecutionException {
       try {
          final Object value = expression().resolve(input, output, scope);
-         if(Adapter.isSet(value)) {
+         if(StandardAdapter.isSet(value)) {
             return value;
          }
          return null;

@@ -14,7 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents an assignment.
@@ -44,7 +44,7 @@ public class Assignment implements Expression {
       try {
          final Object result = value.resolve(input, output, scope);
          scope.assign(name, result);
-         return Adapter.unset();
+         return Adapter.UNSET;
       } catch(final ResolveException e) {
          throw new ResolveException(e, "could not assign to %s: %s", name, snapshot);
       }

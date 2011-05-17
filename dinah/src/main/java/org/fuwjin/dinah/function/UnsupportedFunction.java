@@ -1,9 +1,7 @@
 package org.fuwjin.dinah.function;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * An unsupported function. Designed explicitly to support
@@ -20,7 +18,7 @@ public class UnsupportedFunction extends AbstractFunction {
    }
 
    @Override
-   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+   public Object invoke(final Object... args) {
       throw new UnsupportedOperationException(name());
    }
 

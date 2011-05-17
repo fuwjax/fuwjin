@@ -9,7 +9,7 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Function for reflective field mutation.
@@ -21,13 +21,13 @@ public class FieldMutatorFunction extends FixedArgsFunction<Field> {
     * @param field the field to mutate
     * @param type the type of the host object
     */
-   public FieldMutatorFunction(final String category, final Field field, final Type type) {
-      super(field, category + '.' + field.getName(), type, field.getType());
+   public FieldMutatorFunction(final Adapter adapter, final String category, final Field field, final Type type) {
+      super(adapter, field, category + '.' + field.getName(), type, field.getType());
    }
 
    @Override
    protected Object invokeSafe(final Object... args) throws IllegalArgumentException, IllegalAccessException {
       member().set(args[0], args[1]);
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 }
