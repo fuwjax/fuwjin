@@ -47,7 +47,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
     * Location of the catalog file. May be relative to the classpath or the
     * filesystem.
     * @parameter expression="${chessur.build.catFile}"
-    *            default-value="grin.compiler.cat"
+    *            default-value="org/fuwjin/chessur/compiler/GrinCompiler.cat"
     */
    private String catFile;
    /**
