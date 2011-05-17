@@ -15,9 +15,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.NameOnlySignature;
+import org.fuwjin.dinah.NoSuchFunctionException;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
-import org.fuwjin.dinah.TypedArgsSignature;
+import org.fuwjin.dinah.signature.NameOnlySignature;
+import org.fuwjin.dinah.signature.TypedArgsSignature;
 import org.fuwjin.sample.Sample;
 import org.fuwjin.sample.VarArgsSample;
 import org.junit.Before;
@@ -71,7 +72,7 @@ public class VarArgsTest {
       try {
          provider.getFunction(new NameOnlySignature("java.lang.Class.new"));
          fail("shouldn't work");
-      } catch(final IllegalArgumentException e) {
+      } catch(final NoSuchFunctionException e) {
          // pass
       }
    }
@@ -85,7 +86,7 @@ public class VarArgsTest {
       try {
          provider.getFunction(new TypedArgsSignature("java.lang.Fuw.jax"));
          fail("shouldn't work");
-      } catch(final IllegalArgumentException e) {
+      } catch(final NoSuchFunctionException e) {
          // pass
       }
    }

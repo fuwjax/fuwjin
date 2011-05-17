@@ -109,6 +109,10 @@ public final class TypeUtils {
       return toClass(type).getInterfaces();
    }
 
+   public static String getName(final Type type) {
+      return toClass(type).getCanonicalName();
+   }
+
    /**
     * Returns the super type for the given type. Mimics Class.getSupertype.
     * @param type the type

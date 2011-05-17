@@ -142,6 +142,11 @@ public class 'className' {
     'className'Exception(final String message, final Throwable cause) {
       super(message, cause);
     }
+    
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+      return this;
+    }
   }
   
   static class StringCursor {
@@ -610,7 +615,19 @@ public class 'moduleName' {
   name = Assignment.name(statement)
   index = NameIndex.indexOf(indexer, name)
   value = Assignment.value(statement)
-  publish "'indent'env['index'] /*'name'*/= '<Value>';"
+  either {
+    is Invocation.instanceof(value)
+    statement = value
+    publish "'indent'try {"
+    Indent.increase(indent)
+    publish "'indent'env['index'] /*'name'*/= '<Invocation>';"
+    Indent.decrease(indent)
+    exIndex = AtomicInteger.incrementAndGet(varIndex)
+    exception = "e'exIndex'"
+    publish "'indent'} catch(final Exception 'exception') {"
+    publish "'indent'  throw 'input'.ex('exception');"
+    publish "'indent'}"
+  } or publish "'indent'env['index'] /*'name'*/= '<Value>';"
 }
 <InvocationStatement>{
   is Invocation.instanceof(statement)

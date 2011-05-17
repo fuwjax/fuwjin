@@ -8,7 +8,7 @@
  * Contributors:
  *     Michael Doberenz - initial API and implementation
  ******************************************************************************/
-package org.fuwjin.dinah;
+package org.fuwjin.dinah.signature;
 
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
@@ -16,54 +16,46 @@ import org.fuwjin.dinah.FunctionSignature;
 /**
  * Abstraction over a Function's name and argument types.
  */
-public class ArgCountSignature extends NameOnlySignature {
-   private final int count;
+public class NameOnlySignature implements FunctionSignature {
+   private final String name;
 
    /**
-    * Creates a new instance.
+    * Creates a new instance. The number of arguments is indeterminate without
+    * subsequent calls to addArg.
     * @param name the function name
-    * @param argCount the number of arguments
     */
-   public ArgCountSignature(final String name, final int argCount) {
-      super(name);
-      count = argCount;
+   public NameOnlySignature(final String name) {
+      this.name = name;
    }
 
    @Override
    public FunctionSignature accept(final int paramCount) {
-      if(count() != paramCount) {
-         throw new IllegalArgumentException();
-      }
-      return this;
+      return new ArgCountSignature(name, paramCount);
+   }
+
+   @Override
+   public String category() {
+      final int index = name.lastIndexOf('.');
+      return name.substring(0, index);
    }
 
    @Override
    public boolean matchesFixed(final Type... params) {
-      return params.length == count();
+      return true;
    }
 
    @Override
    public boolean matchesVarArgs(final Type... params) {
-      return params.length <= count() + 1;
+      return true;
+   }
+
+   @Override
+   public String name() {
+      return name;
    }
 
    @Override
    public String toString() {
-      final StringBuilder builder = new StringBuilder();
-      builder.append(name());
-      String delim = "(";
-      if(count() == 0) {
-         builder.append(delim);
-      } else {
-         for(int i = 0; i < count(); i++) {
-            builder.append(delim).append("?");
-            delim = ", ";
-         }
-      }
-      return builder.append(')').toString();
-   }
-
-   protected int count() {
-      return count;
+      return name() + "(*)";
    }
 }
