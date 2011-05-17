@@ -11,8 +11,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * A container for Function composition. While it is presumed that all functions

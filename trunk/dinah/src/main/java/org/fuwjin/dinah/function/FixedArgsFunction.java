@@ -14,9 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.util.Adapter;
-import org.fuwjin.util.Adapter.AdaptException;
 
 /**
  * Base class for methods, constructors and anything else with a fixed number of
@@ -25,6 +25,7 @@ import org.fuwjin.util.Adapter.AdaptException;
  */
 public abstract class FixedArgsFunction<M extends Member> extends AbstractFunction {
    private final M member;
+   private final Adapter adapter;
 
    /**
     * Creates a new instance.
@@ -32,14 +33,15 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
     * @param name the function name
     * @param argTypes the set of required argument types
     */
-   public FixedArgsFunction(final M member, final String name, final Type... argTypes) {
+   public FixedArgsFunction(final Adapter adapter, final M member, final String name, final Type... argTypes) {
       super(name, argTypes);
+      this.adapter = adapter;
       this.member = member;
    }
 
    @Override
    public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
-      Adapter.adaptArray(args, argTypes());
+      adaptArray(args, argTypes());
       try {
          return invokeSafe(args);
       } catch(final IllegalAccessException e) {
@@ -69,6 +71,23 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
          return super.toString();
       }
       return getClass().getSimpleName() + ": " + member;
+   }
+
+   /**
+    * Adapts the array in place, adapting each element to the corresponding
+    * element in types.
+    * @param array the values to adapt
+    * @param types the target types
+    * @throws AdaptException if the array elements cannot be adapted, or the
+    *         arrays are not the same size
+    */
+   protected void adaptArray(final Object[] array, final Type[] types) throws AdaptException {
+      if(array.length != types.length) {
+         throw new AdaptException("expected %d args not %d", types.length, array.length);
+      }
+      for(int i = 0; i < array.length; ++i) {
+         array[i] = adapter.adapt(array[i], types[i]);
+      }
    }
 
    protected abstract Object invokeSafe(Object... args) throws AdaptException, InvocationTargetException,

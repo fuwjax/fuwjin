@@ -18,6 +18,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 import org.fuwjin.dinah.function.AbstractFunction;
 import org.fuwjin.dinah.function.ConstructorFunction;
 import org.fuwjin.dinah.function.FieldAccessFunction;
@@ -38,6 +39,15 @@ import org.fuwjin.util.TypeUtils;
  */
 public class ReflectiveFunctionProvider implements FunctionProvider {
    private final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
+   private final Adapter adapter;
+
+   public ReflectiveFunctionProvider() {
+      this(new StandardAdapter());
+   }
+
+   public ReflectiveFunctionProvider(final Adapter adapter) {
+      this.adapter = adapter;
+   }
 
    @Override
    public Function getFunction(final FunctionSignature signature) throws NoSuchFunctionException {
@@ -85,21 +95,21 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
 
    private void addConstructor(final String typeName, final Constructor<?> constructor) {
       if(constructor.isVarArgs()) {
-         add(new VarArgsFunction(new ConstructorFunction(typeName, constructor)));
+         add(new VarArgsFunction(adapter, new ConstructorFunction(adapter, typeName, constructor)));
       } else {
-         add(new ConstructorFunction(typeName, constructor));
+         add(new ConstructorFunction(adapter, typeName, constructor));
       }
    }
 
    private void addField(final String typeName, final Type type, final Field field, final boolean allowStatic) {
       if(Modifier.isStatic(field.getModifiers())) {
          if(allowStatic) {
-            add(new StaticFieldAccessFunction(typeName, field));
-            add(new StaticFieldMutatorFunction(typeName, field));
+            add(new StaticFieldAccessFunction(adapter, typeName, field));
+            add(new StaticFieldMutatorFunction(adapter, typeName, field));
          }
       } else {
-         add(new FieldAccessFunction(typeName, field, type));
-         add(new FieldMutatorFunction(typeName, field, type));
+         add(new FieldAccessFunction(adapter, typeName, field, type));
+         add(new FieldMutatorFunction(adapter, typeName, field, type));
       }
    }
 
@@ -118,15 +128,15 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
       FixedArgsFunction<?> func;
       if(Modifier.isStatic(method.getModifiers())) {
          if(allowStatic) {
-            func = new StaticMethodFunction(typeName, method);
+            func = new StaticMethodFunction(adapter, typeName, method);
          } else {
             return;
          }
       } else {
-         func = new MethodFunction(typeName, method, type);
+         func = new MethodFunction(adapter, typeName, method, type);
       }
       if(method.isVarArgs()) {
-         add(new VarArgsFunction(func));
+         add(new VarArgsFunction(adapter, func));
       } else {
          add(func);
       }
@@ -154,7 +164,7 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
    }
 
    private void addType(final String typeName, final Type type) {
-      add(new InstanceOfFunction(typeName, type));
+      add(new InstanceOfFunction(adapter, typeName, type));
       for(final Constructor<?> constructor: TypeUtils.getDeclaredConstructors(type)) {
          if(access(constructor)) {
             addConstructor(typeName, constructor);

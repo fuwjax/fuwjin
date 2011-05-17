@@ -9,7 +9,7 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Function for static method invocation.
@@ -20,8 +20,8 @@ public class StaticMethodFunction extends FixedArgsFunction<Method> {
     * @param category the function category
     * @param method the method to invoke
     */
-   public StaticMethodFunction(final String category, final Method method) {
-      super(method, category + '.' + method.getName(), method.getParameterTypes());
+   public StaticMethodFunction(final Adapter adapter, final String category, final Method method) {
+      super(adapter, method, category + '.' + method.getName(), method.getParameterTypes());
    }
 
    @Override
@@ -29,7 +29,7 @@ public class StaticMethodFunction extends FixedArgsFunction<Method> {
          InvocationTargetException {
       final Object result = member().invoke(null, args);
       if(member().getReturnType().equals(void.class)) {
-         return Adapter.unset();
+         return Adapter.UNSET;
       }
       return result;
    }

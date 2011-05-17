@@ -14,7 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a statement that repeats one or more times.
@@ -44,7 +44,7 @@ public class RepeatStatement implements Expression {
       } catch(final ResolveException e) {
          // continue
       }
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 
    public Expression statement() {

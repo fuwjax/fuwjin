@@ -14,6 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a Specification declaration.
@@ -55,11 +56,11 @@ public class Declaration implements Expression {
       final Snapshot snapshot = new Snapshot(in, output, scope);
       final Environment env = scope.newScope();
       try {
-         Object result = block.resolve(in, output, env);
+         block.resolve(in, output, env);
          if(returns != null) {
-            result = returns.resolve(in, output, env);
+            return returns.resolve(in, output, env);
          }
-         return result;
+         return Adapter.UNSET;
       } catch(final AbortedException e) {
          throw new AbortedException(e, "in %s: %s", name, snapshot);
       } catch(final ResolveException e) {

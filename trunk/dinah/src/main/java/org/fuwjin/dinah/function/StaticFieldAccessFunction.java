@@ -11,6 +11,7 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Function for reflective static field access.
@@ -21,8 +22,8 @@ public class StaticFieldAccessFunction extends FixedArgsFunction<Field> {
     * @param category the function category
     * @param field the field to access
     */
-   public StaticFieldAccessFunction(final String category, final Field field) {
-      super(field, category + '.' + field.getName());
+   public StaticFieldAccessFunction(final Adapter adapter, final String category, final Field field) {
+      super(adapter, field, category + '.' + field.getName());
    }
 
    @Override

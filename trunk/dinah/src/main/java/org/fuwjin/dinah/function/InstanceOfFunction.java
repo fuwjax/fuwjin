@@ -12,6 +12,7 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.Adapter;
 import org.fuwjin.util.TypeUtils;
 
 /**
@@ -25,8 +26,8 @@ public class InstanceOfFunction extends FixedArgsFunction<Member> {
     * @param category the function category
     * @param type the expected type
     */
-   public InstanceOfFunction(final String category, final Type type) {
-      super(null, category + ".instanceof", new Type[1]);
+   public InstanceOfFunction(final Adapter adapter, final String category, final Type type) {
+      super(adapter, null, category + ".instanceof", new Type[1]);
       this.type = type;
    }
 

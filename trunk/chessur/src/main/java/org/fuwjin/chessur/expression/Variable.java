@@ -15,7 +15,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 
 /**
  * Represents a variable in the current scope.
@@ -59,7 +59,7 @@ public class Variable implements Expression {
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
       final Object value = scope.retrieve(name);
-      if(Adapter.isSet(value)) {
+      if(StandardAdapter.isSet(value)) {
          return value;
       }
       throw new ResolveException("variable %s is unset: %s", name, new Snapshot(input, output, scope));

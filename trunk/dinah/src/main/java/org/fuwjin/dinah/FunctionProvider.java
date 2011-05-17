@@ -10,12 +10,26 @@
  ******************************************************************************/
 package org.fuwjin.dinah;
 
+import org.fuwjin.util.BusinessException;
+
 /**
  * A Factory method for Function instances. Function instances returned by this
  * method need not be unique, however, if a Function instance could be shared
  * across threads, it must be threadsafe and/or stateless.
  */
 public interface FunctionProvider {
+   public class NoSuchFunctionException extends BusinessException {
+      private static final long serialVersionUID = 1L;
+
+      public NoSuchFunctionException(final String pattern, final Object... args) {
+         super(pattern, args);
+      }
+
+      public NoSuchFunctionException(final Throwable cause, final String pattern, final Object... args) {
+         super(pattern, cause, args);
+      }
+   }
+
    /**
     * Returns the function corresponding to the signature.
     * @param signature the required function signature

@@ -17,7 +17,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a set of ordered options.
@@ -58,7 +58,7 @@ public class EitherOrStatement implements Expression {
             // continue
          }
       }
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 
    /**

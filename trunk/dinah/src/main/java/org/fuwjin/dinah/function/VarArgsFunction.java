@@ -13,9 +13,9 @@ package org.fuwjin.dinah.function;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.util.Adapter;
-import org.fuwjin.util.Adapter.AdaptException;
 import org.fuwjin.util.ArrayUtils;
 import org.fuwjin.util.TypeUtils;
 
@@ -24,13 +24,15 @@ import org.fuwjin.util.TypeUtils;
  */
 public class VarArgsFunction extends AbstractFunction {
    private final FixedArgsFunction<?> function;
+   private final Adapter adapter;
 
    /**
     * Creates a new instance.
     * @param function the decorated function
     */
-   public VarArgsFunction(final FixedArgsFunction<?> function) {
+   public VarArgsFunction(final Adapter adapter, final FixedArgsFunction<?> function) {
       super(function.name(), ArrayUtils.slice(function.argTypes(), 0, -1));
+      this.adapter = adapter;
       this.function = function;
    }
 
@@ -50,7 +52,7 @@ public class VarArgsFunction extends AbstractFunction {
       final Object varArgs = TypeUtils.newArrayInstance(type, varArgsLen);
       realArgs[argCount()] = varArgs;
       for(int i = 0; i < varArgsLen; ++i) {
-         Array.set(varArgs, i, Adapter.adapt(args[i + argCount()], type));
+         Array.set(varArgs, i, adapter.adapt(args[i + argCount()], type));
       }
       return function.invoke(realArgs);
    }

@@ -13,7 +13,7 @@ package org.fuwjin.chessur.expression;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.util.Adapter;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Publishes a value to an outstream.
@@ -34,7 +34,7 @@ public class PublishStatement implements Expression {
          throws AbortedException, ResolveException {
       final Object result = value.resolve(input, output, scope);
       output.append(result);
-      return Adapter.unset();
+      return Adapter.UNSET;
    }
 
    @Override
