@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias org.fuwjin.sample.Struct as Struct
+
+<Root> {
+  return Matcher.is(Struct.newInstance(100))
+}
