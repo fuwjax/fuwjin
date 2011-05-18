@@ -32,5 +32,5 @@ alias java.util.TreeMap.put as put
   accept '\n'
 }
 <EOF> {
-  is not accept next
+  assume not next
 }

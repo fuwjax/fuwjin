@@ -1,6 +1,6 @@
 <Root>{
 either{
  publish 'Hello, World!'
- is java.lang.Boolean.FALSE()
+ assume java.lang.Boolean.FALSE()
 } or publish 'Hi, Mom!'
 }

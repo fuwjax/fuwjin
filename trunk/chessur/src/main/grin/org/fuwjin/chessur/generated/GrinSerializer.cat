@@ -122,28 +122,15 @@ alias java.util.Map$Entry.getValue as value
 
 <IsStatement>{
   is IsStatement.instanceof(statement)
-  publish "is "
+  publish "assume "
   could {
     is IsStatement.isNot(statement)
     publish "not "
   }
   value = IsStatement.value(statement)
-  either {
-    is FilterAcceptStatement.instanceof(value)
-    filter = FilterAcceptStatement.filter(value)
-    publish "in "
-    <Filter>
-  } or {
-    is ValueAcceptStatement.instanceof(value)
-    value = ValueAcceptStatement.value(value)
-    is Literal.instanceof(value)
-    <Value>
-  } or {
-    is eq(Variable.NEXT(), value)
-    publish "accept "
-    <Value>
-  } or {
-    <Value>
+  either <Value> or {
+    statement = value
+    <Statement>
   }
 }
 <EitherOrStatement>{
