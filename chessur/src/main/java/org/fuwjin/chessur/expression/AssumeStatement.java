@@ -20,7 +20,7 @@ import org.fuwjin.dinah.Adapter;
 /**
  * Allows testing for default values.
  */
-public class IsStatement implements Expression {
+public class AssumeStatement implements Expression {
    private static boolean isDefault(final Object value) {
       if(value == null) {
          return true;
@@ -48,7 +48,7 @@ public class IsStatement implements Expression {
     * @param isNot true if the failure should be reversed
     * @param value the value to test for default equality
     */
-   public IsStatement(final boolean isNot, final Expression value) {
+   public AssumeStatement(final boolean isNot, final Expression value) {
       this.isNot = isNot;
       this.value = value;
    }

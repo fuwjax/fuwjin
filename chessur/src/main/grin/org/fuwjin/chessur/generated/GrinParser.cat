@@ -157,6 +157,7 @@ alias org.fuwjin.dinah.Function as Function
 
 <Statement>{
   either stmt = <IsStatement>   # is <Value>, is not <Value>, is in <Filter>, is not in <Filter>
+  or stmt = <AssumeStatement>   # assume <Value>, assume not <Value>, assume <Statement>, assume not <Statement>
   or stmt = <EitherOrStatement> # either <Statement> or <Statement> or <Statement> ...
   or stmt = <CouldStatement>    # could <Statement>
   or stmt = <RepeatStatement>   # repeat <Statement>
@@ -185,6 +186,20 @@ alias org.fuwjin.dinah.Function as Function
     stmt = IsStatement.new(notted, ValueAcceptStatement.new(Boolean.FALSE(), <StaticLiteral>))
   or 
     stmt = IsStatement.new(notted, <Value>)
+  or abort "is keyword requires value or in keyword"
+  return stmt
+}
+<AssumeStatement>{
+  accept 'assume' <Sep>
+  either {
+    accept 'not'
+    <Sep>
+    notted = Boolean.TRUE()
+  } or {
+    notted = Boolean.FALSE()
+  }
+  either stmt = IsStatement.new(notted, <Value>)
+  or stmt = IsStatement.new(notted, <Statement>)
   or abort "is keyword requires value or in keyword"
   return stmt
 }

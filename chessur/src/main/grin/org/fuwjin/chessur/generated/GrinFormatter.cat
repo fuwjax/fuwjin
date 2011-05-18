@@ -100,14 +100,16 @@ alias org.fuwjin.util.Indent as Indent
 }
 
 <IsStatement>{
-  accept 'is' <Sep>
-  publish "is "
+  either accept 'is'
+  or accept 'assume'
+  <Sep>
+  publish "assume "
   could {
     accept 'not' <Sep>
     publish "not "
   }
-  either <InFilter>
-  or publish <Value>
+  either publish <Value>
+  or publish <Statement>
   or abort "is keyword requires value or in keyword"
 }
 <EitherOrStatement>{
