@@ -21,7 +21,7 @@ alias org.fuwjin.chessur.expression.Filter as Filter
 alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
 alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
 alias org.fuwjin.chessur.expression.Invocation as Invocation
-alias org.fuwjin.chessur.expression.IsStatement as IsStatement
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
@@ -156,8 +156,7 @@ alias org.fuwjin.dinah.Function as Function
 }
 
 <Statement>{
-  either stmt = <IsStatement>   # is <Value>, is not <Value>, is in <Filter>, is not in <Filter>
-  or stmt = <AssumeStatement>   # assume <Value>, assume not <Value>, assume <Statement>, assume not <Statement>
+  either stmt = <AssumeStatement>   # assume <Value>, assume not <Value>, assume <Statement>, assume not <Statement>
   or stmt = <EitherOrStatement> # either <Statement> or <Statement> or <Statement> ...
   or stmt = <CouldStatement>    # could <Statement>
   or stmt = <RepeatStatement>   # repeat <Statement>
@@ -171,24 +170,6 @@ alias org.fuwjin.dinah.Function as Function
   return stmt
 }
 
-<IsStatement>{
-  accept 'is' <Sep>
-  either {
-    accept 'not'
-    <Sep>
-    notted = Boolean.TRUE()
-  } or {
-    notted = Boolean.FALSE()
-  }
-  either
-    stmt = IsStatement.new(notted, FilterAcceptStatement.new(Boolean.FALSE(), <InFilter>)) 
-  or 
-    stmt = IsStatement.new(notted, ValueAcceptStatement.new(Boolean.FALSE(), <StaticLiteral>))
-  or 
-    stmt = IsStatement.new(notted, <Value>)
-  or abort "is keyword requires value or in keyword"
-  return stmt
-}
 <AssumeStatement>{
   accept 'assume' <Sep>
   either {
@@ -198,9 +179,9 @@ alias org.fuwjin.dinah.Function as Function
   } or {
     notted = Boolean.FALSE()
   }
-  either stmt = IsStatement.new(notted, <Value>)
-  or stmt = IsStatement.new(notted, <Statement>)
-  or abort "is keyword requires value or in keyword"
+  either stmt = AssumeStatement.new(notted, <Value>)
+  or stmt = AssumeStatement.new(notted, <Statement>)
+  or abort "assume keyword requires value or in keyword"
   return stmt
 }
 <EitherOrStatement>{
@@ -520,12 +501,12 @@ alias org.fuwjin.dinah.Function as Function
   return match
 }
 <IdentifierChar>{
-  is isIdentifierCodepoint(next)
+  assume isIdentifierCodepoint(next)
   accept next
 }
 
 <Sep>{
-  is not isIdentifierCodepoint(next)
+  assume not isIdentifierCodepoint(next)
   <S>
 }
 <S>{
@@ -542,5 +523,5 @@ alias org.fuwjin.dinah.Function as Function
   or <EndOfFile>
 }
 <EndOfFile>{
-  is not next
+  assume not next
 }

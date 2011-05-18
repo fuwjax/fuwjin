@@ -27,7 +27,7 @@ alias org.fuwjin.chessur.expression.Filter as Filter
 alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
 alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
 alias org.fuwjin.chessur.expression.Invocation as Invocation
-alias org.fuwjin.chessur.expression.IsStatement as IsStatement
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
@@ -74,7 +74,7 @@ alias java.util.Map$Entry.getValue as value
   indexer = NameIndex.new()
   specs = iterator(Catalog.scripts(cat))
   repeat <ScriptDeclaration>
-  is not hasNext(specs)
+  assume not hasNext(specs)
   <Postscript>
 }
 <Module>{
@@ -83,7 +83,7 @@ alias java.util.Map$Entry.getValue as value
   indexer = NameIndex.new()
   specs = iterator(Catalog.scripts(cat))
   repeat <ScriptDeclaration>
-  is not hasNext(specs)
+  assume not hasNext(specs)
   <Postscript>
 }
 <Postscript>{
@@ -102,7 +102,7 @@ alias java.util.Map$Entry.getValue as value
     publish "
     env['index'] = environment.containsKey(\"'name'\") ? environment.get(\"'name'\") : UNSET;"
   }
-  is not hasNext(entries)
+  assume not hasNext(entries)
   rootName = Catalog.rootName(cat)
   publish "
     return 'rootName'(input, env);
@@ -380,9 +380,9 @@ public class 'moduleName' {
     <Statement>
   }
   publish "'indent''input'.commit();"
-  is not hasNext(statements)
+  assume not hasNext(statements)
   either{
-    is value
+    assume value
     publish "'indent'return '<Value>';"
   }or{
     publish "'indent'return null;"
@@ -406,7 +406,7 @@ public class 'moduleName' {
   return result
 }
 <Statement>{
-  either <IsStatement>
+  either <AssumeStatement>
   or <EitherOrStatement>
   or <CouldStatement>
   or <RepeatStatement>
@@ -419,15 +419,15 @@ public class 'moduleName' {
   or <InvocationStatement>
 }
 
-<IsStatement>{
-  is IsStatement.instanceof(statement)
-  value = IsStatement.value(statement)
+<AssumeStatement>{
+  assume AssumeStatement.instanceof(statement)
+  value = AssumeStatement.value(statement)
   subIndex = AtomicInteger.incrementAndGet(varIndex)
   oldInput = input
   input = "sub'subIndex'"
   publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
   either {
-    is IsStatement.isNot(statement)
+    assume AssumeStatement.isNot(statement)
     bIndex = AtomicInteger.incrementAndGet(varIndex)
     publish "'indent'boolean b'bIndex' = true;"
     publish "'indent'try {"
@@ -451,7 +451,7 @@ public class 'moduleName' {
   }
 }
 <EitherOrStatement>{
-  is EitherOrStatement.instanceof(statement)
+  assume EitherOrStatement.instanceof(statement)
   stmt = statement
   statements = iterator(EitherOrStatement.statements(stmt))
   publish "'indent'try {"
@@ -464,14 +464,14 @@ public class 'moduleName' {
   publish "'indent'} catch(final 'className'Exception 'exception') {"
   Indent.increase(indent)
   <OrStatement>
-  is not hasNext(statements)
+  assume not hasNext(statements)
   Indent.decrease(indent)
   publish "'indent'}"
 }
 <OrStatement>{
   statement = getNext(statements)
   either {
-    is hasNext(statements)
+    assume hasNext(statements)
     publish "'indent'try {"
     Indent.increase(indent)
     <Statement>
@@ -488,7 +488,7 @@ public class 'moduleName' {
   }  
 }
 <CouldStatement>{
-  is CouldStatement.instanceof(statement)
+  assume CouldStatement.instanceof(statement)
   stmt = statement
   publish "'indent'try {"
   Indent.increase(indent)
@@ -502,7 +502,7 @@ public class 'moduleName' {
   publish "'indent'}"
 }
 <RepeatStatement>{
-  is RepeatStatement.instanceof(statement)
+  assume RepeatStatement.instanceof(statement)
   stmt = statement
   statement = RepeatStatement.statement(stmt)
   <Statement>
@@ -525,25 +525,25 @@ public class 'moduleName' {
   or <ValueAcceptStatement>
 }
 <ValueAcceptStatement>{
-  is ValueAcceptStatement.instanceof(statement)
+  assume ValueAcceptStatement.instanceof(statement)
   publish "'indent''input'.accept"
   could {
-    is ValueAcceptStatement.isNot(statement)
+    assume ValueAcceptStatement.isNot(statement)
     publish 'Not'
   }
   value = ValueAcceptStatement.value(statement)
   publish '('
   could {
-    is not Object.equals(Variable.NEXT(), value)
+    assume not Object.equals(Variable.NEXT(), value)
     publish <Value>
   }
   publish ');'
 }
 <FilterAcceptStatement>{
-  is FilterAcceptStatement.instanceof(statement)
+  assume FilterAcceptStatement.instanceof(statement)
   publish "'indent''input'.accept"
   could {
-    is FilterAcceptStatement.isNot(statement)
+    assume FilterAcceptStatement.isNot(statement)
     publish "Not"
   }
   filter = FilterAcceptStatement.filter(statement)
@@ -555,16 +555,16 @@ public class 'moduleName' {
   return value
 }
 <ValueAcceptValue>{
-  is ValueAcceptStatement.instanceof(statement)
+  assume ValueAcceptStatement.instanceof(statement)
   value = ValueAcceptStatement.value(statement)
   either {
-    is ValueAcceptStatement.isNot(statement)
+    assume ValueAcceptStatement.isNot(statement)
     notted = 'Not'
     val = <Value>
   } or {
     notted = ''
     either {
-      is not Object.equals(Variable.NEXT(), value)
+      assume not Object.equals(Variable.NEXT(), value)
       val = <Value>
     } or {
       val = ''
@@ -573,9 +573,9 @@ public class 'moduleName' {
   return "'input'.accept'notted'('val')"
 }
 <FilterAcceptValue>{
-  is FilterAcceptStatement.instanceof(statement)
+  assume FilterAcceptStatement.instanceof(statement)
   either {
-    is FilterAcceptStatement.isNot(statement)
+    assume FilterAcceptStatement.isNot(statement)
     notted = 'Not'
   } or {
     notted = ''
@@ -584,19 +584,19 @@ public class 'moduleName' {
   return "'input'.accept'notted'In(\"'filter'\",\"'<Filter>'\")"
 }
 <PublishStatement>{
-  is PublishStatement.instanceof(statement)
+  assume PublishStatement.instanceof(statement)
   value = PublishStatement.value(statement)
   publish "'indent''input'.publish('<Value>');"
 }
 <AbortStatement>{
-  is AbortStatement.instanceof(statement)
+  assume AbortStatement.instanceof(statement)
   value = AbortStatement.value(statement)
   publish "'indent''input'.abort('<Value>'"
   could publish ", 'exception'"
   publish ');'
 }
 <Block>{
-  is Block.instanceof(statement)
+  assume Block.instanceof(statement)
   block = statement
   subIndex = AtomicInteger.incrementAndGet(varIndex)
   oldInput = input
@@ -607,16 +607,16 @@ public class 'moduleName' {
     statement = getNext(statements)
     <Statement>
   }
-  is not hasNext(statements)
+  assume not hasNext(statements)
   publish "'indent''input'.commit();"
 }
 <Assignment>{
-  is Assignment.instanceof(statement)
+  assume Assignment.instanceof(statement)
   name = Assignment.name(statement)
   index = NameIndex.indexOf(indexer, name)
   value = Assignment.value(statement)
   either {
-    is Invocation.instanceof(value)
+    assume Invocation.instanceof(value)
     statement = value
     publish "'indent'try {"
     Indent.increase(indent)
@@ -630,7 +630,7 @@ public class 'moduleName' {
   } or publish "'indent'env['index'] /*'name'*/= '<Value>';"
 }
 <InvocationStatement>{
-  is Invocation.instanceof(statement)
+  assume Invocation.instanceof(statement)
   function = Invocation.function(statement)
   params = iterator(Invocation.params(statement))
   publish "'indent'try {"
@@ -646,17 +646,17 @@ public class 'moduleName' {
   publish "'indent'}"
 }
 <Invocation>{
-  is Invocation.instanceof(statement)
+  assume Invocation.instanceof(statement)
   function = Invocation.function(statement)
   params = iterator(Invocation.params(statement))
   return <RenderFunction>
 }
 <Number>{
-  is Number.instanceof(value)
+  assume Number.instanceof(value)
   return Number.toString(value)
 }
 <Object>{
-  is ObjectTemplate.instanceof(value)
+  assume ObjectTemplate.instanceof(value)
   publish "new Object() {"
   Indent.increase(indent)
   publish "'indent'public Object value() {"
@@ -677,7 +677,7 @@ public class 'moduleName' {
     or <MemberMethod>
     or <VarArgs>
   }
-  is not hasNext(setters)
+  assume not hasNext(setters)
   publish "'indent'return value;"
   Indent.decrease(indent)
   publish "'indent'}"
@@ -685,17 +685,17 @@ public class 'moduleName' {
   publish "'indent'}.value()"
 }
 <MemberFieldMutator>{
-  is FieldMutatorFunction.instanceof(function)
+  assume FieldMutatorFunction.instanceof(function)
   field = FieldMutatorFunction.member(function)
   type = Field.getType(field)
   publish "'indent'value.'Field.getName(field)' = ('<Type>')'<Value>';"
 }
 <MemberMethod> {
-  is MethodFunction.instanceof(function)
+  assume MethodFunction.instanceof(function)
   method = MethodFunction.member(function)
   types = iterator(asList(Method.getParameterTypes(method)))
   type = getNext(types)
-  is not hasNext(types)
+  assume not hasNext(types)
   publish "'indent'value.'Method.getName(method)'(('<Type>')'<Value>');"
 }
 <RenderFunction>{
@@ -708,11 +708,11 @@ public class 'moduleName' {
   or <StaticFieldMutator> >> render
   or <StaticMethod> >> render
   or <VarArgs> >> render
-  is not hasNext(params)
+  assume not hasNext(params)
   return render
 }
 <Constructor>{
-  is ConstructorFunction.instanceof(function)
+  assume ConstructorFunction.instanceof(function)
   constructor = ConstructorFunction.member(function)
   type = Constructor.getDeclaringClass(constructor)
   publish "new '<Type>'"
@@ -720,14 +720,14 @@ public class 'moduleName' {
   <Params>
 }
 <FieldAccess>{
-  is FieldAccessFunction.instanceof(function)
+  assume FieldAccessFunction.instanceof(function)
   field = FieldAccessFunction.member(function)
   type = Field.getDeclaringClass(field)
   value = getNext(params)
   publish "(('<Type>')'<Value>').'Field.getName(field)'"
 }
 <FieldMutator>{
-  is FieldMutatorFunction.instanceof(function)
+  assume FieldMutatorFunction.instanceof(function)
   field = FieldMutatorFunction.member(function)
   type = Field.getDeclaringClass(field)
   value = getNext(params)
@@ -737,13 +737,13 @@ public class 'moduleName' {
   publish " = ('<Type>')'<Value>'"
 }
 <InstanceOf> {
-  is InstanceOfFunction.instanceof(function)
+  assume InstanceOfFunction.instanceof(function)
   type = InstanceOfFunction.type(function)
   value = getNext(params)
   publish "'<Value>' instanceof '<Type>'"
 }
 <Method> {
-  is MethodFunction.instanceof(function)
+  assume MethodFunction.instanceof(function)
   method = MethodFunction.member(function)
   type = Method.getDeclaringClass(method)
   value = getNext(params)
@@ -752,13 +752,13 @@ public class 'moduleName' {
   <Params>
 }
 <StaticFieldAccess> {
-  is StaticFieldAccessFunction.instanceof(function)
+  assume StaticFieldAccessFunction.instanceof(function)
   field = StaticFieldAccessFunction.member(function)
   type = Field.getDeclaringClass(field)
   publish "'<Type>'.'Field.getName(field)'"
 }
 <StaticFieldMutator>{
-  is StaticFieldMutatorFunction.instanceof(function)
+  assume StaticFieldMutatorFunction.instanceof(function)
   field = StaticFieldMutatorFunction.member(function)
   type = Field.getDeclaringClass(field)
   publish "'<Type>'.'Field.getName(field)'"
@@ -767,7 +767,7 @@ public class 'moduleName' {
   publish " = ('<Type>')'<Value>'"
 }
 <StaticMethod> {
-  is StaticMethodFunction.instanceof(function)
+  assume StaticMethodFunction.instanceof(function)
   method = StaticMethodFunction.member(function)
   type = Method.getDeclaringClass(method)
   publish "'<Type>'.'Method.getName(method)'"
@@ -789,7 +789,7 @@ public class 'moduleName' {
       publish ", ('<Type>')'<Value>'"
     }
   }
-  is not hasNext(types)
+  assume not hasNext(types)
   publish ')'
 }
 <Type> {
@@ -797,7 +797,7 @@ public class 'moduleName' {
 }
 
 <Filter>{
-  is Filter.instanceof(filter)
+  assume Filter.instanceof(filter)
   filterBuffer = StringBuilder.new()
   ranges = iterator(Filter.ranges(filter))
   range = getNext(ranges)
@@ -806,38 +806,38 @@ public class 'moduleName' {
     range = getNext(ranges)
     <Range>
   }
-  is not hasNext(ranges)
+  assume not hasNext(ranges)
   return StringBuilder.toString(filterBuffer)
 }
 <Range>{
-  is Range.instanceof(range)
+  assume Range.instanceof(range)
   chars = iterator(Range.chars(range))
   repeat {
     ch = getNext(chars)
     append(filterBuffer, Literal.dynamicEscape(ch))
   }
-  is not hasNext(chars)
+  assume not hasNext(chars)
 }
 
 <StaticLiteral>{
-  is Literal.instanceof(value)
+  assume Literal.instanceof(value)
   chars = iterator(Literal.chars(value))
   builder = StringBuilder.new()
   could repeat{
     ch = getNext(chars)
     append(builder, Literal.dynamicEscape(ch))
   }
-  is not hasNext(chars)
+  assume not hasNext(chars)
   return "\"'builder'\""
 }
 <DynamicLiteral>{
-  is CompositeLiteral.instanceof(value)
+  assume CompositeLiteral.instanceof(value)
   composite = value
   values = iterator(CompositeLiteral.values(composite))
   could {
     value = getNext(values)
     either {
-      is not hasNext(values)
+      assume not hasNext(values)
       result = "String.valueOf('<Value>')"
     } or {
       list = ArrayList.new()
@@ -846,25 +846,25 @@ public class 'moduleName' {
         value = getNext(values)
         ArrayList.add(list, "String.valueOf('<Value>')")
       }
-      is not hasNext(values)
+      assume not hasNext(values)
       result = StringUtils.join(" + ", list)
     }
   }
   return result
 }
 <NextValue>{
-  is Object.equals(Variable.NEXT(), value)
+  assume Object.equals(Variable.NEXT(), value)
   return "'input'.next()"
 }
 <MatchValue>{
-  is Object.equals(Variable.MATCH(), value)
+  assume Object.equals(Variable.MATCH(), value)
   return "'input'.match()"
 }
 
 <ScriptStatement>{
   either publish "'indent''<Script>';"
   or {
-     is ScriptOutput.instanceof(statement)
+     assume ScriptOutput.instanceof(statement)
      name = ScriptOutput.name(statement)
      statement = ScriptOutput.spec(statement)
      bIndex = AtomicInteger.incrementAndGet(varIndex)
@@ -879,7 +879,7 @@ public class 'moduleName' {
      index = NameIndex.indexOf(indexer, name)
      publish "'indent'env['index'] /*'name'*/= 'builder'.toString();"
   } or {
-     is ScriptInput.instanceof(statement)
+     assume ScriptInput.instanceof(statement)
      value = ScriptInput.value(statement)
      statement = ScriptInput.spec(statement)
      subIndex = AtomicInteger.incrementAndGet(varIndex)
@@ -889,7 +889,7 @@ public class 'moduleName' {
      <ScriptStatement>
      publish "'indent''input'.commit();"
   } or {
-     is ScriptPipe.instanceof(statement)
+     assume ScriptPipe.instanceof(statement)
      source = ScriptPipe.source(statement)
      sink = ScriptPipe.sink(statement)
      bIndex = AtomicInteger.incrementAndGet(varIndex)
@@ -912,11 +912,11 @@ public class 'moduleName' {
 }
 <Script>{
   either {
-      is Script.instanceof(statement)
+      assume Script.instanceof(statement)
       name = Script.name(statement)
       result = "'name'('input', env)"
   } or {
-      is ScriptProxy.instanceof(statement)
+      assume ScriptProxy.instanceof(statement)
       module = Module.name(ScriptProxy.module(statement))
       name = Script.name(ScriptProxy.script(statement))
       result = "'package'.'module'.'name'('input', env)"
@@ -924,7 +924,7 @@ public class 'moduleName' {
   return result
 }
 <Variable>{
-  is Variable.instanceof(value)
+  assume Variable.instanceof(value)
   name = Variable.name(value)
   index = NameIndex.indexOf(indexer, name)
   return "'input'.isSet(\"'name'\", env['index'])"
