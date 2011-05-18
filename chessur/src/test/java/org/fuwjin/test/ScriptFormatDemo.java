@@ -15,11 +15,10 @@ import java.util.List;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
-import org.fuwjin.util.UserFiles;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.StreamUtils;
+import org.fuwjin.util.UserFiles;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,7 +101,7 @@ public class ScriptFormatDemo {
    @Test
    public void testSerialization() throws Exception {
       final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("postage", new ReflectiveFunctionProvider());
+      env.put("postage", manager);
       env.put("name", path.getName());
       env.put("manager", manager);
       final Catalog cat = (Catalog)catParser.exec(newReader(".cat"), env);

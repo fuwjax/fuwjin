@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.dinah;
 
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -37,8 +36,7 @@ import org.fuwjin.util.TypeUtils;
  * Constructor, Method, and Field, in addition to some virtual methods such as
  * primitive and array access and the instanceof keyword.
  */
-public class ReflectiveFunctionProvider implements FunctionProvider {
-   private final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
+public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
    private final Adapter adapter;
 
    public ReflectiveFunctionProvider() {
@@ -50,81 +48,53 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
    }
 
    @Override
-   public Function getFunction(final FunctionSignature signature) throws NoSuchFunctionException {
-      AbstractFunction function = functions.get(signature.name());
-      if(function == null) {
-         try {
-            final String typeName = signature.category();
-            final Type type = TypeUtils.forName(typeName);
-            addType(typeName, type);
-         } catch(final ClassNotFoundException e) {
-            throw new NoSuchFunctionException(e, "No category found for %s", signature);
-         }
-         function = functions.get(signature.name());
-         if(function == null) {
-            throw new NoSuchFunctionException("No function found for %s", signature);
-         }
+   public Map<String, AbstractFunction> getFunctions(final String typeName) {
+      final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
+      try {
+         final Type type = TypeUtils.forName(typeName);
+         addType(functions, typeName, type);
+      } catch(final ClassNotFoundException e) {
+         // continue, return empty functions map
       }
-      function = function.restrict(signature);
-      if(AbstractFunction.NULL.equals(function)) {
-         throw new NoSuchFunctionException("No function matches arguments for %s", signature);
-      }
-      return function;
+      return functions;
    }
 
-   private boolean access(final AccessibleObject obj) {
-      if(!obj.isAccessible()) {
-         try {
-            obj.setAccessible(true);
-         } catch(final SecurityException e) {
-            return false;
-         }
-      }
-      return true;
-   }
-
-   private void add(final AbstractFunction function) {
-      final String name = function.name();
-      final AbstractFunction func = functions.get(name);
-      if(func == null) {
-         functions.put(name, function);
-      } else {
-         functions.put(name, func.join(function));
-      }
-   }
-
-   private void addConstructor(final String typeName, final Constructor<?> constructor) {
+   private void addConstructor(final Map<String, AbstractFunction> functions, final String typeName,
+         final Constructor<?> constructor) {
       if(constructor.isVarArgs()) {
-         add(new VarArgsFunction(adapter, new ConstructorFunction(adapter, typeName, constructor)));
+         add(functions, new VarArgsFunction(adapter, new ConstructorFunction(adapter, typeName, constructor)));
       } else {
-         add(new ConstructorFunction(adapter, typeName, constructor));
+         add(functions, new ConstructorFunction(adapter, typeName, constructor));
       }
    }
 
-   private void addField(final String typeName, final Type type, final Field field, final boolean allowStatic) {
+   private void addField(final Map<String, AbstractFunction> functions, final String typeName, final Type type,
+         final Field field, final boolean allowStatic) {
       if(Modifier.isStatic(field.getModifiers())) {
          if(allowStatic) {
-            add(new StaticFieldAccessFunction(adapter, typeName, field));
-            add(new StaticFieldMutatorFunction(adapter, typeName, field));
+            add(functions, new StaticFieldAccessFunction(adapter, typeName, field));
+            add(functions, new StaticFieldMutatorFunction(adapter, typeName, field));
          }
       } else {
-         add(new FieldAccessFunction(adapter, typeName, field, type));
-         add(new FieldMutatorFunction(adapter, typeName, field, type));
+         add(functions, new FieldAccessFunction(adapter, typeName, field, type));
+         add(functions, new FieldMutatorFunction(adapter, typeName, field, type));
       }
    }
 
-   private void addFields(final String typeName, final Type type, final Type reflectType, final boolean allowStatic) {
+   private void addFields(final Map<String, AbstractFunction> functions, final String typeName, final Type type,
+         final Type reflectType, final boolean allowStatic) {
       if(reflectType != null) {
          for(final Field field: TypeUtils.getDeclaredFields(reflectType)) {
             if(access(field)) {
-               addField(typeName, type, field, allowStatic);
+               addField(functions, typeName, type, field, allowStatic);
             }
          }
-         addFields(typeName, type, TypeUtils.getSupertype(reflectType), false);
+         addFields(functions, typeName, type, TypeUtils.getSupertype(reflectType), false);
       }
    }
 
-   private void addMethod(final String typeName, final Type type, final Method method, final boolean allowStatic) {
+   private void addMethod(final Map<String, AbstractFunction> functions, final String typeName, final Type type,
+         final Method method, final boolean allowStatic) {
       FixedArgsFunction<?> func;
       if(Modifier.isStatic(method.getModifiers())) {
          if(allowStatic) {
@@ -136,41 +106,43 @@ public class ReflectiveFunctionProvider implements FunctionProvider {
          func = new MethodFunction(adapter, typeName, method, type);
       }
       if(method.isVarArgs()) {
-         add(new VarArgsFunction(adapter, func));
+         add(functions, new VarArgsFunction(adapter, func));
       } else {
-         add(func);
+         add(functions, func);
       }
    }
 
-   private void addMethods(final String typeName, final Type type, final Type reflectType, final boolean allowStatic) {
+   private void addMethods(final Map<String, AbstractFunction> functions, final String typeName, final Type type,
+         final Type reflectType, final boolean allowStatic) {
       if(reflectType != null) {
          for(final Method method: TypeUtils.getDeclaredMethods(reflectType)) {
             if(access(method)) {
-               addMethod(typeName, type, method, allowStatic);
+               addMethod(functions, typeName, type, method, allowStatic);
             }
          }
-         addMoreMethods(typeName, type, reflectType);
+         addMoreMethods(functions, typeName, type, reflectType);
       }
    }
 
-   private void addMoreMethods(final String typeName, final Type type, final Type reflectType) {
+   private void addMoreMethods(final Map<String, AbstractFunction> functions, final String typeName, final Type type,
+         final Type reflectType) {
       if(TypeUtils.isInterface(reflectType)) {
          for(final Type iface: TypeUtils.getInterfaces(reflectType)) {
-            addMethods(typeName, type, iface, false);
+            addMethods(functions, typeName, type, iface, false);
          }
       } else {
-         addMethods(typeName, type, TypeUtils.getSupertype(reflectType), false);
+         addMethods(functions, typeName, type, TypeUtils.getSupertype(reflectType), false);
       }
    }
 
-   private void addType(final String typeName, final Type type) {
-      add(new InstanceOfFunction(adapter, typeName, type));
+   private void addType(final Map<String, AbstractFunction> functions, final String typeName, final Type type) {
+      add(functions, new InstanceOfFunction(adapter, typeName, type));
       for(final Constructor<?> constructor: TypeUtils.getDeclaredConstructors(type)) {
          if(access(constructor)) {
-            addConstructor(typeName, constructor);
+            addConstructor(functions, typeName, constructor);
          }
       }
-      addMethods(typeName, type, type, true);
-      addFields(typeName, type, type, true);
+      addMethods(functions, typeName, type, type, true);
+      addFields(functions, typeName, type, type, true);
    }
 }

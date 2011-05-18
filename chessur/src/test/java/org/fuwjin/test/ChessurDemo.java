@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -118,7 +117,7 @@ public class ChessurDemo {
    public void setup() {
       manager = new CatalogManager();
       env = new HashMap<String, Object>();
-      env.put("postage", new ReflectiveFunctionProvider());
+      env.put("postage", manager);
       env.put("name", "test");
       env.put("manager", manager);
    }

@@ -13,13 +13,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
+import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.CachedFunctionProvider;
+import org.fuwjin.dinah.ClassInstanceFunctionProvider;
+import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
+import org.fuwjin.dinah.FunctionSignature;
 import org.fuwjin.dinah.ReflectiveFunctionProvider;
 
 /**
  * Manages catalogs.
  */
-public class CatalogManager {
+public class CatalogManager implements FunctionProvider {
    private final ConcurrentMap<String, Catalog> catalogs = new ConcurrentHashMap<String, Catalog>();
    private final FunctionProvider provider;
 
@@ -27,7 +32,16 @@ public class CatalogManager {
     * Creates a new instance.
     */
    public CatalogManager() {
-      this(new ReflectiveFunctionProvider());
+      this(new CachedFunctionProvider(new ReflectiveFunctionProvider(), new ClassInstanceFunctionProvider()));
+   }
+
+   /**
+    * Creates a new instance backed by the function provider.
+    * @param provider
+    */
+   public CatalogManager(final Adapter adapter) {
+      this(new CachedFunctionProvider(new ReflectiveFunctionProvider(adapter), new ClassInstanceFunctionProvider(
+            adapter)));
    }
 
    /**
@@ -36,6 +50,11 @@ public class CatalogManager {
     */
    public CatalogManager(final FunctionProvider provider) {
       this.provider = provider;
+   }
+
+   @Override
+   public Function getFunction(final FunctionSignature signature) throws NoSuchFunctionException {
+      return provider.getFunction(signature);
    }
 
    /**
@@ -64,7 +83,7 @@ public class CatalogManager {
       Catalog cat = catalogs.get(name);
       if(cat == null) {
          final Map<String, Object> map = new HashMap<String, Object>();
-         map.put("postage", provider);
+         map.put("postage", this);
          map.put("name", name);
          map.put("manager", this);
          cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);

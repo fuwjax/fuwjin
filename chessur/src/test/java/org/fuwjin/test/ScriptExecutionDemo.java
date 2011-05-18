@@ -24,7 +24,6 @@ import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
 import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
@@ -123,7 +122,7 @@ public class ScriptExecutionDemo {
 
    static Catalog parseModel(final File file) throws FileNotFoundException, ExecutionException {
       final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("postage", new ReflectiveFunctionProvider());
+      env.put("postage", manager);
       env.put("name", file.getName());
       env.put("manager", manager);
       return (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
