@@ -1,0 +1,36 @@
+alias java.util.TreeMap as Map
+alias java.util.TreeMap.put as put
+
+<Root> {
+  map = Map.new()
+  repeat <Record>
+  <EOF>
+  return map
+}
+<Record> {
+  name = <Name>
+  either {
+    <S>
+    value = <Value>
+    either <EOL>
+    or <EOF>
+    put(map, name, value)
+  } or abort "'name' requires a value, but found none"
+}
+<Name> {
+  repeat accept in 0-9, A-Z, _, a-z
+  return match
+}
+<Value> {
+  repeat accept in --., 0-9, _, a-z
+  return match
+}
+<S> {
+  accept ' '
+}
+<EOL> {
+  accept '\n'
+}
+<EOF> {
+  assume not next
+}
