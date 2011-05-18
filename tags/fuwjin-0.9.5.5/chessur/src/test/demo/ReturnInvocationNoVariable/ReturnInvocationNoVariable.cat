@@ -1,0 +1,1 @@
+<Root>{return java.lang.String.toUpperCase(variable)}
