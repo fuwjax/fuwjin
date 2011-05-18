@@ -8,8 +8,8 @@ alias org.fuwjin.chessur.CatalogManager as CatalogManager
 alias java.lang.String as String
 
 <Compile> {
-  postage = FunctionProvider.new()
   manager = CatalogManager.new()
+  postage = manager
   cat = <Parse:Catalog>
   className = name
   <Gen:Catalog>
