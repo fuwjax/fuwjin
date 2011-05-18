@@ -85,7 +85,7 @@ alias org.fuwjin.util.Indent as Indent
   return val
 }
 <Statement>{
-  either <IsStatement> >> val
+  either <AssumeStatement> >> val
   or <EitherOrStatement> >> val
   or <CouldStatement> >> val
   or <RepeatStatement> >> val
@@ -99,10 +99,8 @@ alias org.fuwjin.util.Indent as Indent
   return val
 }
 
-<IsStatement>{
-  either accept 'is'
-  or accept 'assume'
-  <Sep>
+<AssumeStatement>{
+  accept 'assume' <Sep>
   publish "assume "
   could {
     accept 'not' <Sep>
@@ -110,7 +108,7 @@ alias org.fuwjin.util.Indent as Indent
   }
   either publish <Value>
   or publish <Statement>
-  or abort "is keyword requires value or in keyword"
+  or abort "assume keyword requires value or in keyword"
 }
 <EitherOrStatement>{
   accept 'either' <Sep>
@@ -183,7 +181,7 @@ alias org.fuwjin.util.Indent as Indent
   or abort "assignment to 'name' requires a value"
 }
 <Invocation>{
-  is not accept 'return'
+  assume not accept 'return'
   name = <QualifiedName>
   accept '(' <S>
   publish "'name'("
@@ -406,12 +404,12 @@ alias org.fuwjin.util.Indent as Indent
   return match
 }
 <IdentifierChar>{
-  is isIdentifierCodepoint(next)
+  assume isIdentifierCodepoint(next)
   accept next
 }
 
 <Sep>{
-  is not <IdentifierChar>
+  assume not <IdentifierChar>
   <S>
 }
 <S>{
@@ -428,5 +426,5 @@ alias org.fuwjin.util.Indent as Indent
   or <EndOfFile>
 }
 <EndOfFile>{
-  is not next
+  assume not next
 }

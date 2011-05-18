@@ -22,7 +22,7 @@ alias org.fuwjin.chessur.expression.Filter as Filter
 alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
 alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
 alias org.fuwjin.chessur.expression.Invocation as Invocation
-alias org.fuwjin.chessur.expression.IsStatement as IsStatement
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
@@ -51,16 +51,16 @@ alias java.util.Map$Entry.getValue as value
     repeat <LoadDeclaration>
     publish '\n'
   }
-  is not hasNext(modules)
+  assume not hasNext(modules)
   aliases = iterator(Catalog.aliases(cat))
   could {
     repeat <AliasDeclaration>
     publish '\n'
   }
-  is not hasNext(aliases)
+  assume not hasNext(aliases)
   specs = iterator(Catalog.scripts(cat))
   repeat <ScriptDeclaration>
-  is not hasNext(specs)
+  assume not hasNext(specs)
 }
 <LoadDeclaration>{
     module = getNext(modules)
@@ -85,10 +85,10 @@ alias java.util.Map$Entry.getValue as value
     publish "'indent'"
     <Statement>
   }
-  is not hasNext(statements)
+  assume not hasNext(statements)
   could{
     value = Declaration.returns(spec)
-    is value
+    assume value
     publish "'indent'return "
     <Value>
   }
@@ -107,7 +107,7 @@ alias java.util.Map$Entry.getValue as value
   or <Variable>
 }
 <Statement>{
-  either <IsStatement>
+  either <AssumeStatement>
   or <EitherOrStatement>
   or <CouldStatement>
   or <RepeatStatement>
@@ -120,21 +120,22 @@ alias java.util.Map$Entry.getValue as value
   or <Invocation>
 }
 
-<IsStatement>{
-  is IsStatement.instanceof(statement)
+<AssumeStatement>{
+  assume AssumeStatement.instanceof(statement)
   publish "assume "
   could {
-    is IsStatement.isNot(statement)
+    assume AssumeStatement.isNot(statement)
     publish "not "
   }
-  value = IsStatement.value(statement)
-  either <Value> or {
+  value = AssumeStatement.value(statement)
+  either <Value> 
+  or {
     statement = value
     <Statement>
   }
 }
 <EitherOrStatement>{
-  is EitherOrStatement.instanceof(statement)
+  assume EitherOrStatement.instanceof(statement)
   stmt = statement
   statements = iterator(EitherOrStatement.statements(stmt))
   publish "either "
@@ -144,7 +145,7 @@ alias java.util.Map$Entry.getValue as value
     old = statement
     statement = getNext(statements)
     either {
-      is Block.instanceof(old)
+      assume Block.instanceof(old)
       publish ' '
     } or publish indent
     publish "or "
@@ -152,14 +153,14 @@ alias java.util.Map$Entry.getValue as value
   }
 }
 <CouldStatement>{
-  is CouldStatement.instanceof(statement)
+  assume CouldStatement.instanceof(statement)
   stmt = statement
   publish "could "
   statement = CouldStatement.statement(stmt)
   <Statement>
 }
 <RepeatStatement>{
-  is RepeatStatement.instanceof(statement)
+  assume RepeatStatement.instanceof(statement)
   stmt = statement
   publish "repeat "
   statement = RepeatStatement.statement(stmt)
@@ -170,20 +171,20 @@ alias java.util.Map$Entry.getValue as value
   or <ValueAcceptStatement>
 }
 <ValueAcceptStatement>{
-  is ValueAcceptStatement.instanceof(statement)
+  assume ValueAcceptStatement.instanceof(statement)
   publish "accept "
   could {
-    is ValueAcceptStatement.isNot(statement)
+    assume ValueAcceptStatement.isNot(statement)
     publish "not "
   }
   value = ValueAcceptStatement.value(statement)
   <Value>
 }
 <FilterAcceptStatement>{
-  is FilterAcceptStatement.instanceof(statement)
+  assume FilterAcceptStatement.instanceof(statement)
   publish "accept "
   could {
-    is FilterAcceptStatement.isNot(statement)
+    assume FilterAcceptStatement.isNot(statement)
     publish "not "
   }
   publish "in "
@@ -191,19 +192,19 @@ alias java.util.Map$Entry.getValue as value
   <Filter>
 }
 <PublishStatement>{
-  is PublishStatement.instanceof(statement)
+  assume PublishStatement.instanceof(statement)
   publish "publish "
   value = PublishStatement.value(statement)
   <Value>
 }
 <AbortStatement>{
-  is AbortStatement.instanceof(statement)
+  assume AbortStatement.instanceof(statement)
   publish "abort "
   value = AbortStatement.value(statement)
   <Value>
 }
 <Block>{
-  is Block.instanceof(statement)
+  assume Block.instanceof(statement)
   block = statement
   Indent.increase(indent)
   publish "{"
@@ -213,20 +214,20 @@ alias java.util.Map$Entry.getValue as value
     publish indent
     <Statement>
   }
-  is not hasNext(statements)
+  assume not hasNext(statements)
   Indent.decrease(indent)
   publish indent
   publish "}"
 }
 <Assignment>{
-  is Assignment.instanceof(statement)
+  assume Assignment.instanceof(statement)
   name = Assignment.name(statement)
   publish "'name' = "
   value = Assignment.value(statement)
   <Value>
 }
 <Invocation>{
-  is Invocation.instanceof(statement)
+  assume Invocation.instanceof(statement)
   name = Invocation.name(statement)
   alias = Catalog.encode(cat, name)
   publish "'alias'("
@@ -240,12 +241,12 @@ alias java.util.Map$Entry.getValue as value
       <Value>
     }
   }
-  is not hasNext(params)
+  assume not hasNext(params)
   publish ")"
 }
 
 <Filter>{
-  is Filter.instanceof(filter)
+  assume Filter.instanceof(filter)
   ranges = iterator(Filter.ranges(filter))
   range = getNext(ranges)
   <Range>
@@ -254,14 +255,14 @@ alias java.util.Map$Entry.getValue as value
     publish ", "
     <Range>
   }
-  is not hasNext(ranges)
+  assume not hasNext(ranges)
 }
 <Range>{
-  is Range.instanceof(range)
+  assume Range.instanceof(range)
   ch = Range.start(range)
   publish Filter.escape(ch)
   could{
-    is Range.isRange(range)
+    assume Range.isRange(range)
     publish '-'
     ch = Range.end(range)
     publish Filter.escape(ch)
@@ -269,54 +270,54 @@ alias java.util.Map$Entry.getValue as value
 }
 
 <StaticLiteral>{
-  is Literal.instanceof(value)
+  assume Literal.instanceof(value)
   publish '\''
   chars = iterator(Literal.chars(value))
   could repeat{
     ch = getNext(chars)
     publish Literal.escape(ch)
   }
-  is not hasNext(chars)
+  assume not hasNext(chars)
   publish '\''
 }
 <DynamicLiteral>{
-  is CompositeLiteral.instanceof(value)
+  assume CompositeLiteral.instanceof(value)
   composite = value
   publish '"'
   values = iterator(CompositeLiteral.values(composite))
   could repeat{
     value = getNext(values)
     either{
-      is Literal.instanceof(value)
+      assume Literal.instanceof(value)
       chars = iterator(Literal.chars(value))
       could repeat{
         ch = getNext(chars)
         publish CompositeLiteral.escape(ch)
       }
-      is not hasNext(chars)
+      assume not hasNext(chars)
     }or{
       publish "\'"
       <Value>
       publish "\'"
     }
   }
-  is not hasNext(values)
+  assume not hasNext(values)
   publish '"'
 }
 
 <Script>{
   either {
-    is Script.instanceof(statement)
+    assume Script.instanceof(statement)
     name = Script.name(statement)
     publish "\<'name'\>"
   } or {
-    is ScriptOutput.instanceof(statement)
+    assume ScriptOutput.instanceof(statement)
     name = ScriptOutput.name(statement)
     statement = ScriptOutput.spec(statement)
     <Script>
     publish " >> 'name'"
   } or {
-    is ScriptPipe.instanceof(statement)
+    assume ScriptPipe.instanceof(statement)
     pipe = statement
     statement = ScriptPipe.source(pipe)
     <Script>
@@ -324,7 +325,7 @@ alias java.util.Map$Entry.getValue as value
     statement = ScriptPipe.sink(pipe)
     <Script>
   } or {
-    is ScriptInput.instanceof(statement)
+    assume ScriptInput.instanceof(statement)
     input = statement
     statement = ScriptInput.spec(input)
     <Script>
@@ -334,7 +335,7 @@ alias java.util.Map$Entry.getValue as value
   }
 }
 <Object> {
-  is ObjectTemplate.instanceof(value)
+  assume ObjectTemplate.instanceof(value)
   name = ObjectTemplate.type(value)
   alias = Catalog.encode(cat, name)
   publish "('alias')"
@@ -350,15 +351,15 @@ alias java.util.Map$Entry.getValue as value
     value = FieldTemplate.value(setter)
     <Value>
   }
-  is not hasNext(setters)
+  assume not hasNext(setters)
   Indent.decrease(indent) 
   publish "'indent'}"
 }
 <Number>{
-  is Number.instanceof(value)
+  assume Number.instanceof(value)
   publish Number.toString(value)
 }
 <Variable>{
-  is Variable.instanceof(value)
+  assume Variable.instanceof(value)
   publish Variable.name(value)
 }
