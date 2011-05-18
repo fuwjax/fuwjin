@@ -1,2 +1,0 @@
-unexpected value: [1,0] SOF -> [1,0] SOF
-in Root: [1,0] SOF -> [1,0] SOF
