@@ -92,7 +92,7 @@ So, here either the input stream starts with "the cake is a lie" or "GlaDOS love
   return num
 }
 }}}
-There's a whole bunch of new concepts here, so let's break it down. A Value may be named by assigning it to a variable, for instance "num = <Int>". An assigned value may be used later, as in "return num".
+There's a whole bunch of new concepts here, so let's break it down. A Value may be named by assigning it to a variable, for instance "num = `<Int>`". An assigned value may be used later, as in "return num".
 
 Scripts may be called simply by referring to the name, and they may be used as Values, assuming they end with a "return" statement. The "return" keyword is passes the following Value to the caller of the script.
 
