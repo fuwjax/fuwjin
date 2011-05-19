@@ -1,0 +1,103 @@
+#summary Reference for Grin Declarations, Statements, and Values
+
+= Grin Quick Reference =
+
+== Declarations ==
+  * *`load [Path] as [Name]`*: Loads a catalog from a .cat file at Path as a module named Name.
+  * *`alias [QualifiedName] as [Name]`*: Aliases a QualifiedName as a shorter Name for use in Invocations.
+  * *`<[Name]> { [Statements] }`*: Creates a script named Name which will execute Statements in order.
+
+== Statements ==
+  * *`assume [Statement]`*: asserts that the Statement would succeed if executed.
+    * succeeds if: Statement would succeed if executed
+    * fails if: Statement would fail if executed
+  * *`assume not [Statement]`*: asserts that the Statement would fail if executed.
+    * succeeds if: Statement would fail if executed
+    * fails if: Statement would succeed if executed
+  * *`assume [Value]`*: asserts that the Value is not a default value.
+    * succeeds if: Value is a non-default value
+    * fails if: Value is unset or default
+  * *`assume not [Value]`*: asserts that the Value is unset or a default value.
+    * succeeds if: Value is unset or a default value
+    * fails if: Value is a non-default value
+  * *`either [Statement1] or [Statement2]`*: attempts to execute Statements until one succeeds. Or clauses may be added as needed.
+    * succeeds if: Statement1 succeeds, otherwise if Statement2 succeeds
+    * fails if: both Statement1 and Statement2 fail
+  * *`could [Statement]`*: attempts to execute the Statement, but continues even if it fails.
+    * succeeds if: always succeeds
+    * fails if: never fails
+  * *`repeat [Statement]`*: repeatedly executes the Statement until it fails.
+    * succeeds if: Statement executes at least once
+    * fails if: Statement fails on the first execution
+  * *`accept [Value]`*: Consumes the Value from the input.
+    * succeeds if: the input exactly matches the Value
+    * fails if: the input does not have enough characters, or the input does not exactly match the Value
+  * *`accept not [Value]`*: Consumes the next character from the input, if the input does not match the Value.
+    * succeeds if: the input does not exactly match the Value, or there are insufficient character to match
+    * fails if: the input exactly matches the Value
+  * *`accept in [Ranges]`*: Consumes the next character from the input if it matches one of the Ranges.
+    * succeeds if: the next input character falls in a Range
+    * fails if: there is no more input, or the next character does not fall in a Range
+  * *`accept not in [Ranges]`*: Consumes the next character from the input if it does not match one of the Ranges.
+    * succeeds if: there is no more input or the next character does not fall in a Range
+    * fails if: the next input character falls in a Range
+  * *`publish [Value]`*: Serializes the Value to the output stream. Since the output may be buffered, errors in serializing the Value to the output stream may result in aborted execution rather than execution failure.
+    * succeeds if: Value is set
+    * fails if: Value is unset
+  * *`return [Value]`*: Returns a Value from a script. Must be the last statement of a script declaration block.
+    * succeeds if: Value is set
+    * fails if: Value is unset
+  * *`abort [Value]`*: Aborts execution with a message of Value. If the Value is unset, then a generic message will be used instead.
+    * succeeds if: never succeeds
+    * fails if: never fails
+  * *`<[Name]>`*: Executes a script named Name with the same input, output and environment as the current script. Note that the name could be namespaced, i.e. `<[Module]:[Name]>` to refer to a script defined in a loaded module.
+    * succeeds if: the script named Name succeeds
+    * fails if: the script named Name fails
+  * *`<[Name]> << [Value]`*: Redirects input for the script named Name to the serialized Value. Uses the same output and environment as the current script.
+    * succeeds if: Value is set and the script named Name succeeds
+    * fails if: Value is unset or the script named Name fails
+  * *`<[Source]> >> <[Sink]>`*: Redirects the output for the Source script to the input for the Sink script. The current environment is used for both scripts, as is the current input for the Source script, and the current output for the Sink script.
+    * succeeds if: Source and Sink both succeed
+    * fails if: either Source or Sink fail
+  *  *`<[Source]> >> [Name]`*: Redirects the output from Source to a variable named Name.
+    * succeeds if: Source succeeds
+    * fails if: Source fails
+  * *`{ [Statements] }`*: executes a block of Statements in order.
+    * succeeds if: all Statements succeed
+    * fails if: any Statement fails
+  * *`[Name] = [Value]`*: assigns the Value to the variable named Name.
+    * succeeds if: Value is set
+    * fails if: Value is unset
+  * *`[QualifiedName] ( [Values] )`*: invokes the function named QualifiedName with the Values as arguments.
+    * succeeds if: the invocation succeeds
+    * fails if: the Values cannot be adapted to appropriate types, or if the invoked function fails.
+
+== Values ==
+
+  * *`'[Chars]'`*: static string literal
+    * set if: always set
+    * unset if: never unset
+  * *`"[Chars]'[Value]'[Chars]..."`*: dynamic string literal. Characters between single quotes are interpreted as Values.
+    * set if: all inner Values are set
+    * unset if: any inner Values are unset
+  * *`<[Name]>`*: The script named Name is executed and its return value is used as the value.
+    * set if: the script executes successfully and returns a set value
+    * unset if: the script fails or does not have a return statement
+  * *`[QualifiedName] ( [Values] )`*: invokes the function named QualifiedName with the Values as arguments, and returns the return value of the invocation.
+    * set if: the invocation succeeds and returns a value
+    * unset if: the Values cannot be adapted to appropriate types, or if the invoked function fails, or if the function has a void return type
+  * *`[Number]`*: a numeric literal.
+    * set if: always set
+    * unset if: never unset
+  * *`([Type]) { [Field]:[Value], ... }`*: an object literal. 
+    * set if: an object can be created of the Type, and all the Values can be adapted to the Field type
+    * unset if: the Type cannot be instantiated, or if any Value cannot be adapted to the Field type
+  * *`match`*: matches the input consumed during the current script execution.
+    * set if: always set, possibly empty if no input was consumed
+    * unset if: never unset
+  * *`next`*: the value of the next character in the input stream.
+    * set if: there is another character in the input stream
+    * unset if: the input is at the end of the stream
+  * *`[Name]`*: a variable value: returns the value of the variable in the current environment.
+    * set if: the variable has been set to a value
+    * unset if: the variable has not been set to a value
