@@ -33,6 +33,10 @@ public class ObjectTemplate implements Expression {
       this.constructor = constructor;
    }
 
+   /**
+    * Returns the constructor function.
+    * @return the constructor
+    */
    public Function constructor() {
       return constructor;
    }
@@ -72,6 +76,10 @@ public class ObjectTemplate implements Expression {
       setters.add(new FieldTemplate(name, setter, object));
    }
 
+   /**
+    * Returns the field mappings.
+    * @return the fields
+    */
    public Iterable<FieldTemplate> setters() {
       return setters;
    }

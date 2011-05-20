@@ -19,6 +19,7 @@ import org.fuwjin.util.ArrayUtils;
 public class MethodFunction extends FixedArgsFunction<Method> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param method the method to invoke
     * @param type the host object type

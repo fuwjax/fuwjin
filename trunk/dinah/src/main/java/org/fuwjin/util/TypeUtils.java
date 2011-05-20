@@ -109,6 +109,11 @@ public final class TypeUtils {
       return toClass(type).getInterfaces();
    }
 
+   /**
+    * Returns the name of the type.
+    * @param type the type
+    * @return the name
+    */
    public static String getName(final Type type) {
       return toClass(type).getCanonicalName();
    }

@@ -18,13 +18,27 @@ import org.fuwjin.util.BusinessException;
  * across threads, it must be threadsafe and/or stateless.
  */
 public interface FunctionProvider {
+   /**
+    * Thrown when no function can be found.
+    */
    public class NoSuchFunctionException extends BusinessException {
       private static final long serialVersionUID = 1L;
 
+      /**
+       * Creates a new instance.
+       * @param pattern the message pattern
+       * @param args the message arguments
+       */
       public NoSuchFunctionException(final String pattern, final Object... args) {
          super(pattern, args);
       }
 
+      /**
+       * Creates a new instance.
+       * @param cause the cause
+       * @param pattern the message pattern
+       * @param args the message arguments
+       */
       public NoSuchFunctionException(final Throwable cause, final String pattern, final Object... args) {
          super(pattern, cause, args);
       }

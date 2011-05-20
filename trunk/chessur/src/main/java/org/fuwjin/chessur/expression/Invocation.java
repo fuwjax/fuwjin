@@ -35,6 +35,10 @@ public class Invocation implements Expression {
       params.add(value);
    }
 
+   /**
+    * Returns the function.
+    * @return the function
+    */
    public Function function() {
       return function;
    }
@@ -55,6 +59,10 @@ public class Invocation implements Expression {
       return params.size();
    }
 
+   /**
+    * Returns the parameter values.
+    * @return the parameters
+    */
    public Iterable<Expression> params() {
       return params;
    }

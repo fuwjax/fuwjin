@@ -47,6 +47,10 @@ public class RepeatStatement implements Expression {
       return Adapter.UNSET;
    }
 
+   /**
+    * Returns the repeated statement.
+    * @return the statement
+    */
    public Expression statement() {
       return statement;
    }

@@ -17,6 +17,7 @@ import org.fuwjin.dinah.Adapter;
 public class StaticMethodFunction extends FixedArgsFunction<Method> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param method the method to invoke
     */

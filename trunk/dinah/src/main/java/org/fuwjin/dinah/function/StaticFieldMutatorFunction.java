@@ -19,6 +19,7 @@ import org.fuwjin.dinah.Adapter;
 public class StaticFieldMutatorFunction extends FixedArgsFunction<Field> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param field the field to mutate
     */

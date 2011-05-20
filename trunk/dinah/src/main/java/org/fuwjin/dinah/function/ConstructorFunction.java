@@ -21,6 +21,7 @@ import org.fuwjin.dinah.Adapter.AdaptException;
 public class ConstructorFunction extends FixedArgsFunction<Constructor<?>> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param constructor the constructor
     */

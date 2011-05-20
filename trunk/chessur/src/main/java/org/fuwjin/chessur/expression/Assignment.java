@@ -33,6 +33,10 @@ public class Assignment implements Expression {
       this.value = value;
    }
 
+   /**
+    * Returns the variable name.
+    * @return the variable
+    */
    public String name() {
       return name;
    }
@@ -55,6 +59,10 @@ public class Assignment implements Expression {
       return name + " = " + value;
    }
 
+   /**
+    * Returns the assigned value.
+    * @return the assigned value
+    */
    public Expression value() {
       return value;
    }

@@ -28,6 +28,7 @@ public class VarArgsFunction extends AbstractFunction {
 
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param function the decorated function
     */
    public VarArgsFunction(final Adapter adapter, final FixedArgsFunction<?> function) {

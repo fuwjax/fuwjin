@@ -22,6 +22,10 @@ public class ScriptProxy extends Executable implements Expression {
       this.script = script;
    }
 
+   /**
+    * Returns the declaring module.
+    * @return the declaring module
+    */
    public Module module() {
       return module;
    }
@@ -37,6 +41,10 @@ public class ScriptProxy extends Executable implements Expression {
       return expression().resolve(input, output, scope);
    }
 
+   /**
+    * Returns the proxied script.
+    * @return the script
+    */
    public Executable script() {
       return script;
    }

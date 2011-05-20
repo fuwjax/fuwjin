@@ -5,7 +5,7 @@ import static org.fuwjin.util.StreamUtils.inputStream;
 import static org.fuwjin.util.StreamUtils.readAll;
 import static org.fuwjin.util.StreamUtils.reader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
@@ -36,8 +36,8 @@ public class CatalogManager implements FunctionProvider {
    }
 
    /**
-    * Creates a new instance backed by the function provider.
-    * @param provider
+    * Creates a new instance backed by the adapter.
+    * @param adapter the type adapter
     */
    public CatalogManager(final Adapter adapter) {
       this(new CachedFunctionProvider(new ReflectiveFunctionProvider(adapter), new ClassInstanceFunctionProvider(
@@ -46,7 +46,7 @@ public class CatalogManager implements FunctionProvider {
 
    /**
     * Creates a new instance backed by the function provider.
-    * @param provider
+    * @param provider the function provider
     */
    public CatalogManager(final FunctionProvider provider) {
       this.provider = provider;
@@ -58,32 +58,52 @@ public class CatalogManager implements FunctionProvider {
    }
 
    /**
-    * Loads a catalog from a file.
+    * Loads a catalog from a file with a default charset.
     * @param file the catalog file
     * @return the new collection
-    * @throws ChessurException if it fails
-    * @throws IOException
+    * @throws GrinParserException if it fails
+    * @throws IOException if I/O fails
     */
    public Catalog loadCat(final File file) throws GrinParserException, IOException {
-      return loadCat(file.getAbsolutePath(), new FileReader(file));
+      return loadCat(file, "UTF-8");
+   }
+
+   /**
+    * Loads a catalog from a file with a specific charset.
+    * @param file the catalog file
+    * @param charset the character encoding for the file
+    * @return the new collection
+    * @throws GrinParserException if it fails
+    * @throws IOException if I/O fails
+    */
+   public Catalog loadCat(final File file, final String charset) throws GrinParserException, IOException {
+      return loadCat(file.getAbsolutePath(), reader(new FileInputStream(file), charset));
    }
 
    /**
     * Loads a catalog from a file.
     * @param path the path to the catalog file
     * @return the new collection
-    * @throws ChessurException if it fails
-    * @throws IOException
+    * @throws GrinParserException if it fails
+    * @throws IOException if I/O fails
     */
    public Catalog loadCat(final String path) throws GrinParserException, IOException {
-      return loadCat(path, reader(inputStream(path), "UTF-8"));
+      return loadCat(path, "UTF-8");
    }
 
-   protected Catalog loadCat(final String name, final Reader reader) throws IOException, GrinParserException {
+   /**
+    * Loads a catalog from a reader. This method should only be used when
+    * strictly necessary, preferring other loadCat methods instead.
+    * @param name the logical name of the catalog, usually the file name
+    * @param reader the input reader
+    * @return the catalog
+    * @throws IOException if I/O fails
+    * @throws GrinParserException if the parse fails
+    */
+   public Catalog loadCat(final String name, final Reader reader) throws IOException, GrinParserException {
       Catalog cat = catalogs.get(name);
       if(cat == null) {
          final Map<String, Object> map = new HashMap<String, Object>();
-         map.put("postage", this);
          map.put("name", name);
          map.put("manager", this);
          cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);
@@ -93,5 +113,17 @@ public class CatalogManager implements FunctionProvider {
          }
       }
       return cat;
+   }
+
+   /**
+    * Loads a catalog from a file with a specific charset.
+    * @param path the catalog file
+    * @param charset the character encoding for the file
+    * @return the new collection
+    * @throws GrinParserException if it fails
+    * @throws IOException if I/O fails
+    */
+   public Catalog loadCat(final String path, final String charset) throws GrinParserException, IOException {
+      return loadCat(path, reader(inputStream(path), charset));
    }
 }

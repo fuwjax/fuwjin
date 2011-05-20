@@ -20,6 +20,7 @@ import org.fuwjin.dinah.Adapter;
 public class FieldAccessFunction extends FixedArgsFunction<Field> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param field the field instance
     * @param type the object type required to access the field

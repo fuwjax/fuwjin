@@ -32,6 +32,10 @@ public class ValueAcceptStatement implements Expression {
       this.value = value;
    }
 
+   /**
+    * Returns true if the statement is negated.
+    * @return true if negated, false otherwise
+    */
    public boolean isNot() {
       return isNot;
    }
@@ -79,6 +83,10 @@ public class ValueAcceptStatement implements Expression {
       return "accept " + (isNot ? "not " : "") + value;
    }
 
+   /**
+    * Returns the filter value.
+    * @return the filter
+    */
    public Expression value() {
       return value;
    }

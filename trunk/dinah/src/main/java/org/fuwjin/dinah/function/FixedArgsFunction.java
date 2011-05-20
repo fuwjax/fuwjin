@@ -29,6 +29,7 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
 
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param member the reflection member
     * @param name the function name
     * @param argTypes the set of required argument types
@@ -53,6 +54,10 @@ public abstract class FixedArgsFunction<M extends Member> extends AbstractFuncti
       }
    }
 
+   /**
+    * Returns the reflective member.
+    * @return the member, or null if there is none
+    */
    public final M member() {
       return member;
    }

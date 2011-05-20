@@ -36,6 +36,10 @@ public class FieldTemplate implements Expression {
       return setter.invoke(object, val);
    }
 
+   /**
+    * Returns the field name.
+    * @return the name
+    */
    public String name() {
       return name;
    }
@@ -46,10 +50,18 @@ public class FieldTemplate implements Expression {
       return value.resolve(input, output, scope);
    }
 
+   /**
+    * Returns the field mutator function.
+    * @return the setter
+    */
    public Function setter() {
       return setter;
    }
 
+   /**
+    * Returns the field value.
+    * @return the value
+    */
    public Expression value() {
       return value;
    }

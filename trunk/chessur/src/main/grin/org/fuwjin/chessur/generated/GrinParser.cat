@@ -43,7 +43,7 @@ alias org.fuwjin.dinah.Function as Function
 # << a Grin stream
 # >> nil
 # env
-#   postage: the dinah reflection factory
+#   manager: the dinah reflection factory
 # returns the catalog for the Grin stream
 <Catalog>{
   cat = Catalog.new(name, manager)
@@ -111,7 +111,7 @@ alias org.fuwjin.dinah.Function as Function
 # >> nil
 # env
 #   cat: the catalog
-#   postage: the reflection factory
+#   manager: the reflection factory
 # returns the script
 <ScriptDeclaration>{
   accept '<'
@@ -267,7 +267,7 @@ alias org.fuwjin.dinah.Function as Function
   <S>
   either{
     signature = Catalog.getSignature(cat, name, Invocation.paramCount(inv))
-    function = FunctionProvider.getFunction(postage, signature)
+    function = FunctionProvider.getFunction(manager, signature)
     Invocation.setFunction(inv, function)
   } or abort "Could not get function for 'name'"
   return inv
@@ -310,7 +310,7 @@ alias org.fuwjin.dinah.Function as Function
 <Object>{
   accept '(' <S>
   type = <AliasName>
-  constructor = FunctionProvider.getFunction(postage,ArgCountSignature.new("'type'.new",0))
+  constructor = FunctionProvider.getFunction(manager,ArgCountSignature.new("'type'.new",0))
   object = ObjectTemplate.new(type, constructor)
   accept ')' <S>
   accept '{' <S>
@@ -326,7 +326,7 @@ alias org.fuwjin.dinah.Function as Function
 }
 <Field>{
   name = <Name>
-  setter = FunctionProvider.getFunction(postage, ArgCountSignature.new("'type'.'name'",2))
+  setter = FunctionProvider.getFunction(manager, ArgCountSignature.new("'type'.'name'",2))
   accept ':' <S>
   ObjectTemplate.set(object, name, setter, <Value>)
 }
