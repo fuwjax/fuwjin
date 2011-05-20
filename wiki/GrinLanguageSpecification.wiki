@@ -11,11 +11,9 @@ The Grin Language is a fairly radical departure from traditional scripting langu
   or <ScriptDeclaration>
 }
 }}}
-Note that the Grin scripts on this page are meant to illustrate rather than define. In particular, for the sake of brevity, white space is not addressed. For the language parser, please refer to GrinParser.cat in the code base.
+Note that the Grin scripts on this page are meant to illustrate rather than define. In particular, for the sake of brevity, white space is not addressed. For the language parser, please refer to !GrinParser.cat in the code base.
 
 Grin is written in files called Catalogs or .cat files. Catalogs are primarily collections of Script Declarations, a Script being the primary code block in Grin, much as methods are to Java. These catalogs are implicit namespaces and may be included in other catalogs through Load Declarations. Aliases are a shortened identifier for function signatures and are declared just like Loads and Scripts in the catalog.
-
-==Grin Declarations==
 
 ===Alias Declaration===
 
@@ -104,10 +102,6 @@ A Load Declaration imports the catalog indicated by the file system path Path as
 <ScriptName> {
   accept '<'
   <Name>
-  could {
-    accept ':'
-    <Name>
-  }
   accept '>'
 }
 <ScriptBlock> {
@@ -131,8 +125,8 @@ Scripts, when executed, have a state associated with their execution. This state
   either <AcceptStatement>
   or <PublishStatement>
   or <AssignmentStatement>
-  or <ScriptStatement>
-  or <InvocationStatement>
+  or <Script>
+  or <Invocation>
   or <BlockStatement>
   or <CouldStatement>
   or <RepeatStatement>
@@ -196,6 +190,7 @@ A publish statement will set the state "failure" marker if the value cannot be r
   accept '='
   <Value>
 }
+}}}
 
 Assignments associate the resolved value with the name in the current environment. This association will not leave the current script, i.e. a Script cannot modify the name-value mapping for the caller.
 
@@ -203,22 +198,31 @@ An assignment will set the state "failure" marker if the value cannot be resolve
 
 ====Script====
 
-=RESUME EDITING HERE=
 {{{
-<ScriptStatement> {
+<Script> {
+  <ScriptId>
+  could {
+    accept '<<'
+    <Value>
+  }
+  could repeat {
+    accept '>>'
+    <ScriptId>
+  }
+  could {
+    accept '>>'
+    <Name>
+  }
+}
+<ScriptId> {
+  accept '<'
+  <Name>
+  could {
+    accept ':'
+    <Name>
+  }
+  accept '>'
 }}}
-
- Script = _!ElevatedNamespaceName_ _!InputValue_? _!ChainedOutput_? _!OutputAssignment_?
-
- !ElevatedNamespaceName = *`<`* _Namespace_? _Name_ *>*
-
- Namespace = _Name_ *:*
-
- !InputValue = *<<* _Value_
-
- !ChainedOutput = (*>>* _Script_)`*`
-
- !OutputAssignment = *>>* _Name_
 
 Script redirections are calls to other scripts. Scripts located in the same catalog as the caller should omit the namespace, while scripts in loaded catalogs should use the local namespace from the load command.
 
@@ -238,9 +242,20 @@ The script redirection will set the state "failure" marker if the call fails or 
 
 ====Invocation====
 
- Invocation = _!QualifiedName_ *(* _Arguments_? *)*
-
- Arguments = _Value_ (*,* _Value_)*
+{{{
+<Invocation> {
+  <QualfiedName>
+  accept '('
+  could {
+    <Value>
+    could repeat {
+      accept ','
+      <Value>
+    }
+  }
+  accept ')'
+}
+}}}
 
 An Invocation redirects control back to the underlying implementation language, presumably to handle some task which is not expressible in Grin. The details behind mapping a qualified name to an execution target in the underlying language is implementation dependent. However, the initial name of the qualified name may be an alias name regardless of the implementation, and therefore the alias declarations must be referenced when determining the fully qualified name.
 
@@ -248,34 +263,49 @@ An invocation may be used as a value, and it will resolve to the return value of
 
 An invocation will set the state "failure" marker if the arguments cannot be resolved, or if there is no binding in the underlying implementation for the qualified name with the specified arguments, or if the underlying execution target fails.
 
-
-===Control Flow Statements===
-
- !ControlFlowStatement = _Block_ | _Is_ | _!EitherOr_ | _Could_ | _Repeat_ | _Abort_
-
-Additionally, the ReturnStatement will be described in this section, although it is formally not treated as a control flow statement.
-
 ====Block Statement====
 
- Block = *{* _Statement_`*` *}*
+{{{
+<BlockStatement> {
+  accept '{'
+  could repeat <Statement>
+  accept '}'
+}
+}}}
 
 A block is a set of statements enclosed in curly braces. When the block statement executes, it will execute each of the inner statements in order. If any statement sets the state "failure" marker, the block will not execute any further statements.
 
 The block will set the state "failure" marker if any inner statement sets the state "failure" marker. In particular, the block will *not* set the state "failure" marker if there are no inner statements.
 
-====Is Statement====
+====Assume Statement====
 
- Is = *is* *not*? _Value_
+{{{
+<AssumeStatement> {
+  accept 'assume'
+  could accept 'not'
+  either <Value>
+  or <Statement>
+}
+}}}
 
-An Is statement is designed to make an assertion without altering the current state. After an Is statement completes, regardless of whether the state "failure" marker is set or not, the input, output and environment should be identical to when the Is statement started execution.
+An Assume statement is designed to make an assertion without altering the current state. After an Assume statement completes, regardless of whether the state "failure" marker is set or not, the input, output and environment should be identical to when the Assume statement started execution.
 
-The is statement technically performs two checks. First, it checks that the value can be resolved. Next, it checks that the resolved value is not a "default" value. What constitutes a "default" is subject to the implementation, but in general, false for booleans, zero for numeric types and null for objects is fairly standard.
+The Assume statement technically performs two checks on values. First, it checks that the value can be resolved. Next, it checks that the resolved value is not a "default" value. What constitutes a "default" is subject to the implementation, but in general, false for booleans, zero for numeric types and null for objects is fairly standard. On a statement, the Assume statement just checks that the statement will execute.
 
-The Is statement sets the state "failure" marker if the value cannot be resolved, or if the value is a "default" (or the inverse if the "not" keyword is used)
+The Assume statement sets the state "failure" marker if the value or statement cannot be resolved, or if the value is a "default" (or the inverse if the "not" keyword is used)
 
 ====Either/Or Statement====
 
- !EitherOr = *either* _Statement_ (*or* _Statement_)+
+{{{
+<EitherOrStatement> {
+  accept 'either'
+  <Statement>
+  repeat {
+    accept 'or'
+    <Statement>
+  }
+}
+}}}
 
 An either/or statement is an ordered set of optional statements. Each statement will proceed in order until a statement succeeds. If every statement sets the "failure" marker, then the either/or statement will set the marker as well. At each step, if a statement sets the "failure" marker, then the state will be reset to the same state as when the either/or statement started before executing the next option.
 
@@ -283,7 +313,12 @@ The either/or statement sets the state "failure" marker if no option can apply t
 
 ====Could Statement====
 
- Could = *could* _Statement_
+{{{
+<CouldStatement> {
+  accept 'could'
+  <Statement>
+}
+}}}
 
 A could statement will attempt to execute the statement. If the statement sets the state "failure" marker, the could statement will clear the marker.
 
@@ -291,7 +326,12 @@ The could statement will *not* set the state "failure" marker.
 
 ====Repeat Statement====
 
- Repeat = *repeat* _Statement_
+{{{
+<RepeatStatement> {
+  accept 'repeat'
+  <Statement>
+}
+}}}
 
 A repeat statement will attempt to execute the statement at least once. If the statement cannot be executed at least once, then it will set the state "failure" marker. Otherwise the statement will execute until it sets the marker, and the repeat will then clear the marker.
 
@@ -299,7 +339,12 @@ The repeat statement will set the state "failure" marker if the statement cannot
 
 ====Abort Statement====
 
- Abort = *abort* _Value_
+{{{
+<AbortStatement> {
+  accept 'abort'
+  <Value>
+}
+}}}
 
 An abort statement completely halts all script execution and returns control immediately to the underlying implementation language. The resolved value may be used as part of the failure information passed to the underlying caller. If the value cannot be resolved, a generic message is supplied instead.
 
@@ -307,7 +352,12 @@ The abort statement will not set the state "failure" marker, instead it will alw
 
 ====Return Statement====
 
- !ReturnStatement = *return* _Value_
+{{{
+<ReturnStatement> {
+  accept 'return'
+  <Value>
+}
+}}}
 
 A return statement returns the resolved value as the value of the enclosing script. It may only be used as the final statement in a script block.
 
@@ -315,37 +365,47 @@ The return statement will set the state "failure" marker if the value cannot be 
 
 ==Grin Values==
 
- Value = _Variable_ | _!RedirectionStatement_ | _Literal_
+{{{
+<Value> {
+  either <Script>
+  or <Invocation>
+  or <StaticLiteral>
+  or <DynamicLiteral>
+  or <NumericLiteral>
+  or <ObjectLiteral>
+  or <MatchVariable>
+  or <NextVariable>
+  or <Variable>
+}
+}}}
 
-There are several values in Grin. Variables fetch a bound object from the environment. Redirection statements (scripts and invocations) may also be used as values. Literals are rich ways of specifying interesting objects, but which may still require runtime resolution.
-
-===Variable===
-
- Variable = _Match_ | _Next_ | _Name_
-
- Match = *match*
- 
- Next = *next*
-
-Variables are named references to environment bindings. There are two in particular, match and next, which are specially defined variables. Other variables such as true, false, or null may be provided by the implementation.
-
-Variables resolve to a value if they have been set to a value in the current environment, or any of its parent environments.
-
-Match is a deprecated keyword which is the same as the invocation "input.buffer()". Next is a deprecated keyword which is the same as "input.next()". These keywords should not be used as they will likely be removed before the official release.
-
-===Literals===
-
- Literal = _!StaticLiteral_ | _!DynamicLiteral_ | _!NumberLiteral_ | _!ObjectLiteral_
+There are several values in Grin. Variables fetch a bound object from the environment. Redirection statements (scripts and invocations) may also be used as values. Literals are rich ways of specifying interesting objects, but which may still require runtime resolution. Scripts and Invocations may both be used as values.
 
 ====Static Literals====
 
- !StaticLiteral = *'* .`*` *'*
+{{{
+<StaticLiteral> {
+  accept '\''
+  could repeat accept not '\''
+  accept '\''
+}
+}}}
 
 Static literals are enclosed in single quotes. They resolve to the string value within the quotes. 
 
 ====Dynamic Literals====
   
- !DynamicLiteral = *"* (*'* _Value_ *'* | .)`*` *"*
+{{{
+<DynamicLiteral> {
+  accept '\"'
+  could repeat either {
+    accept '\''
+    <Value>
+    accept '\''
+  } or repeat accept not in ', "
+  accept '\"'
+}
+}}}
 
 Dynamic literals are enclosed in double quotes. The significant difference between these and static literals is that values may be enclosed in single quotes. Then when the dynamic literal is resolved, each of the internal values are resolved and their location within the literal is replaced by the resolved value.
 
@@ -353,4 +413,91 @@ The dynamic literal will fail to resolve if any of the inner values fail to reso
 
 ====Numeric Literals====
 
- !NumberLiteral = // standard numeric literal, definition omitted for brevity.
+{{{
+<NumericLiteral> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could accept '.'
+  } or {
+    accept '.'
+    accept in 0-9
+  }
+  could repeat accept in 0-9
+  could {
+    accept in e,E
+    could accept '-'
+    could repeat accept in 0-9
+  }
+}
+}}}
+
+A numeric literal is an untyped number. How and when the underlying language maps the value to a real numeric type is implementation dependent.
+
+===Object Literal===
+
+{{{
+<ObjectLiteral> {
+  accept '('
+  <QualifiedName>
+  accept ')'
+  accept '{'
+  could {
+    <FieldLiteral>
+    could repeat{
+       accept ','
+       <FieldLiteral>
+    }
+  }
+  accept '}'
+}
+<FieldLiteral> {
+  <Name>
+  accept ':'
+  <Value>
+}
+}}}
+
+Object literals allow construction and population of objects. The Qualified Name in the parentheses determines the type of the object, and it is constructed using a default constructor. The Field Literal's Name is the field to set, and the Value is the new value.
+
+=== Match Variable ===
+
+{{{
+<MatchVariable> {
+  accept 'match'
+}
+}}}
+
+A match variable is a special reserved name representing the input accepted during the current script.
+
+=== Next Variable ===
+
+{{{
+<NextVariable> {
+  accept 'next'
+}
+}}}
+
+A next variable is a special reserved name representing the next character in the input.  
+
+===Variable===
+
+{{{
+<Variable> {
+  <Name>
+}
+}}}
+
+Variables are named references to environment bindings. There are two in particular, match and next, which are specially defined variables. Other variables such as true, false, or null may be provided by the implementation.
+
+Variables resolve to a value if they have been set to a value in the current environment, or any of its parent environments.
+
+===Name===
+
+`<Name>` should be the only reference still undefined. The characters allowed in name are generally dependent on the underlying language. In Chessur for instance, they are valid Java identifiers. It should be safe to always assume the following Names at least
+
+{{{
+<Name> {
+  repeat accept in A-Z, a-z, 0-9, _
+}
+}}}
