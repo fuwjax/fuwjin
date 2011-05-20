@@ -1,0 +1,4 @@
+<Root> {
+  assume not next
+  return 'yes'
+}

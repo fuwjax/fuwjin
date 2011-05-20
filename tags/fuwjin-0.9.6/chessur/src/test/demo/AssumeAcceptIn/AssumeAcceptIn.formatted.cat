@@ -1,0 +1,4 @@
+<Root> {
+  assume accept in a, c, e
+  return 'yes'
+}

@@ -1,0 +1,15 @@
+<Root>{
+  <A> << "new input" >> <B> >> result
+  return result
+}
+
+<A> {
+  repeat accept in a-z
+  publish match
+}
+
+<B> {
+  repeat accept next
+  publish java.lang.String.toUpperCase(match)
+}
+
