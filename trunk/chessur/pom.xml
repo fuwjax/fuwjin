@@ -26,19 +26,12 @@
 			<version>0.9.7-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-<!--	<build>
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.fuwjin</groupId>
 				<artifactId>chessur-maven-plugin</artifactId>
-				<version>0.9.5.7-SNAPSHOT</version>
- 				<dependencies>
-					<dependency>
-						<groupId>org.fuwjin</groupId>
-						<artifactId>chessur</artifactId>
-						<version>0.9.5.7-SNAPSHOT</version>
-					</dependency>
-				</dependencies>
+				<version>0.9.6</version>
 				<executions>
 					<execution>
 						<goals>
@@ -48,5 +41,5 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build> -->
+	</build>
 </project>
