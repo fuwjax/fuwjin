@@ -40,10 +40,18 @@ public class ScriptInput implements Expression {
       return spec.resolve(in, output, scope);
    }
 
+   /**
+    * Returns the script.
+    * @return the script
+    */
    public Expression spec() {
       return spec;
    }
 
+   /**
+    * Returns the input value.
+    * @return the value
+    */
    public Expression value() {
       return value;
    }

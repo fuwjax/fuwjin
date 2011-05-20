@@ -101,7 +101,6 @@ public class ScriptFormatDemo {
    @Test
    public void testSerialization() throws Exception {
       final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("postage", manager);
       env.put("name", path.getName());
       env.put("manager", manager);
       final Catalog cat = (Catalog)catParser.exec(newReader(".cat"), env);

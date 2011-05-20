@@ -23,6 +23,7 @@ public class InstanceOfFunction extends FixedArgsFunction<Member> {
 
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param type the expected type
     */
@@ -36,6 +37,10 @@ public class InstanceOfFunction extends FixedArgsFunction<Member> {
       return TypeUtils.isInstance(type, args[0]);
    }
 
+   /**
+    * Returns the test type.
+    * @return the type
+    */
    public Type type() {
       return type;
    }

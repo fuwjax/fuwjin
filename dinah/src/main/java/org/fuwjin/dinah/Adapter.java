@@ -3,6 +3,9 @@ package org.fuwjin.dinah;
 import java.lang.reflect.Type;
 import org.fuwjin.util.BusinessException;
 
+/**
+ * Manages transformation of objects into other types.
+ */
 public interface Adapter {
    /**
     * Exception for Adapter methods.
@@ -30,6 +33,9 @@ public interface Adapter {
       }
    }
 
+   /**
+    * The unset sentinel.
+    */
    Object UNSET = new Object() {
       @Override
       public String toString() {
@@ -37,5 +43,12 @@ public interface Adapter {
       }
    };
 
+   /**
+    * Transforms the value to an instance of the type.
+    * @param value the value to transform
+    * @param type the type to transform into
+    * @return the transformed value
+    * @throws AdaptException if the value cannot be transformed into the type
+    */
    Object adapt(Object value, Type type) throws AdaptException;
 }

@@ -69,10 +69,19 @@ public class ChessurExecuteMojo extends AbstractMojo {
     */
    private MavenProject project;
 
+   /**
+    * Creates a new instance.
+    */
    public ChessurExecuteMojo() {
       // normal constructor
    }
 
+   /**
+    * Creates a new instance. Reserved for testing.
+    * @param catFile the catalog file path
+    * @param source the input file
+    * @param output the output file
+    */
    public ChessurExecuteMojo(final String catFile, final File source, final File output) {
       this.catFile = catFile;
       sourceDirectory = source;

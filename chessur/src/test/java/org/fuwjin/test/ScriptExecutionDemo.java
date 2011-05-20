@@ -122,7 +122,6 @@ public class ScriptExecutionDemo {
 
    static Catalog parseModel(final File file) throws FileNotFoundException, ExecutionException {
       final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("postage", manager);
       env.put("name", file.getName());
       env.put("manager", manager);
       return (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
@@ -177,7 +176,7 @@ public class ScriptExecutionDemo {
     * Creates a new instance.
     * @param name the name of the test
     * @param file the test directory
-    * @param index the test case
+    * @param caseFolder the test case
     * @param data the test catalogs
     */
    public ScriptExecutionDemo(final String name, final File file, final File caseFolder, final TestData data) {

@@ -39,10 +39,17 @@ import org.fuwjin.util.TypeUtils;
 public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
    private final Adapter adapter;
 
+   /**
+    * Creates a new instance.
+    */
    public ReflectiveFunctionProvider() {
       this(new StandardAdapter());
    }
 
+   /**
+    * Creates a new instance.
+    * @param adapter the type converter
+    */
    public ReflectiveFunctionProvider(final Adapter adapter) {
       this.adapter = adapter;
    }

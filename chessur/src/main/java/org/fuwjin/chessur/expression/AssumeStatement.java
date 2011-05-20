@@ -53,6 +53,10 @@ public class AssumeStatement implements Expression {
       this.value = value;
    }
 
+   /**
+    * Returns true if this statement has been negated.
+    * @return true if negated, false otherwise
+    */
    public boolean isNot() {
       return isNot;
    }
@@ -85,6 +89,10 @@ public class AssumeStatement implements Expression {
       return "assume " + (isNot ? "not " : "") + value;
    }
 
+   /**
+    * Returns the value or statement being tested.
+    * @return the tested expression
+    */
    public Expression value() {
       return value;
    }

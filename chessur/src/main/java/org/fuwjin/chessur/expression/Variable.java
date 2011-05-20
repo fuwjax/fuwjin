@@ -51,6 +51,10 @@ public class Variable implements Expression {
       this.name = name;
    }
 
+   /**
+    * Returns the name of the variable.
+    * @return the name
+    */
    public String name() {
       return name;
    }

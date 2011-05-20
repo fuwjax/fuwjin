@@ -19,9 +19,10 @@ public class InstanceMethodFunction extends FixedArgsFunction<Method> {
 
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param method the method to invoke
-    * @param type the host object type
+    * @param target the host object type
     */
    public InstanceMethodFunction(final Adapter adapter, final String category, final Method method, final Object target) {
       super(adapter, method, category + '.' + method.getName(), method.getParameterTypes());

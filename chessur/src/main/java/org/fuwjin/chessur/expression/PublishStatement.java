@@ -42,6 +42,10 @@ public class PublishStatement implements Expression {
       return "publish " + value;
    }
 
+   /**
+    * Returns the published value.
+    * @return the value
+    */
    public Expression value() {
       return value;
    }

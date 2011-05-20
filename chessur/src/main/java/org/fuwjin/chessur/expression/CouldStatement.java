@@ -41,6 +41,10 @@ public class CouldStatement implements Expression {
       }
    }
 
+   /**
+    * Returns the optional statement.
+    * @return the optional statement
+    */
    public Expression statement() {
       return statement;
    }

@@ -42,10 +42,18 @@ public class ScriptPipe implements Expression {
       return sink.resolve(in, output, scope);
    }
 
+   /**
+    * Returns the destination script.
+    * @return the destination
+    */
    public Expression sink() {
       return sink;
    }
 
+   /**
+    * Returns the source script.
+    * @return the source
+    */
    public Expression source() {
       return source;
    }

@@ -46,6 +46,10 @@ public class AbortStatement implements Expression {
       return "abort " + value;
    }
 
+   /**
+    * Returns the abort message.
+    * @return the message
+    */
    public Expression value() {
       return value;
    }

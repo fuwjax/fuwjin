@@ -32,6 +32,10 @@ public class ScriptOutput implements Expression {
       this.name = name;
    }
 
+   /**
+    * Returns the variable name.
+    * @return the variable
+    */
    public String name() {
       return name;
    }
@@ -45,6 +49,10 @@ public class ScriptOutput implements Expression {
       return result;
    }
 
+   /**
+    * Returns the script.
+    * @return the script
+    */
    public Expression spec() {
       return spec;
    }

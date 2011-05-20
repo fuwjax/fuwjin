@@ -25,17 +25,22 @@ import org.fuwjin.dinah.function.VarArgsFunction;
 import org.fuwjin.util.TypeUtils;
 
 /**
- * Provider which supplies functions abstracting the reflection classes such as
- * Constructor, Method, and Field, in addition to some virtual methods such as
- * primitive and array access and the instanceof keyword.
+ * Provider which supplies functions provided by a Class instance.
  */
 public class ClassInstanceFunctionProvider extends AbstractFunctionProvider {
    private final Adapter adapter;
 
+   /**
+    * Creates a new instance.
+    */
    public ClassInstanceFunctionProvider() {
       this(new StandardAdapter());
    }
 
+   /**
+    * Creates a new instance.
+    * @param adapter the type converter
+    */
    public ClassInstanceFunctionProvider(final Adapter adapter) {
       this.adapter = adapter;
    }

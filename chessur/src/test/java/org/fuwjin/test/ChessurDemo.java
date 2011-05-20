@@ -117,7 +117,6 @@ public class ChessurDemo {
    public void setup() {
       manager = new CatalogManager();
       env = new HashMap<String, Object>();
-      env.put("postage", manager);
       env.put("name", "test");
       env.put("manager", manager);
    }

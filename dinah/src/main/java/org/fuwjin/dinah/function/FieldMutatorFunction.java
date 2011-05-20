@@ -17,6 +17,7 @@ import org.fuwjin.dinah.Adapter;
 public class FieldMutatorFunction extends FixedArgsFunction<Field> {
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param field the field to mutate
     * @param type the type of the host object

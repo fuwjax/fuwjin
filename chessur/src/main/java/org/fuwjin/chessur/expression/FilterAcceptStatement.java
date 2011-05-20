@@ -32,10 +32,18 @@ public class FilterAcceptStatement implements Expression {
       this.filter = filter;
    }
 
+   /**
+    * Returns the filter expression.
+    * @return the filter
+    */
    public Filter filter() {
       return filter;
    }
 
+   /**
+    * Returns true if this statement is negated.
+    * @return true if negated, false otherwise
+    */
    public boolean isNot() {
       return isNot;
    }

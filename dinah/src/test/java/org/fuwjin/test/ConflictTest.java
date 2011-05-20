@@ -29,6 +29,10 @@ public class ConflictTest {
       Sample.staticValue = "initial";
    }
 
+   /**
+    * I'm not sure what the desired behavior should be here.
+    * @throws Exception if the test fails
+    */
    @Test
    @Ignore
    public void testAppendOverlap() throws Exception {

@@ -21,9 +21,10 @@ public class InstanceFieldAccessFunction extends FixedArgsFunction<Field> {
 
    /**
     * Creates a new instance.
+    * @param adapter the type converter
     * @param category the function category
     * @param field the field instance
-    * @param type the object type required to access the field
+    * @param target the object type required to access the field
     */
    public InstanceFieldAccessFunction(final Adapter adapter, final String category, final Field field,
          final Object target) {

@@ -68,14 +68,26 @@ public class CodePointSet {
          };
       }
 
+      /**
+       * Returns the end of the range.
+       * @return the end
+       */
       public int end() {
          return end;
       }
 
+      /**
+       * Returns true if start is not end.
+       * @return true if a range, false otherwise
+       */
       public boolean isRange() {
          return isRange;
       }
 
+      /**
+       * Returns the start of the range.
+       * @return the start
+       */
       public int start() {
          return start;
       }
