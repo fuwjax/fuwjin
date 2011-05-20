@@ -4,61 +4,121 @@
 
 The Grin Language is a fairly radical departure from traditional scripting languages. At first glance, it may seem easy to list all the things that are missing from Grin. But the driving force behind Grin is the sneaking suspicion that programming doesn't have to always be so hard. What happens if the simple stays easy, and the hard is pushed back to a supporting language?
 
- Catalog = _Declaration_+
+{{{
+<Catalog> {
+  repeat either <AliasDeclaration>
+  or <LoadDeclaration>
+  or <ScriptDeclaration>
+}
+}}}
+Note that the Grin scripts on this page are meant to illustrate rather than define. In particular, for the sake of brevity, white space is not addressed. For the language parser, please refer to GrinParser.cat in the code base.
 
-Grin is written in files called Catalogs or .cat files. Catalogs are primarily collections of Script Declarations, a Script being the primary code block in Grin, much as methods are to Java. These catalogs are implicit namespaces and may be included in other catalogs through Load Declarations. An important feature to Grin is the concept of an Alias, a binding from Grin to the underlying implementation language. Aliases are declared just like Loads and Scripts in the catalog.
+Grin is written in files called Catalogs or .cat files. Catalogs are primarily collections of Script Declarations, a Script being the primary code block in Grin, much as methods are to Java. These catalogs are implicit namespaces and may be included in other catalogs through Load Declarations. Aliases are a shortened identifier for function signatures and are declared just like Loads and Scripts in the catalog.
 
 ==Grin Declarations==
 
- Declaration = _!AliasDeclaration_ | _!LoadDeclaration_ | _!ScriptDeclaration_
-
-There are 3 declarations. Alias Declarations bind a function signature to the underlying implementation language. Load Declarations import other catalogs by assigning them a local namespace. Script Declarations are the primary code blocks in catalogs.
-
 ===Alias Declaration===
 
- !AliasDeclaration = _!NameAlias_ | _!SignatureAlias_
+{{{
+<AliasDeclaration> {
+  either <SignatureAlias>
+  or <NameAlias>
+}
+}}}
 
-Alias Declarations come in two flavors. The Name Alias allows a qualified name to be replaced with a simpler identifier. The Signature Alias maps a specific function signature to a simple name. Aliases are currently used in Invocation, ObjectType and Field resolution.
-
-====Name Alias====
-
- !NameAlias = *alias* _!QualifiedName_ *as* _Name_
-
- !QualifiedName = _!AnnotatedName_ (*.* _!AnnotatedName_)`*`
-
- !AnnotatedName = _Name_ _Annotation_?
- 
- Name = `[0-9A-Za-z_$]+`
-
- Annotation = *`[`* _Name_? *`]`*
-
-The simple version of an alias binds a qualified name to a simple name. A qualified name or "dotted name" is a series of names, possibly just one, separated by periods (.). The alias name may then be substituted for the aliased qualified name in the rest of the catalog. 
+Alias Declarations come in two flavors. The Name Alias allows a qualified name to be replaced with a simpler identifier. The Signature Alias maps a specific function signature to a simple name. Aliases are currently used in Invocation, Object, Type and Field resolution.
 
 ====Signature Alias====
 
- !SignatureAlias = *alias* _Signature_ *as* _Name_
+{{{
+<SignatureAlias> {
+  accept 'alias'
+  <Signature>
+  accept 'as'
+  <Name>
+}
+<Signature> {
+  <QualfiedName>
+  accept '('
+  could {
+    <QualifiedName>
+    could repeat {
+      accept ','
+      <QualifiedName>
+    }
+  }
+  accept ')'
+}
+<QualifiedName> {
+  <Name>
+  could repeat {
+    accept '.'
+    <Name>
+  }
+}
+}}}
 
- Signature = _!QualifiedName_ *(* _Parameters_? *)*
+This more complicated version of alias binds a function signature to a simple name. A Signature is a qualified name followed by a comma delimited list of qualified names enclosed in parentheses. A qualified name or "dotted name" is a series of names, possibly just one, separated by periods (.).
 
- Parameters = _!QualifiedName_ (*,* _!QualifiedName_)`*`
+====Name Alias====
 
-This more complicated version of alias binds a function signature to a simple name. A Signature is a qualified name followed by a comma delimited list of qualified names enclosed in parentheses.
+{{{
+<NameAlias> {
+  accept 'alias'
+  <QualifiedName>
+  accept 'as'
+  <Name>
+}
+}}}
+
+If the name alone is enough to identify the alias, the simple version of an alias binds a qualified name to a simple name. The alias name may then be substituted for the aliased qualified name in the rest of the catalog. 
 
 ===Load Declaration===
 
- !LoadDeclaration = *load* _Path_ *as* _Name_
+{{{
+<LoadDeclaration> {
+  accept 'load'
+  <Path>
+  accept 'as'
+  <Name>
+}
+<Path> {
+  could accept '/'
+  <QualifiedName>
+  could repeat {
+    accept '/'
+    <QualifiedName>
+  }
+}
+}}}
 
 A Load Declaration imports the catalog indicated by the file system path Path as the local namespace Name. All Scripts from the loaded catalog may be referenced by their namespaced name. See the Script statement for more detail.
 
 ===Script Declaration===
 
- !ScriptDeclaration = _!ElevatedName_ _!ScriptBlock_ 
- 
- !ElevatedName = *`<`*_Name_*>*
+{{{
+<ScriptDeclaration> {
+  <ScriptName>
+  <ScriptBlock>
+}
+<ScriptName> {
+  accept '<'
+  <Name>
+  could {
+    accept ':'
+    <Name>
+  }
+  accept '>'
+}
+<ScriptBlock> {
+  accept '{'
+  could repeat <Statement>
+  could <ReturnStatement>
+  accept '}'
+}
+}}}
 
- !ScriptBlock =  *{* _Statement_`*` _!ReturnStatement_? *}*
-
-A Script Declaration defines a script for later use within other scripts or from the underlying language. The script is a Script Block prefixed with an elevated name. The elevated name is technically up to the IDE for presentation, for instance, it may be rendered as bold or with a green background. However, for the sake of text only presentation, it is assumed to be a normal name enclosed in angle brackets.
+ A Script Declaration defines a script for later use within other scripts or from the underlying language. The script is a Script Block prefixed with an elevated name. The elevated name is technically up to the IDE for presentation, for instance, it may be rendered as bold or with a green background. However, for the sake of text only presentation, it is assumed to be a normal name enclosed in angle brackets.
 
 The Script Block is like a standard Block statement except that it may optionally end with a return statement. Return statements are only valid as the last statement in a script block.
 
@@ -66,25 +126,50 @@ Scripts, when executed, have a state associated with their execution. This state
 
 ==Grin Statements==
 
- Statement = _!StateChangeStatement_ | _!RedirectStatement_ | _!ControlFlowStatement_
+{{{
+<Statement> {
+  either <AcceptStatement>
+  or <PublishStatement>
+  or <AssignmentStatement>
+  or <ScriptStatement>
+  or <InvocationStatement>
+  or <BlockStatement>
+  or <CouldStatement>
+  or <RepeatStatement>
+  or <EitherOrStatement>
+  or <AssumeStatement>
+  or <AbortStatement>
+}
+}}}
 
 Grin Statements are the primary code elements in Grin. There are only a dozen or so statements dealing with input/output, redirection and control flow. Each statement may modify the execution state of the script, and in particular, may toggle the "failed" marker.
 
-===State Change Statements===
-
- !StateChangeStatement = _!AcceptStatement_ | _!PublishStatement_ | _Assignment_
-
 ====Accept Statement====
 
- !AcceptStatement = _!FilterAcceptStatement_ | _!ValueAcceptStatement_
- 
- !FilterAcceptStatement = *accept* *not*? *in* _Filter_
-
- Filter = _Range_ (*,* _Range_)`*`
-
- Range = . *-* . | .
-
- !ValueAcceptStatement = *accept* *not*? _Value_
+{{{
+<AcceptStatement> {
+  accept 'accept'
+  could accept 'not'
+  either {
+    accept 'in'
+    <Filter>
+  } or <Value>
+}
+<Filter> {
+  <Range>
+  could repeat {
+    accept ','
+    <Range>
+  }
+}
+<Range> {
+  accept next
+  could {
+    accept '-'
+    accept next
+  }
+} 
+}}}
 
 Accept statements consume matching characters from the input stream associated with the script. The Filtered version accepts a character if it falls in any of the ranges in the filter (or doesn't fall in any ranges if the "not" keyword is present). The value version consumes a sequence of characters if the input matches the resolved value. If the "not" keyword is present in the value version, it consumes the next character from the input if the input does not match the resolved value.
 
@@ -92,7 +177,12 @@ An accept statement will set the state "failure" marker if the input does not ma
 
 ====Publish Statement====
 
- !PublishStatement = *publish* _Value_
+{{{
+<PublishStatement> {
+  accept 'publish'
+  <Value>
+}
+}}}
 
 Publish statements serialize the resolved value to the output stream. 
 
@@ -100,17 +190,23 @@ A publish statement will set the state "failure" marker if the value cannot be r
 
 ====Assignment====
 
- Assignment = _Name_ *=* _Value_
+{{{
+<AssignmentStatement> {
+  <Name>
+  accept '='
+  <Value>
+}
 
 Assignments associate the resolved value with the name in the current environment. This association will not leave the current script, i.e. a Script cannot modify the name-value mapping for the caller.
 
 An assignment will set the state "failure" marker if the value cannot be resolved. An assignment will always successfully associate a name with a resolved value.
 
-===Redirection Statements===
-
- !RedirectStatements = _Script_ | _Invocation_
-
 ====Script====
+
+=RESUME EDITING HERE=
+{{{
+<ScriptStatement> {
+}}}
 
  Script = _!ElevatedNamespaceName_ _!InputValue_? _!ChainedOutput_? _!OutputAssignment_?
 
