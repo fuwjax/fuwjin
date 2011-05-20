@@ -122,4 +122,4 @@ You'll also notice that the curly braces can show up in more places than just th
 
 The "assume" statement can be negated, much like an "accept" statement. 
 
-This concludes the "Getting Started with Grin", but there is still more to learn. If you want to learn more about Grin `<->` Java interoperability, check out EmbeddedGrin. If you're interested in how to manage catalogs as they grow in size, check out AdvancedScriptManagement. Looking for a pragmatic way to grow and test your scripts? Look no further than DebuggingAndTestingScripts. And perhaps most importantly, the GrinQuickReference.
+This concludes the "Getting Started with Grin", but there is still more to learn. If you want to learn more about Grin `<->` Java interoperability, check out EmbeddedGrin. If you're interested in how to manage catalogs as they grow in size, check out AdvancedScriptManagement. Looking for a pragmatic way to grow and test your scripts? Look no further than DebuggingAndTestingScripts. And if you're looking for the details, there's the GrinLanguageSpecification or the distilled down GrinQuickReference.
