@@ -1,0 +1,13 @@
+#summary Grin interoperability with its Host language
+
+=Embedded Grin=
+
+Grin has no mathematical or comparison operators, no ability to define new Data Objects or perform I/O operations. So to do all the heavy lifting, Grin relies on bindings to the host language.
+
+==Aliases==
+
+==Invocations==
+
+==Initial Environment==
+
+==Streams==
