@@ -2,18 +2,30 @@
 
 The Fuwjin Suite has grown to a library of 3 major components and a half dozen experimental libraries. While almost all of the code has been written by one man, there has been significant involvement in the design and direction of the Suite from countless friends and coworkers. This has always been a community project even if it is only actively maintained by a single developer.
 
-The Fuwjin Suite had its roots in JON, the Java Object Notation library. In 2005, Michael Doberenz was a member of a team faced with developing a product with a large volume of static data. The team was frustrated by the complexity of relational databases, the verbosity of XMLl and the opacity of Java serialization. We wanted something easily readable and writable by both humans and computers. JSON seemed a natural fit, but unfortunately it suffered from three major shortcomings
+The Fuwjin Suite had its roots in JON, the Java Object Notation library. In 2005, Michael Doberenz was a member of a team faced with developing a product with a large volume of static data. The team was frustrated by the complexity of using relational databases to manage non-tabular data, the verbosity of XML and the opacity of Java serialization. We wanted something easily readable and writable by both humans and computers. JSON seemed a natural fit, but unfortunately it suffered from three major shortcomings
 
   # Object graphs are rarely trees, the same object may be referenced several times
   # Java is strongly typed, but JSON carries no type information
   # Maps don't always have strings for keys
 
-This let to the precursor to JON, a set of extensions to JSON that allow serialization to and from plain Java objects. Even several complete rewrites later, JON was still parsed by a handwritten zero-lookahead, top-down parser.
+This led to the precursor to JON, a set of extensions to JSON that allow serialization to and from plain Java objects. Even several complete rewrites later, JON was still parsed by a handwritten zero-lookahead, top-down parser.
 
-At about the same time, two separate events led to a dramatic shift in JON's design. First was the desire to have forward references, the ability to refer to an object in the JON stream which had not yet been deserialized.The second was the claim and subsequent challenge that the same engine could be used for both serialization and parsing. A little research led to the discovery that the underlying parser/serializer in JON was already very similar to PEG, 
+At about the same time, two separate events led to a dramatic shift in JON's design. First was the desire to have forward references, the ability to refer to an object in the JON stream which had not yet been deserialized.The second was the claim and subsequent challenge that the same engine could be used for both serialization and parsing. A little research led to the discovery that the underlying parser/serializer in JON was already very similar to other PEG (Parsing Expression Grammar) parsers, 
 
-Pogo was an attempt to make the simplest possible attributed PEG parser. Most attributed parsers are trying to define a new language to manage attributes; Pogo simply binds the attributes to Java. This leads to a very simple parser with very elaborate parse handling. Grammars which are impossible in other parser parsers are trivial in Pogo.
+Pogo was an attempt to make the simplest possible attributed PEG parser. Most attributed parsers are trying to define a new language to manage attributes; Pogo simply binds the attributes to Java. This lead to a very simple parser with very elaborate parse handling. Grammars which are impossible in other parser parsers are trivial in Pogo.
 
 However, as the binding grew in complexity, the need became great to refactor the underlying Java reflection into something more manageable. Postage was intended to just be a message parsing framework, but grew into a deeper abstraction, allowing methods, fields, constructors and virtual functions to merge into one common invocation structure mimicking public static functions.
+
+Pogo saw development for almost 3 years, and it grew into a very useful and mature product, used by several teams for several different purposes. But there were always two seemingly insurmountable issues: the syntax and the attributes.
+
+The Pogo syntax is so sufficiently similar to other parsers and regular expressions that it takes more time to discuss why Pogo doesn't work the way you might expect than to explain how it really works. The attributes are so sufficiently unlike everything else in the programming world, that it seems to defy any decent explanation at all. So Pogo requires an unreasonable level of sophistication just to create a simple grammar followed by a ridiculous amount of trial and error to pair that grammar with the attributes that would make it even marginally useful.
+
+As much as it pained me, Pogo would likely never be ready for mainstream usage. This was made even more painful by the fact that November 2010 saw a great leap in the redesign of Pogo attributes, finally giving them a hope to be explained and understood. But reducing the attribute problem served to expose the syntax problem all the more. Pogo pushed the PEG-style syntax to its limit, and it was time for a real change.
+
+Grin is the spiritual successor to Pogo, a language born from the desire to have a deeper set of string parsing idioms than regular expressions but without the cryptic operators. Ultimately, Grin is a transformation language, capable of articulating complex exchanges between input and output streams and a set of objects.
+
+The response to Grin has been interesting. Most programmers feel it looks too much like pseudocode that couldn't possibly work. But everyone else seems to have picked it up extremely fast. I've seen manager use it to parse log files and HTML pages that even a seasoned Perl guru would have balked at. And perhaps more meaningful to me than anything else, I'm able to create rich and compelling domain language parsers and serializers in days instead of months.
+
+There are a few features, namely native arrays, POJO serialization, and static variables, that need to be implemented before Chessur hits v1.0. After that, there are plans to get a web demo and a set of eclipse plugins started as well as work on a sister implementation in .NET called tweed.
 
 Over the past few years, the Fuwjin Suite has been hosted on assembla,, sourceforge, dreamhost, and now makes its home at googlecode.  It has no runtime dependencies other than Java and is built from and deployed to maven central.
