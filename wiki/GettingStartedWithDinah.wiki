@@ -2,6 +2,11 @@
 
 =Dinah=
 
+==Getting Dinah==
+If you're using a dependency management tool, you can find information on the latest public release at [http://mvnrepository.com/artifact/org.fuwjin/dinah MvnRepository]. Otherwise, you can download public releases from the [https://oss.sonatype.org/content/repositories/releases/org/fuwjin/dinah Sonatype Open Source Releases repository] or if you're feeling particularly brave, the latest snapshot release from the [https://oss.sonatype.org/content/repositories/snapshots/org/fuwjin/dinah Sonatype Open Source Snapshots repository].
+
+==Understanding Virtual Signatures==
+
 Dinah is a reflection library which effectively strips the Object-Orientedness from Java. The idea is to transform all of Java into a Function which looks and acts much like a static method would. For instance, consider the following Java snippet:
 
 {{{
