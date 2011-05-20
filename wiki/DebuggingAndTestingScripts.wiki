@@ -1,0 +1,13 @@
+#summary Debugging and Testing
+
+= Debugging and Testing Grin =
+
+Grin tries to give helpful messages when failures bubble back to the surface, but it can only report on the state at the time of the failure and not on the context. But users can supply more information in the form of Abort statements and, when not using the output stream for anything else, it can be used for logging
+
+== Understanding Failure ==
+
+== Error Messages ==
+
+== User Aborted Execution ==
+
+== Assumptions ==
