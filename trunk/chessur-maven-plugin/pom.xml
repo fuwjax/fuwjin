@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>fuwjin</artifactId>
 		<groupId>org.fuwjin</groupId>
-		<version>0.9.7</version>
+		<version>0.9.8-SNAPSHOT</version>
 	</parent>
 	<artifactId>chessur-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.fuwjin</groupId>
 			<artifactId>chessur</artifactId>
-			<version>0.9.7</version>
+			<version>0.9.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
