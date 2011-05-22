@@ -27,7 +27,7 @@
 			<version>0.9.7-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-	<build>
+<!--	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.fuwjin</groupId>
@@ -49,5 +49,5 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 </project>
