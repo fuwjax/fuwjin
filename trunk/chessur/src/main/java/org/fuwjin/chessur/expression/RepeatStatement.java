@@ -34,8 +34,7 @@ public class RepeatStatement implements Expression {
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws AbortedException, ResolveException {
       Snapshot snapshot = new Snapshot(input, output, scope);
-      //statement.resolve(input, output, scope);
-      snapshot.resolve(statement, true);
+      statement.resolve(input, output, scope);
       try {
          while(true) {
             snapshot = new Snapshot(input, output, scope);

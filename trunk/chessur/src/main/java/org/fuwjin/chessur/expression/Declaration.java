@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
@@ -20,9 +22,24 @@ import org.fuwjin.dinah.Adapter;
  * Represents a Specification declaration.
  */
 public class Declaration implements Expression {
+   private static class MatchExpression extends Variable {
+      private final Deque<SourceStream> buffers = new LinkedList<SourceStream>();
+
+      public MatchExpression() {
+         super("match");
+      }
+
+      @Override
+      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+            throws AbortedException, ResolveException {
+         return buffers.peek().toString();
+      }
+   }
+
    private final String name;
    private final Block block;
    private Expression returns;
+   private MatchExpression match;
 
    /**
     * Creates a new instance.
@@ -41,6 +58,13 @@ public class Declaration implements Expression {
       block.add(statement);
    }
 
+   public Expression match() {
+      if(match == null) {
+         match = new MatchExpression();
+      }
+      return match;
+   }
+
    /**
     * Returns the specification name.
     * @return the specification name
@@ -52,7 +76,11 @@ public class Declaration implements Expression {
    @Override
    public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
          throws ResolveException, AbortedException {
-      final SourceStream in = input.mark();
+      SourceStream in = input;
+      if(match != null) {
+         in = input.buffer();
+         match.buffers.push(in);
+      }
       final Snapshot snapshot = new Snapshot(in, output, scope);
       final Environment env = scope.newScope();
       try {
@@ -65,6 +93,10 @@ public class Declaration implements Expression {
          throw new AbortedException(e, "in %s: %s", name, snapshot);
       } catch(final ResolveException e) {
          throw new ResolveException(e, "in %s: %s", name, snapshot);
+      } finally {
+         if(match != null) {
+            match.buffers.poll();
+         }
       }
    }
 

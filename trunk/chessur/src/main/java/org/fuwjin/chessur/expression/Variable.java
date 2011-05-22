@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.CodePointInStream;
 import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
@@ -21,16 +20,6 @@ import org.fuwjin.dinah.adapter.StandardAdapter;
  * Represents a variable in the current scope.
  */
 public class Variable implements Expression {
-   /**
-    * Represents a match within a specification.
-    */
-   public static final Variable MATCH = new Variable("match") {
-      @Override
-      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-            throws AbortedException, ResolveException {
-         return CodePointInStream.stringOf(input.buffer(new Snapshot(input, output, scope)));
-      }
-   };
    /**
     * Represents the next character.
     */

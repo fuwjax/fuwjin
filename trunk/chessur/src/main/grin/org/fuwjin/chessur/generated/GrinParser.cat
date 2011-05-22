@@ -332,7 +332,7 @@ alias org.fuwjin.dinah.Function as Function
 }
 <MatchValue>{
   accept 'match' <Sep>
-  return Variable.MATCH()
+  return Declaration.match(script)
 }
 <NextValue>{
   accept 'next' <Sep>

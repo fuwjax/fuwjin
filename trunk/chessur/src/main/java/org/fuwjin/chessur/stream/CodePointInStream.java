@@ -4,75 +4,33 @@ import static org.fuwjin.chessur.stream.CodePointPosition.EOF;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.Iterator;
 import org.fuwjin.chessur.expression.ResolveException;
 
 /**
  * A source stream for code points.
  */
 public abstract class CodePointInStream implements SourceStream {
-   private class DetachedStream implements SourceStream {
-      private final int start;
-      private int pos;
-
-      public DetachedStream(final int start, final int pos) {
-         this.start = start;
-         this.pos = pos;
-      }
-
-      @Override
-      public void attach(final SourceStream stream) {
-         pos = stream.current().index();
-      }
-
-      @Override
-      public Iterable<? extends Position> buffer(final Snapshot snapshot) throws ResolveException {
-         return positions(snapshot, start, pos);
-      }
-
-      @Override
-      public Position current() {
-         return get(pos);
-      }
-
-      @Override
-      public SourceStream detach() {
-         return new DetachedStream(start, pos);
-      }
-
-      @Override
-      public SourceStream mark() {
-         return new MarkedStream(pos, this);
-      }
-
-      @Override
-      public Position next(final Snapshot snapshot) throws ResolveException {
-         return getImpl(snapshot, pos + 1);
-      }
-
-      @Override
-      public Position read(final Snapshot snapshot) throws ResolveException {
-         return getImpl(snapshot, ++pos);
-      }
-   }
-
-   private class MarkedStream implements SourceStream {
-      private final int mark;
+   private static class BufferStream implements SourceStream {
+      StringBuilder builder = new StringBuilder();
       private final SourceStream source;
+      private int tail;
+      private int confirmed;
 
-      public MarkedStream(final int mark, final SourceStream stream) {
-         this.mark = mark;
-         source = stream;
+      public BufferStream(final SourceStream source) {
+         this.source = source;
+         tail = source.index();
+         confirmed = source.index();
       }
 
       @Override
       public void attach(final SourceStream stream) {
          source.attach(stream);
+         confirmed = stream.index();
       }
 
       @Override
-      public Iterable<? extends Position> buffer(final Snapshot snapshot) throws ResolveException {
-         return positions(snapshot, mark, source.current().index());
+      public SourceStream buffer() {
+         return new BufferStream(this);
       }
 
       @Override
@@ -82,12 +40,12 @@ public abstract class CodePointInStream implements SourceStream {
 
       @Override
       public SourceStream detach() {
-         return new DetachedStream(mark, source.current().index());
+         return new DetachedStream(index(), current(), this);
       }
 
       @Override
-      public SourceStream mark() {
-         return source.mark();
+      public int index() {
+         return source.index();
       }
 
       @Override
@@ -97,7 +55,88 @@ public abstract class CodePointInStream implements SourceStream {
 
       @Override
       public Position read(final Snapshot snapshot) throws ResolveException {
-         return source.read(snapshot);
+         final Position p = source.read(snapshot);
+         append(source.index(), p);
+         confirmed = source.index();
+         return p;
+      }
+
+      @Override
+      public Position readAt(final Snapshot snapshot, final int index) throws ResolveException {
+         final Position p = source.readAt(snapshot, index);
+         append(index, p);
+         return p;
+      }
+
+      @Override
+      public String toString() {
+         return builder.substring(0, builder.length() - tail + confirmed);
+      }
+
+      void append(final int index, final Position pos) {
+         if(index > tail) {
+            tail = index;
+            builder.append(pos.valueString());
+         }
+      }
+   }
+
+   private static class DetachedStream implements SourceStream {
+      private int pos;
+      private final SourceStream source;
+      private Position curr;
+
+      public DetachedStream(final int index, final Position current, final SourceStream source) {
+         this.source = source;
+         curr = current;
+         pos = index;
+      }
+
+      @Override
+      public void attach(final SourceStream stream) {
+         pos = stream.index();
+         curr = stream.current();
+      }
+
+      @Override
+      public SourceStream buffer() {
+         return new BufferStream(this);
+      }
+
+      @Override
+      public Position current() {
+         return curr;
+      }
+
+      @Override
+      public SourceStream detach() {
+         return new DetachedStream(pos, curr, source);
+      }
+
+      @Override
+      public int index() {
+         return pos;
+      }
+
+      @Override
+      public Position next(final Snapshot snapshot) throws ResolveException {
+         return source.readAt(snapshot, pos + 1);
+      }
+
+      @Override
+      public Position read(final Snapshot snapshot) throws ResolveException {
+         curr = source.readAt(snapshot, ++pos);
+         return curr;
+      }
+
+      @Override
+      public Position readAt(final Snapshot snapshot, final int index) throws ResolveException {
+         return source.readAt(snapshot, index);
+      }
+
+      @Override
+      public String toString() {
+         return source.toString();
       }
    }
 
@@ -160,19 +199,6 @@ public abstract class CodePointInStream implements SourceStream {
       };
    }
 
-   /**
-    * Converts a set of positions to a string.
-    * @param positions the set of positions
-    * @return the resulting string
-    */
-   public static String stringOf(final Iterable<? extends Position> positions) {
-      final StringBuilder builder = new StringBuilder();
-      for(final Position p: positions) {
-         builder.append(p.valueString());
-      }
-      return builder.toString();
-   }
-
    private CodePointPosition[] queue = new CodePointPosition[10];
    {
       queue[0] = new CodePointPosition();
@@ -182,12 +208,12 @@ public abstract class CodePointInStream implements SourceStream {
 
    @Override
    public void attach(final SourceStream stream) {
-      current = stream.current().index();
+      current = stream.index();
    }
 
    @Override
-   public Iterable<CodePointPosition> buffer(final Snapshot snapshot) throws ResolveException {
-      return positions(snapshot, 0, current);
+   public SourceStream buffer() {
+      return new BufferStream(this);
    }
 
    @Override
@@ -197,34 +223,28 @@ public abstract class CodePointInStream implements SourceStream {
 
    @Override
    public SourceStream detach() {
-      return new DetachedStream(0, current);
+      return new DetachedStream(current, current(), this);
    }
 
    @Override
-   public SourceStream mark() {
-      return new MarkedStream(current, this);
+   public int index() {
+      return current;
    }
 
    @Override
    public Position next(final Snapshot snapshot) throws ResolveException {
-      return getImpl(snapshot, current + 1);
+      return readAt(snapshot, current + 1);
    }
 
    @Override
    public Position read(final Snapshot snapshot) throws ResolveException {
-      final Position p = getImpl(snapshot, current + 1);
-      current++;
+      final Position p = readAt(snapshot, current + 1);
+      ++current;
       return p;
    }
 
-   protected CodePointPosition get(final int index) {
-      while(index >= count) {
-         add();
-      }
-      return queue[index % queue.length];
-   }
-
-   protected CodePointPosition getImpl(final Snapshot snapshot, final int index) throws ResolveException {
+   @Override
+   public CodePointPosition readAt(final Snapshot snapshot, final int index) throws ResolveException {
       final CodePointPosition next = get(index);
       if(next.isValid()) {
          return next;
@@ -232,34 +252,16 @@ public abstract class CodePointInStream implements SourceStream {
       throw new ResolveException("unexpected EOF: %s", snapshot);
    }
 
-   protected Iterable<CodePointPosition> positions(final Snapshot snapshot, final int start, final int end)
-         throws ResolveException {
-      if(end >= count || start < count - queue.length || get(start) == null) {
-         throw new ResolveException("Could not iterate over %d to %d: %s", start, end, snapshot);
+   @Override
+   public String toString() {
+      return current().toString();
+   }
+
+   protected CodePointPosition get(final int index) {
+      while(index >= count) {
+         add();
       }
-      return new Iterable<CodePointPosition>() {
-         @Override
-         public Iterator<CodePointPosition> iterator() {
-            return new Iterator<CodePointPosition>() {
-               private int index = start;
-
-               @Override
-               public boolean hasNext() {
-                  return index < end;
-               }
-
-               @Override
-               public CodePointPosition next() {
-                  return get(++index);
-               }
-
-               @Override
-               public void remove() {
-                  throw new UnsupportedOperationException();
-               }
-            };
-         }
-      };
+      return queue[index % queue.length];
    }
 
    protected abstract int readChar() throws IOException;

@@ -857,7 +857,7 @@ public class 'moduleName' {
   return "'input'.next()"
 }
 <MatchValue>{
-  assume Object.equals(Variable.MATCH(), value)
+  assume Object.equals("match",Variable.name(value))
   return "'input'.match()"
 }
 
