@@ -22,6 +22,12 @@ public class ChessurMain {
          script = cat.get(args[1]);
       }
       final Object value = script.exec(System.in, System.out, (Map)System.getProperties());
-      System.out.println("\n\n" + script.name() + " returned " + value);
+      System.out.println();
+      if(value != null) {
+         if(value instanceof Integer) {
+            System.exit((Integer)value);
+         }
+         System.err.println(script.name() + " returned " + value);
+      }
    }
 }

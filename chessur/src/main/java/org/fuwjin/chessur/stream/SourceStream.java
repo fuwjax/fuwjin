@@ -12,13 +12,7 @@ public interface SourceStream {
     */
    void attach(SourceStream stream);
 
-   /**
-    * Returns the position buffer.
-    * @param snapshot the snapshot for error reporting.
-    * @return the new failure
-    * @throws ResolveException if it fails
-    */
-   Iterable<? extends Position> buffer(Snapshot snapshot) throws ResolveException;
+   SourceStream buffer();
 
    /**
     * Returns the current position.
@@ -32,11 +26,7 @@ public interface SourceStream {
     */
    SourceStream detach();
 
-   /**
-    * Marks a new buffer start.
-    * @return the marked stream
-    */
-   SourceStream mark();
+   int index();
 
    /**
     * Returns the next position in the stream.
@@ -53,4 +43,6 @@ public interface SourceStream {
     * @throws ResolveException if it fails
     */
    Position read(Snapshot snapshot) throws ResolveException;
+
+   Position readAt(Snapshot snapshot, int index) throws ResolveException;
 }
