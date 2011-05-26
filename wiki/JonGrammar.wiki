@@ -47,10 +47,15 @@
 <unknown>{
   Either value=<unknown map>
   Or value=<unknown list>
-  Or value=<primative>
+  Or value=<primitive>
   Return value
 }
-
-
-
-    
+<value>{
+  Either{
+    Is Map.assignablefrom(type)
+    Value=<map>
+  } or {
+     #etc.
+  }
+  Return value
+}
