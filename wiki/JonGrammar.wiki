@@ -1,0 +1,56 @@
+#summary JON parser in grin
+
+{{{
+<element>{
+  Either{
+    Accept '&'
+    Name=<name>
+    Either{
+      Accept '=' <s>
+      Value=<object>
+      Registry.store(registry, name,value)
+    }or{
+      Value=registry.retrieve(registry,name)
+    }
+  }or{
+    Value=<object>
+  }
+  Return value
+}
+<object>{
+  Could Type=<classcast>
+  Either{
+    Is not type
+    Value=<unknown>
+  } or value = <value>
+  Return value
+}
+<class cast>{
+  Accept'('
+  Either{
+    Accept '&'
+    Name=<name>
+    Either{
+      Accept '=' <s>
+      Value=<class>
+      Registry.store(registry, name,value)
+    }or{
+      Value=registry.retrieve(registry,name)
+    }
+  }or{
+    Value=<class>
+  }
+  #check that value is assignable to type?
+  Accept')'
+  Return value
+}
+<unknown>{
+  Either value=<unknown map>
+  Or value=<unknown list>
+  Or value=<primative>
+  Return value
+}
+
+
+
+    
