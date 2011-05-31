@@ -18,6 +18,7 @@ alias java.util.Collections as Collections
 alias java.util.concurrent.atomic.AtomicInteger as AtomicInteger
 alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.ConditionalAbortStatement as ConditionalAbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
 alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
@@ -413,6 +414,7 @@ public class 'moduleName' {
 <Statement>{
   either <AssumeStatement>
   or <EitherOrStatement>
+  or <ConditionalAbortStatement>
   or <CouldStatement>
   or <RepeatStatement>
   or <AcceptStatement>
@@ -491,6 +493,29 @@ public class 'moduleName' {
   } or {
     <Statement>
   }  
+}
+<ConditionalAbortStatement>{
+  assume ConditionalAbortStatement.instanceof(statement)
+  value = ConditionalAbortStatement.value(statement)
+  stmt = statement # ConditionalAbortStatement.statement(statement)
+  assume EitherOrStatement.instanceof(stmt)
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "'indent'try {"
+  Indent.increase(indent)
+  <OrStatement>
+  assume not hasNext(statements)
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final 'className'Exception 'exception') {"
+  Indent.increase(indent)
+  publish "'indent''input'.abort('<Value>', 'exception');"
+  Indent.decrease(indent)
+  publish "'indent'} catch(final RuntimeException 'exception') {"
+  Indent.increase(indent)
+  publish "'indent''input'.abort('<Value>', 'exception');"
+  Indent.decrease(indent)
+  publish "'indent'}"
 }
 <CouldStatement>{
   assume CouldStatement.instanceof(statement)

@@ -3,7 +3,8 @@
 	Eclipse Public License v1.0 which accompanies this distribution, and is available 
 	at http://www.eclipse.org/legal/epl-v10.html Contributors: Michael Doberenz 
 	- initial API and implementation -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>fuwjin</artifactId>
@@ -25,19 +26,19 @@
 			<artifactId>dinah</artifactId>
 			<version>0.9.7.2-SNAPSHOT</version>
 		</dependency>
-        <dependency>
-            <groupId>org.fuwjin</groupId>
-            <artifactId>glory</artifactId>
-            <version>0.9.7.2-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.fuwjin</groupId>
+			<artifactId>glory</artifactId>
+			<version>0.9.7.2-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.fuwjin</groupId>
 				<artifactId>chessur-maven-plugin</artifactId>
-				<version>0.9.7</version>
+				<version>0.9.7.2-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

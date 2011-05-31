@@ -44,6 +44,10 @@ public class ConditionalAbortStatement implements Expression {
       }
    }
 
+   public Expression statement() {
+      return statement;
+   }
+
    @Override
    public String toString() {
       return "abort " + value;
