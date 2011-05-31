@@ -13,6 +13,7 @@ alias java.lang.Character as Character
 alias java.lang.Object.equals as eq
 alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.ConditionalAbortStatement as ConditionalAbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
 alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
@@ -109,6 +110,7 @@ alias java.util.Map$Entry.getValue as value
 <Statement>{
   either <AssumeStatement>
   or <EitherOrStatement>
+  or <ConditionalAbortStatement>
   or <CouldStatement>
   or <RepeatStatement>
   or <AcceptStatement>
@@ -151,6 +153,25 @@ alias java.util.Map$Entry.getValue as value
     publish "or "
     <Statement>
   }
+}
+<ConditionalAbortStatement>{
+  assume ConditionalAbortStatement.instanceof(statement)
+  value = ConditionalAbortStatement.value(statement)
+  stmt = statement # ConditionalAbortStatement.statement(statement)
+  assume EitherOrStatement.instanceof(stmt)
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "either "
+  repeat{
+    statement = getNext(statements)
+    <Statement>
+    either {
+      assume Block.instanceof(statement)
+      publish ' '
+    } or publish indent
+    publish "or "
+  }
+  publish "abort "
+  <Value>
 }
 <CouldStatement>{
   assume CouldStatement.instanceof(statement)

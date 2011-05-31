@@ -106,7 +106,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
    public void execute() throws MojoExecutionException, MojoFailureException {
       try {
          getLog().info("Transforming " + sourceDirectory + " to " + outputDirectory);
-         final CatalogManager manager = new CatalogManager();
+         final CatalogManager manager = new CatalogManager(loader());
          final Catalog cat = manager.loadCat(catFile);
          transform(cat, sourceDirectory, null);
          if(project != null) {
@@ -120,12 +120,15 @@ public class ChessurExecuteMojo extends AbstractMojo {
    }
 
    ClassLoader loader() throws MalformedURLException {
+      if(classpath == null) {
+         return Thread.currentThread().getContextClassLoader();
+      }
       final URL[] urls = new URL[classpath.size()];
       int index = 0;
       for(final String element: classpath) {
          urls[index++] = new File(element).toURI().toURL();
       }
-      return new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
+      return new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
    }
 
    String path(final File source) {
