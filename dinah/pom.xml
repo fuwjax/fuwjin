@@ -13,11 +13,11 @@
   <parent>
     <artifactId>fuwjin</artifactId>
     <groupId>org.fuwjin</groupId>
-    <version>0.9.7.2-SNAPSHOT</version>
+    <version>0.9.7.2</version>
   </parent>
   <groupId>org.fuwjin</groupId>
   <artifactId>dinah</artifactId>
-  <version>0.9.7.2-SNAPSHOT</version>
+  <version>0.9.7.2</version>
   <name>Dinah</name>
   <description>Dinah is a very simple reflection/mirroring/functional abstraction API</description>
   <dependencies>
