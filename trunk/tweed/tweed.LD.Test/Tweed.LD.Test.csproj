@@ -5,10 +5,10 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.50727</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}</ProjectGuid>
+    <ProjectGuid>{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Tweed.LD</RootNamespace>
-    <AssemblyName>Tweed.LD</AssemblyName>
+    <RootNamespace>Tweed.LD.Test</RootNamespace>
+    <AssemblyName>Tweed.LD.Test</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,23 +30,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="nunit.core, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="IAdapter.cs" />
-    <Compile Include="IFunctionSignature.cs" />
-    <Compile Include="IFunctionProvider.cs" />
-    <Compile Include="NoSuchFunctionException.cs" />
-    <Compile Include="IFunction.cs" />
-    <Compile Include="AdaptException.cs" />
-    <Compile Include="Provider\FunctionProvider.cs" />
-    <Compile Include="Function\Function.cs" />
-    <Compile Include="Provider\CachedFunctionProvider.cs" />
-    <Compile Include="Provider\ReflectiveFunctionProvider.cs" />
-    <Compile Include="Signature\NameOnlySignature.cs" />
-    <Compile Include="Signature\ArgCountSignature.cs" />
-    <Compile Include="Signature\TypedArgsSignature.cs" />
-    <Compile Include="Adapter\Adapter.cs" />
+    <Compile Include="ReflectiveFunctionProviderTest.cs" />
+    <Compile Include="Sample\Sample.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -55,9 +44,12 @@
     </MonoDevelop>
   </ProjectExtensions>
   <ItemGroup>
-    <Folder Include="Provider\" />
-    <Folder Include="Function\" />
-    <Folder Include="Signature\" />
-    <Folder Include="Adapter\" />
+    <ProjectReference Include="..\Tweed.LD\Tweed.LD.csproj">
+      <Project>{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}</Project>
+      <Name>Tweed.LD</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Sample\" />
   </ItemGroup>
 </Project>
