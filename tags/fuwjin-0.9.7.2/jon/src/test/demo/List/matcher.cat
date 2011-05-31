@@ -1,0 +1,11 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Number.intValue as int
+alias java.util.ArrayList as List
+
+<Root> {
+  list = List.new()
+  List.add(list, int(1))
+  List.add(list, int(2))
+  List.add(list, int(3))
+  return Matcher.is(list)
+}

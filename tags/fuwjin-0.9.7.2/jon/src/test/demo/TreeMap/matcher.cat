@@ -1,0 +1,10 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+alias java.util.TreeMap as Map
+
+<Root> {
+  map = Map.new()
+  Map.put(map, "key", "value")
+  Map.put(map, "other", "value")
+  return Matcher.is(map)
+}

@@ -1,0 +1,386 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2011 Michael Doberenz.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+# 
+# Contributors:
+#     Michael Doberenz - initial API and implementation
+#-------------------------------------------------------------------------------
+alias java.lang.Boolean as Boolean
+alias java.lang.Character as Character
+alias java.lang.Object.equals as eq
+alias org.fuwjin.chessur.Module as Module
+alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.ConditionalAbortStatement as ConditionalAbortStatement
+alias org.fuwjin.chessur.expression.Assignment as Assignment
+alias org.fuwjin.chessur.expression.Block as Block
+alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
+alias org.fuwjin.chessur.expression.Declaration as Declaration
+alias org.fuwjin.chessur.expression.EitherOrStatement as EitherOrStatement
+alias org.fuwjin.chessur.expression.Filter as Filter
+alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
+alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
+alias org.fuwjin.chessur.expression.Invocation as Invocation
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
+alias org.fuwjin.chessur.expression.Literal as Literal
+alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
+alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
+alias org.fuwjin.chessur.expression.Number as Number
+alias org.fuwjin.chessur.Script as Script
+alias org.fuwjin.chessur.expression.ScriptImpl as ScriptImpl
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
+alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
+alias org.fuwjin.chessur.expression.Variable as Variable
+alias org.fuwjin.util.CodePointSet$Range as Range
+alias org.fuwjin.util.Indent as Indent
+alias java.lang.Iterable.iterator as iterator
+alias java.util.Iterator.next as getNext
+alias java.util.Iterator.hasNext as hasNext
+alias java.util.Map$Entry.getKey as key
+alias java.util.Map$Entry.getValue as value
+
+<Catalog>{
+  modules = iterator(Catalog.modules(cat))
+  could {
+    repeat <LoadDeclaration>
+    publish '\n'
+  }
+  assume not hasNext(modules)
+  aliases = iterator(Catalog.aliases(cat))
+  could {
+    repeat <AliasDeclaration>
+    publish '\n'
+  }
+  assume not hasNext(aliases)
+  specs = iterator(Catalog.scripts(cat))
+  repeat <ScriptDeclaration>
+  assume not hasNext(specs)
+}
+<LoadDeclaration>{
+    module = getNext(modules)
+    path = Module.source(module)
+    name = Module.name(module)
+    publish "load 'path' as 'name'\n"
+}
+<AliasDeclaration>{
+    entry = getNext(aliases)
+    name = key(entry)
+    alias = value(entry)
+    publish "alias 'alias' as 'name'\n"
+}
+<ScriptDeclaration>{
+  spec = ScriptImpl.declaration(getNext(specs))
+  name = Declaration.name(spec)
+  publish "\<'name'> {"
+  indent = Indent.new()
+  statements = iterator(Declaration.statements(spec))
+  could repeat {
+    statement = getNext(statements)
+    publish "'indent'"
+    <Statement>
+  }
+  assume not hasNext(statements)
+  could{
+    value = Declaration.returns(spec)
+    assume value
+    publish "'indent'return "
+    <Value>
+  }
+  publish "\n}\n"
+}
+
+<Value>{
+  statement = value
+  either <Script>
+  or <StaticLiteral>
+  or <DynamicLiteral>
+  or <AcceptStatement>
+  or <Invocation>
+  or <Object>
+  or <Number>
+  or <Variable>
+}
+<Statement>{
+  either <AssumeStatement>
+  or <EitherOrStatement>
+  or <ConditionalAbortStatement>
+  or <CouldStatement>
+  or <RepeatStatement>
+  or <AcceptStatement>
+  or <PublishStatement>
+  or <AbortStatement>
+  or <Script>
+  or <Block>
+  or <Assignment>
+  or <Invocation>
+}
+
+<AssumeStatement>{
+  assume AssumeStatement.instanceof(statement)
+  publish "assume "
+  could {
+    assume AssumeStatement.isNot(statement)
+    publish "not "
+  }
+  value = AssumeStatement.value(statement)
+  either <Value> 
+  or {
+    statement = value
+    <Statement>
+  }
+}
+<EitherOrStatement>{
+  assume EitherOrStatement.instanceof(statement)
+  stmt = statement
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "either "
+  statement = getNext(statements)
+  <Statement>
+  repeat{
+    old = statement
+    statement = getNext(statements)
+    either {
+      assume Block.instanceof(old)
+      publish ' '
+    } or publish indent
+    publish "or "
+    <Statement>
+  }
+}
+<ConditionalAbortStatement>{
+  assume ConditionalAbortStatement.instanceof(statement)
+  value = ConditionalAbortStatement.value(statement)
+  stmt = statement # ConditionalAbortStatement.statement(statement)
+  assume EitherOrStatement.instanceof(stmt)
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "either "
+  repeat{
+    statement = getNext(statements)
+    <Statement>
+    either {
+      assume Block.instanceof(statement)
+      publish ' '
+    } or publish indent
+    publish "or "
+  }
+  publish "abort "
+  <Value>
+}
+<CouldStatement>{
+  assume CouldStatement.instanceof(statement)
+  stmt = statement
+  publish "could "
+  statement = CouldStatement.statement(stmt)
+  <Statement>
+}
+<RepeatStatement>{
+  assume RepeatStatement.instanceof(statement)
+  stmt = statement
+  publish "repeat "
+  statement = RepeatStatement.statement(stmt)
+  <Statement>
+}
+<AcceptStatement>{
+  either <FilterAcceptStatement>
+  or <ValueAcceptStatement>
+}
+<ValueAcceptStatement>{
+  assume ValueAcceptStatement.instanceof(statement)
+  publish "accept "
+  could {
+    assume ValueAcceptStatement.isNot(statement)
+    publish "not "
+  }
+  value = ValueAcceptStatement.value(statement)
+  <Value>
+}
+<FilterAcceptStatement>{
+  assume FilterAcceptStatement.instanceof(statement)
+  publish "accept "
+  could {
+    assume FilterAcceptStatement.isNot(statement)
+    publish "not "
+  }
+  publish "in "
+  filter = FilterAcceptStatement.filter(statement)
+  <Filter>
+}
+<PublishStatement>{
+  assume PublishStatement.instanceof(statement)
+  publish "publish "
+  value = PublishStatement.value(statement)
+  <Value>
+}
+<AbortStatement>{
+  assume AbortStatement.instanceof(statement)
+  publish "abort "
+  value = AbortStatement.value(statement)
+  <Value>
+}
+<Block>{
+  assume Block.instanceof(statement)
+  block = statement
+  Indent.increase(indent)
+  publish "{"
+  statements = iterator(Block.statements(block))
+  could repeat {
+    statement = getNext(statements)
+    publish indent
+    <Statement>
+  }
+  assume not hasNext(statements)
+  Indent.decrease(indent)
+  publish indent
+  publish "}"
+}
+<Assignment>{
+  assume Assignment.instanceof(statement)
+  name = Assignment.name(statement)
+  publish "'name' = "
+  value = Assignment.value(statement)
+  <Value>
+}
+<Invocation>{
+  assume Invocation.instanceof(statement)
+  name = Invocation.name(statement)
+  alias = Catalog.encode(cat, name)
+  publish "'alias'("
+  params = iterator(Invocation.params(statement))
+  could {
+    value = getNext(params)
+    <Value>
+    could repeat{
+      value = getNext(params)
+      publish ", "
+      <Value>
+    }
+  }
+  assume not hasNext(params)
+  publish ")"
+}
+
+<Filter>{
+  assume Filter.instanceof(filter)
+  ranges = iterator(Filter.ranges(filter))
+  range = getNext(ranges)
+  <Range>
+  could repeat{
+    range = getNext(ranges)
+    publish ", "
+    <Range>
+  }
+  assume not hasNext(ranges)
+}
+<Range>{
+  assume Range.instanceof(range)
+  ch = Range.start(range)
+  publish Filter.escape(ch)
+  could{
+    assume Range.isRange(range)
+    publish '-'
+    ch = Range.end(range)
+    publish Filter.escape(ch)
+  }
+}
+
+<StaticLiteral>{
+  assume Literal.instanceof(value)
+  publish '\''
+  chars = iterator(Literal.chars(value))
+  could repeat{
+    ch = getNext(chars)
+    publish Literal.escape(ch)
+  }
+  assume not hasNext(chars)
+  publish '\''
+}
+<DynamicLiteral>{
+  assume CompositeLiteral.instanceof(value)
+  composite = value
+  publish '"'
+  values = iterator(CompositeLiteral.values(composite))
+  could repeat{
+    value = getNext(values)
+    either{
+      assume Literal.instanceof(value)
+      chars = iterator(Literal.chars(value))
+      could repeat{
+        ch = getNext(chars)
+        publish CompositeLiteral.escape(ch)
+      }
+      assume not hasNext(chars)
+    }or{
+      publish "\'"
+      <Value>
+      publish "\'"
+    }
+  }
+  assume not hasNext(values)
+  publish '"'
+}
+
+<Script>{
+  either {
+    assume Script.instanceof(statement)
+    name = Script.name(statement)
+    publish "\<'name'\>"
+  } or {
+    assume ScriptOutput.instanceof(statement)
+    name = ScriptOutput.name(statement)
+    statement = ScriptOutput.spec(statement)
+    <Script>
+    publish " >> 'name'"
+  } or {
+    assume ScriptPipe.instanceof(statement)
+    pipe = statement
+    statement = ScriptPipe.source(pipe)
+    <Script>
+    publish " >> "
+    statement = ScriptPipe.sink(pipe)
+    <Script>
+  } or {
+    assume ScriptInput.instanceof(statement)
+    input = statement
+    statement = ScriptInput.spec(input)
+    <Script>
+    publish " << "
+    value = ScriptInput.value(input)
+    <Value>
+  }
+}
+<Object> {
+  assume ObjectTemplate.instanceof(value)
+  name = ObjectTemplate.type(value)
+  alias = Catalog.encode(cat, name)
+  publish "('alias')"
+  Indent.increase(indent) 
+  setters = iterator(ObjectTemplate.setters(value))
+  delim = '{'
+  repeat {
+    publish delim
+    delim = ','
+    setter = getNext(setters)
+    name = FieldTemplate.name(setter)
+    publish "'indent''name': "
+    value = FieldTemplate.value(setter)
+    <Value>
+  }
+  assume not hasNext(setters)
+  Indent.decrease(indent) 
+  publish "'indent'}"
+}
+<Number>{
+  assume Number.instanceof(value)
+  publish Number.toString(value)
+}
+<Variable>{
+  assume Variable.instanceof(value)
+  publish Variable.name(value)
+}

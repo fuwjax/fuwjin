@@ -1,0 +1,3 @@
+<Root> {
+  return java.lang.String.toUpperCase('test')
+}
