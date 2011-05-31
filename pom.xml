@@ -25,6 +25,8 @@
 		<module>chessur</module>
 		<module>dinah</module>
 		<module>chessur-maven-plugin</module>
+		<module>jon</module>
+		<module>glory</module>
 	</modules>
 	<url>http://fuwjin.googlecode.com</url>
 	<scm>
@@ -107,6 +109,9 @@
 	</dependencyManagement>
 	<build>
         <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
             <resource>
                 <directory>src/main/grin</directory>
             </resource>

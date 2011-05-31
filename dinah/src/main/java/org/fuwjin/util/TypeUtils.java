@@ -39,22 +39,16 @@ public final class TypeUtils {
       }
    }
 
-   /**
-    * Returns the type for the given name. Mimics Class.forName.
-    * @param name the type name
-    * @return the type
-    * @throws ClassNotFoundException if no such type was found
-    */
-   public static Type forName(final String name) throws ClassNotFoundException {
+   public static Type forName(final String name, final ClassLoader loader) throws ClassNotFoundException {
       try {
-         if(name.endsWith("]")) {
-            return Class.forName(toArray(name));
+         if(name.endsWith("[]")) {
+            return Class.forName(toArray(name), true, loader);
          }
-         return Class.forName(name);
+         return Class.forName(name, true, loader);
       } catch(final ClassNotFoundException e) {
          final Class<?> cls = PRIMITIVES.get(name);
          if(cls == null) {
-            return inner(name);
+            return inner(name, loader);
          }
          return cls;
       }
@@ -100,6 +94,10 @@ public final class TypeUtils {
       return toClass(type).getDeclaredMethods();
    }
 
+   public static Enum[] getEnumConstants(final Type type) {
+      return (Enum[])toClass(type).getEnumConstants();
+   }
+
    /**
     * Returns the interfaces for the given type. Mimics Class.getInterfaces.
     * @param type the type
@@ -127,6 +125,10 @@ public final class TypeUtils {
       return toClass(type).getSuperclass();
    }
 
+   public static boolean isArray(final Type type) {
+      return toClass(type).isArray();
+   }
+
    /**
     * Returns true if type is assignable from test. Mimics
     * Class.isAssignableFrom.
@@ -139,6 +141,10 @@ public final class TypeUtils {
          return true;
       }
       return toClass(type).isAssignableFrom(toClass(test));
+   }
+
+   public static boolean isEnum(final Type type) {
+      return toClass(type).isEnum();
    }
 
    /**
@@ -159,6 +165,10 @@ public final class TypeUtils {
     */
    public static boolean isInterface(final Type type) {
       return toClass(type).isInterface();
+   }
+
+   public static boolean isPrimitive(final Type type) {
+      return toClass(type).isPrimitive();
    }
 
    /**
@@ -184,27 +194,27 @@ public final class TypeUtils {
       return cls;
    }
 
-   private static Type inner(final String name) throws ClassNotFoundException {
+   private static Type inner(final String name, final ClassLoader loader) throws ClassNotFoundException {
       final int index = name.lastIndexOf('.');
       final String value = name.substring(0, index) + '$' + name.substring(index + 1);
       try {
-         return Class.forName(value);
+         return Class.forName(value, true, loader);
       } catch(final ClassNotFoundException e) {
          if(value.indexOf('.') >= 0) {
-            return inner(value);
+            return inner(value, loader);
          }
          throw e;
       }
    }
 
    private static String toArray(final String name) {
-      final StringBuilder builder = new StringBuilder();
-      int index = name.indexOf('[');
-      while(index > -1) {
-         builder.append('[');
-         index = name.indexOf('[', index + 1);
+      if(name.endsWith("[]")) {
+         return '[' + toArray(name.substring(0, name.length() - 2));
       }
-      return builder.append('L').append(name.substring(0, name.indexOf('['))).append(';').toString();
+      if(PRIMITIVES.containsKey(name)) {
+         return "I";
+      }
+      return 'L' + name + ';';
    }
 
    /**

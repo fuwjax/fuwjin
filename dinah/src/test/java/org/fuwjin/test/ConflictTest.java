@@ -3,9 +3,9 @@ package org.fuwjin.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import org.fuwjin.dinah.CachedFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.dinah.function.MethodFunction;
 import org.fuwjin.dinah.signature.TypedArgsSignature;
 import org.fuwjin.sample.SameName;
@@ -25,7 +25,7 @@ public class ConflictTest {
     */
    @Before
    public void setup() {
-      provider = new ReflectiveFunctionProvider();
+      provider = new CachedFunctionProvider();
       Sample.staticValue = "initial";
    }
 

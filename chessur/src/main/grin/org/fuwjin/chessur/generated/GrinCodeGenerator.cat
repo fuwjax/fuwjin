@@ -64,7 +64,7 @@ alias java.lang.reflect.Field as Field
 alias java.lang.Iterable.iterator as iterator
 alias java.util.Iterator.next as getNext
 alias java.util.Iterator.hasNext as hasNext
-alias java.util.Arrays.asList as asList
+alias java.util.Arrays.asList(java.lang.Object[]) as asList
 alias java.util.Map$Entry.getKey as key
 alias java.util.Map$Entry.getValue as value
 
@@ -312,6 +312,11 @@ public class 'className' {
     public int next() throws 'className'Exception {
       checkBounds(pos);
       return seq.charAt(pos);
+    }
+    
+    public String nextStr() throws 'className'Exception {
+      checkBounds(pos);
+      return seq.subSequence(pos,pos+1).toString();
     }
     
     public StringCursor sub() {

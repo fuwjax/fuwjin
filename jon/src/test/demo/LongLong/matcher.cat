@@ -1,0 +1,7 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+alias java.lang.Number as Number
+
+<Root> {
+  return Matcher.is(Number.longValue(9876543210))
+}

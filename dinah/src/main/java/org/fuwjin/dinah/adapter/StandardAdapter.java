@@ -1,6 +1,8 @@
 package org.fuwjin.dinah.adapter;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import org.fuwjin.dinah.Adapter;
 import org.fuwjin.util.TypeUtils;
 
@@ -15,6 +17,16 @@ public class StandardAdapter implements Adapter {
     */
    public static boolean isSet(final Object value) {
       return !Adapter.UNSET.equals(value);
+   }
+
+   private final ClassLoader loader;
+
+   public StandardAdapter() {
+      this(Thread.currentThread().getContextClassLoader());
+   }
+
+   public StandardAdapter(final ClassLoader loader) {
+      this.loader = loader;
    }
 
    @Override
@@ -40,6 +52,28 @@ public class StandardAdapter implements Adapter {
             return ((Number)value).doubleValue();
          }
       }
+      if(value instanceof Collection && TypeUtils.isArray(type)) {
+         return toArray((Collection<?>)value, TypeUtils.getComponentType(type));
+      }
+      if(value instanceof String && TypeUtils.isAssignableFrom(Type.class, type)) {
+         try {
+            return TypeUtils.forName((String)value, loader);
+         } catch(final ClassNotFoundException e) {
+            throw new AdaptException(e, "Could not find class named %s", value);
+         }
+      }
       throw new AdaptException("Could not map %s to %s", value.getClass(), type);
+   }
+
+   Object toArray(final Collection<?> collection, final Type type) {
+      final Object arr = TypeUtils.newArrayInstance(type, collection.size());
+      if(TypeUtils.isPrimitive(type)) {
+         int i = 0;
+         for(final Object obj: collection) {
+            Array.set(arr, i++, obj);
+         }
+         return arr;
+      }
+      return collection.toArray((Object[])arr);
    }
 }

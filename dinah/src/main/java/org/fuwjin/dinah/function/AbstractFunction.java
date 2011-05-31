@@ -30,6 +30,11 @@ public abstract class AbstractFunction implements Function {
       this.argTypes = argTypes;
    }
 
+   @Override
+   public Type argType(final int index) {
+      return argTypes()[index];
+   }
+
    /**
     * Creates a composite of this function and the next function. May alter this
     * function. This method is an implementation detail and should not be called
@@ -66,10 +71,6 @@ public abstract class AbstractFunction implements Function {
 
    protected int argCount() {
       return argTypes.length;
-   }
-
-   protected Type argType(final int index) {
-      return argTypes()[index];
    }
 
    protected Type[] argTypes() {

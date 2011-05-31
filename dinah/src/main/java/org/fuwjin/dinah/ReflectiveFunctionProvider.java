@@ -17,8 +17,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import org.fuwjin.dinah.adapter.StandardAdapter;
 import org.fuwjin.dinah.function.AbstractFunction;
+import org.fuwjin.dinah.function.ConstantFunction;
 import org.fuwjin.dinah.function.ConstructorFunction;
 import org.fuwjin.dinah.function.FieldAccessFunction;
 import org.fuwjin.dinah.function.FieldMutatorFunction;
@@ -37,30 +37,21 @@ import org.fuwjin.util.TypeUtils;
  * primitive and array access and the instanceof keyword.
  */
 public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
-   private final Adapter adapter;
-
-   /**
-    * Creates a new instance.
-    */
-   public ReflectiveFunctionProvider() {
-      this(new StandardAdapter());
-   }
-
    /**
     * Creates a new instance.
     * @param adapter the type converter
     */
    public ReflectiveFunctionProvider(final Adapter adapter) {
-      this.adapter = adapter;
+      super(adapter);
    }
 
    @Override
    public Map<String, AbstractFunction> getFunctions(final String typeName) {
       final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
       try {
-         final Type type = TypeUtils.forName(typeName);
+         final Type type = adapt(typeName, Type.class);
          addType(functions, typeName, type);
-      } catch(final ClassNotFoundException e) {
+      } catch(final AdaptException e) {
          // continue, return empty functions map
       }
       return functions;
@@ -69,9 +60,17 @@ public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
    private void addConstructor(final Map<String, AbstractFunction> functions, final String typeName,
          final Constructor<?> constructor) {
       if(constructor.isVarArgs()) {
-         add(functions, new VarArgsFunction(adapter, new ConstructorFunction(adapter, typeName, constructor)));
+         add(functions, new VarArgsFunction(this, new ConstructorFunction(this, typeName, constructor)));
       } else {
-         add(functions, new ConstructorFunction(adapter, typeName, constructor));
+         add(functions, new ConstructorFunction(this, typeName, constructor));
+      }
+   }
+
+   private void addEnums(final Map<String, AbstractFunction> functions, final String typeName, final Type type) {
+      if(TypeUtils.isEnum(type)) {
+         for(final Enum<?> e: TypeUtils.getEnumConstants(type)) {
+            add(functions, new ConstantFunction(typeName + "." + e.name(), e));
+         }
       }
    }
 
@@ -79,12 +78,12 @@ public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
          final Field field, final boolean allowStatic) {
       if(Modifier.isStatic(field.getModifiers())) {
          if(allowStatic) {
-            add(functions, new StaticFieldAccessFunction(adapter, typeName, field));
-            add(functions, new StaticFieldMutatorFunction(adapter, typeName, field));
+            add(functions, new StaticFieldAccessFunction(this, typeName, field));
+            add(functions, new StaticFieldMutatorFunction(this, typeName, field));
          }
       } else {
-         add(functions, new FieldAccessFunction(adapter, typeName, field, type));
-         add(functions, new FieldMutatorFunction(adapter, typeName, field, type));
+         add(functions, new FieldAccessFunction(this, typeName, field, type));
+         add(functions, new FieldMutatorFunction(this, typeName, field, type));
       }
    }
 
@@ -105,15 +104,15 @@ public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
       FixedArgsFunction<?> func;
       if(Modifier.isStatic(method.getModifiers())) {
          if(allowStatic) {
-            func = new StaticMethodFunction(adapter, typeName, method);
+            func = new StaticMethodFunction(this, typeName, method);
          } else {
             return;
          }
       } else {
-         func = new MethodFunction(adapter, typeName, method, type);
+         func = new MethodFunction(this, typeName, method, type);
       }
       if(method.isVarArgs()) {
-         add(functions, new VarArgsFunction(adapter, func));
+         add(functions, new VarArgsFunction(this, func));
       } else {
          add(functions, func);
       }
@@ -143,7 +142,7 @@ public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
    }
 
    private void addType(final Map<String, AbstractFunction> functions, final String typeName, final Type type) {
-      add(functions, new InstanceOfFunction(adapter, typeName, type));
+      add(functions, new InstanceOfFunction(this, typeName, type));
       for(final Constructor<?> constructor: TypeUtils.getDeclaredConstructors(type)) {
          if(access(constructor)) {
             addConstructor(functions, typeName, constructor);
@@ -151,5 +150,6 @@ public class ReflectiveFunctionProvider extends AbstractFunctionProvider {
       }
       addMethods(functions, typeName, type, type, true);
       addFields(functions, typeName, type, type, true);
+      addEnums(functions, typeName, type);
    }
 }

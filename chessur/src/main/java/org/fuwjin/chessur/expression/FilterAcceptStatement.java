@@ -14,6 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Accepts based on a filter.
@@ -56,10 +57,12 @@ public class FilterAcceptStatement implements Expression {
          if(filter.allow((Integer)input.next(snapshot).value())) {
             throw new ResolveException("Unexpected match: %s: %s", filter, snapshot);
          }
-         return input.read(snapshot).value();
+         input.read(snapshot);
+         return Adapter.UNSET;
       }
       if(filter.allow((Integer)input.next(snapshot).value())) {
-         return input.read(snapshot).value();
+         input.read(snapshot);
+         return Adapter.UNSET;
       }
       throw new ResolveException("Did not match filter: %s: %s", filter, snapshot);
    }

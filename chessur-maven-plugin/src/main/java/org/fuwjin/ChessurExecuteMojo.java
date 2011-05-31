@@ -9,7 +9,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.apache.maven.plugin.AbstractMojo;
@@ -63,6 +67,13 @@ public class ChessurExecuteMojo extends AbstractMojo {
     */
    private String outputExtension;
    /**
+    * The classpath elements of the project.
+    * @parameter expression="${project.runtimeClasspathElements}"
+    * @required
+    * @readonly
+    */
+   private List<String> classpath;
+   /**
     * @parameter expression="${project}"
     * @required
     * @readonly
@@ -106,6 +117,15 @@ public class ChessurExecuteMojo extends AbstractMojo {
       } catch(final Exception e) {
          throw new MojoExecutionException("Syntax error in " + catFile, e);
       }
+   }
+
+   ClassLoader loader() throws MalformedURLException {
+      final URL[] urls = new URL[classpath.size()];
+      int index = 0;
+      for(final String element: classpath) {
+         urls[index++] = new File(element).toURI().toURL();
+      }
+      return new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
    }
 
    String path(final File source) {

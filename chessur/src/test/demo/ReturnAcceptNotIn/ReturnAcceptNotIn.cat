@@ -1,1 +1,1 @@
-<Root>{return accept not in _,a-z}
+<Root>{ch = next accept not in _,a-z return ch}

@@ -17,7 +17,7 @@ import org.fuwjin.util.BusinessException;
  * method need not be unique, however, if a Function instance could be shared
  * across threads, it must be threadsafe and/or stateless.
  */
-public interface FunctionProvider {
+public interface FunctionProvider extends Adapter {
    /**
     * Thrown when no function can be found.
     */

@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Class as Class
+
+<Root> {
+  return Matcher.is(Class.forName("java.lang.String"))
+}

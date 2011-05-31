@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.signature.TypedArgsSignature;
 import org.fuwjin.util.ArrayUtils;
 import org.fuwjin.util.TypeUtils;
 
@@ -62,7 +63,10 @@ public class VarArgsFunction extends AbstractFunction {
    public AbstractFunction restrict(final FunctionSignature signature) {
       final AbstractFunction func = function.restrict(signature);
       if(AbstractFunction.NULL != func) {
-         return func;
+         if(signature instanceof TypedArgsSignature) {
+            return func;
+         }
+         return this;
       }
       if(signature.matchesVarArgs(function.argTypes())) {
          return this;

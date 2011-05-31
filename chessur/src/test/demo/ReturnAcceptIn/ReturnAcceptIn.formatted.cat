@@ -1,3 +1,5 @@
 <Root> {
-  return accept in _, a-z
+  ch = next
+  accept in _, a-z
+  return ch
 }

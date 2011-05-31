@@ -1,6 +1,7 @@
 package org.fuwjin.dinah;
 
 import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Type;
 import java.util.Map;
 import org.fuwjin.dinah.function.AbstractFunction;
 
@@ -27,6 +28,21 @@ public abstract class AbstractFunctionProvider implements FunctionProvider {
       } else {
          functions.put(name, func.join(function));
       }
+   }
+
+   private final Adapter adapter;
+
+   protected AbstractFunctionProvider(final Adapter adapter) {
+      this.adapter = adapter;
+   }
+
+   public <T>T adapt(final Object value, final Class<T> type) throws AdaptException {
+      return (T)adapter.adapt(value, type);
+   }
+
+   @Override
+   public Object adapt(final Object value, final Type type) throws AdaptException {
+      return adapter.adapt(value, type);
    }
 
    @Override

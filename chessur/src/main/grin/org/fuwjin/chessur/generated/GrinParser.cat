@@ -12,6 +12,7 @@ alias java.lang.Boolean as Boolean
 alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
 alias org.fuwjin.chessur.Module as Module
 alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.ConditionalAbortStatement as ConditionalAbortStatement
 alias org.fuwjin.chessur.expression.Assignment as Assignment
 alias org.fuwjin.chessur.expression.Block as Block
 alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
@@ -145,7 +146,7 @@ alias org.fuwjin.dinah.Function as Function
   either val = <StaticLiteral>  # '...'
   or val = <DynamicLiteral>     # "..."
   or val = <Script>             # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
-  or val = <AcceptStatement>    # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
+  or val = <AcceptStatement>    # deprecated
   or val = <Invocation>         # <QualifiedIdentifier>(<Value>,<Value>,...)
   or val = <Number>             # integral, floating point, or scientific notation
   or val = <Object>             # (<QualifiedIdentifier>) { <Field> : <Value>, ... }
@@ -190,6 +191,11 @@ alias org.fuwjin.dinah.Function as Function
   or abort "either keyword requires a statement"
   either repeat{
     accept 'or' <Sep>
+#    either {
+#      accept 'abort' <Sep>
+#      either stmt = ConditionalAbortStatement.new(stmt, <Value>)
+#      or abort "abort keyword requires a value"
+#    } or 
     either EitherOrStatement.or(stmt, <Statement>)
     or abort "or keyword requires a statement"
   } or abort "either keyword requires at least one or keyword"
@@ -363,8 +369,10 @@ alias org.fuwjin.dinah.Function as Function
 <FilterChar>{
   either {
     ch = <Escape>
-  } or 
-    ch = accept not '\\'
+  } or {
+    ch = next
+    accept not '\\'
+  }
   return ch
 }
 
@@ -372,7 +380,8 @@ alias org.fuwjin.dinah.Function as Function
   accept '\''
   lit = Literal.new()
   could repeat either {
-    ch = accept not in \\, ' 
+    ch = next
+    accept not in \\, ' 
     Literal.append(lit, ch)
   } or {
     Literal.append(lit, <Escape>)
@@ -393,7 +402,8 @@ alias org.fuwjin.dinah.Function as Function
   } or {
     CompositeLiteral.appendChar(lit, <Escape>)
   } or {
-    ch = accept not in \\, "
+    ch = next
+    accept not in \\, "
     CompositeLiteral.appendChar(lit, ch)
   }
   either accept '"'
@@ -417,7 +427,8 @@ alias org.fuwjin.dinah.Function as Function
     accept 'x'
     ch = Literal.parseHex(<HexDigits>)
   } or {
-    ch = accept next
+    ch = next
+    accept next
   }
   return ch
 }
@@ -462,7 +473,7 @@ alias org.fuwjin.dinah.Function as Function
   return path
 }
 <AliasName> {
-  prefix = <Identifier>
+  prefix = <AnnotatedIdentifier>
   alias = Catalog.alias(cat, prefix)
   either {
     accept '.'
@@ -495,6 +506,7 @@ alias org.fuwjin.dinah.Function as Function
     could <Identifier>
     accept ']'
   }
+  return match
 }
 <Identifier>{
   repeat <IdentifierChar>

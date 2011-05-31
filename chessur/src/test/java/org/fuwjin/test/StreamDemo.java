@@ -31,11 +31,11 @@ public class StreamDemo {
       final SourceStream detached = stream.detach();
       final Position p3 = detached.read(snapshot);
       assertThat((Integer)p3.value(), is((int)'t'));
-      assertThat(stream.toString(), is("tes"));
+      assertThat(stream.toString(), is("test"));
       assertThat(p3.toString(), is("[1,4] 't'"));
       final Position p4 = detached.read(snapshot);
       assertThat((Integer)p4.value(), is((int)'\n'));
-      assertThat(stream.toString(), is("tes"));
+      assertThat(stream.toString(), is("test\n"));
       assertThat(p4.toString(), is("[1,5] '\\n'"));
       stream.attach(detached);
       assertThat(stream.toString(), is("test\n"));
@@ -127,15 +127,15 @@ public class StreamDemo {
       final SourceStream detached = stream.detach();
       final Position p3 = detached.read(snapshot);
       assertThat((Integer)p3.value(), is((int)'t'));
-      assertThat(stream.toString(), is("tes"));
+      assertThat(stream.toString(), is("test"));
       assertThat(p3.toString(), is("[1,4] 't'"));
       final Position p4 = detached.read(snapshot);
       assertThat((Integer)p4.value(), is((int)'\n'));
-      assertThat(stream.toString(), is("tes"));
+      assertThat(stream.toString(), is("test\n"));
       assertThat(p4.toString(), is("[1,5] '\\n'"));
       final Position p5 = detached.read(snapshot);
       assertThat((Integer)p5.value(), is((int)'x'));
-      assertThat(stream.toString(), is("tes"));
+      assertThat(stream.toString(), is("test\nx"));
       assertThat(p5.toString(), is("[2,1] 'x'"));
       try {
          detached.read(snapshot);
@@ -143,6 +143,8 @@ public class StreamDemo {
       } catch(final ResolveException e) {
          // pass
       }
+      stream.resume();
+      assertThat(stream.toString(), is("tes"));
       final Position p32 = stream.read(snapshot);
       assertThat((Integer)p32.value(), is((int)'t'));
       assertThat(stream.toString(), is("test"));
@@ -194,5 +196,6 @@ public class StreamDemo {
       } catch(final ResolveException e) {
          // pass
       }
+      stream.attach(detach);
    }
 }
