@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+
+<Root> {
+  return Matcher.is("")
+}

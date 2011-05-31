@@ -40,12 +40,16 @@ public class Snapshot {
    public Object resolve(final Expression statement, final boolean update) throws AbortedException, ResolveException {
       final SourceStream inBuffer = input.detach();
       final SinkStream outBuffer = output.detach();
-      final Object value = statement.resolve(inBuffer, outBuffer, scope);
-      if(update) {
-         input.attach(inBuffer);
-         output.attach(outBuffer);
+      try {
+         final Object value = statement.resolve(inBuffer, outBuffer, scope);
+         if(update) {
+            input.attach(inBuffer);
+            output.attach(outBuffer);
+         }
+         return value;
+      } finally {
+         input.resume();
       }
-      return value;
    }
 
    @Override

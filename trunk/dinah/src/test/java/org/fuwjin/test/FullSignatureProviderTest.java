@@ -14,9 +14,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import org.fuwjin.dinah.CachedFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
 import org.fuwjin.dinah.signature.TypedArgsSignature;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
@@ -33,7 +33,7 @@ public class FullSignatureProviderTest {
     */
    @Before
    public void setup() {
-      provider = new ReflectiveFunctionProvider();
+      provider = new CachedFunctionProvider();
       Sample.staticValue = "initial";
    }
 

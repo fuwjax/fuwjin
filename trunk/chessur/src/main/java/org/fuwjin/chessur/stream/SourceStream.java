@@ -14,10 +14,6 @@ public interface SourceStream {
 
    SourceStream buffer();
 
-   /**
-    * Returns the current position.
-    * @return the current position
-    */
    Position current();
 
    /**
@@ -26,6 +22,7 @@ public interface SourceStream {
     */
    SourceStream detach();
 
+   /* implementation specific, may throw UnsupOp */
    int index();
 
    /**
@@ -44,5 +41,10 @@ public interface SourceStream {
     */
    Position read(Snapshot snapshot) throws ResolveException;
 
-   Position readAt(Snapshot snapshot, int index) throws ResolveException;
+   /* implementation specific, may throw UnsupOp */
+   Position readAt(final Snapshot snapshot, final int index) throws ResolveException;
+
+   void resume();
+
+   void resumeAt(int index);
 }

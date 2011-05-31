@@ -1,0 +1,9 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+alias java.util.ArrayList as List
+
+<Root> {
+  list = List.new()
+  List.add(list, "hello, reference!")
+  return Matcher.is(list)
+}

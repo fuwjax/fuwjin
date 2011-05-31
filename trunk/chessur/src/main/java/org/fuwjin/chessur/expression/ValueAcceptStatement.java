@@ -14,6 +14,7 @@ import org.fuwjin.chessur.stream.Environment;
 import org.fuwjin.chessur.stream.SinkStream;
 import org.fuwjin.chessur.stream.Snapshot;
 import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.dinah.Adapter;
 
 /**
  * Represents a value based accept statement.
@@ -60,10 +61,14 @@ public class ValueAcceptStatement implements Expression {
             try {
                cp = ((Integer)sub.read(snapshot).value()).intValue();
             } catch(final ResolveException e) {
-               return input.read(snapshot).value();
+               input.resume();
+               input.read(snapshot);
+               return Adapter.UNSET;
             }
             if(codePoint != cp) {
-               return input.read(snapshot).value();
+               input.resume();
+               input.read(snapshot);
+               return Adapter.UNSET;
             }
          }
          throw new ResolveException("failed while matching %s: %s", str, snapshot);
@@ -75,7 +80,7 @@ public class ValueAcceptStatement implements Expression {
             throw new ResolveException("failed while matching %s: %s", str, snapshot);
          }
       }
-      return str.codePointBefore(str.length());
+      return Adapter.UNSET;
    }
 
    @Override

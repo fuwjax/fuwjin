@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 import org.fuwjin.dinah.function.AbstractFunction;
 
 /**
@@ -14,11 +15,21 @@ public class CachedFunctionProvider extends AbstractFunctionProvider {
    private final Set<String> categories = new HashSet<String>();
    private final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
 
+   public CachedFunctionProvider() {
+      this(new StandardAdapter());
+   }
+
+   public CachedFunctionProvider(final Adapter adapter) {
+      this(adapter, new VirtualArrayFunctionProvider(adapter), new ReflectiveFunctionProvider(adapter),
+            new ClassInstanceFunctionProvider(adapter));
+   }
+
    /**
     * Creates a new instance.
     * @param providers the set of providers
     */
-   public CachedFunctionProvider(final AbstractFunctionProvider... providers) {
+   public CachedFunctionProvider(final Adapter adapter, final AbstractFunctionProvider... providers) {
+      super(adapter);
       this.providers = providers;
    }
 

@@ -16,42 +16,32 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import org.fuwjin.dinah.adapter.StandardAdapter;
 import org.fuwjin.dinah.function.AbstractFunction;
+import org.fuwjin.dinah.function.ConstantFunction;
 import org.fuwjin.dinah.function.InstanceFieldAccessFunction;
 import org.fuwjin.dinah.function.InstanceFieldMutatorFunction;
 import org.fuwjin.dinah.function.InstanceMethodFunction;
 import org.fuwjin.dinah.function.VarArgsFunction;
-import org.fuwjin.util.TypeUtils;
 
 /**
  * Provider which supplies functions provided by a Class instance.
  */
 public class ClassInstanceFunctionProvider extends AbstractFunctionProvider {
-   private final Adapter adapter;
-
-   /**
-    * Creates a new instance.
-    */
-   public ClassInstanceFunctionProvider() {
-      this(new StandardAdapter());
-   }
-
    /**
     * Creates a new instance.
     * @param adapter the type converter
     */
    public ClassInstanceFunctionProvider(final Adapter adapter) {
-      this.adapter = adapter;
+      super(adapter);
    }
 
    @Override
    public Map<String, AbstractFunction> getFunctions(final String typeName) {
       final Map<String, AbstractFunction> functions = new HashMap<String, AbstractFunction>();
       try {
-         final Type type = TypeUtils.forName(typeName);
+         final Type type = adapt(typeName, Type.class);
          addType(functions, typeName, type);
-      } catch(final ClassNotFoundException e) {
+      } catch(final AdaptException e) {
          // continue, return empty functions map
       }
       return functions;
@@ -60,8 +50,8 @@ public class ClassInstanceFunctionProvider extends AbstractFunctionProvider {
    private void addFields(final Map<String, AbstractFunction> functions, final String typeName, final Type type) {
       for(final Field field: Class.class.getDeclaredFields()) {
          if(access(field) && !Modifier.isStatic(field.getModifiers())) {
-            add(functions, new InstanceFieldAccessFunction(adapter, typeName, field, type));
-            add(functions, new InstanceFieldMutatorFunction(adapter, typeName, field, type));
+            add(functions, new InstanceFieldAccessFunction(this, typeName, field, type));
+            add(functions, new InstanceFieldMutatorFunction(this, typeName, field, type));
          }
       }
    }
@@ -70,15 +60,16 @@ public class ClassInstanceFunctionProvider extends AbstractFunctionProvider {
       for(final Method method: Class.class.getDeclaredMethods()) {
          if(access(method) && !Modifier.isStatic(method.getModifiers())) {
             if(method.isVarArgs()) {
-               add(functions, new VarArgsFunction(adapter, new InstanceMethodFunction(adapter, typeName, method, type)));
+               add(functions, new VarArgsFunction(this, new InstanceMethodFunction(this, typeName, method, type)));
             } else {
-               add(functions, new InstanceMethodFunction(adapter, typeName, method, type));
+               add(functions, new InstanceMethodFunction(this, typeName, method, type));
             }
          }
       }
    }
 
    private void addType(final Map<String, AbstractFunction> functions, final String typeName, final Type type) {
+      add(functions, new ConstantFunction(typeName + ".this", type));
       addMethods(functions, typeName, type);
       addFields(functions, typeName, type);
    }

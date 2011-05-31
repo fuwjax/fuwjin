@@ -1,3 +1,4 @@
 <Root> {
-  return accept 'value'
+  accept 'value'
+  return match
 }

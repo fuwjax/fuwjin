@@ -1,3 +1,5 @@
 <Root> {
-  return accept not 'value'
+  ch = next
+  accept not 'value'
+  return ch
 }

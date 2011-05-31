@@ -12,6 +12,7 @@ package org.fuwjin.dinah.signature;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.fuwjin.util.TypeUtils;
 
@@ -30,6 +31,11 @@ public class TypedArgsSignature extends ArgCountSignature {
       super(name, 0);
    }
 
+   public TypedArgsSignature addAll(final Type... types) {
+      args.addAll(Arrays.asList(types));
+      return this;
+   }
+
    /**
     * Adds an argument type to the argument type list.
     * @param typeName the name of the argument type
@@ -40,7 +46,7 @@ public class TypedArgsSignature extends ArgCountSignature {
       if(typeName == null || "null".equals(typeName)) {
          args.add(null);
       } else {
-         args.add(TypeUtils.forName(typeName));
+         args.add(TypeUtils.forName(typeName, Thread.currentThread().getContextClassLoader()));
       }
       return this;
    }

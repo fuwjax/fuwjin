@@ -1,3 +1,5 @@
 <Root> {
-  return accept not in _, a-z
+  ch = next
+  accept not in _, a-z
+  return ch
 }

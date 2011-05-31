@@ -13,19 +13,16 @@ public abstract class CodePointInStream implements SourceStream {
    private static class BufferStream implements SourceStream {
       StringBuilder builder = new StringBuilder();
       private final SourceStream source;
-      private int tail;
-      private int confirmed;
+      private final int start;
 
       public BufferStream(final SourceStream source) {
          this.source = source;
-         tail = source.index();
-         confirmed = source.index();
+         start = source.index();
       }
 
       @Override
       public void attach(final SourceStream stream) {
          source.attach(stream);
-         confirmed = stream.index();
       }
 
       @Override
@@ -56,28 +53,35 @@ public abstract class CodePointInStream implements SourceStream {
       @Override
       public Position read(final Snapshot snapshot) throws ResolveException {
          final Position p = source.read(snapshot);
-         append(source.index(), p);
-         confirmed = source.index();
+         if(builder.length() == source.index() - start - 1) {
+            builder.append(p.valueString());
+         }
          return p;
       }
 
       @Override
       public Position readAt(final Snapshot snapshot, final int index) throws ResolveException {
          final Position p = source.readAt(snapshot, index);
-         append(index, p);
+         if(builder.length() == index - start - 1) {
+            builder.append(p.valueString());
+         }
          return p;
       }
 
       @Override
-      public String toString() {
-         return builder.substring(0, builder.length() - tail + confirmed);
+      public void resume() {
+         resumeAt(index());
       }
 
-      void append(final int index, final Position pos) {
-         if(index > tail) {
-            tail = index;
-            builder.append(pos.valueString());
-         }
+      @Override
+      public void resumeAt(final int index) {
+         builder.setLength(index - start);
+         source.resumeAt(index);
+      }
+
+      @Override
+      public String toString() {
+         return builder.toString();
       }
    }
 
@@ -94,8 +98,8 @@ public abstract class CodePointInStream implements SourceStream {
 
       @Override
       public void attach(final SourceStream stream) {
-         pos = stream.index();
          curr = stream.current();
+         pos = stream.index();
       }
 
       @Override
@@ -132,6 +136,16 @@ public abstract class CodePointInStream implements SourceStream {
       @Override
       public Position readAt(final Snapshot snapshot, final int index) throws ResolveException {
          return source.readAt(snapshot, index);
+      }
+
+      @Override
+      public void resume() {
+         resumeAt(index());
+      }
+
+      @Override
+      public void resumeAt(final int index) {
+         source.resumeAt(index);
       }
 
       @Override
@@ -250,6 +264,16 @@ public abstract class CodePointInStream implements SourceStream {
          return next;
       }
       throw new ResolveException("unexpected EOF: %s", snapshot);
+   }
+
+   @Override
+   public void resume() {
+      // do nothing
+   }
+
+   @Override
+   public void resumeAt(final int index) {
+      assert current <= index;
    }
 
    @Override

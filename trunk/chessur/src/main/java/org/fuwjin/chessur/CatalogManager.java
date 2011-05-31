@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,11 +16,10 @@ import java.util.concurrent.ConcurrentMap;
 import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.Adapter;
 import org.fuwjin.dinah.CachedFunctionProvider;
-import org.fuwjin.dinah.ClassInstanceFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionSignature;
-import org.fuwjin.dinah.ReflectiveFunctionProvider;
+import org.fuwjin.dinah.adapter.StandardAdapter;
 
 /**
  * Manages catalogs.
@@ -32,7 +32,7 @@ public class CatalogManager implements FunctionProvider {
     * Creates a new instance.
     */
    public CatalogManager() {
-      this(new CachedFunctionProvider(new ReflectiveFunctionProvider(), new ClassInstanceFunctionProvider()));
+      this(new CachedFunctionProvider());
    }
 
    /**
@@ -40,8 +40,11 @@ public class CatalogManager implements FunctionProvider {
     * @param adapter the type adapter
     */
    public CatalogManager(final Adapter adapter) {
-      this(new CachedFunctionProvider(new ReflectiveFunctionProvider(adapter), new ClassInstanceFunctionProvider(
-            adapter)));
+      this(new CachedFunctionProvider(adapter));
+   }
+
+   public CatalogManager(final ClassLoader loader) {
+      this(new StandardAdapter(loader));
    }
 
    /**
@@ -50,6 +53,11 @@ public class CatalogManager implements FunctionProvider {
     */
    public CatalogManager(final FunctionProvider provider) {
       this.provider = provider;
+   }
+
+   @Override
+   public Object adapt(final Object value, final Type type) throws AdaptException {
+      return provider.adapt(value, type);
    }
 
    @Override

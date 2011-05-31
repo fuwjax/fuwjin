@@ -25,20 +25,19 @@
 			<artifactId>dinah</artifactId>
 			<version>0.9.8-SNAPSHOT</version>
 		</dependency>
+        <dependency>
+            <groupId>org.fuwjin</groupId>
+            <artifactId>glory</artifactId>
+            <version>0.9.8-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.fuwjin</groupId>
 				<artifactId>chessur-maven-plugin</artifactId>
-				<version>0.9.8-SNAPSHOT</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.fuwjin</groupId>
-						<artifactId>chessur</artifactId>
-						<version>0.9.8-SNAPSHOT</version>
-					</dependency>
-				</dependencies>
+				<version>0.9.7</version>
 				<executions>
 					<execution>
 						<goals>
