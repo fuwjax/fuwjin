@@ -1,0 +1,936 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2011 Michael Doberenz.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+# 
+# Contributors:
+#     Michael Doberenz - initial API and implementation
+#-------------------------------------------------------------------------------
+alias java.lang.StringBuilder as StringBuilder
+alias java.lang.Appendable.append(java.lang.Appendable, java.lang.CharSequence) as append
+alias java.lang.Boolean as Boolean
+alias java.lang.Character as Character
+alias java.lang.Object as Object
+alias java.util.ArrayList as ArrayList
+alias java.util.Collections as Collections
+alias java.util.concurrent.atomic.AtomicInteger as AtomicInteger
+alias org.fuwjin.chessur.Module as Module
+alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.Assignment as Assignment
+alias org.fuwjin.chessur.expression.Block as Block
+alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
+alias org.fuwjin.chessur.expression.Declaration as Declaration
+alias org.fuwjin.chessur.expression.EitherOrStatement as EitherOrStatement
+alias org.fuwjin.chessur.expression.Filter as Filter
+alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
+alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
+alias org.fuwjin.chessur.expression.Invocation as Invocation
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
+alias org.fuwjin.chessur.expression.Literal as Literal
+alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
+alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
+alias org.fuwjin.chessur.expression.ScriptImpl as Script
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
+alias org.fuwjin.chessur.expression.ScriptProxy as ScriptProxy
+alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
+alias org.fuwjin.chessur.expression.Variable as Variable
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
+alias org.fuwjin.chessur.expression.Number as Number
+alias org.fuwjin.util.CodePointSet$Range as Range
+alias org.fuwjin.util.StringUtils as StringUtils
+alias org.fuwjin.util.Indent as Indent
+alias org.fuwjin.util.NameIndex as NameIndex
+alias org.fuwjin.dinah.Function as Function
+alias org.fuwjin.dinah.function.ConstructorFunction as ConstructorFunction
+alias org.fuwjin.dinah.function.FieldAccessFunction as FieldAccessFunction
+alias org.fuwjin.dinah.function.FieldMutatorFunction as FieldMutatorFunction
+alias org.fuwjin.dinah.function.InstanceOfFunction as InstanceOfFunction
+alias org.fuwjin.dinah.function.MethodFunction as MethodFunction
+alias org.fuwjin.dinah.function.StaticFieldAccessFunction as StaticFieldAccessFunction
+alias org.fuwjin.dinah.function.StaticFieldMutatorFunction as StaticFieldMutatorFunction
+alias org.fuwjin.dinah.function.StaticMethodFunction as StaticMethodFunction
+alias org.fuwjin.dinah.function.VarArgsFunction as VarArgsFunction
+alias org.fuwjin.util.TypeUtils.toWrapper as toWrapper
+alias java.lang.Class as Class
+alias java.lang.reflect.Constructor as Constructor
+alias java.lang.reflect.Method as Method
+alias java.lang.reflect.Field as Field
+alias java.lang.Iterable.iterator as iterator
+alias java.util.Iterator.next as getNext
+alias java.util.Iterator.hasNext as hasNext
+alias java.util.Arrays.asList(java.lang.Object[]) as asList
+alias java.util.Map$Entry.getKey as key
+alias java.util.Map$Entry.getValue as value
+
+<Catalog>{
+  <Preamble>
+  varIndex = AtomicInteger.new()
+  indexer = NameIndex.new()
+  specs = iterator(Catalog.scripts(cat))
+  repeat <ScriptDeclaration>
+  assume not hasNext(specs)
+  <Postscript>
+}
+<Module>{
+  <ModulePreamble>
+  varIndex = AtomicInteger.new()
+  indexer = NameIndex.new()
+  specs = iterator(Catalog.scripts(cat))
+  repeat <ScriptDeclaration>
+  assume not hasNext(specs)
+  <Postscript>
+}
+<Postscript>{
+  publish "
+  
+  public static Object interpret(final CharSequence in, final Appendable out, final Map\<String, ?\> environment) throws 'className'Exception {
+    final StringCursor input = new StringCursor(in, out);"
+  size = NameIndex.size(indexer)
+  publish "
+    final Object[] env = new Object['size'];"
+  entries = iterator(NameIndex.entries(indexer))
+  could repeat {
+    entry = getNext(entries)
+    name = key(entry)
+    index = value(entry)
+    publish "
+    env['index'] = environment.containsKey(\"'name'\") ? environment.get(\"'name'\") : UNSET;"
+  }
+  assume not hasNext(entries)
+  rootName = Catalog.rootName(cat)
+  publish "
+    return 'rootName'(input, env);
+  }
+}
+"
+}
+<Preamble>{
+  publish "/*******************************************************************************
+ * Copyright (c) 2011 Michael Doberenz.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Michael Doberenz - initial API and implementation
+ ******************************************************************************/
+package 'package';
+
+import java.io.IOException;
+import java.util.Map;
+
+public class 'className' {
+  static final Object UNSET = new Object() {
+    public String toString() {
+      return \"UNSET\";
+    }
+  };
+
+  public static class 'className'Exception extends Exception {
+    private static final long serialVersionUID = 1; 
+    'className'Exception(final String message) {
+      super(message);
+    }
+    
+    'className'Exception(final String message, final Throwable cause) {
+      super(message, cause);
+    }
+    
+    @Override
+    public synchronized Throwable fillInStackTrace() {
+      return this;
+    }
+  }
+  
+  static class StringCursor {
+    private int pos;
+    private int line;
+    private int column;
+    private final CharSequence seq;
+    private final int start;
+    private final StringCursor parent;
+    private final Appendable appender;
+    
+    public StringCursor(final CharSequence seq, final Appendable appender) {
+         start = 0;
+         pos = 0;
+         this.seq = seq;
+         parent = null;
+         line = 1;
+         column = 0;
+         this.appender = appender;
+    }
+    
+    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent) {
+      this.start = start;
+      pos = start;
+      this.seq = seq;
+      this.parent = parent;
+      this.line = line;
+      this.column = column;
+      this.appender = new StringBuilder();
+    }
+    
+    public int accept() throws 'className'Exception {
+      checkBounds(pos);
+      return advance();
+    }
+    
+    public int accept(final String expected) throws 'className'Exception {
+      if(expected == null || expected.length() == 0) {
+        throw ex(\"UNSET\");
+      }
+      checkBounds(pos + expected.length() - 1);
+      final CharSequence sub = seq.subSequence(pos, pos + expected.length());
+      if(!sub.equals(expected)) {
+        throw ex(\"failed while matching \"+expected);
+      }
+      final int stop = pos + expected.length() - 1;
+      while(pos < stop) {
+        advance();
+      }
+      return advance();
+    }
+    
+    public int acceptIn(final String name, final String set) throws 'className'Exception {
+      checkBounds(pos);
+      if(set.indexOf(seq.charAt(pos)) < 0) {
+        throw ex(\"Did not match filter: \"+name);
+      }
+      return advance();
+    }
+    
+    public int acceptNot(final String expected) throws 'className'Exception {
+      if(expected == null || expected.length() == 0) {
+        throw ex(\"UNSET\");
+      }
+      if(pos + expected.length() - 1 >= seq.length()) {
+        return accept();
+      }       
+      if(seq.subSequence(pos, pos + expected.length()).equals(expected)) {
+        throw ex(\"failed while matching \"+expected);
+      }
+      return advance();
+    }
+    
+    public int acceptNotIn(final String name, final String set) throws 'className'Exception {
+      checkBounds(pos);
+      if(set.indexOf(seq.charAt(pos)) >= 0) {
+        throw ex(\"Unexpected match: \"+name);
+      }
+      return advance();
+    }
+    
+    public void publish(final Object value) throws 'className'Exception {
+      try {
+        appender.append(value.toString());
+      } catch(IOException e) {
+        throw ex(e);
+      }
+    }
+    
+    public Object isSet(final String name, final Object value) throws 'className'Exception {
+      if(UNSET.equals(value)) {
+        throw ex(\"variable \"+name+\" is unset\");
+      }
+      return value;
+    }
+    
+    protected void checkBounds(final int p) throws 'className'Exception {
+      if(p >= seq.length()) {
+        throw ex(\"unexpected EOF\");
+      }
+    }
+    
+    public void commit() {
+      commitInput();
+      commitOutput();
+    }
+    
+    void commitInput() {
+      parent.pos = pos;
+      parent.line = line;
+      parent.column = column;
+    }
+    
+    void commitOutput() {
+      appendTo(parent.appender);
+    }
+    
+    void appendTo(final Appendable dest) {
+      try {
+        dest.append(appender.toString());
+      } catch(final IOException e) {
+        throw new RuntimeException(\"IOException never thrown by StringBuilder\", e);
+      }
+    }
+    
+    public 'className'Exception ex(final String message) {
+      return new 'className'Exception(message + context());
+    }
+    
+    public String context() {
+      if(pos == 0) {
+        return \": [\" + line + \",\" + column + \"] SOF -> [1,0] SOF\";
+      }
+      if(pos > seq.length()) {
+        return \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\";
+      }
+      return \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos - 1)+\"' -> [1,0] SOF\";
+    }
+    
+    public 'className'Exception ex(final Throwable cause) {
+      return new 'className'Exception(context(), cause);
+    }
+    
+    public void abort(final Object message) {
+      throw new RuntimeException(message + context());
+    }
+      
+    public void abort(final Object message, final Throwable cause) {
+      throw new RuntimeException(message + context(), cause);
+    }
+    
+    private int advance() {
+      final char ch = seq.charAt(pos++);
+       if(ch == \'\\n\') {
+         line++;
+         column = 0;
+       } else {
+         column++;
+       }
+       return ch;
+    }
+    
+    public int next() throws 'className'Exception {
+      checkBounds(pos);
+      return seq.charAt(pos);
+    }
+    
+    public String nextStr() throws 'className'Exception {
+      checkBounds(pos);
+      return seq.subSequence(pos,pos+1).toString();
+    }
+    
+    public StringCursor sub() {
+      return new StringCursor(pos, line, column, seq, this);
+    }
+    
+    public StringCursor subOutput(final StringBuilder newOutput) {
+      return new StringCursor(pos, line, column, seq, this) {
+        public void commit() {
+          commitInput();
+          appendTo(newOutput);
+        }
+      };
+    }
+    
+    public StringCursor subInput(final CharSequence newInput) {
+      return new StringCursor(0, 1, 0, newInput, this) {
+        public void commit() {
+          commitOutput();
+        }
+      };
+    }
+    
+    public String match() {
+      return seq.subSequence(start, pos).toString();
+    }
+  }"   
+}
+<ModulePreamble>{
+  publish "/*******************************************************************************
+ * Copyright (c) 2011 Michael Doberenz.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     Michael Doberenz - initial API and implementation
+ ******************************************************************************/
+package 'package';
+
+import java.io.IOException;
+import java.util.Map;
+import static 'package'.'className'.UNSET;
+import 'package'.'className'.'className'Exception;
+import 'package'.'className'.StringCursor;
+
+public class 'moduleName' {
+"
+}
+<ScriptDeclaration>{
+  spec = Script.declaration(getNext(specs))
+  name = Declaration.name(spec)
+  value = Declaration.returns(spec)
+  indent = Indent.new()
+  publish "\n'indent'static Object 'name'(final StringCursor input, final Object... parentEnv) throws 'className'Exception {
+    final Object[] env = new Object[parentEnv.length];
+    System.arraycopy(parentEnv, 0, env, 0, env.length);"
+  Indent.increase(indent)
+  subIndex = AtomicInteger.incrementAndGet(varIndex)
+  input = "sub'subIndex'"
+  publish "'indent'final StringCursor 'input' = input.sub();"
+  statements = iterator(Declaration.statements(spec))
+  could repeat {
+    statement = getNext(statements)
+    <Statement>
+  }
+  publish "'indent''input'.commit();"
+  assume not hasNext(statements)
+  either{
+    assume value
+    publish "'indent'return '<Value>';"
+  }or{
+    publish "'indent'return null;"
+  }
+  Indent.decrease(indent)
+  publish "'indent'}"
+}
+
+<Value>{
+  statement = value
+  either result = <Script>
+  or result = <StaticLiteral>
+  or result = <DynamicLiteral>
+  or result = <AcceptValue>
+  or result = <NextValue>
+  or result = <MatchValue>
+  or <Object> >> result
+  or result = <Number>
+  or result = <Invocation>
+  or result = <Variable>
+  return result
+}
+<Statement>{
+  either <AssumeStatement>
+  or <EitherOrStatement>
+  or <CouldStatement>
+  or <RepeatStatement>
+  or <AcceptStatement>
+  or <PublishStatement>
+  or <AbortStatement>
+  or <ScriptStatement>
+  or <Block>
+  or <Assignment>
+  or <InvocationStatement>
+}
+
+<AssumeStatement>{
+  assume AssumeStatement.instanceof(statement)
+  value = AssumeStatement.value(statement)
+  subIndex = AtomicInteger.incrementAndGet(varIndex)
+  oldInput = input
+  input = "sub'subIndex'"
+  publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
+  either {
+    assume AssumeStatement.isNot(statement)
+    bIndex = AtomicInteger.incrementAndGet(varIndex)
+    publish "'indent'boolean b'bIndex' = true;"
+    publish "'indent'try {"
+    Indent.increase(indent)
+    publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"
+    publish "'indent'  b'bIndex' = false;"
+    publish "'indent'}"
+    Indent.decrease(indent)
+    exIndex = AtomicInteger.incrementAndGet(varIndex)
+    exception = "e'exIndex'"
+    publish "'indent'} catch(final 'className'Exception 'exception') {"
+    publish "'indent'  b'bIndex' = false;"
+    publish "'indent'}"
+    publish "'indent'if(b'bIndex'){"
+    publish "'indent'  throw 'oldInput'.ex(\"unexpected value\");"
+    publish "'indent'}"
+  } or {
+    publish "'indent'if((Object)'<Value>' == Boolean.FALSE) {"
+    publish "'indent'  throw 'input'.ex(\"check failed\");"
+    publish "'indent'}"
+  }
+}
+<EitherOrStatement>{
+  assume EitherOrStatement.instanceof(statement)
+  stmt = statement
+  statements = iterator(EitherOrStatement.statements(stmt))
+  publish "'indent'try {"
+  Indent.increase(indent)
+  statement = getNext(statements)
+  <Statement>
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final 'className'Exception 'exception') {"
+  Indent.increase(indent)
+  <OrStatement>
+  assume not hasNext(statements)
+  Indent.decrease(indent)
+  publish "'indent'}"
+}
+<OrStatement>{
+  statement = getNext(statements)
+  either {
+    assume hasNext(statements)
+    publish "'indent'try {"
+    Indent.increase(indent)
+    <Statement>
+    Indent.decrease(indent)
+    exIndex = AtomicInteger.incrementAndGet(varIndex)
+    exception = "e'exIndex'"
+    publish "'indent'} catch(final 'className'Exception 'exception') {"
+    Indent.increase(indent)
+    <OrStatement>
+    Indent.decrease(indent)
+    publish "'indent'}"
+  } or {
+    <Statement>
+  }  
+}
+<CouldStatement>{
+  assume CouldStatement.instanceof(statement)
+  stmt = statement
+  publish "'indent'try {"
+  Indent.increase(indent)
+  statement = CouldStatement.statement(stmt)
+  <Statement>
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final 'className'Exception 'exception') {"
+  publish "'indent'  //continue"
+  publish "'indent'}"
+}
+<RepeatStatement>{
+  assume RepeatStatement.instanceof(statement)
+  stmt = statement
+  statement = RepeatStatement.statement(stmt)
+  <Statement>
+  publish "'indent'try {"
+  Indent.increase(indent)
+  publish "'indent'while(true) {"
+  Indent.increase(indent)
+  <Statement>
+  Indent.decrease(indent)
+  publish "'indent'}"
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final 'className'Exception 'exception') {"
+  publish "'indent'  //continue"
+  publish "'indent'}"
+}
+<AcceptStatement>{
+  either <FilterAcceptStatement>
+  or <ValueAcceptStatement>
+}
+<ValueAcceptStatement>{
+  assume ValueAcceptStatement.instanceof(statement)
+  publish "'indent''input'.accept"
+  could {
+    assume ValueAcceptStatement.isNot(statement)
+    publish 'Not'
+  }
+  value = ValueAcceptStatement.value(statement)
+  publish '('
+  could {
+    assume not Object.equals(Variable.NEXT(), value)
+    publish <Value>
+  }
+  publish ');'
+}
+<FilterAcceptStatement>{
+  assume FilterAcceptStatement.instanceof(statement)
+  publish "'indent''input'.accept"
+  could {
+    assume FilterAcceptStatement.isNot(statement)
+    publish "Not"
+  }
+  filter = FilterAcceptStatement.filter(statement)
+  publish "In(\"'filter'\",\"'<Filter>'\");"
+}
+<AcceptValue>{
+  either value = <FilterAcceptValue>
+  or value = <ValueAcceptValue>
+  return value
+}
+<ValueAcceptValue>{
+  assume ValueAcceptStatement.instanceof(statement)
+  value = ValueAcceptStatement.value(statement)
+  either {
+    assume ValueAcceptStatement.isNot(statement)
+    notted = 'Not'
+    val = <Value>
+  } or {
+    notted = ''
+    either {
+      assume not Object.equals(Variable.NEXT(), value)
+      val = <Value>
+    } or {
+      val = ''
+    }
+  }
+  return "'input'.accept'notted'('val')"
+}
+<FilterAcceptValue>{
+  assume FilterAcceptStatement.instanceof(statement)
+  either {
+    assume FilterAcceptStatement.isNot(statement)
+    notted = 'Not'
+  } or {
+    notted = ''
+  }
+  filter = FilterAcceptStatement.filter(statement)
+  return "'input'.accept'notted'In(\"'filter'\",\"'<Filter>'\")"
+}
+<PublishStatement>{
+  assume PublishStatement.instanceof(statement)
+  value = PublishStatement.value(statement)
+  publish "'indent''input'.publish('<Value>');"
+}
+<AbortStatement>{
+  assume AbortStatement.instanceof(statement)
+  value = AbortStatement.value(statement)
+  publish "'indent''input'.abort('<Value>'"
+  could publish ", 'exception'"
+  publish ');'
+}
+<Block>{
+  assume Block.instanceof(statement)
+  block = statement
+  subIndex = AtomicInteger.incrementAndGet(varIndex)
+  oldInput = input
+  input = "sub'subIndex'"
+  publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
+  statements = iterator(Block.statements(block))
+  could repeat {
+    statement = getNext(statements)
+    <Statement>
+  }
+  assume not hasNext(statements)
+  publish "'indent''input'.commit();"
+}
+<Assignment>{
+  assume Assignment.instanceof(statement)
+  name = Assignment.name(statement)
+  index = NameIndex.indexOf(indexer, name)
+  value = Assignment.value(statement)
+  either {
+    assume Invocation.instanceof(value)
+    statement = value
+    publish "'indent'try {"
+    Indent.increase(indent)
+    publish "'indent'env['index'] /*'name'*/= '<Invocation>';"
+    Indent.decrease(indent)
+    exIndex = AtomicInteger.incrementAndGet(varIndex)
+    exception = "e'exIndex'"
+    publish "'indent'} catch(final Exception 'exception') {"
+    publish "'indent'  throw 'input'.ex('exception');"
+    publish "'indent'}"
+  } or publish "'indent'env['index'] /*'name'*/= '<Value>';"
+}
+<InvocationStatement>{
+  assume Invocation.instanceof(statement)
+  function = Invocation.function(statement)
+  params = iterator(Invocation.params(statement))
+  publish "'indent'try {"
+  Indent.increase(indent)
+  publish indent
+  publish <RenderFunction>
+  publish ';'
+  Indent.decrease(indent)
+  exIndex = AtomicInteger.incrementAndGet(varIndex)
+  exception = "e'exIndex'"
+  publish "'indent'} catch(final Exception 'exception') {"
+  publish "'indent'  throw 'input'.ex('exception');"
+  publish "'indent'}"
+}
+<Invocation>{
+  assume Invocation.instanceof(statement)
+  function = Invocation.function(statement)
+  params = iterator(Invocation.params(statement))
+  return <RenderFunction>
+}
+<Number>{
+  assume Number.instanceof(value)
+  return Number.toString(value)
+}
+<Object>{
+  assume ObjectTemplate.instanceof(value)
+  publish "new Object() {"
+  Indent.increase(indent)
+  publish "'indent'public Object value() {"
+  Indent.increase(indent)
+  function = ObjectTemplate.constructor(value)
+  constructor = ConstructorFunction.member(function)
+  type = Constructor.getDeclaringClass(constructor)
+  publish "'indent''<Type>' value = "
+  params = iterator(Collections.emptySet())
+  <Constructor>
+  publish ";"
+  setters = iterator(ObjectTemplate.setters(value))
+  could repeat{
+    field = getNext(setters)
+    function = FieldTemplate.setter(field)
+    value = FieldTemplate.value(field)
+    either <MemberFieldMutator>
+    or <MemberMethod>
+    or <VarArgs>
+  }
+  assume not hasNext(setters)
+  publish "'indent'return value;"
+  Indent.decrease(indent)
+  publish "'indent'}"
+  Indent.decrease(indent)
+  publish "'indent'}.value()"
+}
+<MemberFieldMutator>{
+  assume FieldMutatorFunction.instanceof(function)
+  field = FieldMutatorFunction.member(function)
+  type = Field.getType(field)
+  publish "'indent'value.'Field.getName(field)' = ('<Type>')'<Value>';"
+}
+<MemberMethod> {
+  assume MethodFunction.instanceof(function)
+  method = MethodFunction.member(function)
+  types = iterator(asList(Method.getParameterTypes(method)))
+  type = getNext(types)
+  assume not hasNext(types)
+  publish "'indent'value.'Method.getName(method)'(('<Type>')'<Value>');"
+}
+<RenderFunction>{
+  either <Constructor> >> render
+  or <FieldAccess> >> render
+  or <FieldMutator> >> render
+  or <InstanceOf> >> render
+  or <Method> >> render
+  or <StaticFieldAccess> >> render
+  or <StaticFieldMutator> >> render
+  or <StaticMethod> >> render
+  or <VarArgs> >> render
+  assume not hasNext(params)
+  return render
+}
+<Constructor>{
+  assume ConstructorFunction.instanceof(function)
+  constructor = ConstructorFunction.member(function)
+  type = Constructor.getDeclaringClass(constructor)
+  publish "new '<Type>'"
+  types = iterator(asList(Constructor.getParameterTypes(constructor)))
+  <Params>
+}
+<FieldAccess>{
+  assume FieldAccessFunction.instanceof(function)
+  field = FieldAccessFunction.member(function)
+  type = Field.getDeclaringClass(field)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Field.getName(field)'"
+}
+<FieldMutator>{
+  assume FieldMutatorFunction.instanceof(function)
+  field = FieldMutatorFunction.member(function)
+  type = Field.getDeclaringClass(field)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Field.getName(field)'"
+  type = Field.getType(field)
+  value = getNext(params)
+  publish " = ('<Type>')'<Value>'"
+}
+<InstanceOf> {
+  assume InstanceOfFunction.instanceof(function)
+  type = InstanceOfFunction.type(function)
+  value = getNext(params)
+  publish "'<Value>' instanceof '<Type>'"
+}
+<Method> {
+  assume MethodFunction.instanceof(function)
+  method = MethodFunction.member(function)
+  type = Method.getDeclaringClass(method)
+  value = getNext(params)
+  publish "(('<Type>')'<Value>').'Method.getName(method)'"
+  types = iterator(asList(Method.getParameterTypes(method)))
+  <Params>
+}
+<StaticFieldAccess> {
+  assume StaticFieldAccessFunction.instanceof(function)
+  field = StaticFieldAccessFunction.member(function)
+  type = Field.getDeclaringClass(field)
+  publish "'<Type>'.'Field.getName(field)'"
+}
+<StaticFieldMutator>{
+  assume StaticFieldMutatorFunction.instanceof(function)
+  field = StaticFieldMutatorFunction.member(function)
+  type = Field.getDeclaringClass(field)
+  publish "'<Type>'.'Field.getName(field)'"
+  type = Field.getType(field)
+  value = getNext(params)
+  publish " = ('<Type>')'<Value>'"
+}
+<StaticMethod> {
+  assume StaticMethodFunction.instanceof(function)
+  method = StaticMethodFunction.member(function)
+  type = Method.getDeclaringClass(method)
+  publish "'<Type>'.'Method.getName(method)'"
+  types = iterator(asList(Method.getParameterTypes(method)))
+  <Params>
+}
+<VarArgs> {
+  abort "VarArgs is currently unsupported: 'Function.name(function)'"
+}
+<Params> {
+  publish '('
+  could {
+    type = getNext(types)
+    value = getNext(params)
+    publish "('<Type>')'<Value>'"
+    could repeat {
+      type = getNext(types)
+      value = getNext(params)
+      publish ", ('<Type>')'<Value>'"
+    }
+  }
+  assume not hasNext(types)
+  publish ')'
+}
+<Type> {
+  return Class.getCanonicalName(toWrapper(type))
+}
+
+<Filter>{
+  assume Filter.instanceof(filter)
+  filterBuffer = StringBuilder.new()
+  ranges = iterator(Filter.ranges(filter))
+  range = getNext(ranges)
+  <Range>
+  could repeat{
+    range = getNext(ranges)
+    <Range>
+  }
+  assume not hasNext(ranges)
+  return StringBuilder.toString(filterBuffer)
+}
+<Range>{
+  assume Range.instanceof(range)
+  chars = iterator(Range.chars(range))
+  repeat {
+    ch = getNext(chars)
+    append(filterBuffer, Literal.dynamicEscape(ch))
+  }
+  assume not hasNext(chars)
+}
+
+<StaticLiteral>{
+  assume Literal.instanceof(value)
+  chars = iterator(Literal.chars(value))
+  builder = StringBuilder.new()
+  could repeat{
+    ch = getNext(chars)
+    append(builder, Literal.dynamicEscape(ch))
+  }
+  assume not hasNext(chars)
+  return "\"'builder'\""
+}
+<DynamicLiteral>{
+  assume CompositeLiteral.instanceof(value)
+  composite = value
+  values = iterator(CompositeLiteral.values(composite))
+  could {
+    value = getNext(values)
+    either {
+      assume not hasNext(values)
+      result = "String.valueOf('<Value>')"
+    } or {
+      list = ArrayList.new()
+      ArrayList.add(list, "String.valueOf('<Value>')")
+      repeat{
+        value = getNext(values)
+        ArrayList.add(list, "String.valueOf('<Value>')")
+      }
+      assume not hasNext(values)
+      result = StringUtils.join(" + ", list)
+    }
+  }
+  return result
+}
+<NextValue>{
+  assume Object.equals(Variable.NEXT(), value)
+  return "'input'.next()"
+}
+<MatchValue>{
+  assume Object.equals("match",Variable.name(value))
+  return "'input'.match()"
+}
+
+<ScriptStatement>{
+  either publish "'indent''<Script>';"
+  or {
+     assume ScriptOutput.instanceof(statement)
+     name = ScriptOutput.name(statement)
+     statement = ScriptOutput.spec(statement)
+     bIndex = AtomicInteger.incrementAndGet(varIndex)
+     builder = "builder'bIndex'"
+     publish "'indent'final StringBuilder 'builder' = new StringBuilder();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subOutput('builder');"
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+     index = NameIndex.indexOf(indexer, name)
+     publish "'indent'env['index'] /*'name'*/= 'builder'.toString();"
+  } or {
+     assume ScriptInput.instanceof(statement)
+     value = ScriptInput.value(statement)
+     statement = ScriptInput.spec(statement)
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subInput(String.valueOf('<Value>'));"
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+  } or {
+     assume ScriptPipe.instanceof(statement)
+     source = ScriptPipe.source(statement)
+     sink = ScriptPipe.sink(statement)
+     bIndex = AtomicInteger.incrementAndGet(varIndex)
+     builder = "builder'bIndex'"
+     publish "'indent'final StringBuilder 'builder' = new StringBuilder();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     oldInput = input
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subOutput('builder');"
+     statement = source
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+     subIndex = AtomicInteger.incrementAndGet(varIndex)
+     input = "sub'subIndex'"
+     publish "'indent'final StringCursor 'input' = 'oldInput'.subInput('builder');"
+     statement = sink 
+     <ScriptStatement>
+     publish "'indent''input'.commit();"
+  }
+}
+<Script>{
+  either {
+      assume Script.instanceof(statement)
+      name = Script.name(statement)
+      result = "'name'('input', env)"
+  } or {
+      assume ScriptProxy.instanceof(statement)
+      module = Module.name(ScriptProxy.module(statement))
+      name = Script.name(ScriptProxy.script(statement))
+      result = "'package'.'module'.'name'('input', env)"
+  }
+  return result
+}
+<Variable>{
+  assume Variable.instanceof(value)
+  name = Variable.name(value)
+  index = NameIndex.indexOf(indexer, name)
+  return "'input'.isSet(\"'name'\", env['index'])"
+}

@@ -1,0 +1,1 @@
+<Root>{either { accept 'a' v = 'yes' } or v = 'no' return v}

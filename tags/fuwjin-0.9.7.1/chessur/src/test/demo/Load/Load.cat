@@ -1,0 +1,5 @@
+load src/test/demo/Load/include.cat as I
+
+<Root> {
+  <I:Root>
+}

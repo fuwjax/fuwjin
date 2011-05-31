@@ -1,0 +1,16 @@
+load org/fuwjin/chessur/generated/GrinParser.cat as Parse
+load org/fuwjin/chessur/generated/GrinCodeGenerator.cat as Gen
+#load grin.parse.cat as Parse
+#load grin.code.cat as Gen
+alias org.fuwjin.dinah.ReflectiveFunctionProvider as FunctionProvider
+alias java.io.File as File
+alias org.fuwjin.chessur.CatalogManager as CatalogManager
+alias java.lang.String as String
+
+<Compile> {
+  manager = CatalogManager.new()
+  postage = manager
+  cat = <Parse:Catalog>
+  className = name
+  <Gen:Catalog>
+}

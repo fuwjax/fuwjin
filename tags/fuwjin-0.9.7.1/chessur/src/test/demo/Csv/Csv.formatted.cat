@@ -1,0 +1,7 @@
+<Csv> {
+  repeat {
+    repeat accept not ','
+    accept ','
+  }
+  publish match
+}

@@ -1,0 +1,64 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Tweed.LD/Provider/ReflectiveFunctionProvider.cs">
+    <Files>
+      <File FileName="tweed.LD/AssemblyInfo.cs" Line="9" Column="1" />
+      <File FileName="tweed.LD/IFunctionProvider.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/IFunction.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/IFunctionSignature.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/IAdapter.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/NoSuchFunctionException.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/AdaptException.cs" Line="2" Column="12" />
+      <File FileName="tweed.LD/provider/FunctionProvider.cs" Line="26" Column="16" />
+      <File FileName="tweed.LD/function/Function.cs" Line="2" Column="21" />
+      <File FileName="tweed.LD/provider/CachedFunctionProvider.cs" Line="26" Column="38" />
+      <File FileName="Tweed.LD.Test/ReflectiveFunctionProviderTest.cs" Line="21" Column="128" />
+      <File FileName="Tweed.LD/Provider/ReflectiveFunctionProvider.cs" Line="17" Column="4" />
+      <File FileName="Tweed.LD.Test/Sample/Sample.cs" Line="15" Column="4" />
+      <File FileName="Tweed.LD/Signature/NameOnlySignature.cs" Line="44" Column="9" />
+      <File FileName="Tweed.LD/Signature/ArgCountSignature.cs" Line="52" Column="1" />
+      <File FileName="Tweed.LD/Signature/TypedArgsSignature.cs" Line="27" Column="30" />
+      <File FileName="Tweed.LD/Adapter/Adapter.cs" Line="10" Column="3" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Tweed.LD" expanded="True">
+            <Node name="Provider" expanded="True">
+              <Node name="ReflectiveFunctionProvider.cs" selected="True" />
+            </Node>
+            <Node name="Signature" expanded="True" />
+          </Node>
+          <Node name="Tweed.LD.Test" expanded="True">
+            <Node name="References" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True">
+          <Node name="Tweed.LD" expanded="True">
+            <Node name="Tweed" expanded="True">
+              <Node name="LD" expanded="True">
+                <Node name="Function" expanded="True" />
+                <Node name="Provider" expanded="True" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+      <Pad Id="ConnectionManagerPad">
+        <State selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
