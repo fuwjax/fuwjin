@@ -17,12 +17,7 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Script;
-import org.fuwjin.chessur.stream.CodePointInStream;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.ObjectOutStream;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.dinah.adapter.StandardAdapter;
+import org.fuwjin.chessur.ScriptState;
 
 /**
  * Base utility class for all things transformative.
@@ -30,115 +25,113 @@ import org.fuwjin.dinah.adapter.StandardAdapter;
 public abstract class Executable implements Script {
    @Override
    public Object exec() throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.NONE, Environment.NONE);
+      return exec(new ScriptState());
    }
 
    @Override
    public Object exec(final InputStream input) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.NONE, Environment.NONE);
+      return exec(new ScriptState(input));
    }
 
    @Override
-   public Object exec(final InputStream input, final Map<String, ? extends Object> scope) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.NONE, new Environment(scope));
+   public Object exec(final InputStream input, final Map<String, ? extends Object> environment)
+         throws ExecutionException {
+      return exec(new ScriptState(input, environment));
    }
 
    @Override
    public Object exec(final InputStream input, final PrintStream output) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), Environment.NONE);
+      return exec(new ScriptState(input, output));
    }
 
    @Override
-   public Object exec(final InputStream input, final PrintStream output, final Map<String, ? extends Object> scope)
+   public Object exec(final InputStream input, final PrintStream output, final Map<String, ? extends Object> environment)
          throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), new Environment(scope));
+      return exec(new ScriptState(input, output, environment));
    }
 
    @Override
    public Object exec(final InputStream input, final Writer output) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), Environment.NONE);
+      return exec(new ScriptState(input, output));
    }
 
    @Override
-   public Object exec(final InputStream input, final Writer output, final Map<String, ? extends Object> scope)
+   public Object exec(final InputStream input, final Writer output, final Map<String, ? extends Object> environment)
          throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), new Environment(scope));
+      return exec(new ScriptState(input, output, environment));
    }
 
    @Override
-   public Object exec(final Map<String, ? extends Object> scope) throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.NONE, new Environment(scope));
+   public Object exec(final Map<String, ? extends Object> environment) throws ExecutionException {
+      return exec(new ScriptState(environment));
    }
 
    @Override
    public Object exec(final PrintStream output) throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.stream(output), Environment.NONE);
+      return exec(new ScriptState(output));
    }
 
    @Override
-   public Object exec(final PrintStream output, final Map<String, ? extends Object> scope) throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.stream(output), new Environment(scope));
+   public Object exec(final PrintStream output, final Map<String, ? extends Object> environment)
+         throws ExecutionException {
+      return exec(new ScriptState(output, environment));
    }
 
    @Override
    public Object exec(final Reader input) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.NONE, Environment.NONE);
+      return exec(new ScriptState(input));
    }
 
    @Override
-   public Object exec(final Reader input, final Map<String, ? extends Object> scope) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.NONE, new Environment(scope));
+   public Object exec(final Reader input, final Map<String, ? extends Object> environment) throws ExecutionException {
+      return exec(new ScriptState(input, environment));
    }
 
    @Override
    public Object exec(final Reader input, final PrintStream output) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), Environment.NONE);
+      return exec(new ScriptState(input, output));
    }
 
    @Override
-   public Object exec(final Reader input, final PrintStream output, final Map<String, ? extends Object> scope)
+   public Object exec(final Reader input, final PrintStream output, final Map<String, ? extends Object> environment)
          throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), new Environment(scope));
+      return exec(new ScriptState(input, output, environment));
    }
 
    @Override
    public Object exec(final Reader input, final Writer output) throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), Environment.NONE);
+      return exec(new ScriptState(input, output));
    }
 
    @Override
-   public Object exec(final Reader input, final Writer output, final Map<String, ? extends Object> scope)
+   public Object exec(final Reader input, final Writer output, final Map<String, ? extends Object> environment)
          throws ExecutionException {
-      return exec(CodePointInStream.stream(input), ObjectOutStream.stream(output), new Environment(scope));
+      return exec(new ScriptState(input, output, environment));
    }
 
    @Override
-   public Object exec(final Writer output) throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.stream(output), Environment.NONE);
-   }
-
-   @Override
-   public Object exec(final Writer output, final Map<String, ? extends Object> scope) throws ExecutionException {
-      return exec(CodePointInStream.NONE, ObjectOutStream.stream(output), new Environment(scope));
-   }
-
-   @Override
-   public abstract String name();
-
-   protected Object exec(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ExecutionException {
+   public Object exec(final ScriptState state) throws ExecutionException {
       try {
-         final Object value = expression().resolve(input, output, scope);
-         if(StandardAdapter.isSet(value)) {
-            return value;
-         }
-         return null;
+         return state.exec(expression());
       } catch(final AbortedException e) {
          throw new ExecutionException(String.format("Execution of %s aborted", name()), e);
       } catch(final ResolveException e) {
          throw new ExecutionException(String.format("Execution of %s failed", name()), e);
       }
    }
+
+   @Override
+   public Object exec(final Writer output) throws ExecutionException {
+      return exec(new ScriptState(output));
+   }
+
+   @Override
+   public Object exec(final Writer output, final Map<String, ? extends Object> environment) throws ExecutionException {
+      return exec(new ScriptState(output, environment));
+   }
+
+   @Override
+   public abstract String name();
 
    protected abstract Expression expression() throws AbortedException;
 }

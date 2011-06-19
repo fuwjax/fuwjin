@@ -38,13 +38,13 @@ alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
 alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
 alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
 alias org.fuwjin.chessur.expression.Variable as Variable
-alias org.fuwjin.util.CodePointSet$Range as Range
+alias org.fuwjin.util.CodePointSet.Range as Range
 alias org.fuwjin.util.Indent as Indent
 alias java.lang.Iterable.iterator as iterator
 alias java.util.Iterator.next as getNext
 alias java.util.Iterator.hasNext as hasNext
-alias java.util.Map$Entry.getKey as key
-alias java.util.Map$Entry.getValue as value
+alias java.util.Map.Entry.getKey as key
+alias java.util.Map.Entry.getValue as value
 
 <Catalog>{
   modules = iterator(Catalog.modules(cat))

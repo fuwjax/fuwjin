@@ -13,12 +13,10 @@ package org.fuwjin.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import org.fuwjin.dinah.CachedFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionProvider.NoSuchFunctionException;
-import org.fuwjin.dinah.signature.NameOnlySignature;
-import org.fuwjin.dinah.signature.TypedArgsSignature;
+import org.fuwjin.dinah.provider.CompositeFunctionProvider;
 import org.fuwjin.sample.Sample;
 import org.fuwjin.sample.VarArgsSample;
 import org.junit.Before;
@@ -35,7 +33,7 @@ public class VarArgsTest {
     */
    @Before
    public void setup() {
-      provider = new CachedFunctionProvider();
+      provider = new CompositeFunctionProvider();
       Sample.staticValue = "initial";
    }
 
@@ -45,8 +43,8 @@ public class VarArgsTest {
     */
    @Test
    public void testConstructor() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.new")
-            .addArg("java.lang.String"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.new").withNextArg("java.lang.String")
+            .function();
       final Object result = function.invoke("test");
       assertThat((VarArgsSample)result, is(new VarArgsSample("test")));
    }
@@ -57,8 +55,8 @@ public class VarArgsTest {
     */
    @Test
    public void testConstructorArray() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.new")
-            .addArg("java.lang.String[]"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.new")
+            .withNextArg("java.lang.String[]").function();
       final Object result = function.invoke((Object)new String[]{"test"});
       assertThat((VarArgsSample)result, is(new VarArgsSample("test")));
    }
@@ -70,7 +68,7 @@ public class VarArgsTest {
    @Test
    public void testFailingAccess() throws Exception {
       try {
-         provider.getFunction(new NameOnlySignature("java.lang.Class.new"));
+         provider.forName("java.lang.Class.new").function();
          fail("shouldn't work");
       } catch(final NoSuchFunctionException e) {
          // pass
@@ -84,7 +82,7 @@ public class VarArgsTest {
    @Test
    public void testFailingType() throws Exception {
       try {
-         provider.getFunction(new TypedArgsSignature("java.lang.Fuw.jax"));
+         provider.forName("java.lang.Fuw.jax").function();
          fail("shouldn't work");
       } catch(final NoSuchFunctionException e) {
          // pass
@@ -97,9 +95,8 @@ public class VarArgsTest {
     */
    @Test
    public void testInterfaceMethod() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature(
-            "org.fuwjin.sample.VarArgsInterface.VarArgsChild.setValues").addArg(
-            "org.fuwjin.sample.VarArgsInterface.VarArgsChild").addArg("java.lang.String"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsInterface.VarArgsChild.setValues")
+            .withNextArg("org.fuwjin.sample.VarArgsInterface.VarArgsChild").withNextArg("java.lang.String").function();
       final VarArgsSample obj = new VarArgsSample("ignore");
       function.invoke(obj, "test");
       assertThat(obj, is(new VarArgsSample("test")));
@@ -111,9 +108,9 @@ public class VarArgsTest {
     */
    @Test
    public void testInterfaceMethodArray() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature(
-            "org.fuwjin.sample.VarArgsInterface.VarArgsChild.setValues").addArg(
-            "org.fuwjin.sample.VarArgsInterface.VarArgsChild").addArg("java.lang.String[]"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsInterface.VarArgsChild.setValues")
+            .withNextArg("org.fuwjin.sample.VarArgsInterface.VarArgsChild").withNextArg("java.lang.String[]")
+            .function();
       final VarArgsSample obj = new VarArgsSample("ignore");
       function.invoke(obj, new String[]{"test"});
       assertThat(obj, is(new VarArgsSample("test")));
@@ -125,9 +122,8 @@ public class VarArgsTest {
     */
    @Test
    public void testMethod() throws Exception {
-      final Function function = provider
-            .getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.setValues").addArg(
-                  "org.fuwjin.sample.VarArgsSample").addArg("java.lang.String"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.setValues")
+            .withNextArg("org.fuwjin.sample.VarArgsSample").withNextArg("java.lang.String").function();
       final VarArgsSample obj = new VarArgsSample("ignore");
       function.invoke(obj, "test");
       assertThat(obj, is(new VarArgsSample("test")));
@@ -139,9 +135,8 @@ public class VarArgsTest {
     */
    @Test
    public void testMethodArray() throws Exception {
-      final Function function = provider
-            .getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.setValues").addArg(
-                  "org.fuwjin.sample.VarArgsSample").addArg("java.lang.String[]"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.setValues")
+            .withNextArg("org.fuwjin.sample.VarArgsSample").withNextArg("java.lang.String[]").function();
       final VarArgsSample obj = new VarArgsSample("ignore");
       function.invoke(obj, new String[]{"test"});
       assertThat(obj, is(new VarArgsSample("test")));
@@ -153,8 +148,8 @@ public class VarArgsTest {
     */
    @Test
    public void testStaticMethod() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.join")
-            .addArg("java.lang.String"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.join")
+            .withNextArg("java.lang.String").function();
       final Object value = function.invoke("test");
       assertThat((String)value, is("[test]"));
    }
@@ -165,8 +160,8 @@ public class VarArgsTest {
     */
    @Test
    public void testStaticMethodArray() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.VarArgsSample.join")
-            .addArg("java.lang.String[]"));
+      final Function function = provider.forName("org.fuwjin.sample.VarArgsSample.join")
+            .withNextArg("java.lang.String[]").function();
       final Object value = function.invoke((Object)new String[]{"test"});
       assertThat((String)value, is("[test]"));
    }

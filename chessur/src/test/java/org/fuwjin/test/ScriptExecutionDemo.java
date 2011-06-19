@@ -23,7 +23,6 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
-import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
@@ -116,7 +115,7 @@ public class ScriptExecutionDemo {
       return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
    }
 
-   static Catalog loadCatalog(final File file) throws GrinParserException, IOException {
+   static Catalog loadCatalog(final File file) throws ExecutionException, IOException {
       return manager.loadCat(new File(file, file.getName() + ".cat"));
    }
 

@@ -11,12 +11,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.VarArgsSignature;
 import org.fuwjin.util.ArrayUtils;
 
 /**
  * Function for reflective method invocation.
  */
-public class MethodFunction extends FixedArgsFunction<Method> {
+public class MethodFunction extends MemberFunction<Method> {
    /**
     * Creates a new instance.
     * @param adapter the type converter
@@ -24,8 +25,9 @@ public class MethodFunction extends FixedArgsFunction<Method> {
     * @param method the method to invoke
     * @param type the host object type
     */
-   public MethodFunction(final Adapter adapter, final String category, final Method method, final Type type) {
-      super(adapter, method, category + '.' + method.getName(), ArrayUtils.push(method.getParameterTypes(), type));
+   public MethodFunction(final Adapter adapter, final Type category, final Method method) {
+      super(method, VarArgsSignature.newSignature(adapter, category, method.getName(), method.getReturnType(),
+            ArrayUtils.push(method.getParameterTypes(), category), method.isVarArgs()));
    }
 
    @Override
@@ -34,7 +36,13 @@ public class MethodFunction extends FixedArgsFunction<Method> {
       final Object obj = args[0];
       final Object[] realArgs = new Object[args.length - 1];
       System.arraycopy(args, 1, realArgs, 0, args.length - 1);
-      final Object result = member().invoke(obj, realArgs);
+      final Object result;
+      try {
+         result = member().invoke(obj, realArgs);
+      } catch(final NoClassDefFoundError e) {
+         System.out.println(signature());
+         throw e;
+      }
       if(member().getReturnType().equals(void.class)) {
          return Adapter.UNSET;
       }

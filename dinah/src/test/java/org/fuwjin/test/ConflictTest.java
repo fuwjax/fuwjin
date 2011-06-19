@@ -3,11 +3,10 @@ package org.fuwjin.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import org.fuwjin.dinah.CachedFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.function.MethodFunction;
-import org.fuwjin.dinah.signature.TypedArgsSignature;
+import org.fuwjin.dinah.provider.CompositeFunctionProvider;
 import org.fuwjin.sample.SameName;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
@@ -25,7 +24,7 @@ public class ConflictTest {
     */
    @Before
    public void setup() {
-      provider = new CachedFunctionProvider();
+      provider = new CompositeFunctionProvider();
       Sample.staticValue = "initial";
    }
 
@@ -36,8 +35,8 @@ public class ConflictTest {
    @Test
    @Ignore
    public void testAppendOverlap() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("java.lang.StringBuilder.append").addArg(
-            "java.lang.StringBuilder").addArg("java.lang.Object"));
+      final Function function = provider.forName("java.lang.StringBuilder.append")
+            .withNextArg("java.lang.StringBuilder").withNextArg("java.lang.Object").function();
       assertTrue(function.getClass().getCanonicalName(), function instanceof MethodFunction);
    }
 
@@ -48,8 +47,8 @@ public class ConflictTest {
     */
    @Test
    public void testOverlap() throws Exception {
-      final Function function = provider.getFunction(new TypedArgsSignature("org.fuwjin.sample.SameName.name").addArg(
-            "org.fuwjin.sample.SameName").addArg("java.lang.String"));
+      final Function function = provider.forName("org.fuwjin.sample.SameName.name")
+            .withNextArg("org.fuwjin.sample.SameName").withNextArg("java.lang.String").function();
       final SameName name = new SameName();
       function.invoke(name, "test");
       assertThat(name.name, is("static:test"));

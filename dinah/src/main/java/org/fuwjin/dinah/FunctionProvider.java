@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.fuwjin.dinah;
 
+import java.lang.reflect.Type;
 import org.fuwjin.util.BusinessException;
 
 /**
@@ -44,6 +45,10 @@ public interface FunctionProvider extends Adapter {
       }
    }
 
+   public ConstraintBuilder forCategoryName(final Type category, final String simpleName) throws AdaptException;
+
+   public ConstraintBuilder forName(final String qualifiedName) throws AdaptException;
+
    /**
     * Returns the function corresponding to the signature.
     * @param signature the required function signature
@@ -51,5 +56,5 @@ public interface FunctionProvider extends Adapter {
     * @throws NoSuchFunctionException if the signature cannot be mapped to a
     *         function on this provider
     */
-   Function getFunction(FunctionSignature signature) throws NoSuchFunctionException;
+   Function getFunction(SignatureConstraint constraint) throws NoSuchFunctionException;
 }

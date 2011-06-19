@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.fuwjin.dinah.function;
 
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.FixedArgsSignature;
 import org.fuwjin.util.TypeUtils;
 
 /**
  * Function encapsulating the "instanceof" keyword.
  */
-public class InstanceOfFunction extends FixedArgsFunction<Member> {
+public class InstanceOfFunction extends AbstractFunction {
    private final Type type;
 
    /**
@@ -27,9 +27,9 @@ public class InstanceOfFunction extends FixedArgsFunction<Member> {
     * @param category the function category
     * @param type the expected type
     */
-   public InstanceOfFunction(final Adapter adapter, final String category, final Type type) {
-      super(adapter, null, category + ".instanceof", new Type[1]);
-      this.type = type;
+   public InstanceOfFunction(final Adapter adapter, final Type category) {
+      super(new FixedArgsSignature(adapter, category, "instanceof", boolean.class, Object.class));
+      type = category;
    }
 
    @Override

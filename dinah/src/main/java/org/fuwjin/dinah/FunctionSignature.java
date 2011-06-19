@@ -1,44 +1,34 @@
 package org.fuwjin.dinah;
 
 import java.lang.reflect.Type;
+import org.fuwjin.dinah.Adapter.AdaptException;
 
 /**
- * Matches the signature of a function according to a set of constraints.
+ * The real signature of a Function. Every function will have a single
+ * signature, however, several functions may share the same signature.
  */
 public interface FunctionSignature {
-   /**
-    * Returns a similar signature that can accept the specified number of
-    * arguments.
-    * @param paramCount the required number of arguments
-    * @return the new signature
-    * @throws IllegalArgumentException if a signature cannot be produced
-    */
-   FunctionSignature accept(int paramCount);
+   Object[] adapt(Object[] args) throws AdaptException;
+
+   Type argType(int index);
+
+   boolean canAdapt(Type[] types);
 
    /**
     * Returns the category (usually the declaring type) for the signature.
     * @return the category
     */
-   String category();
+   Type category();
 
-   /**
-    * Returns true if this signature matches the set of fixed parameters.
-    * @param params the set of parameters
-    * @return true if the signature matches, false otherwise
-    */
-   boolean matchesFixed(Type... params);
+   FunctionSignature meets(SignatureConstraint constraint);
 
-   /**
-    * Returns true if this signature matches the set of variable parameters. The
-    * last parameter type should be an array.
-    * @param params the set of parameters
-    * @return true if the signature matches, false otherwise
-    */
-   boolean matchesVarArgs(Type... params);
+   String memberName();
 
    /**
     * Returns the full name of the signature.
     * @return the name
     */
    String name();
+
+   boolean supportsArgs(int count);
 }

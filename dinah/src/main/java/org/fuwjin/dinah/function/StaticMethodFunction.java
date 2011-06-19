@@ -9,20 +9,23 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.VarArgsSignature;
 
 /**
  * Function for static method invocation.
  */
-public class StaticMethodFunction extends FixedArgsFunction<Method> {
+public class StaticMethodFunction extends MemberFunction<Method> {
    /**
     * Creates a new instance.
     * @param adapter the type converter
     * @param category the function category
     * @param method the method to invoke
     */
-   public StaticMethodFunction(final Adapter adapter, final String category, final Method method) {
-      super(adapter, method, category + '.' + method.getName(), method.getParameterTypes());
+   public StaticMethodFunction(final Adapter adapter, final Type category, final Method method) {
+      super(method, VarArgsSignature.newSignature(adapter, category, method.getName(), method.getReturnType(),
+            method.getParameterTypes(), method.isVarArgs()));
    }
 
    @Override

@@ -16,11 +16,15 @@ import java.util.Arrays;
  * Simple class for managing indention during serialization.
  */
 public class Indent {
-   private static char[] spaces = new char[100];
-   static {
-      Arrays.fill(spaces, ' ');
-      spaces[0] = '\n';
+   private static char[] spaces = arr(100);
+
+   private static char[] arr(final int len) {
+      final char[] arr = new char[len];
+      Arrays.fill(arr, ' ');
+      arr[0] = '\n';
+      return arr;
    }
+
    private int width = 3;
 
    /**
@@ -39,6 +43,9 @@ public class Indent {
 
    @Override
    public String toString() {
+      if(width > spaces.length) {
+         spaces = arr(spaces.length * 2);
+      }
       return new String(spaces, 0, width);
    }
 }

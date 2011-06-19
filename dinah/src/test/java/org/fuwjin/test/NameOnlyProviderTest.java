@@ -14,10 +14,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import org.fuwjin.dinah.CachedFunctionProvider;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
-import org.fuwjin.dinah.signature.ArgCountSignature;
+import org.fuwjin.dinah.provider.CompositeFunctionProvider;
 import org.fuwjin.sample.Sample;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class NameOnlyProviderTest {
     */
    @Before
    public void setup() {
-      provider = new CachedFunctionProvider();
+      provider = new CompositeFunctionProvider();
       Sample.staticValue = "initial";
    }
 
@@ -43,7 +42,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testConstructor() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.new", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.new").withArgCount(1).function();
       final Object result = function.invoke("test");
       assertThat((Sample)result, is(new Sample("test")));
    }
@@ -54,7 +53,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testFieldAccess() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.value", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.value").withArgCount(1).function();
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
       assertThat((String)test, is("test"));
@@ -66,7 +65,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testFieldMutator() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.value", 2));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.value").withArgCount(2).function();
       final Sample sample = new Sample("test");
       function.invoke(sample, "check");
       assertThat(sample, is(new Sample("check")));
@@ -78,7 +77,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testInstanceOf() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.instanceof", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.instanceof").withArgCount(1).function();
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
       assertTrue((Boolean)test);
@@ -92,7 +91,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testMethod() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.getValue", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.getValue").withArgCount(1).function();
       final Sample sample = new Sample("test");
       final Object test = function.invoke(sample);
       assertThat((String)test, is("get:test"));
@@ -104,7 +103,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testStaticFieldAccess() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.staticValue", 0));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.staticValue").withArgCount(0).function();
       final Object test = function.invoke();
       assertThat((String)test, is("initial"));
    }
@@ -115,7 +114,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testStaticFieldMutator() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.staticValue", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.staticValue").withArgCount(1).function();
       function.invoke("check");
       assertThat(Sample.staticValue, is("check"));
    }
@@ -126,7 +125,7 @@ public class NameOnlyProviderTest {
     */
    @Test
    public void testStaticMethod() throws Exception {
-      final Function function = provider.getFunction(new ArgCountSignature("org.fuwjin.sample.Sample.doStatic", 1));
+      final Function function = provider.forName("org.fuwjin.sample.Sample.doStatic").withArgCount(1).function();
       final Object test = function.invoke("test");
       assertThat((String)test, is("initial:test"));
    }

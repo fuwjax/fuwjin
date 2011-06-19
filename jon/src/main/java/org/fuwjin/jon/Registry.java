@@ -8,23 +8,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Script;
-import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionProvider.NoSuchFunctionException;
-import org.fuwjin.dinah.signature.ArgCountSignature;
-import org.fuwjin.dinah.signature.TypedArgsSignature;
-import org.fuwjin.util.TypeUtils;
 
 public class Registry {
    private static CatalogManager manager = new CatalogManager();
    private static Catalog jonParser;
 
-   private static Script parser() throws GrinParserException, IOException {
+   private static Script parser() throws ExecutionException, IOException {
       if(jonParser == null) {
          jonParser = manager.loadCat("org/fuwjin/jon/JonParser.cat");
       }
@@ -62,12 +59,20 @@ public class Registry {
    }
 
    public Function getFunction(final Type type, final String name, final int count) throws NoSuchFunctionException {
-      return provider.getFunction(new ArgCountSignature(TypeUtils.getName(type) + "." + name, count));
+      try {
+         return provider.forCategoryName(type, name).withArgCount(count).function();
+      } catch(final AdaptException e) {
+         throw new NoSuchFunctionException(e, "could not produce name for %s", type);
+      }
    }
 
    public Function getFunction(final Type type, final String name, final Type... parameters)
          throws NoSuchFunctionException {
-      return provider.getFunction(new TypedArgsSignature(TypeUtils.getName(type) + "." + name).addAll(parameters));
+      try {
+         return provider.forCategoryName(type, name).withTypedArgs(parameters).function();
+      } catch(final AdaptException e) {
+         throw new NoSuchFunctionException(e, "could not produce name for %s", type);
+      }
    }
 
    public boolean hasUnresolvedReferences() {

@@ -43,6 +43,8 @@ public interface Adapter {
       }
    };
 
+   <T>T adapt(Object value, Class<T> type) throws AdaptException;
+
    /**
     * Transforms the value to an instance of the type.
     * @param value the value to transform
@@ -51,4 +53,6 @@ public interface Adapter {
     * @throws AdaptException if the value cannot be transformed into the type
     */
    Object adapt(Object value, Type type) throws AdaptException;
+
+   boolean canAdapt(Type fromType, Type toType);
 }

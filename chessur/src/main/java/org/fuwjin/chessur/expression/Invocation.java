@@ -48,7 +48,7 @@ public class Invocation implements Expression {
     * @return the function name
     */
    public String name() {
-      return function.name();
+      return function.signature().name();
    }
 
    /**
@@ -100,7 +100,7 @@ public class Invocation implements Expression {
 
    @Override
    public String toString() {
-      final StringBuilder builder = new StringBuilder(function.name()).append("(");
+      final StringBuilder builder = new StringBuilder(name()).append("(");
       boolean first = true;
       for(final Expression param: params) {
          if(first) {
