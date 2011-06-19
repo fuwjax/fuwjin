@@ -36,9 +36,8 @@ alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.chessur.expression.Number as Number
 alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
-alias org.fuwjin.dinah.signature.TypedArgsSignature as TypedArgsSignature
-alias org.fuwjin.dinah.signature.ArgCountSignature as ArgCountSignature
 alias org.fuwjin.dinah.Function as Function
+alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
 
 # Parses a Grin stream and returns the corresponding Catalog Object Model.
 # << a Grin stream
@@ -91,17 +90,17 @@ alias org.fuwjin.dinah.Function as Function
     or abort "alias-as keywords require a name"
   } or {
     accept '(' <S>
-    signature = TypedArgsSignature.new(qname)
+    signature = FunctionProvider.forName(manager, qname)
     could {
-      TypedArgsSignature.addArg(signature, <QualifiedName>)
+      ConstraintBuilder.withNextArg(signature, <QualifiedName>)
       could repeat {
         accept ',' <S>
-        TypedArgsSignature.addArg(signature, <QualifiedName>)
+        ConstraintBuilder.withNextArg(signature, <QualifiedName>)
       }      
     }
     accept ')' <S>
     accept 'as' <Sep>
-    either Catalog.aliasSignature(cat, signature, <Name>)
+    either Catalog.aliasSignature(cat, ConstraintBuilder.constraint(signature), <Name>)
     or abort "alias-as keywords require a name"
   }  
   or abort "alias keyword requires as keyword" 
@@ -271,11 +270,11 @@ alias org.fuwjin.dinah.Function as Function
   either accept ')'
   or abort "invocation must end with a parenthesis" 
   <S>
+  signature = Catalog.getSignature(cat, name, Invocation.paramCount(inv))
   either{
-    signature = Catalog.getSignature(cat, name, Invocation.paramCount(inv))
     function = FunctionProvider.getFunction(manager, signature)
     Invocation.setFunction(inv, function)
-  } or abort "Could not get function for 'name'"
+  } or abort "Could not get function for 'signature'"
   return inv
 }
 <Script>{
@@ -316,7 +315,9 @@ alias org.fuwjin.dinah.Function as Function
 <Object>{
   accept '(' <S>
   type = <AliasName>
-  constructor = FunctionProvider.getFunction(manager,ArgCountSignature.new("'type'.new",0))
+  signature = FunctionProvider.forName(manager, "'type'.new")
+  ConstraintBuilder.withArgCount(signature, 0)
+  constructor = ConstraintBuilder.function(signature)
   object = ObjectTemplate.new(type, constructor)
   accept ')' <S>
   accept '{' <S>
@@ -332,7 +333,9 @@ alias org.fuwjin.dinah.Function as Function
 }
 <Field>{
   name = <Name>
-  setter = FunctionProvider.getFunction(manager, ArgCountSignature.new("'type'.'name'",2))
+  signature = FunctionProvider.forName(manager, "'type'.'name'")
+  ConstraintBuilder.withArgCount(signature, 2)
+  setter = ConstraintBuilder.function(signature)
   accept ':' <S>
   ObjectTemplate.set(object, name, setter, <Value>)
 }

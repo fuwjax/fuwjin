@@ -8,17 +8,38 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.fuwjin.dinah.Adapter.AdaptException;
+import org.fuwjin.dinah.FunctionProvider.NoSuchFunctionException;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.SignatureConstraint;
+import org.fuwjin.dinah.signature.CompositeSignature;
 
 /**
  * A container for Function composition. While it is presumed that all functions
  * will share the same name, this is not required.
  */
 public class CompositeFunction extends AbstractFunction {
+   public static AbstractFunction merge(final SignatureConstraint signature, final List<AbstractFunction> funcs)
+         throws NoSuchFunctionException {
+      if(funcs.size() == 1) {
+         return funcs.get(0);
+      }
+      if(funcs.size() == 0) {
+         throw new NoSuchFunctionException("No function matches %s", signature);
+      }
+      return new CompositeFunction(signature, funcs);
+   }
+
+   private static FunctionSignature[] signatures(final List<AbstractFunction> functions) {
+      final FunctionSignature[] signatures = new FunctionSignature[functions.size()];
+      int i = 0;
+      for(final AbstractFunction function: functions) {
+         signatures[i++] = function.signature();
+      }
+      return signatures;
+   }
+
    private final List<AbstractFunction> functions;
 
    /**
@@ -26,13 +47,26 @@ public class CompositeFunction extends AbstractFunction {
     * first supplied function.
     * @param functions the set of functions, must be at least 1
     */
-   public CompositeFunction(final AbstractFunction... functions) {
-      super(functions[0].name());
-      this.functions = new ArrayList<AbstractFunction>(Arrays.asList(functions));
+   private CompositeFunction(final SignatureConstraint constraint, final List<AbstractFunction> functions) {
+      super(new CompositeSignature(constraint, signatures(functions)));
+      this.functions = functions;
+   }
+
+   public AbstractFunction bestOption() {
+      AbstractFunction best = null;
+      for(final AbstractFunction function: functions) {
+         if(!function.isPrivate() && best == null) {
+            best = function;
+         }
+      }
+      if(best == null) {
+         return functions.get(0);
+      }
+      return best;
    }
 
    @Override
-   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+   public Object invokeSafe(final Object... args) throws AdaptException, InvocationTargetException {
       AdaptException failure = null;
       for(final AbstractFunction function: functions) {
          try {
@@ -55,49 +89,5 @@ public class CompositeFunction extends AbstractFunction {
          }
       }
       return true;
-   }
-
-   @Override
-   public AbstractFunction restrict(final FunctionSignature signature) {
-      AbstractFunction accessible = null;
-      AbstractFunction restricted = AbstractFunction.NULL;
-      for(final AbstractFunction function: functions) {
-         final AbstractFunction func = function.restrict(signature);
-         restricted = restricted.join(func);
-         accessible = moreAccessible(accessible, func);
-      }
-      if(accessible != null && accessible != this) {
-         return accessible;
-      }
-      return restricted;
-   }
-
-   @Override
-   protected AbstractFunction joinImpl(final AbstractFunction next) {
-      functions.add(next);
-      return this;
-   }
-
-   private AbstractFunction moreAccessible(final AbstractFunction current, final AbstractFunction func) {
-      if(func.isPrivate()) {
-         return current;
-      }
-      if(current == null) {
-         return func;
-      }
-      if(func instanceof FixedArgsFunction && current instanceof FixedArgsFunction) {
-         final FixedArgsFunction<?> c = (FixedArgsFunction<?>)current;
-         final FixedArgsFunction<?> f = (FixedArgsFunction<?>)func;
-         if(f.member() != null && c.member() != null
-               && !c.member().getDeclaringClass().equals(f.member().getDeclaringClass())) {
-            if(c.member().getDeclaringClass().isAssignableFrom(f.member().getDeclaringClass())) {
-               return func;
-            }
-            if(f.member().getDeclaringClass().isAssignableFrom(c.member().getDeclaringClass())) {
-               return current;
-            }
-         }
-      }
-      return this;
    }
 }

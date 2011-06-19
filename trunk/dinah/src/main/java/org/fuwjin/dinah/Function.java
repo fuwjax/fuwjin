@@ -11,7 +11,6 @@
 package org.fuwjin.dinah;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter.AdaptException;
 
 /**
@@ -20,8 +19,6 @@ import org.fuwjin.dinah.Adapter.AdaptException;
  * are exposed through this interface outside of Dinah.
  */
 public interface Function {
-   Type argType(int index);
-
    /**
     * Invokes this function with the supplied arguments.
     * @param args the function arguments
@@ -33,10 +30,5 @@ public interface Function {
     */
    Object invoke(Object... args) throws AdaptException, InvocationTargetException;
 
-   /**
-    * The name of this function. Note that the exact same underlying executable
-    * target may have multiple names.
-    * @return the name of this function
-    */
-   String name();
+   FunctionSignature signature();
 }

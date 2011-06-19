@@ -10,11 +10,12 @@ package org.fuwjin.dinah.function;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.FixedArgsSignature;
 
 /**
  * Function for reflective field mutation.
  */
-public class FieldMutatorFunction extends FixedArgsFunction<Field> {
+public class FieldMutatorFunction extends MemberFunction<Field> {
    /**
     * Creates a new instance.
     * @param adapter the type converter
@@ -22,8 +23,8 @@ public class FieldMutatorFunction extends FixedArgsFunction<Field> {
     * @param field the field to mutate
     * @param type the type of the host object
     */
-   public FieldMutatorFunction(final Adapter adapter, final String category, final Field field, final Type type) {
-      super(adapter, field, category + '.' + field.getName(), type, field.getType());
+   public FieldMutatorFunction(final Adapter adapter, final Type category, final Field field) {
+      super(field, new FixedArgsSignature(adapter, category, field.getName(), void.class, category, field.getType()));
    }
 
    @Override

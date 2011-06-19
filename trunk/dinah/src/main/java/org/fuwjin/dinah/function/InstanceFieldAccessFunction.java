@@ -11,12 +11,14 @@
 package org.fuwjin.dinah.function;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.FixedArgsSignature;
 
 /**
  * Function for reflective field access.
  */
-public class InstanceFieldAccessFunction extends FixedArgsFunction<Field> {
+public class InstanceFieldAccessFunction extends MemberFunction<Field> {
    private final Object target;
 
    /**
@@ -26,9 +28,8 @@ public class InstanceFieldAccessFunction extends FixedArgsFunction<Field> {
     * @param field the field instance
     * @param target the object type required to access the field
     */
-   public InstanceFieldAccessFunction(final Adapter adapter, final String category, final Field field,
-         final Object target) {
-      super(adapter, field, category + '.' + field.getName());
+   public InstanceFieldAccessFunction(final Adapter adapter, final Type category, final Field field, final Object target) {
+      super(field, new FixedArgsSignature(adapter, category, field.getName(), field.getType()));
       this.target = target;
    }
 

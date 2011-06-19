@@ -39,21 +39,6 @@ public final class TypeUtils {
       }
    }
 
-   public static Type forName(final String name, final ClassLoader loader) throws ClassNotFoundException {
-      try {
-         if(name.endsWith("[]")) {
-            return Class.forName(toArray(name), true, loader);
-         }
-         return Class.forName(name, true, loader);
-      } catch(final ClassNotFoundException e) {
-         final Class<?> cls = PRIMITIVES.get(name);
-         if(cls == null) {
-            return inner(name, loader);
-         }
-         return cls;
-      }
-   }
-
    /**
     * Returns the component type of the given type. Mimics
     * Class.getComponentType.
@@ -105,15 +90,6 @@ public final class TypeUtils {
     */
    public static Type[] getInterfaces(final Type type) {
       return toClass(type).getInterfaces();
-   }
-
-   /**
-    * Returns the name of the type.
-    * @param type the type
-    * @return the name
-    */
-   public static String getName(final Type type) {
-      return toClass(type).getCanonicalName();
    }
 
    /**
@@ -192,29 +168,6 @@ public final class TypeUtils {
          cls = WRAPPERS.get(cls);
       }
       return cls;
-   }
-
-   private static Type inner(final String name, final ClassLoader loader) throws ClassNotFoundException {
-      final int index = name.lastIndexOf('.');
-      final String value = name.substring(0, index) + '$' + name.substring(index + 1);
-      try {
-         return Class.forName(value, true, loader);
-      } catch(final ClassNotFoundException e) {
-         if(value.indexOf('.') >= 0) {
-            return inner(value, loader);
-         }
-         throw e;
-      }
-   }
-
-   private static String toArray(final String name) {
-      if(name.endsWith("[]")) {
-         return '[' + toArray(name.substring(0, name.length() - 2));
-      }
-      if(PRIMITIVES.containsKey(name)) {
-         return "I";
-      }
-      return 'L' + name + ';';
    }
 
    /**

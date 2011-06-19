@@ -10,13 +10,13 @@
  ******************************************************************************/
 package org.fuwjin.dinah.signature;
 
-import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.SignatureConstraint;
 
 /**
  * Abstraction over a Function's name and argument types.
  */
-public class ArgCountSignature extends NameOnlySignature {
+public class ArgCountSignature extends ConstraintDecorator {
    private final int count;
 
    /**
@@ -24,27 +24,14 @@ public class ArgCountSignature extends NameOnlySignature {
     * @param name the function name
     * @param argCount the number of arguments
     */
-   public ArgCountSignature(final String name, final int argCount) {
-      super(name);
+   public ArgCountSignature(final SignatureConstraint constraint, final int argCount) {
+      super(constraint);
       count = argCount;
    }
 
    @Override
-   public FunctionSignature accept(final int paramCount) {
-      if(count() != paramCount) {
-         throw new IllegalArgumentException();
-      }
-      return this;
-   }
-
-   @Override
-   public boolean matchesFixed(final Type... params) {
-      return params.length == count();
-   }
-
-   @Override
-   public boolean matchesVarArgs(final Type... params) {
-      return params.length <= count() + 1;
+   public boolean matches(final FunctionSignature signature) {
+      return super.matches(signature) && signature.supportsArgs(count);
    }
 
    @Override
@@ -52,18 +39,14 @@ public class ArgCountSignature extends NameOnlySignature {
       final StringBuilder builder = new StringBuilder();
       builder.append(name());
       String delim = "(";
-      if(count() == 0) {
+      if(count == 0) {
          builder.append(delim);
       } else {
-         for(int i = 0; i < count(); i++) {
+         for(int i = 0; i < count; i++) {
             builder.append(delim).append("?");
             delim = ", ";
          }
       }
       return builder.append(')').toString();
-   }
-
-   protected int count() {
-      return count;
    }
 }

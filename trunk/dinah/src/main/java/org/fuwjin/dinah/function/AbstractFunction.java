@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.fuwjin.dinah.function;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.InvocationTargetException;
+import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionSignature;
 
@@ -18,70 +19,39 @@ import org.fuwjin.dinah.FunctionSignature;
  * Base implementation of Function interface.
  */
 public abstract class AbstractFunction implements Function {
-   /**
-    * The null Function.
-    */
-   public static final AbstractFunction NULL = new UnsupportedFunction(null);
-   private final String name;
-   private final Type[] argTypes;
+   private final FunctionSignature signature;
 
-   protected AbstractFunction(final String name, final Type... argTypes) {
-      this.name = name;
-      this.argTypes = argTypes;
+   protected AbstractFunction(final FunctionSignature signature) {
+      this.signature = signature;
    }
 
    @Override
-   public Type argType(final int index) {
-      return argTypes()[index];
-   }
-
-   /**
-    * Creates a composite of this function and the next function. May alter this
-    * function. This method is an implementation detail and should not be called
-    * externally.
-    * @param next the next function in the chain
-    * @return the new composite function
-    */
-   public final AbstractFunction join(final AbstractFunction next) {
-      if(AbstractFunction.NULL.equals(next)) {
-         return this;
+   public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
+      try {
+         return invokeSafe(signature().adapt(args));
+      } catch(final IllegalAccessException e) {
+         throw new AdaptException(e, "%s could not be accessed: %s", signature(), e);
+      } catch(final InstantiationException e) {
+         throw new AdaptException(e, "%s could not be instantiated: %s", signature(), e);
+      } catch(final IllegalArgumentException e) {
+         throw new AdaptException(e, "%s could not be adapted: %s", signature(), e);
       }
-      return joinImpl(next);
    }
 
    @Override
-   public final String name() {
-      return name;
+   public FunctionSignature signature() {
+      return signature;
    }
-
-   /**
-    * Restricts the function to just the signature. Does not alter this
-    * function. This method is an implementation detail and should not be called
-    * externally.
-    * @param signature the signature to restrict to
-    * @return the new restricted function, or null if this function cannot
-    *         handle the signature
-    */
-   public abstract AbstractFunction restrict(FunctionSignature signature);
 
    @Override
    public String toString() {
-      return getClass().getSimpleName() + ": " + name();
+      return getClass().getSimpleName() + ": " + signature;
    }
 
-   protected int argCount() {
-      return argTypes.length;
-   }
-
-   protected Type[] argTypes() {
-      return argTypes;
-   }
+   protected abstract Object invokeSafe(Object... args) throws AdaptException, InvocationTargetException,
+         IllegalArgumentException, IllegalAccessException, InstantiationException;
 
    protected boolean isPrivate() {
       return true;
-   }
-
-   protected AbstractFunction joinImpl(final AbstractFunction next) {
-      return new CompositeFunction(this, next);
    }
 }

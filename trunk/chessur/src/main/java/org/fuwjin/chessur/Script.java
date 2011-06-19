@@ -207,6 +207,8 @@ public interface Script {
    Object exec(final Reader input, final Writer output, final Map<String, ? extends Object> environment)
          throws ExecutionException;
 
+   Object exec(ScriptState state) throws ExecutionException;
+
    /**
     * Executes the script with no input, a Writer output and no initial
     * environment. Returns the result of the script or null if there is no

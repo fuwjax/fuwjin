@@ -43,7 +43,7 @@ alias org.fuwjin.chessur.expression.Variable as Variable
 alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
 alias org.fuwjin.chessur.expression.Number as Number
-alias org.fuwjin.util.CodePointSet$Range as Range
+alias org.fuwjin.util.CodePointSet.Range as Range
 alias org.fuwjin.util.StringUtils as StringUtils
 alias org.fuwjin.util.Indent as Indent
 alias org.fuwjin.util.NameIndex as NameIndex
@@ -56,7 +56,7 @@ alias org.fuwjin.dinah.function.MethodFunction as MethodFunction
 alias org.fuwjin.dinah.function.StaticFieldAccessFunction as StaticFieldAccessFunction
 alias org.fuwjin.dinah.function.StaticFieldMutatorFunction as StaticFieldMutatorFunction
 alias org.fuwjin.dinah.function.StaticMethodFunction as StaticMethodFunction
-alias org.fuwjin.dinah.function.VarArgsFunction as VarArgsFunction
+alias org.fuwjin.dinah.function.CompositeFunction as CompositeFunction
 alias org.fuwjin.util.TypeUtils.toWrapper as toWrapper
 alias java.lang.Class as Class
 alias java.lang.reflect.Constructor as Constructor
@@ -66,8 +66,8 @@ alias java.lang.Iterable.iterator as iterator
 alias java.util.Iterator.next as getNext
 alias java.util.Iterator.hasNext as hasNext
 alias java.util.Arrays.asList(java.lang.Object[]) as asList
-alias java.util.Map$Entry.getKey as key
-alias java.util.Map$Entry.getValue as value
+alias java.util.Map.Entry.getKey as key
+alias java.util.Map.Entry.getValue as value
 
 <Catalog>{
   <Preamble>
@@ -737,7 +737,7 @@ public class 'moduleName' {
   or <StaticFieldAccess> >> render
   or <StaticFieldMutator> >> render
   or <StaticMethod> >> render
-  or <VarArgs> >> render
+  or render = <Composite>
   assume not hasNext(params)
   return render
 }
@@ -804,8 +804,11 @@ public class 'moduleName' {
   types = iterator(asList(Method.getParameterTypes(method)))
   <Params>
 }
-<VarArgs> {
-  abort "VarArgs is currently unsupported: 'Function.name(function)'"
+<Composite> {
+  either assume CompositeFunction.instanceof(function)
+  or abort "Unknown function type for 'Function.signature(function)'"
+  function = CompositeFunction.bestOption(function)
+  return <RenderFunction>
 }
 <Params> {
   publish '('

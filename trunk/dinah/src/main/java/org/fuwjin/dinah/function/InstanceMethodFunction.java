@@ -9,12 +9,14 @@ package org.fuwjin.dinah.function;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.dinah.signature.VarArgsSignature;
 
 /**
  * Function for reflective method invocation.
  */
-public class InstanceMethodFunction extends FixedArgsFunction<Method> {
+public class InstanceMethodFunction extends MemberFunction<Method> {
    private final Object target;
 
    /**
@@ -24,8 +26,9 @@ public class InstanceMethodFunction extends FixedArgsFunction<Method> {
     * @param method the method to invoke
     * @param target the host object type
     */
-   public InstanceMethodFunction(final Adapter adapter, final String category, final Method method, final Object target) {
-      super(adapter, method, category + '.' + method.getName(), method.getParameterTypes());
+   public InstanceMethodFunction(final Adapter adapter, final Type category, final Method method, final Object target) {
+      super(method, VarArgsSignature.newSignature(adapter, category, method.getName(), method.getReturnType(),
+            method.getParameterTypes(), method.isVarArgs()));
       this.target = target;
    }
 

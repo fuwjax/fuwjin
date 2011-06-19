@@ -10,43 +10,34 @@
  ******************************************************************************/
 package org.fuwjin.dinah.signature;
 
-import java.lang.reflect.Type;
 import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.SignatureConstraint;
 
 /**
  * Abstraction over a Function's name and argument types.
  */
-public class NameOnlySignature implements FunctionSignature {
+public class NameSignatureConstraint implements SignatureConstraint {
    private final String name;
+   private final String category;
 
    /**
     * Creates a new instance. The number of arguments is indeterminate without
     * subsequent calls to addArg.
     * @param name the function name
     */
-   public NameOnlySignature(final String name) {
+   public NameSignatureConstraint(final String category, final String name) {
+      this.category = category;
       this.name = name;
    }
 
    @Override
-   public FunctionSignature accept(final int paramCount) {
-      return new ArgCountSignature(name, paramCount);
-   }
-
-   @Override
    public String category() {
-      final int index = name.lastIndexOf('.');
-      return name.substring(0, index);
+      return category;
    }
 
    @Override
-   public boolean matchesFixed(final Type... params) {
-      return true;
-   }
-
-   @Override
-   public boolean matchesVarArgs(final Type... params) {
-      return true;
+   public boolean matches(final FunctionSignature signature) {
+      return signature.name().equals(name);
    }
 
    @Override

@@ -17,12 +17,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManager;
 import org.fuwjin.chessur.Module;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
-import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.Adapter.AdaptException;
+import org.fuwjin.dinah.SignatureConstraint;
 import org.fuwjin.dinah.signature.ArgCountSignature;
 
 /**
@@ -30,7 +32,7 @@ import org.fuwjin.dinah.signature.ArgCountSignature;
  */
 public class CatalogImpl extends Executable implements Catalog {
    private final Map<String, String> aliases = new LinkedHashMap<String, String>();
-   private final Map<String, FunctionSignature> signatures = new LinkedHashMap<String, FunctionSignature>();
+   private final Map<String, SignatureConstraint> signatures = new LinkedHashMap<String, SignatureConstraint>();
    private final Map<String, ScriptImpl> scripts = new HashMap<String, ScriptImpl>();
    private final List<ScriptImpl> orderedScripts = new ArrayList<ScriptImpl>();
    private final Map<String, CatalogProxy> modules = new LinkedHashMap<String, CatalogProxy>();
@@ -96,7 +98,7 @@ public class CatalogImpl extends Executable implements Catalog {
     * @param signature the signature to alias
     * @param name the alias
     */
-   public void aliasSignature(final FunctionSignature signature, final String name) {
+   public void aliasSignature(final SignatureConstraint signature, final String name) {
       signatures.put(name, signature);
    }
 
@@ -148,13 +150,14 @@ public class CatalogImpl extends Executable implements Catalog {
     * @param name the name of the signature
     * @param paramCount the parameter count
     * @return the signature
+    * @throws AdaptException
     */
-   public FunctionSignature getSignature(final String name, final int paramCount) {
-      final FunctionSignature signature = signatures.get(name);
+   public SignatureConstraint getSignature(final String name, final int paramCount) throws AdaptException {
+      final SignatureConstraint signature = signatures.get(name);
       if(signature == null) {
-         return new ArgCountSignature(name, paramCount);
+         return manager.forName(name).withArgCount(paramCount).constraint();
       }
-      return signature.accept(paramCount);
+      return new ArgCountSignature(signature, paramCount);
    }
 
    /**
@@ -164,7 +167,7 @@ public class CatalogImpl extends Executable implements Catalog {
     * @throws GrinParserException if the catalog cannot be loaded
     * @throws IOException if the path does not refer to a file
     */
-   public void load(final String path, final String name) throws GrinParserException, IOException {
+   public void load(final String path, final String name) throws ExecutionException, IOException {
       modules.put(name, new CatalogProxy(name, manager.loadCat(path)));
    }
 

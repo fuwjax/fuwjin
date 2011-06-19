@@ -11,91 +11,28 @@
 package org.fuwjin.dinah.signature;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.fuwjin.util.TypeUtils;
+import org.fuwjin.dinah.FunctionSignature;
+import org.fuwjin.dinah.SignatureConstraint;
 
 /**
  * Abstraction over a Function's name and argument types.
  */
-public class TypedArgsSignature extends ArgCountSignature {
-   private final List<Type> args = new ArrayList<Type>();
+public class TypedArgsSignature extends ConstraintDecorator {
+   private final Type[] args;
 
    /**
     * Creates a new instance. The number of arguments is indeterminate without
     * subsequent calls to addArg.
     * @param name the function name
     */
-   public TypedArgsSignature(final String name) {
-      super(name, 0);
-   }
-
-   public TypedArgsSignature addAll(final Type... types) {
-      args.addAll(Arrays.asList(types));
-      return this;
-   }
-
-   /**
-    * Adds an argument type to the argument type list.
-    * @param typeName the name of the argument type
-    * @return this function signature, for chaining
-    * @throws ClassNotFoundException if the typeName does not map to a type
-    */
-   public TypedArgsSignature addArg(final String typeName) throws ClassNotFoundException {
-      if(typeName == null || "null".equals(typeName)) {
-         args.add(null);
-      } else {
-         args.add(TypeUtils.forName(typeName, Thread.currentThread().getContextClassLoader()));
-      }
-      return this;
-   }
-
-   /**
-    * Returns the argument type for the given argument index.
-    * @param index the argument index
-    * @return the argument type
-    */
-   public Type argType(final int index) {
-      if(index < args.size()) {
-         return args.get(index);
-      }
-      return null;
+   public TypedArgsSignature(final SignatureConstraint constraint, final Type... types) {
+      super(constraint);
+      args = types;
    }
 
    @Override
-   public boolean matchesFixed(final Type... params) {
-      if(!super.matchesFixed(params)) {
-         return false;
-      }
-      for(int i = 0; i < params.length; ++i) {
-         if(!TypeUtils.isAssignableFrom(params[i], argType(i))) {
-            return false;
-         }
-      }
-      return true;
-   }
-
-   @Override
-   public boolean matchesVarArgs(final Type... params) {
-      if(matchesFixed(params)) {
-         return true;
-      }
-      if(!super.matchesVarArgs(params)) {
-         return false;
-      }
-      for(int i = 0; i < params.length - 1; ++i) {
-         if(!TypeUtils.isAssignableFrom(params[i], argType(i))) {
-            return false;
-         }
-      }
-      final Type componentType = TypeUtils.getComponentType(params[params.length - 1]);
-      for(int index = params.length - 1; index < count(); ++index) {
-         if(!TypeUtils.isAssignableFrom(componentType, argType(index))) {
-            return false;
-         }
-      }
-      return true;
+   public boolean matches(final FunctionSignature signature) {
+      return super.matches(signature) && signature.canAdapt(args);
    }
 
    @Override
@@ -103,23 +40,10 @@ public class TypedArgsSignature extends ArgCountSignature {
       final StringBuilder builder = new StringBuilder();
       builder.append(name());
       String delim = "(";
-      if(count() == 0) {
-         builder.append(delim);
-      } else {
-         for(final Type type: args) {
-            builder.append(delim).append(TypeUtils.getName(type));
-            delim = ", ";
-         }
+      for(final Type type: args) {
+         builder.append(delim).append(type);
+         delim = ", ";
       }
       return builder.append(')').toString();
-   }
-
-   /**
-    * Returns the number of arguments.
-    * @return the number of arguments
-    */
-   @Override
-   protected int count() {
-      return args.size();
    }
 }
