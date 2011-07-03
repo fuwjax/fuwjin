@@ -21,7 +21,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 
 /**
  * Goal which runs a Grin Catalog against every file in a fileset.
@@ -106,7 +106,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
    public void execute() throws MojoExecutionException, MojoFailureException {
       try {
          getLog().info("Transforming " + sourceDirectory + " to " + outputDirectory);
-         final CatalogManager manager = new CatalogManager(loader());
+         final CatalogManagerImpl manager = new CatalogManagerImpl(loader());
          final Catalog cat = manager.loadCat(catFile);
          transform(cat, sourceDirectory, null);
          if(project != null) {

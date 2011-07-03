@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.chessur.expression.CatalogImpl;
 import org.fuwjin.chessur.expression.CatalogProxy;
 import org.fuwjin.util.Parameterized;
@@ -71,7 +71,7 @@ public class ScriptExecutionDemo {
       }
    }
 
-   private static CatalogManager manager;
+   private static CatalogManagerImpl manager;
    private static Catalog catCodeGenerator;
    private static Catalog catParser;
    private static RuntimeClassLoader loader;
@@ -101,7 +101,7 @@ public class ScriptExecutionDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManager();
+      manager = new CatalogManagerImpl();
       catCodeGenerator = manager.loadCat("org/fuwjin/chessur/generated/GrinCodeGenerator.cat");
       catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
       loader = new RuntimeClassLoader();

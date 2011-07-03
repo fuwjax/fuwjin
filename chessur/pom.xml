@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.fuwjin</groupId>
-			<artifactId>dinah</artifactId>
+			<artifactId>grin</artifactId>
 			<version>0.9.7.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>

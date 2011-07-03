@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.dinah.SignatureConstraint;
 import org.fuwjin.dinah.function.AbstractFunction;
 import org.fuwjin.dinah.function.CompositeFunction;
@@ -17,7 +17,7 @@ public class VirtualClassFunctionProvider extends BaseFunctionProvider {
    private final File sourcePath;
    private final Catalog sourceParser;
 
-   protected VirtualClassFunctionProvider(final CatalogManager manager, final File sourcePath)
+   protected VirtualClassFunctionProvider(final CatalogManagerImpl manager, final File sourcePath)
          throws ExecutionException, IOException {
       super(manager);
       this.sourcePath = sourcePath;

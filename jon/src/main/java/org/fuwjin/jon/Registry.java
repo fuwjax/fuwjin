@@ -10,7 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.chessur.Script;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
@@ -18,7 +18,7 @@ import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionProvider.NoSuchFunctionException;
 
 public class Registry {
-   private static CatalogManager manager = new CatalogManager();
+   private static CatalogManagerImpl manager = new CatalogManagerImpl();
    private static Catalog jonParser;
 
    private static Script parser() throws ExecutionException, IOException {

@@ -1,6 +1,6 @@
 package org.fuwjin.test;
 
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -9,7 +9,7 @@ public class JavaSourceParserTest {
 
    @BeforeClass
    public static void setup() throws Exception {
-      harness = new CatalogTestHarness(new CatalogManager().loadCat("org/fuwjin/chessur/compiler/JavaGrammar.cat"));
+      harness = new CatalogTestHarness(new CatalogManagerImpl().loadCat("org/fuwjin/chessur/compiler/JavaGrammar.cat"));
    }
 
    @Test

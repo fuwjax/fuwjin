@@ -27,6 +27,7 @@
 		<module>chessur-maven-plugin</module>
 		<module>jon</module>
 		<module>glory</module>
+		<module>grin</module>
 	</modules>
 	<url>http://fuwjin.googlecode.com</url>
 	<scm>
