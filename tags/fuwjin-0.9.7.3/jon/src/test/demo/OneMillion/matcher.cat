@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Number as Number
+
+<Root> {
+  return Matcher.is(Number.doubleValue(1000000.0))
+}

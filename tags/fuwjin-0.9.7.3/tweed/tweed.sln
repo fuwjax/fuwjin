@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tweed.LD", "Tweed.LD\Tweed.LD.csproj", "{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}"
+EndProject
+Project("{9344bdbb-3e7f-41fc-a0dd-8665d75ee146}") = "Packages", "Packages.mdproj", "{27F24C8C-A8D2-4294-9836-C4E6C3F81B69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tweed.LD.Test", "Tweed.LD.Test\Tweed.LD.Test.csproj", "{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Default|Any CPU = Default|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25F42F54-DD3D-433C-AA31-3E5B3C5FB8E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27F24C8C-A8D2-4294-9836-C4E6C3F81B69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27F24C8C-A8D2-4294-9836-C4E6C3F81B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94D6E8FA-3CBF-4E7F-8FA5-D11F954E975F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Tweed.LD\Tweed.LD.csproj
+	EndGlobalSection
+EndGlobal

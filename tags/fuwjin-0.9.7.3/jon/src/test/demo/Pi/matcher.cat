@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Math as Math
+
+<Root> {
+  return Matcher.is(Math.PI())
+}
