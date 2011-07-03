@@ -8,11 +8,11 @@
 	<parent>
 		<artifactId>fuwjin</artifactId>
 		<groupId>org.fuwjin</groupId>
-		<version>0.9.7.3</version>
+		<version>0.9.7.4-SNAPSHOT</version>
 	</parent>
 	<groupId>org.fuwjin</groupId>
 	<artifactId>chessur</artifactId>
-	<version>0.9.7.3</version>
+	<version>0.9.7.4-SNAPSHOT</version>
 	<name>Chessur</name>
 	<description>Chessur is a Java implementation of Grin, a scripting language</description>
 	<dependencies>
@@ -23,12 +23,12 @@
 		<dependency>
 			<groupId>org.fuwjin</groupId>
 			<artifactId>grin</artifactId>
-			<version>0.9.7.3</version>
+			<version>0.9.7.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fuwjin</groupId>
 			<artifactId>glory</artifactId>
-			<version>0.9.7.3</version>
+			<version>0.9.7.4-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
