@@ -1,0 +1,542 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2011 Michael Doberenz.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+# 
+# Contributors:
+#     Michael Doberenz - initial API and implementation
+#-------------------------------------------------------------------------------
+alias java.lang.Boolean as Boolean
+alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
+alias org.fuwjin.chessur.Module as Module
+alias org.fuwjin.chessur.expression.AbortStatement as AbortStatement
+alias org.fuwjin.chessur.expression.ConditionalAbortStatement as ConditionalAbortStatement
+alias org.fuwjin.chessur.expression.Assignment as Assignment
+alias org.fuwjin.chessur.expression.Block as Block
+alias org.fuwjin.chessur.expression.CouldStatement as CouldStatement
+alias org.fuwjin.chessur.expression.Declaration as Declaration
+alias org.fuwjin.chessur.expression.EitherOrStatement as EitherOrStatement
+alias org.fuwjin.chessur.expression.Filter as Filter
+alias org.fuwjin.chessur.expression.FilterAcceptStatement as FilterAcceptStatement
+alias org.fuwjin.chessur.expression.CatalogImpl as Catalog
+alias org.fuwjin.chessur.expression.Invocation as Invocation
+alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
+alias org.fuwjin.chessur.expression.Literal as Literal
+alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
+alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
+alias org.fuwjin.chessur.expression.ScriptImpl as Script
+alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
+alias org.fuwjin.chessur.expression.ScriptOutput as ScriptOutput
+alias org.fuwjin.chessur.expression.ScriptPipe as ScriptPipe
+alias org.fuwjin.chessur.expression.ValueAcceptStatement as ValueAcceptStatement
+alias org.fuwjin.chessur.expression.Variable as Variable
+alias org.fuwjin.chessur.expression.Number as Number
+alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
+alias org.fuwjin.dinah.FunctionProvider as FunctionProvider
+alias org.fuwjin.dinah.Function as Function
+alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
+
+# Parses a Grin stream and returns the corresponding Catalog Object Model.
+# << a Grin stream
+# >> nil
+# env
+#   manager: the dinah reflection factory
+# returns the catalog for the Grin stream
+<Catalog>{
+  cat = Catalog.new(name, manager)
+  <S>
+  could repeat 
+    either <LoadDeclaration>
+    or <AliasDeclaration>
+    or Catalog.add(cat, <ScriptDeclaration>)
+  <EndOfFile>
+  return cat
+}
+
+# Parses a "load path/to/cat/file as name" declaration. The path and name are passed to the Catalog.load method.
+# << a Grin load statement
+# >> nil
+# env
+#   cat: the catalog
+# returns nil
+# fails if the path name does not map to a file
+<LoadDeclaration>{
+  accept 'load' <Sep>
+  either path = <PathName>
+  or abort "load keyword requires a file path"
+  either accept 'as'
+  or abort "load keyword requires as keyword" 
+  <Sep>
+  either Catalog.load(cat, path, <Name>)
+  or abort "load-as keywords require a name"
+}
+
+# Parses an "alias qualified.name as name" declaration. The qualified name and name are passed to the Grin.alias method. 
+# << a Grin alias statement
+# >> nil
+# env
+#   cat: the catalog
+# returns nil
+<AliasDeclaration>{
+  accept 'alias' <Sep>
+  either qname = <QualifiedName>
+  or abort "alias keyword requires a qualified name"
+  either {
+    accept 'as' <Sep>
+    either Catalog.alias(cat, qname, <Name>)
+    or abort "alias-as keywords require a name"
+  } or {
+    accept '(' <S>
+    signature = FunctionProvider.forName(manager, qname)
+    could {
+      ConstraintBuilder.withNextArg(signature, <QualifiedName>)
+      could repeat {
+        accept ',' <S>
+        ConstraintBuilder.withNextArg(signature, <QualifiedName>)
+      }      
+    }
+    accept ')' <S>
+    accept 'as' <Sep>
+    either Catalog.aliasSignature(cat, ConstraintBuilder.constraint(signature), <Name>)
+    or abort "alias-as keywords require a name"
+  }  
+  or abort "alias keyword requires as keyword" 
+}
+
+# Parses a "<ScriptName> { ... }" declaration.
+# << a Grin script declaration
+# >> nil
+# env
+#   cat: the catalog
+#   manager: the reflection factory
+# returns the script
+<ScriptDeclaration>{
+  accept '<'
+  either name = <Identifier>
+  or abort "script identifiers must be enclosed in angle brackets"
+  either accept '>'
+  or abort "script identifiers must end with an angle bracket" 
+  <S>
+  either accept '{'
+  or abort "script declarations must start with a brace"
+  <S>
+  script = Declaration.new(name)
+  could repeat Declaration.add(script, <Statement>)
+  could{
+    accept 'return' <Sep>
+    either Declaration.returns(script, <Value>)
+    or abort "return keyword requires a value"
+  }
+  either accept '}'
+  or abort "script declaration for 'name' must end with a brace" 
+  <S>
+  return script
+}
+
+# Parses a Grin Value.
+# << a Grin Value
+# >> nil
+# env
+# returns the value
+<Value>{
+  either val = <StaticLiteral>  # '...'
+  or val = <DynamicLiteral>     # "..."
+  or val = <Script>             # <<Identifer>>, <<Identifier>> << <Value> >> <OutTarget>
+  or val = <AcceptStatement>    # deprecated
+  or val = <Invocation>         # <QualifiedIdentifier>(<Value>,<Value>,...)
+  or val = <Number>             # integral, floating point, or scientific notation
+  or val = <Object>             # (<QualifiedIdentifier>) { <Field> : <Value>, ... }
+  or val = <MatchValue>         # deprecated, use input.buffer() instead
+  or val = <NextValue>          # deprecated, use input.next() instead
+  or val = Variable.new(<Name>) # <Identifier>
+  return val
+}
+
+<Statement>{
+  either stmt = <AssumeStatement>   # assume <Value>, assume not <Value>, assume <Statement>, assume not <Statement>
+  or stmt = <EitherOrStatement> # either <Statement> or <Statement> or <Statement> ...
+  or stmt = <CouldStatement>    # could <Statement>
+  or stmt = <RepeatStatement>   # repeat <Statement>
+  or stmt = <AcceptStatement>   # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
+  or stmt = <PublishStatement>  # publish <Value>
+  or stmt = <AbortStatement>    # abort <Value>
+  or stmt = <Script>            # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
+  or stmt = <Block>             # { Statement Statement... }
+  or stmt = <Assignment>        # <Identifier> = <Value>
+  or stmt = <Invocation>        # <QualifiedIdentifier>(<Value>,<Value>,...)
+  return stmt
+}
+
+<AssumeStatement>{
+  accept 'assume' <Sep>
+  either {
+    accept 'not'
+    <Sep>
+    notted = Boolean.TRUE()
+  } or {
+    notted = Boolean.FALSE()
+  }
+  either stmt = AssumeStatement.new(notted, <Value>)
+  or stmt = AssumeStatement.new(notted, <Statement>)
+  or abort "assume keyword requires value or in keyword"
+  return stmt
+}
+<EitherOrStatement>{
+  accept 'either' <Sep>
+  either stmt = EitherOrStatement.new(<Statement>)
+  or abort "either keyword requires a statement"
+  either repeat{
+    accept 'or' <Sep>
+#    either {
+#      accept 'abort' <Sep>
+#      either stmt = ConditionalAbortStatement.new(stmt, <Value>)
+#      or abort "abort keyword requires a value"
+#    } or 
+    either EitherOrStatement.or(stmt, <Statement>)
+    or abort "or keyword requires a statement"
+  } or abort "either keyword requires at least one or keyword"
+  return stmt
+}
+<CouldStatement>{
+  accept 'could' <Sep>
+  either stmt = CouldStatement.new(<Statement>)
+  or abort "could keyword requires a statement"
+  return stmt
+}
+<RepeatStatement>{
+  accept 'repeat' <Sep>
+  either stmt = RepeatStatement.new(<Statement>)
+  or abort "repeat keyword requires a statement"
+  return stmt
+}
+<AcceptStatement>{
+  accept 'accept' <Sep>
+  either {
+    accept 'not' <Sep>
+    notted = Boolean.TRUE()
+  } or {
+    notted = Boolean.FALSE()
+  }
+  either 
+    stmt = FilterAcceptStatement.new(notted, <InFilter>) 
+  or
+    stmt = ValueAcceptStatement.new(notted, <Value>)
+  or abort "accept keyword requires a value or in keyword"
+  return stmt
+}
+<PublishStatement>{
+  accept 'publish' <Sep>
+  either stmt = PublishStatement.new(<Value>)
+  or abort "publish keyword requires a value"
+  return stmt
+}
+<AbortStatement>{
+  accept 'abort' <Sep>
+  either stmt = AbortStatement.new(<Value>)
+  or abort "abort keyword requires a value"
+  return stmt
+}
+<Block>{
+  accept '{' <S>
+  block = Block.new()
+  could repeat Block.add(block, <Statement>)
+  either accept '}'
+  or abort "block must end with a brace"
+  <S>
+  return block
+}
+<Assignment>{
+  name = <Name>
+  accept '=' <S>
+  either stmt = Assignment.new(name, <Value>)
+  or abort "assignment requires a value"
+  return stmt
+}
+<Invocation>{
+  name = <AliasName>
+  accept '(' <S>
+  inv = Invocation.new()
+  could{
+    Invocation.addParam(inv, <Value>)
+    could repeat{
+      accept ',' <S>
+      either Invocation.addParam(inv, <Value>)
+      or abort "invocation parameter must be a value"
+    }
+  }
+  either accept ')'
+  or abort "invocation must end with a parenthesis" 
+  <S>
+  signature = Catalog.getSignature(cat, name, Invocation.paramCount(inv))
+  either{
+    function = FunctionProvider.getFunction(manager, signature)
+    Invocation.setFunction(inv, function)
+  } or abort "Could not get function for 'signature'"
+  return inv
+}
+<Script>{
+  script = <ScriptIdent>
+  could{
+    accept '<<' <S>
+    script = ScriptInput.new(script, <Value>)
+  }
+  could repeat {
+    accept '>>' <S>
+    script = ScriptPipe.new(script, <ScriptIdent>)
+  }
+  could {
+    accept '>>' <S>
+    script = ScriptOutput.new(script, <Name>)
+  }
+  return script
+}
+<ScriptIdent>{
+  accept '<'
+  either id = <Identifier>
+  or abort "script identifiers must be enclosed in angle brackets"
+  either {
+    accept ':'
+    either {
+        name = <Identifier>
+        module = Catalog.getModule(cat, id)
+        script = Module.get(module, name)
+    } or abort "namespaced script 'id': could not be resolved"
+  } or {
+    script = Module.get(cat, id)
+  }  
+  either accept '>'
+  or abort "script identifiers must be normal identifiers in angle brackets"
+  <S>
+  return script
+}
+<Object>{
+  accept '(' <S>
+  type = <AliasName>
+  signature = FunctionProvider.forName(manager, "'type'.new")
+  ConstraintBuilder.withArgCount(signature, 0)
+  constructor = ConstraintBuilder.function(signature)
+  object = ObjectTemplate.new(type, constructor)
+  accept ')' <S>
+  accept '{' <S>
+  could {
+    <Field>
+    could repeat {
+      accept ',' <S>
+      <Field>
+    }
+  }
+  accept '}' <S>
+  return object
+}
+<Field>{
+  name = <Name>
+  signature = FunctionProvider.forName(manager, "'type'.'name'")
+  ConstraintBuilder.withArgCount(signature, 2)
+  setter = ConstraintBuilder.function(signature)
+  accept ':' <S>
+  ObjectTemplate.set(object, name, setter, <Value>)
+}
+<MatchValue>{
+  accept 'match' <Sep>
+  return Declaration.match(script)
+}
+<NextValue>{
+  accept 'next' <Sep>
+  return Variable.NEXT()
+}
+
+<InFilter>{
+  accept 'in' <Sep>
+  filter = Filter.new()
+  either <FilterRange>
+  or abort "in keyword requires at least one filter"
+  could repeat{
+    accept ',' <S>
+    either <FilterRange>
+    or abort "in keyword requires a filter after a comma"
+  }
+  return filter
+}
+<FilterRange>{
+  start = <FilterChar> <S>
+  either{
+    accept '-' <S>
+    Filter.addRange(filter, start, <FilterChar>) <S>
+  }or{
+    Filter.addChar(filter, start)
+  }
+}
+<FilterChar>{
+  either {
+    ch = <Escape>
+  } or {
+    ch = next
+    accept not '\\'
+  }
+  return ch
+}
+
+<StaticLiteral>{
+  accept '\''
+  lit = Literal.new()
+  could repeat either {
+    ch = next
+    accept not in \\, ' 
+    Literal.append(lit, ch)
+  } or {
+    Literal.append(lit, <Escape>)
+  }
+  either accept '\''
+  or abort "static literals must end with a quote" 
+  <S>
+  return lit
+}
+<DynamicLiteral>{
+  accept '"'
+  lit = CompositeLiteral.new()
+  could repeat either {
+    accept '\''
+    <S>
+    CompositeLiteral.append(lit, <Value>)
+    accept '\''
+  } or {
+    CompositeLiteral.appendChar(lit, <Escape>)
+  } or {
+    ch = next
+    accept not in \\, "
+    CompositeLiteral.appendChar(lit, ch)
+  }
+  either accept '"'
+  or abort "dynamic literals must end with a double quote" 
+  <S>
+  return lit
+}
+
+<Escape>{
+  accept '\\' 
+  either {
+    accept 'n'
+    ch = Literal.NEW_LINE()
+  } or {
+    accept 't'
+    ch = Literal.TAB()
+  } or {
+    accept 'r'
+    ch = Literal.RETURN()
+  } or {
+    accept 'x'
+    ch = Literal.parseHex(<HexDigits>)
+  } or {
+    ch = next
+    accept next
+  }
+  return ch
+}
+<HexDigits>{
+  <HexDigit><HexDigit><HexDigit><HexDigit>
+  return match
+}
+<HexDigit>{
+  accept in 0-9, a-f, A-F
+}
+<Number> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could {
+      accept '.'
+      could repeat accept in 0-9
+    }
+  } or {
+    accept '.'
+    repeat accept in 0-9
+  }
+  could {
+    accept in e,E
+    could accept '-'
+    repeat accept in 0-9
+  }
+  num = Number.new(match)
+  <Sep>
+  return num
+}  
+<Path>{
+  repeat {
+    could accept '/'
+    <QualifiedIdentifier>
+  }
+  could accept '/'
+  return match
+}
+<PathName>{
+  path = <Path> <S>
+  return path
+}
+<AliasName> {
+  prefix = <AnnotatedIdentifier>
+  alias = Catalog.alias(cat, prefix)
+  either {
+    accept '.'
+    name = "'alias'.'<QualifiedName>'"
+  } or {
+    name = alias
+  }
+  return name
+}
+<Name>{
+  id = <Identifier> <S>
+  return id
+}
+<QualifiedName>{
+  id = <QualifiedIdentifier> <S>
+  return id
+}
+<QualifiedIdentifier>{
+  <AnnotatedIdentifier>
+  could repeat{
+    accept '.'
+    <AnnotatedIdentifier>
+  }
+  return match
+}
+<AnnotatedIdentifier>{
+  <Identifier>
+  could repeat{
+    accept '['
+    could <Identifier>
+    accept ']'
+  }
+  return match
+}
+<Identifier>{
+  repeat <IdentifierChar>
+  return match
+}
+<IdentifierChar>{
+  assume isIdentifierCodepoint(next)
+  accept next
+}
+
+<Sep>{
+  assume not isIdentifierCodepoint(next)
+  <S>
+}
+<S>{
+  could <Space>
+}
+<Space>{
+  repeat either accept in \ , \n, \t, \r or <Comment>
+}
+<Comment>{
+  accept '#'
+  could repeat accept not in \r, \n
+  could accept '\r'
+  either accept '\n'
+  or <EndOfFile>
+}
+<EndOfFile>{
+  assume not next
+}

@@ -1,0 +1,6 @@
+<Root> {
+  either {
+    publish 'Hello, World!'
+    assume java.lang.Boolean.FALSE()
+  } or publish 'Hi, Mom!'
+}
