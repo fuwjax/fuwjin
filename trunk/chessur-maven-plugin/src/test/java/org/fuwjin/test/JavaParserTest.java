@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.UserFiles;
@@ -31,7 +31,7 @@ public class JavaParserTest {
 
    @BeforeClass
    public static void setup() throws Exception {
-      catalog = new CatalogManager().loadCat("org/fuwjin/chessur/compiler/JavaSignatureParser.cat");
+      catalog = new CatalogManagerImpl().loadCat("org/fuwjin/chessur/compiler/JavaSignatureParser.cat");
    }
 
    private static void add(final List<Object[]> list, final File path) {

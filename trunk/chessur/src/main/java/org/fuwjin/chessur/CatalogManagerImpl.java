@@ -23,13 +23,13 @@ import org.fuwjin.dinah.provider.FunctionProviderDecorator;
 /**
  * Manages catalogs.
  */
-public class CatalogManager extends FunctionProviderDecorator {
+public class CatalogManagerImpl extends FunctionProviderDecorator implements CatalogManager{
    private final ConcurrentMap<String, Catalog> catalogs = new ConcurrentHashMap<String, Catalog>();
 
    /**
     * Creates a new instance.
     */
-   public CatalogManager() {
+   public CatalogManagerImpl() {
       this(new CompositeFunctionProvider());
    }
 
@@ -37,7 +37,7 @@ public class CatalogManager extends FunctionProviderDecorator {
     * Creates a new instance backed by the adapter.
     * @param adapter the type adapter
     */
-   public CatalogManager(final Adapter adapter) {
+   public CatalogManagerImpl(final Adapter adapter) {
       this(new CompositeFunctionProvider(adapter));
    }
 
@@ -45,11 +45,11 @@ public class CatalogManager extends FunctionProviderDecorator {
     * Creates a new instance backed by the function provider.
     * @param provider the function provider
     */
-   public CatalogManager(final BaseFunctionProvider provider) {
+   public CatalogManagerImpl(final BaseFunctionProvider provider) {
       super(provider);
    }
 
-   public CatalogManager(final ClassLoader loader) {
+   public CatalogManagerImpl(final ClassLoader loader) {
       this(new StandardAdapter(loader));
    }
 

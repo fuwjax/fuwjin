@@ -19,7 +19,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,7 +35,7 @@ public class ChessurDemo {
       System.out.println("echoing " + message);
    }
 
-   private CatalogManager manager;
+   private CatalogManagerImpl manager;
    private Map<String, Object> env;
 
    /**
@@ -115,7 +115,7 @@ public class ChessurDemo {
     */
    @Before
    public void setup() {
-      manager = new CatalogManager();
+      manager = new CatalogManagerImpl();
       env = new HashMap<String, Object>();
       env.put("name", "test");
       env.put("manager", manager);

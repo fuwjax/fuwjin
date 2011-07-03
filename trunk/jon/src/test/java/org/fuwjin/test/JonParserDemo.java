@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.jon.Registry;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Parameterized.class)
 public class JonParserDemo {
-   private static CatalogManager manager;
+   private static CatalogManagerImpl manager;
 
    /**
     * The parameters for the test.
@@ -48,7 +48,7 @@ public class JonParserDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManager();
+      manager = new CatalogManagerImpl();
    }
 
    private static Matcher<Object> matcher(final File file) throws Exception {

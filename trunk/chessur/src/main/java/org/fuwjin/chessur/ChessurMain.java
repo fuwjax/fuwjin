@@ -15,7 +15,7 @@ public class ChessurMain {
     * @throws Exception if the catalog cannot load or the script fails
     */
    public static void main(final String... args) throws Exception {
-      final CatalogManager manager = new CatalogManager();
+      final CatalogManagerImpl manager = new CatalogManagerImpl();
       final Catalog cat = manager.loadCat(args[0]);
       Script script = cat;
       if(args.length > 1) {

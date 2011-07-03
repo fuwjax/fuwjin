@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManager;
+import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.StreamUtils;
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Parameterized.class)
 public class ScriptFormatDemo {
-   private static CatalogManager manager;
+   private static CatalogManagerImpl manager;
    private static Catalog catParser;
    private static Catalog catFormatter;
    private static Catalog catSerializer;
@@ -53,7 +53,7 @@ public class ScriptFormatDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManager();
+      manager = new CatalogManagerImpl();
       catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
       catFormatter = manager.loadCat("org/fuwjin/chessur/generated/GrinFormatter.cat");
       catSerializer = manager.loadCat("org/fuwjin/chessur/generated/GrinSerializer.cat");
