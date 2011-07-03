@@ -3,18 +3,18 @@
   <parent>
     <artifactId>fuwjin</artifactId>
     <groupId>org.fuwjin</groupId>
-    <version>0.9.7.4</version>
+    <version>0.9.7.5-SNAPSHOT</version>
   </parent>
   <groupId>org.fuwjin</groupId>
   <artifactId>grin</artifactId>
-  <version>0.9.7.4</version>
+  <version>0.9.7.5-SNAPSHOT</version>
   <name>Grin Model</name>
   <description>The Grin runtime model for Chessur</description>
   <dependencies>
     <dependency>
       <groupId>org.fuwjin</groupId>
       <artifactId>dinah</artifactId>
-      <version>0.9.7.4</version>
+      <version>0.9.7.5-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
