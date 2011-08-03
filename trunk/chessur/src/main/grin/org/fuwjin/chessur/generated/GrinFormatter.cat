@@ -91,6 +91,7 @@ alias org.fuwjin.util.Indent as Indent
   or <RepeatStatement> >> val
   or <AcceptStatement> >> val
   or <PublishStatement> >> val
+  or <LogStatement> >> val
   or <AbortStatement> >> val
   or <Script> >> val
   or <Block> >> val
@@ -155,6 +156,11 @@ alias org.fuwjin.util.Indent as Indent
   accept 'publish' <Sep>
   either publish "publish '<Value>'"
   or abort "publish keyword requires a value"
+}
+<LogStatement>{
+  accept 'log' <Sep>
+  either publish "log '<Value>'"
+  or abort "log keyword requires a value"
 }
 <AbortStatement>{
   accept 'abort' <Sep>

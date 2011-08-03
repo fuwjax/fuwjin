@@ -14,10 +14,12 @@ public abstract class ObjectOutStream implements SinkStream {
    private class DetachedStream implements SinkStream {
       private int index;
       private StringPosition pos;
+      private final ObjectOutStream log;
 
-      public DetachedStream(final int i, final StringPosition current) {
+      public DetachedStream(final int i, final StringPosition current, final ObjectOutStream log) {
          index = i;
          pos = current;
+         this.log = log;
       }
 
       @Override
@@ -38,7 +40,12 @@ public abstract class ObjectOutStream implements SinkStream {
 
       @Override
       public SinkStream detach() {
-         return new DetachedStream(index, pos);
+         return new DetachedStream(index, pos, log);
+      }
+
+      @Override
+      public void log(final Object value) {
+         log.log(value);
       }
 
       protected int index() {
@@ -51,6 +58,11 @@ public abstract class ObjectOutStream implements SinkStream {
     */
    public static final SinkStream NONE = new ObjectOutStream() {
       @Override
+      public void log(final Object result) {
+         // do nothing
+      }
+
+      @Override
       protected void appendImpl(final String value) throws IOException {
          // do nothing
       }
@@ -59,6 +71,11 @@ public abstract class ObjectOutStream implements SinkStream {
     * The standard output stream.
     */
    public static final SinkStream STDOUT = new ObjectOutStream() {
+      @Override
+      public void log(final Object value) {
+         System.err.print(value);
+      }
+
       @Override
       protected void appendImpl(final String value) throws IOException {
          System.out.print(value);
@@ -80,6 +97,11 @@ public abstract class ObjectOutStream implements SinkStream {
          }
 
          @Override
+         public void log(final Object value) {
+            // do nothing
+         }
+
+         @Override
          public String toString() {
             return builder.toString();
          }
@@ -97,6 +119,11 @@ public abstract class ObjectOutStream implements SinkStream {
          public void appendImpl(final String value) throws IOException {
             output.print(value);
          }
+
+         @Override
+         public void log(final Object value) {
+            // do nothing
+         }
       };
    }
 
@@ -110,6 +137,11 @@ public abstract class ObjectOutStream implements SinkStream {
          @Override
          public void appendImpl(final String value) throws IOException {
             writer.append(value);
+         }
+
+         @Override
+         public void log(final Object value) {
+            // do nothing
          }
       };
    }
@@ -147,7 +179,7 @@ public abstract class ObjectOutStream implements SinkStream {
 
    @Override
    public SinkStream detach() {
-      return new DetachedStream(0, current);
+      return new DetachedStream(0, current, this);
    }
 
    protected StringPosition add(final int index, final StringPosition pos, final Object value) {

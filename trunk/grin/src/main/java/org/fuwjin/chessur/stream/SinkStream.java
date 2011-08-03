@@ -31,4 +31,6 @@ public interface SinkStream {
     * @return the detached stream
     */
    SinkStream detach();
+
+   void log(Object value);
 }

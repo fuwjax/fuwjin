@@ -27,6 +27,7 @@ alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.LogStatement as LogStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.expression.ObjectTemplate as ObjectTemplate
 alias org.fuwjin.chessur.expression.FieldTemplate as FieldTemplate
@@ -115,6 +116,7 @@ alias java.util.Map.Entry.getValue as value
   or <RepeatStatement>
   or <AcceptStatement>
   or <PublishStatement>
+  or <LogStatement>
   or <AbortStatement>
   or <Script>
   or <Block>
@@ -216,6 +218,12 @@ alias java.util.Map.Entry.getValue as value
   assume PublishStatement.instanceof(statement)
   publish "publish "
   value = PublishStatement.value(statement)
+  <Value>
+}
+<LogStatement>{
+  assume LogStatement.instanceof(statement)
+  publish "log "
+  value = LogStatement.value(statement)
   <Value>
 }
 <AbortStatement>{
