@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import org.fuwjin.chessur.generated.GrinParser.GrinParserException;
 import org.fuwjin.dinah.Adapter;
 import org.fuwjin.dinah.adapter.StandardAdapter;
 import org.fuwjin.dinah.provider.BaseFunctionProvider;
@@ -23,7 +22,7 @@ import org.fuwjin.dinah.provider.FunctionProviderDecorator;
 /**
  * Manages catalogs.
  */
-public class CatalogManagerImpl extends FunctionProviderDecorator implements CatalogManager{
+public class CatalogManagerImpl extends FunctionProviderDecorator implements CatalogManager {
    private final ConcurrentMap<String, Catalog> catalogs = new ConcurrentHashMap<String, Catalog>();
 
    /**
@@ -57,7 +56,7 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
     * Loads a catalog from a file with a default charset.
     * @param file the catalog file
     * @return the new collection
-    * @throws GrinParserException if it fails
+    * @throws ExecutionException if it fails
     * @throws IOException if I/O fails
     */
    public Catalog loadCat(final File file) throws ExecutionException, IOException {
@@ -69,7 +68,7 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
     * @param file the catalog file
     * @param charset the character encoding for the file
     * @return the new collection
-    * @throws GrinParserException if it fails
+    * @throws ExecutionException if it fails
     * @throws IOException if I/O fails
     */
    public Catalog loadCat(final File file, final String charset) throws ExecutionException, IOException {
@@ -80,9 +79,10 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
     * Loads a catalog from a file.
     * @param path the path to the catalog file
     * @return the new collection
-    * @throws GrinParserException if it fails
+    * @throws ExecutionException if it fails
     * @throws IOException if I/O fails
     */
+   @Override
    public Catalog loadCat(final String path) throws ExecutionException, IOException {
       return loadCat(path, "UTF-8");
    }
@@ -94,7 +94,7 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
     * @param reader the input reader
     * @return the catalog
     * @throws IOException if I/O fails
-    * @throws GrinParserException if the parse fails
+    * @throws ExecutionException if the parse fails
     */
    public Catalog loadCat(final String name, final Reader reader) throws IOException, ExecutionException {
       Catalog cat = catalogs.get(name);
@@ -102,7 +102,13 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
          final Map<String, Object> map = new HashMap<String, Object>();
          map.put("name", name);
          map.put("manager", this);
-         cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);
+         try {
+            cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);
+         } catch(final IOException e) {
+            throw e;
+         } catch(final Exception e) {
+            throw new ExecutionException("could not execute catalog " + name, e);
+         }
          final Catalog old = catalogs.putIfAbsent(name, cat);
          if(old != null) {
             cat = old;
@@ -116,7 +122,7 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
     * @param path the catalog file
     * @param charset the character encoding for the file
     * @return the new collection
-    * @throws GrinParserException if it fails
+    * @throws ExecutionException if it fails
     * @throws IOException if I/O fails
     */
    public Catalog loadCat(final String path, final String charset) throws ExecutionException, IOException {

@@ -8,7 +8,7 @@ alias org.fuwjin.chessur.CatalogManagerImpl as CatalogManagerImpl
 alias java.lang.String as String
 
 <Compile> {
-  manager = CatalogManagerImpl.new()
+  manager = CatalogManagerImpl.new(loader)
   postage = manager
   cat = <Parse:Catalog>
   className = name

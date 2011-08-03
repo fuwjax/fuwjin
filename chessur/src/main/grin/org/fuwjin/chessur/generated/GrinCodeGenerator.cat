@@ -32,6 +32,7 @@ alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.LogStatement as LogStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.expression.ScriptImpl as Script
 alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
@@ -90,8 +91,8 @@ alias java.util.Map.Entry.getValue as value
 <Postscript>{
   publish "
   
-  public static Object interpret(final CharSequence in, final Appendable out, final Map\<String, ?\> environment) throws 'className'Exception {
-    final StringCursor input = new StringCursor(in, out);"
+  public static Object interpret(final CharSequence in, final Appendable out, final Appendable log, final Map\<String, ?\> environment) throws ExecutionException {
+    final StringCursor input = new StringCursor(in, out, log);"
   size = NameIndex.size(indexer)
   publish "
     final Object[] env = new Object['size'];"
@@ -106,7 +107,11 @@ alias java.util.Map.Entry.getValue as value
   assume not hasNext(entries)
   rootName = Catalog.rootName(cat)
   publish "
-    return 'rootName'(input, env);
+    try {
+      return 'rootName'(input, env);
+    } catch('className'Exception e) {
+      throw new ExecutionException(e.getMessage(), e);
+    }
   }
 }
 "
@@ -126,6 +131,7 @@ package 'package';
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class 'className' {
   static final Object UNSET = new Object() {
@@ -158,8 +164,9 @@ public class 'className' {
     private final int start;
     private final StringCursor parent;
     private final Appendable appender;
+    private final Appendable log;
     
-    public StringCursor(final CharSequence seq, final Appendable appender) {
+    public StringCursor(final CharSequence seq, final Appendable appender, final Appendable log) {
          start = 0;
          pos = 0;
          this.seq = seq;
@@ -167,9 +174,10 @@ public class 'className' {
          line = 1;
          column = 0;
          this.appender = appender;
+         this.log = log;
     }
     
-    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent) {
+    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent, final Appendable log) {
       this.start = start;
       pos = start;
       this.seq = seq;
@@ -177,6 +185,7 @@ public class 'className' {
       this.line = line;
       this.column = column;
       this.appender = new StringBuilder();
+      this.log = log;
     }
     
     public int accept() throws 'className'Exception {
@@ -232,6 +241,14 @@ public class 'className' {
     public void publish(final Object value) throws 'className'Exception {
       try {
         appender.append(value.toString());
+      } catch(IOException e) {
+        throw ex(e);
+      }
+    }
+    
+    public void log(final Object value) throws 'className'Exception {
+      try {
+        log.append(value.toString());
       } catch(IOException e) {
         throw ex(e);
       }
@@ -321,11 +338,11 @@ public class 'className' {
     }
     
     public StringCursor sub() {
-      return new StringCursor(pos, line, column, seq, this);
+      return new StringCursor(pos, line, column, seq, this, log);
     }
     
     public StringCursor subOutput(final StringBuilder newOutput) {
-      return new StringCursor(pos, line, column, seq, this) {
+      return new StringCursor(pos, line, column, seq, this, log) {
         public void commit() {
           commitInput();
           appendTo(newOutput);
@@ -334,7 +351,7 @@ public class 'className' {
     }
     
     public StringCursor subInput(final CharSequence newInput) {
-      return new StringCursor(0, 1, 0, newInput, this) {
+      return new StringCursor(0, 1, 0, newInput, this, log) {
         public void commit() {
           commitOutput();
         }
@@ -361,6 +378,7 @@ package 'package';
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import static 'package'.'className'.UNSET;
 import 'package'.'className'.'className'Exception;
 import 'package'.'className'.StringCursor;
@@ -420,6 +438,7 @@ public class 'moduleName' {
   or <AcceptStatement>
   or <PublishStatement>
   or <AbortStatement>
+  or <LogStatement>
   or <ScriptStatement>
   or <Block>
   or <Assignment>
@@ -618,6 +637,11 @@ public class 'moduleName' {
   value = PublishStatement.value(statement)
   publish "'indent''input'.publish('<Value>');"
 }
+<LogStatement>{
+  assume LogStatement.instanceof(statement)
+  value = LogStatement.value(statement)
+  publish "'indent''input'.log('<Value>');"
+}
 <AbortStatement>{
   assume AbortStatement.instanceof(statement)
   value = AbortStatement.value(statement)
@@ -705,7 +729,7 @@ public class 'moduleName' {
     value = FieldTemplate.value(field)
     either <MemberFieldMutator>
     or <MemberMethod>
-    or <VarArgs>
+    or <Composite>
   }
   assume not hasNext(setters)
   publish "'indent'return value;"

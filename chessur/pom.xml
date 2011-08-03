@@ -32,12 +32,12 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<!-- <build>
+    <build>
 		<plugins>
 			<plugin>
 				<groupId>org.fuwjin</groupId>
 				<artifactId>chessur-maven-plugin</artifactId>
-				<version>0.9.7.3-SNAPSHOT</version>
+				<version>0.9.7.5-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -47,5 +47,5 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build> -->
+	</build>
 </project>

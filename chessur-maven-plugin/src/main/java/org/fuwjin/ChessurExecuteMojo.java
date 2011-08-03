@@ -79,6 +79,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
     * @readonly
     */
    private MavenProject project;
+   private ClassLoader loader;
 
    /**
     * Creates a new instance.
@@ -106,8 +107,9 @@ public class ChessurExecuteMojo extends AbstractMojo {
    public void execute() throws MojoExecutionException, MojoFailureException {
       try {
          getLog().info("Transforming " + sourceDirectory + " to " + outputDirectory);
-         final CatalogManagerImpl manager = new CatalogManagerImpl(loader());
+         final CatalogManagerImpl manager = new CatalogManagerImpl();
          final Catalog cat = manager.loadCat(catFile);
+         loader = loader();
          transform(cat, sourceDirectory, null);
          if(project != null) {
             project.addCompileSourceRoot(outputDirectory.getAbsolutePath());
@@ -123,6 +125,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
       if(classpath == null) {
          return Thread.currentThread().getContextClassLoader();
       }
+      getLog().info("Using project classpath: " + classpath);
       final URL[] urls = new URL[classpath.size()];
       int index = 0;
       for(final String element: classpath) {
@@ -170,6 +173,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
                         map.put("package", dest.getPath().substring(1).replaceAll("/", "."));
                         map.put("target", target);
                         map.put("name", name);
+                        map.put("loader", loader);
                         cat.exec(reader, writer, map);
                      } catch(final ExecutionException e) {
                         throw new MojoExecutionException("Could not transform from " + path(source) + " to "

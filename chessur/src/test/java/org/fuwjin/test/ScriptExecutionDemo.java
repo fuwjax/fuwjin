@@ -112,7 +112,7 @@ public class ScriptExecutionDemo {
       final String className = addSource(sources, simpleClassName, cat, simpleClassName);
       loader.compile(sources);
       final Class<?> parserClass = loader.loadClass(className);
-      return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Map.class);
+      return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Appendable.class, Map.class);
    }
 
    static Catalog loadCatalog(final File file) throws ExecutionException, IOException {
@@ -192,7 +192,7 @@ public class ScriptExecutionDemo {
       try {
          final StringBuilder codeOutput = new StringBuilder();
          final Object codeResult = data.interpreter().invoke(null, StreamUtils.readAll(newReader("input.txt")),
-               codeOutput, environment());
+               codeOutput, new StringBuilder(), environment());
          assertEquals(codeOutput.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(codeResult, is(matcher(file("matcher.cat"))));
       } catch(final InvocationTargetException e) {

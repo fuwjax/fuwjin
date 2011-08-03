@@ -26,6 +26,7 @@ alias org.fuwjin.chessur.expression.AssumeStatement as AssumeStatement
 alias org.fuwjin.chessur.expression.Literal as Literal
 alias org.fuwjin.chessur.expression.CompositeLiteral as CompositeLiteral
 alias org.fuwjin.chessur.expression.PublishStatement as PublishStatement
+alias org.fuwjin.chessur.expression.LogStatement as LogStatement
 alias org.fuwjin.chessur.expression.RepeatStatement as RepeatStatement
 alias org.fuwjin.chessur.expression.ScriptImpl as Script
 alias org.fuwjin.chessur.expression.ScriptInput as ScriptInput
@@ -163,6 +164,7 @@ alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
   or stmt = <AcceptStatement>   # accept <Value>, accept not <Value>, accept in <Filter>, accept not in <Filter>
   or stmt = <PublishStatement>  # publish <Value>
   or stmt = <AbortStatement>    # abort <Value>
+  or stmt = <LogStatement>      # log <Value>
   or stmt = <Script>            # <<Identifier>>, <<Identifier>> << <Value> >> <OutTarget>
   or stmt = <Block>             # { Statement Statement... }
   or stmt = <Assignment>        # <Identifier> = <Value>
@@ -231,6 +233,12 @@ alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
   accept 'publish' <Sep>
   either stmt = PublishStatement.new(<Value>)
   or abort "publish keyword requires a value"
+  return stmt
+}
+<LogStatement> {
+  accept 'log' <Sep>
+  either stmt = LogStatement.new(<Value>)
+  or abort "log keyword requires a value"
   return stmt
 }
 <AbortStatement>{
