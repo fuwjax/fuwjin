@@ -103,7 +103,7 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
          map.put("name", name);
          map.put("manager", this);
          try {
-            cat = (Catalog)interpret(readAll(reader), new StringBuilder(), map);
+            cat = (Catalog)interpret(readAll(reader), new StringBuilder(), new StringBuilder(), map);
          } catch(final IOException e) {
             throw e;
          } catch(final Exception e) {
