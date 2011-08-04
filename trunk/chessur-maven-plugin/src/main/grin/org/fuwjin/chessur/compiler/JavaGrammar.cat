@@ -1,7 +1,7 @@
 alias java.lang.Character.isJavaIdentifierStart(int) as identifierStart
 alias java.lang.Character.isJavaIdentifierPart(int) as identifierPart
 alias java.lang.System.out as out
-alias java.io.PrintStream.println as log
+alias java.io.PrintStream.println as logger
 
 #7.3
 <CompilationUnit> {
@@ -694,7 +694,7 @@ alias java.io.PrintStream.println as log
   either <LocalVariableDeclarationStatement>
   or <ClassDeclaration>
   or <Statement>
-  log(out(), match)
+  logger(out(), match)
 }
 #14.4
 <LocalVariableDeclarationStatement> {
