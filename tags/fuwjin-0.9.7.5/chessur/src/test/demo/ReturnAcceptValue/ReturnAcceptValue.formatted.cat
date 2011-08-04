@@ -1,0 +1,4 @@
+<Root> {
+  accept 'value'
+  return match
+}

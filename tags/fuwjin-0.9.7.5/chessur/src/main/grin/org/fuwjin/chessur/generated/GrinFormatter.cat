@@ -1,0 +1,436 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2011 Michael Doberenz.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+# 
+# Contributors:
+#     Michael Doberenz - initial API and implementation
+#-------------------------------------------------------------------------------
+alias java.lang.Character.isJavaIdentifierPart(int) as isIdentifierCodepoint
+alias org.fuwjin.util.Indent as Indent
+
+
+<Catalog>{
+  <S>
+  could {
+    repeat <LoadDeclaration>
+    publish "\n"
+  }
+  could {
+    repeat <AliasDeclaration>
+    publish "\n"
+  }
+  repeat <ScriptDeclaration>
+  <EndOfFile>
+}
+<LoadDeclaration>{
+  accept 'load' <Sep>
+  either path = <PathName>
+  or abort "load keyword requires a file path"
+  either accept 'as'
+  or abort "load keyword requires as keyword" 
+  <Sep>
+  either alias = <Name>
+  or abort "load-as keywords require a name"
+  publish "load 'path' as 'alias'\n"
+}
+<AliasDeclaration>{
+  accept 'alias' <Sep>
+  either name = <QualifiedName>
+  or abort "alias keyword requires a qualified name"
+  either accept 'as'
+  or abort "alias keyword requires as keyword" 
+  <Sep>
+  either alias = <Name>
+  or abort "alias-as keywords require a name"
+  publish "alias 'name' as 'alias'\n"
+}
+<ScriptDeclaration>{
+  accept '<'
+  either name = <Identifier>
+  or abort "script identifiers must be enclosed in angle brackets"
+  either accept '>'
+  or abort "script identifier 'name' must end with an angle bracket"
+  <S>
+  either accept '{'
+  or abort "script declaration 'name' must start with a brace"
+  <S>
+  publish "<'name'> {"
+  indent = Indent.new()
+  could repeat {
+    publish "'indent''<Statement>'"
+  }
+  could{
+    accept 'return' <Sep>
+    either publish "'indent'return '<Value>'"
+    or abort "return keyword in script 'name' requires a value"
+  }
+  either accept '}'
+  or abort "script declaration 'name' must end with a brace" 
+  <S>
+  publish "\n}\n"
+}
+
+<Value>{
+  either <Script> >> val
+  or <StaticLiteral> >> val
+  or <DynamicLiteral> >> val
+  or <AcceptStatement> >> val
+  or <Invocation> >> val
+  or <Number> >> val
+  or <Object> >> val
+  or val = <Name>
+  return val
+}
+<Statement>{
+  either <AssumeStatement> >> val
+  or <EitherOrStatement> >> val
+  or <CouldStatement> >> val
+  or <RepeatStatement> >> val
+  or <AcceptStatement> >> val
+  or <PublishStatement> >> val
+  or <LogStatement> >> val
+  or <AbortStatement> >> val
+  or <Script> >> val
+  or <Block> >> val
+  or <Assignment> >> val
+  or <Invocation> >> val
+  return val
+}
+
+<AssumeStatement>{
+  accept 'assume' <Sep>
+  publish "assume "
+  could {
+    accept 'not' <Sep>
+    publish "not "
+  }
+  either publish <Value>
+  or publish <Statement>
+  or abort "assume keyword requires value or in keyword"
+}
+<EitherOrStatement>{
+  accept 'either' <Sep>
+  publish 'either '
+  prefix = <StatementWithPrefix>
+  either repeat {
+    accept 'or' <Sep>
+    publish "'prefix'or " 
+    prefix = <StatementWithPrefix>
+  } or abort "either keyword requires at least one or keyword"
+}
+<StatementWithPrefix> {
+  either {
+    <Block>
+    prefix = ' '
+  } or {
+    publish <Statement>
+    prefix = indent
+  }
+  return prefix
+}
+<CouldStatement>{
+  accept 'could' <Sep>
+  either publish "could '<Statement>'"
+  or abort "could keyword requires a statement"
+}
+<RepeatStatement>{
+  accept 'repeat' <Sep>
+  either publish "repeat '<Statement>'"
+  or abort "repeat keyword requires a statement"
+}
+<AcceptStatement>{
+  accept 'accept' <Sep>
+  publish "accept "
+  could {
+    accept 'not' <Sep>
+    publish "not "
+  }
+  either <InFilter> 
+  or publish <Value>
+  or abort "accept keyword requires a value or in keyword"
+}
+<PublishStatement>{
+  accept 'publish' <Sep>
+  either publish "publish '<Value>'"
+  or abort "publish keyword requires a value"
+}
+<LogStatement>{
+  accept 'log' <Sep>
+  either publish "log '<Value>'"
+  or abort "log keyword requires a value"
+}
+<AbortStatement>{
+  accept 'abort' <Sep>
+  either publish "abort '<Value>'"
+  or abort "abort keyword requires a value"
+}
+<Block>{
+  accept '{' <S>
+  publish "{"
+  Indent.increase(indent)
+  could repeat {
+    publish "'indent''<Statement>'"
+  }
+  either accept '}'
+  or abort "block must end with a brace"
+  <S>
+  Indent.decrease(indent)
+  publish "'indent'}"
+}
+<Assignment>{
+  name = <Name>
+  accept '=' <S>
+  either publish "'name' = '<Value>'"
+  or abort "assignment to 'name' requires a value"
+}
+<Invocation>{
+  assume not accept 'return'
+  name = <QualifiedName>
+  accept '(' <S>
+  publish "'name'("
+  could{
+    publish <Value>
+    could repeat{
+      accept ',' <S>
+      either publish ", '<Value>'"
+      or abort "invocation parameter for 'name' must be a value"
+    }
+  }
+  either accept ')'
+  or abort "invocation must end with a parenthesis" 
+  <S>
+  publish ")"
+}
+<Script>{
+  <ScriptIdent>
+  could{
+    accept '<<' <S>
+    publish " << '<Value>'"
+  }
+  could repeat {
+    accept '>>' <S>
+    publish ' >> '
+    <ScriptIdent>
+  }
+  could {
+    accept '>>' <S>
+    publish " >> '<Name>'"
+  }
+}
+<ScriptIdent>{
+  accept '<'
+  either id = <Identifier>
+  or abort "scripts must be an identifier enclosed in angle brackets"
+  could {
+    accept ':'
+    either id = "'id':'<Identifier>'"
+    or abort "namespaced script ideitifiers must have a valid name"
+  }
+  either accept '>'
+  or abort "script id 'id' must end with an angle bracket" 
+  <S>
+  publish "<'id'>"
+}
+<Object>{
+  accept '('
+  <S>
+  either type = <QualifiedName>
+  or abort "objects must lead with a type cast"
+  either accept ')'
+  or abort "object type cast 'type' must end with a parenthesis"
+  <S>
+  either accept '{'
+  or abort "object data must be enclosed in braces"
+  <S>
+  publish "('type'){"
+  Indent.increase(indent)
+  could {
+    publish "'indent''<Field>'"
+    could repeat {
+      accept ',' <S>
+      either publish ",'indent''<Field>'"
+      or abort "field mapping must follow a comma in a object data"
+    }
+  }
+  either accept '}'
+  or abort "object data must end with a brace"
+  <S>
+  Indent.decrease(indent)
+  publish "'indent'}"
+}
+<Field>{
+  name = <Name>
+  either accept ':'
+  or abort "field mappings must be separated by a colon"
+  <S>
+  either value = <Value>
+  or abort "field 'name' must be mapped to a value"
+  return "'name': 'value'"
+}
+
+<InFilter>{
+  accept 'in' <Sep>
+  publish "in "
+  either <FilterRange>
+  or abort "in keyword requires at least one filter"
+  could repeat{
+    accept ',' <S>
+    publish ", "
+    either <FilterRange>
+    or abort "in keyword requires a filter after a comma"
+  }
+}
+<FilterRange>{
+  <FilterChar> 
+  <S>
+  could{
+    accept '-' 
+    <S>
+    publish '-'
+    either <FilterChar>
+    or abort "range must have an end character"
+    <S>
+  }
+}
+<FilterChar>{
+  either 
+    <Escape>
+  or 
+    accept not '\\'
+  publish match
+}
+
+<StaticLiteral>{
+  accept '\''
+  could repeat either {
+    accept not in \\, ' 
+  } or {
+    <Escape>
+  }
+  either accept '\''
+  or abort "static literals must end with a quote"
+  publish match 
+  <S>
+}
+<DynamicLiteral>{
+  accept '"'
+  could repeat either {
+    accept '\''
+    <Value>
+    accept '\''
+  } or {
+    <Escape>
+  } or {
+    accept not in \\, "
+  }
+  either accept '"'
+  or abort "dynamic literals must end with a double quote" 
+  publish match
+  <S>
+}
+
+<Escape>{
+  accept '\\' 
+  either {
+    accept 'x'
+    <HexDigits>
+  } or {
+    accept next
+  }
+  return match
+}
+<HexDigits>{
+  <HexDigit><HexDigit><HexDigit><HexDigit>
+}
+<HexDigit>{
+  accept in 0-9, a-f, A-F
+}
+<Number> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could {
+      accept '.'
+      could repeat accept in 0-9
+    }
+  } or {
+    accept '.'
+    repeat accept in 0-9
+  }
+  could {
+    accept in e,E
+    could accept '-'
+    repeat accept in 0-9
+  }
+  publish match
+  <Sep>
+}
+
+<Path>{
+  repeat {
+    could accept '/'
+    <QualifiedIdentifier>
+  }
+  could accept '/'
+  return match
+}
+<PathName>{
+  path = <Path> <S>
+  return path
+}
+<Name>{
+  id = <Identifier> <S>
+  return id
+}
+<QualifiedName>{
+  id = <QualifiedIdentifier> <S>
+  return id
+}
+<QualifiedIdentifier>{
+  <AnnotatedIdentifier>
+  could repeat{
+    accept '.'
+    <AnnotatedIdentifier>
+  }
+  return match
+}
+<AnnotatedIdentifier>{
+  <Identifier>
+  could repeat{
+    accept '['
+    could <Identifier>
+    accept ']'
+  }
+}
+<Identifier>{
+  repeat <IdentifierChar>
+  return match
+}
+<IdentifierChar>{
+  assume isIdentifierCodepoint(next)
+  accept next
+}
+
+<Sep>{
+  assume not <IdentifierChar>
+  <S>
+}
+<S>{
+  could <Space>
+}
+<Space>{
+  repeat either accept in \ , \n, \t, \r or <Comment>
+}
+<Comment>{
+  accept '#'
+  could repeat accept not in \r, \n
+  could accept '\r'
+  either accept '\n'
+  or <EndOfFile>
+}
+<EndOfFile>{
+  assume not next
+}

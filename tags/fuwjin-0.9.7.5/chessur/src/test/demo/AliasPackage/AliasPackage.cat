@@ -1,0 +1,12 @@
+alias
+java.lang
+as
+jl
+<Root>
+{
+return
+jl.String.toUpperCase
+(
+'value'
+)
+}
