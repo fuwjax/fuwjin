@@ -14,7 +14,7 @@
 	<groupId>org.fuwjin</groupId>
 	<artifactId>fuwjin</artifactId>
 	<packaging>pom</packaging>
-	<version>0.9.7.5</version>
+	<version>0.9.7.6-SNAPSHOT</version>
 	<name>Fuwjin</name>
 	<description>
                 The central management site for Chessur and Dinah as well as host
@@ -31,9 +31,9 @@
 	</modules>
 	<url>http://fuwjin.googlecode.com</url>
 	<scm>
-		<connection>scm:svn:http://fuwjin.googlecode.com/svn/tags/fuwjin-0.9.7.5</connection>
-		<developerConnection>scm:svn:https://fuwjin.googlecode.com/svn/tags/fuwjin-0.9.7.5</developerConnection>
-		<url>http://fuwjin.googlecode.com/svn/tags/fuwjin-0.9.7.5</url>
+		<connection>scm:svn:http://fuwjin.googlecode.com/svn/trunk/</connection>
+		<developerConnection>scm:svn:https://fuwjin.googlecode.com/svn/trunk/</developerConnection>
+		<url>http://fuwjin.googlecode.com/svn/trunk/</url>
 	</scm>
 	<licenses>
 		<license>
