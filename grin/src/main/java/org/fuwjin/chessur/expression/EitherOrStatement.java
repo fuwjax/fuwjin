@@ -13,11 +13,11 @@ package org.fuwjin.chessur.expression;
 import static java.util.Collections.unmodifiableCollection;
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a set of ordered options.
@@ -44,16 +44,15 @@ public class EitherOrStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
       int index = statements.size();
       for(final Expression statement: statements) {
          if(--index == 0) {
-            return statement.resolve(input, output, scope);
+            return statement.resolve(input, output, scope, trace);
          }
          try {
-            return snapshot.resolve(statement, true);
+            return trace.resolve(statement);
          } catch(final ResolveException e) {
             // continue
          }

@@ -11,11 +11,11 @@
 package org.fuwjin.chessur.expression;
 
 import java.lang.reflect.Array;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Allows testing for default values.
@@ -62,24 +62,23 @@ public class AssumeStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException, AbortedException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
       if(isNot) {
          final Object result;
          try {
-            result = snapshot.resolve(value, false);
+            result = trace.resolveAndRevert(value);
          } catch(final ResolveException e) {
             return Adapter.UNSET;
          }
          if(isDefault(result)) {
             return Adapter.UNSET;
          }
-         throw new ResolveException("unexpected value: %s", snapshot);
+         throw trace.fail("unexpected value");
       }
-      final Object result = snapshot.resolve(value, false);
+      final Object result = trace.resolveAndRevert(value);
       if(isDefault(result)) {
-         throw new ResolveException("Unexpected default: %s", snapshot);
+         throw trace.fail("Unexpected default");
       }
       return Adapter.UNSET;
    }

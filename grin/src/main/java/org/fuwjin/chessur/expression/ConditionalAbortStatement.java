@@ -10,10 +10,10 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents an unrecoverable failure.
@@ -32,15 +32,17 @@ public class ConditionalAbortStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
       try {
-         return statement.resolve(input, output, scope);
+         return statement.resolve(input, output, scope, trace);
       } catch(final ResolveException e) {
-         throw abort(snapshot, e);
-      } catch(final AbortedException e) {
-         throw abort(snapshot, e);
+         try {
+            final Object val = value.resolve(input, output, scope, trace);
+            return trace.abort(e, "%s", val);
+         } catch(final ResolveException ex) {
+            return trace.abort(e, "Abort string could not be generated");
+         }
       }
    }
 
@@ -59,14 +61,5 @@ public class ConditionalAbortStatement implements Expression {
     */
    public Expression value() {
       return value;
-   }
-
-   protected AbortedException abort(final Snapshot snapshot, final Throwable cause) throws AbortedException {
-      try {
-         final Object val = snapshot.resolve(value, true);
-         return new AbortedException(cause, "%s: %s", val, snapshot);
-      } catch(final ResolveException e) {
-         return new AbortedException(cause, "Abort string could not be generated: %s", snapshot);
-      }
    }
 }

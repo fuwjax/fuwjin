@@ -21,7 +21,8 @@ public class ChessurMain {
       if(args.length > 1) {
          script = cat.get(args[1]);
       }
-      final Object value = script.exec(System.in, System.out, (Map)System.getProperties());
+      final Object value = script.acceptFrom(System.in).publishTo(System.out).logTo(System.err)
+            .withState((Map)System.getProperties());
       System.out.println();
       if(value != null) {
          if(value instanceof Integer) {

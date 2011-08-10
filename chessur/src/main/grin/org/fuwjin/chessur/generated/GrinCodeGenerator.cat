@@ -160,6 +160,7 @@ public class 'className' {
     private int pos;
     private int line;
     private int column;
+    private int[] limit;
     private final CharSequence seq;
     private final int start;
     private final StringCursor parent;
@@ -173,17 +174,19 @@ public class 'className' {
          parent = null;
          line = 1;
          column = 0;
+         limit = new int[1];
          this.appender = appender;
          this.log = log;
     }
     
-    public StringCursor(final int start, final int line, final int column, final CharSequence seq, final StringCursor parent, final Appendable log) {
+    public StringCursor(final int start, final int line, final int column, final int[] limit, final CharSequence seq, final StringCursor parent, final Appendable log) {
       this.start = start;
       pos = start;
       this.seq = seq;
       this.parent = parent;
       this.line = line;
       this.column = column;
+      this.limit = limit;
       this.appender = new StringBuilder();
       this.log = log;
     }
@@ -200,6 +203,11 @@ public class 'className' {
       checkBounds(pos + expected.length() - 1);
       final CharSequence sub = seq.subSequence(pos, pos + expected.length());
       if(!sub.equals(expected)) {
+        int i = 0;
+        while (seq.charAt(pos) == expected.charAt(i++)) {
+          advance();
+        }
+        reach(pos+1);
         throw ex(\"failed while matching \"+expected);
       }
       final int stop = pos + expected.length() - 1;
@@ -212,6 +220,7 @@ public class 'className' {
     public int acceptIn(final String name, final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) < 0) {
+        reach(pos+1);
         throw ex(\"Did not match filter: \"+name);
       }
       return advance();
@@ -225,6 +234,7 @@ public class 'className' {
         return accept();
       }       
       if(seq.subSequence(pos, pos + expected.length()).equals(expected)) {
+        reach(pos + expected.length());
         throw ex(\"failed while matching \"+expected);
       }
       return advance();
@@ -233,6 +243,7 @@ public class 'className' {
     public int acceptNotIn(final String name, final String set) throws 'className'Exception {
       checkBounds(pos);
       if(set.indexOf(seq.charAt(pos)) >= 0) {
+        reach(pos + 1);
         throw ex(\"Unexpected match: \"+name);
       }
       return advance();
@@ -263,6 +274,9 @@ public class 'className' {
     
     protected void checkBounds(final int p) throws 'className'Exception {
       if(p >= seq.length()) {
+        while(pos < seq.length()) {
+          advance();
+        }
         throw ex(\"unexpected EOF\");
       }
     }
@@ -295,13 +309,18 @@ public class 'className' {
     }
     
     public String context() {
-      if(pos == 0) {
+      if(pos == 0 && limit[0] == 0) {
         return \": [\" + line + \",\" + column + \"] SOF -> [1,0] SOF\";
       }
-      if(pos > seq.length()) {
-        return \": [\" + line + \",\" + column + \"] EOF -> [1,0] SOF\";
+      int low = pos - 5;
+      if(low < 0) {
+        low = 0;
       }
-      return \": [\" + line + \",\" + column + \"] '\"+ seq.charAt(pos - 1)+\"' -> [1,0] SOF\";
+      int high = pos + 5;
+      if(high > limit[0]){
+        high = limit[0];
+      }
+      return \": [\" + line + \",\" + column + \"] \\\"\" + seq.subSequence(low,pos) + \"⎀\" + seq.subSequence(pos,high) + \"\\\" -> [1,0] SOF\";
     }
     
     public 'className'Exception ex(final Throwable cause) {
@@ -318,6 +337,7 @@ public class 'className' {
     
     private int advance() {
       final char ch = seq.charAt(pos++);
+      reach(pos);
        if(ch == \'\\n\') {
          line++;
          column = 0;
@@ -327,22 +347,30 @@ public class 'className' {
        return ch;
     }
     
+    private void reach(int p) {
+      if(p > limit[0]) {
+        limit[0] = p;
+      }
+    }
+    
     public int next() throws 'className'Exception {
       checkBounds(pos);
+      reach(pos+1);
       return seq.charAt(pos);
     }
     
     public String nextStr() throws 'className'Exception {
       checkBounds(pos);
+      reach(pos+1);
       return seq.subSequence(pos,pos+1).toString();
     }
     
     public StringCursor sub() {
-      return new StringCursor(pos, line, column, seq, this, log);
+      return new StringCursor(pos, line, column, limit, seq, this, log);
     }
     
     public StringCursor subOutput(final StringBuilder newOutput) {
-      return new StringCursor(pos, line, column, seq, this, log) {
+      return new StringCursor(pos, line, column, limit, seq, this, log) {
         public void commit() {
           commitInput();
           appendTo(newOutput);
@@ -351,7 +379,7 @@ public class 'className' {
     }
     
     public StringCursor subInput(final CharSequence newInput) {
-      return new StringCursor(0, 1, 0, newInput, this, log) {
+      return new StringCursor(0, 1, 0, new int[1], newInput, this, log) {
         public void commit() {
           commitOutput();
         }

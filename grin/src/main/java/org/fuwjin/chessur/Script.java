@@ -6,6 +6,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
 
 /**
  * The executable script interface. Script executions have four central pieces
@@ -30,6 +34,26 @@ import java.util.concurrent.ExecutionException;
  */
 public interface Script {
    /**
+    * Executes the script with a byte-based InputStream input, no output and no
+    * initial environment. Returns the result of the script or null if there is
+    * no return statement in the script.
+    * @param input the byte-based input
+    * @return the script
+    */
+   Script acceptFrom(final InputStream input);
+
+   /**
+    * Executes the script with a code point-based Reader input, no output and no
+    * initial environment. Returns the result of the script or null if there is
+    * no return statement in the script.
+    * @param input the code point-based input
+    * @return the result of the script
+    */
+   Script acceptFrom(final Reader input);
+
+   Script acceptFrom(final Source input);
+
+   /**
     * Executes the script with no input, output or initial environment. Returns
     * the result of the script or null if there is no return statement in the
     * script.
@@ -38,197 +62,27 @@ public interface Script {
     */
    Object exec() throws ExecutionException;
 
-   /**
-    * Executes the script with a byte-based InputStream input, no output and no
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the byte-based input
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input) throws ExecutionException;
-
-   /**
-    * Executes the script with a byte-based InputStream input, no output and an
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the byte-based input
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input, final Map<String, ? extends Object> environment) throws ExecutionException;
-
-   /**
-    * Executes the script with a byte-based InputStream input, a PrintStream
-    * output and no initial environment. Returns the result of the script or
-    * null if there is no return statement in the script.
-    * @param input the byte-based input
-    * @param output the output
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input, final PrintStream output) throws ExecutionException;
-
-   /**
-    * Executes the script with a byte-based InputStream input, a PrintStream
-    * output and an initial environment. Returns the result of the script or
-    * null if there is no return statement in the script.
-    * @param input the byte-based input
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input, final PrintStream output, final Map<String, ? extends Object> environment)
-         throws ExecutionException;
-
-   /**
-    * Executes the script with a byte-based InputStream input, a Writer output
-    * and no initial environment. Returns the result of the script or null if
-    * there is no return statement in the script.
-    * @param input the byte-based input
-    * @param output the output
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input, final Writer output) throws ExecutionException;
-
-   /**
-    * Executes the script with a byte-based InputStream input, a Writer output
-    * and an initial environment. Returns the result of the script or null if
-    * there is no return statement in the script.
-    * @param input the byte-based input
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final InputStream input, final Writer output, final Map<String, ? extends Object> environment)
-         throws ExecutionException;
-
-   /**
-    * Executes the script with no input, no output and an initial environment.
-    * Returns the result of the script or null if there is no return statement
-    * in the script.
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Map<String, ? extends Object> environment) throws ExecutionException;
+   Script logTo(final Logger log);
 
    /**
     * Executes the script with no input, a PrintStream output and no initial
     * environment. Returns the result of the script or null if there is no
     * return statement in the script.
-    * @param output the output
+    * @param log the output
     * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
     */
-   Object exec(final PrintStream output) throws ExecutionException;
+   Script logTo(final PrintStream log);
 
-   /**
-    * Executes the script with no input, a PrintStream output and an initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final PrintStream output, final Map<String, ? extends Object> environment) throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, no output and no
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the code point-based input
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input) throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, no output and an
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the code point-based input
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input, final Map<String, ? extends Object> environment) throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, a PrintStream
-    * output and no initial environment. Returns the result of the script or
-    * null if there is no return statement in the script.
-    * @param input the code point-based input
-    * @param output the output
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input, final PrintStream output) throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, a PrintStream
-    * output and an initial environment. Returns the result of the script or
-    * null if there is no return statement in the script.
-    * @param input the code point-based input
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input, final PrintStream output, final Map<String, ? extends Object> environment)
-         throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, a Writer output
-    * and no initial environment. Returns the result of the script or null if
-    * there is no return statement in the script.
-    * @param input the code point-based input
-    * @param output the output
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input, final Writer output) throws ExecutionException;
-
-   /**
-    * Executes the script with a code point-based Reader input, a Writer output
-    * and an initial environment. Returns the result of the script or null if
-    * there is no return statement in the script.
-    * @param input the code point-based input
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Reader input, final Writer output, final Map<String, ? extends Object> environment)
-         throws ExecutionException;
-
-   Object exec(ScriptState state) throws ExecutionException;
+   Script logTo(final Sink log);
 
    /**
     * Executes the script with no input, a Writer output and no initial
     * environment. Returns the result of the script or null if there is no
     * return statement in the script.
-    * @param output the output
+    * @param log the output
     * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
     */
-   Object exec(final Writer output) throws ExecutionException;
-
-   /**
-    * Executes the script with no input, a Writer output and an initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param output the output
-    * @param environment the initial environment
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec(final Writer output, final Map<String, ? extends Object> environment) throws ExecutionException;
+   Script logTo(final Writer log);
 
    /**
     * Returns a name for this script. Note that the same underlying script may
@@ -236,4 +90,35 @@ public interface Script {
     * @return the name
     */
    String name();
+
+   /**
+    * Executes the script with no input, a PrintStream output and no initial
+    * environment. Returns the result of the script or null if there is no
+    * return statement in the script.
+    * @param output the output
+    * @return the result of the script
+    */
+   Script publishTo(final PrintStream output);
+
+   Script publishTo(Sink output);
+
+   /**
+    * Executes the script with no input, a Writer output and no initial
+    * environment. Returns the result of the script or null if there is no
+    * return statement in the script.
+    * @param output the output
+    * @return the result of the script
+    */
+   Script publishTo(final Writer output);
+
+   /**
+    * Executes the script with no input, no output and an initial environment.
+    * Returns the result of the script or null if there is no return statement
+    * in the script.
+    * @param environment the initial environment
+    * @return the result of the script
+    */
+   Script withState(final Map<String, ? extends Object> environment);
+
+   Script withState(Scope environment);
 }

@@ -694,7 +694,6 @@ alias java.io.PrintStream.println as logger
   either <LocalVariableDeclarationStatement>
   or <ClassDeclaration>
   or <Statement>
-  logger(out(), match)
 }
 #14.4
 <LocalVariableDeclarationStatement> {

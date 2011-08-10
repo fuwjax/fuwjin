@@ -44,7 +44,7 @@ public class VirtualClassFunctionProvider extends BaseFunctionProvider {
       final File file = new File(sourcePath, category.replace('.', '/') + ".java");
       try {
          final FileInputStream input = new FileInputStream(file);
-         return (VirtualClass)sourceParser.exec(input, System.out);
+         return (VirtualClass)sourceParser.acceptFrom(input).publishTo(System.out).exec();
       } catch(final Exception e) {
          throw new AdaptException(e, "Could not open %s", file);
       }

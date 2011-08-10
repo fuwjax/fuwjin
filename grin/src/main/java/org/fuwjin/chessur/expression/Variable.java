@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.adapter.StandardAdapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a variable in the current scope.
@@ -25,9 +25,9 @@ public class Variable implements Expression {
     */
    public static final Variable NEXT = new Variable("next") {
       @Override
-      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+      public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
             throws AbortedException, ResolveException {
-         return input.next(new Snapshot(input, output, scope)).value();
+         return input.next();
       }
    };
    private final String name;
@@ -49,13 +49,13 @@ public class Variable implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Object value = scope.retrieve(name);
+      final Object value = scope.get(name);
       if(StandardAdapter.isSet(value)) {
          return value;
       }
-      throw new ResolveException("variable %s is unset: %s", name, new Snapshot(input, output, scope));
+      throw trace.fail("variable %s is unset", name);
    }
 
    @Override

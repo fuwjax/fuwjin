@@ -174,7 +174,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
                         map.put("target", target);
                         map.put("name", name);
                         map.put("loader", loader);
-                        cat.exec(reader, writer, map);
+                        cat.acceptFrom(reader).publishTo(writer).withState(map).exec();
                      } catch(final ExecutionException e) {
                         throw new MojoExecutionException("Could not transform from " + path(source) + " to "
                               + path(target), e);

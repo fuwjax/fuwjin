@@ -10,36 +10,20 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import java.util.Deque;
-import java.util.LinkedList;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
-import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a Specification declaration.
  */
 public class Declaration implements Expression {
-   private static class MatchExpression extends Variable {
-      private final Deque<SourceStream> buffers = new LinkedList<SourceStream>();
-
-      public MatchExpression() {
-         super("match");
-      }
-
-      @Override
-      public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-            throws AbortedException, ResolveException {
-         return buffers.peek().toString();
-      }
-   }
-
    private final String name;
    private final Block block;
    private Expression returns;
-   private MatchExpression match;
+   private Expression exec;
+   private Expression match;
 
    /**
     * Creates a new instance.
@@ -48,6 +32,7 @@ public class Declaration implements Expression {
    public Declaration(final String name) {
       this.name = name;
       block = new Block();
+      exec = block;
    }
 
    /**
@@ -60,7 +45,13 @@ public class Declaration implements Expression {
 
    public Expression match() {
       if(match == null) {
-         match = new MatchExpression();
+         match = new Variable("match") {
+            @Override
+            public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+                  throws AbortedException, ResolveException {
+               return super.resolve(input, output, scope, trace).toString();
+            }
+         };
       }
       return match;
    }
@@ -74,30 +65,12 @@ public class Declaration implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException, AbortedException {
-      SourceStream in = input;
-      if(match != null) {
-         in = input.buffer();
-         match.buffers.push(in);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
+      if(match == null) {
+         return trace.resolve(name, exec);
       }
-      final Snapshot snapshot = new Snapshot(in, output, scope);
-      final Environment env = scope.newScope();
-      try {
-         block.resolve(in, output, env);
-         if(returns != null) {
-            return returns.resolve(in, output, env);
-         }
-         return Adapter.UNSET;
-      } catch(final AbortedException e) {
-         throw new AbortedException(e, "in %s: %s", name, snapshot);
-      } catch(final ResolveException e) {
-         throw new ResolveException(e, "in %s: %s", name, snapshot);
-      } finally {
-         if(match != null) {
-            match.buffers.poll();
-         }
-      }
+      return trace.resolveMatch(name, exec);
    }
 
    /**
@@ -114,6 +87,14 @@ public class Declaration implements Expression {
     */
    public void returns(final Expression value) {
       returns = value;
+      exec = new Expression() {
+         @Override
+         public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+               throws AbortedException, ResolveException {
+            block.resolve(input, output, scope, trace);
+            return returns.resolve(input, output, scope, trace);
+         }
+      };
    }
 
    /**

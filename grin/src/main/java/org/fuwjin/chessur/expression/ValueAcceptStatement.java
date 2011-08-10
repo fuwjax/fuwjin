@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a value based accept statement.
@@ -42,43 +42,44 @@ public class ValueAcceptStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
-      final Object result = value.resolve(input, output, scope);
-      final String str;
-      if(result instanceof Integer) {
-         str = new String(Character.toChars((Integer)result));
-      } else {
-         str = String.valueOf(result);
+      if(value.equals(Variable.NEXT)) {
+         input.read();
+         return Adapter.UNSET;
       }
+      final Object result = value.resolve(input, output, scope, trace);
+      final String str = String.valueOf(result);
       if(isNot) {
-         final SourceStream sub = input.detach();
-         int codePoint;
-         for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
-            codePoint = str.codePointAt(index);
-            int cp;
-            try {
-               cp = ((Integer)sub.read(snapshot).value()).intValue();
-            } catch(final ResolveException e) {
-               input.resume();
-               input.read(snapshot);
-               return Adapter.UNSET;
-            }
-            if(codePoint != cp) {
-               input.resume();
-               input.read(snapshot);
-               return Adapter.UNSET;
-            }
+         try {
+            trace.resolveAndRevert(new Expression() {
+               @Override
+               public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+                     throws AbortedException, ResolveException {
+                  int codePoint;
+                  for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
+                     codePoint = str.codePointAt(index);
+                     if(codePoint != input.next()) {
+                        throw trace.fail("failed while matching %s", str);
+                     }
+                     input.read();
+                  }
+                  return Adapter.UNSET;
+               }
+            });
+         } catch(final ResolveException e) {
+            input.read();
+            return Adapter.UNSET;
          }
-         throw new ResolveException("failed while matching %s: %s", str, snapshot);
+         throw trace.fail("failed while matching %s", str);
       }
       int codePoint;
       for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
          codePoint = str.codePointAt(index);
-         if(codePoint != ((Integer)input.read(snapshot).value()).intValue()) {
-            throw new ResolveException("failed while matching %s: %s", str, snapshot);
+         if(codePoint != input.next()) {
+            throw trace.fail("failed while matching %s", str);
          }
+         input.read();
       }
       return Adapter.UNSET;
    }

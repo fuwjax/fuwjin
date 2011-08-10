@@ -29,6 +29,8 @@ public abstract class AbstractFunction implements Function {
    public Object invoke(final Object... args) throws AdaptException, InvocationTargetException {
       try {
          return invokeSafe(signature().adapt(args));
+      } catch(final NullPointerException e) {
+         throw new AdaptException(e, "%s requires a non-null target", signature());
       } catch(final IllegalAccessException e) {
          throw new AdaptException(e, "%s could not be accessed: %s", signature(), e);
       } catch(final InstantiationException e) {

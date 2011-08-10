@@ -17,7 +17,56 @@ package org.fuwjin.util;
  */
 public class BusinessException extends Exception {
    private static final long serialVersionUID = 1L;
-   private final Object[] args;
+
+   public static Object concatObject(final Object... args) {
+      return new Object() {
+         @Override
+         public String toString() {
+            final StringBuilder builder = new StringBuilder();
+            for(final Object o: args) {
+               builder.append(o);
+            }
+            return builder.toString();
+         }
+      };
+   }
+
+   public static String format(final String pattern, final Object... formatArgs) {
+      return String.format(pattern, formatArgs);
+   }
+
+   public static Object formatObject(final String pattern, final Object... formatArgs) {
+      return new Object() {
+         @Override
+         public String toString() {
+            return format(pattern, formatArgs);
+         }
+      };
+   }
+
+   public static Object joinObject(final String join, final Iterable<?> list) {
+      return new Object() {
+         @Override
+         public String toString() {
+            final StringBuilder builder = new StringBuilder();
+            boolean first = true;
+            for(final Object o: list) {
+               if(!first) {
+                  builder.append(join);
+               }
+               first = false;
+               builder.append(o);
+            }
+            return builder.toString();
+         }
+      };
+   }
+
+   private Object richMessage;
+
+   public BusinessException() {
+      super();
+   }
 
    /**
     * Creates a new instance.
@@ -26,7 +75,11 @@ public class BusinessException extends Exception {
     */
    public BusinessException(final String pattern, final Object... args) {
       super(pattern);
-      this.args = args;
+      richMessage = formatObject(pattern, args);
+   }
+
+   public BusinessException(final Throwable cause) {
+      super(cause);
    }
 
    /**
@@ -37,7 +90,7 @@ public class BusinessException extends Exception {
     */
    public BusinessException(final Throwable cause, final String pattern, final Object... args) {
       super(pattern, cause);
-      this.args = args;
+      richMessage = formatObject(pattern, args);
    }
 
    @Override
@@ -47,8 +100,8 @@ public class BusinessException extends Exception {
 
    @Override
    public String getMessage() {
-      if(args != null && args.length > 0) {
-         return format(args);
+      if(richMessage != null) {
+         return richMessage.toString();
       }
       return super.getMessage();
    }
@@ -61,11 +114,11 @@ public class BusinessException extends Exception {
       return new StackTraceElement[0];
    }
 
-   protected String format(final Object[] formatArgs) {
-      return format(super.getMessage(), formatArgs);
+   protected synchronized Throwable restoreStackTrace() {
+      return super.fillInStackTrace();
    }
 
-   protected String format(final String pattern, final Object[] formatArgs) {
-      return String.format(pattern, formatArgs);
+   protected void setRichMessage(final Object rich) {
+      richMessage = rich;
    }
 }

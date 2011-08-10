@@ -2,6 +2,7 @@ package org.fuwjin.test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,8 +10,8 @@ import org.fuwjin.chessur.Catalog;
 import org.fuwjin.chessur.CatalogManagerImpl;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
-import org.fuwjin.util.UserFiles;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,7 +24,7 @@ public class JavaParserTest {
 
    @Parameters
    public static Collection<Object[]> parameters() {
-      final File catPath = new File("../chessur/src/main/java");
+      final File catPath = new File("../");
       final List<Object[]> list = new ArrayList<Object[]>();
       add(list, catPath);
       return list;
@@ -31,11 +32,16 @@ public class JavaParserTest {
 
    @BeforeClass
    public static void setup() throws Exception {
-      catalog = new CatalogManagerImpl().loadCat("org/fuwjin/chessur/compiler/JavaSignatureParser.cat");
+      catalog = new CatalogManagerImpl().loadCat("org/fuwjin/chessur/compiler/JavaGrammar.cat");
    }
 
    private static void add(final List<Object[]> list, final File path) {
-      for(final File file: path.listFiles(new UserFiles())) {
+      for(final File file: path.listFiles(new FilenameFilter() {
+         @Override
+         public boolean accept(final File dir, final String name) {
+            return name.endsWith(".java") || !name.contains(".");
+         }
+      })) {
          if(file.isDirectory()) {
             add(list, file);
          } else {
@@ -54,9 +60,10 @@ public class JavaParserTest {
     * Executes the compiler.
     * @throws Exception if the test fails
     */
+   @Ignore
    @Test
    public void testMojo() throws Exception {
       final FileInputStream input = new FileInputStream(source);
-      catalog.exec(input, System.out);
+      catalog.acceptFrom(input).publishTo(System.out).exec();
    }
 }
