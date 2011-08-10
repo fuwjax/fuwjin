@@ -3,11 +3,11 @@
   <parent>
     <artifactId>fuwjin</artifactId>
     <groupId>org.fuwjin</groupId>
-    <version>0.9.8</version>
+    <version>0.9.9-SNAPSHOT</version>
   </parent>
   <groupId>org.fuwjin</groupId>
   <artifactId>glory</artifactId>
-  <version>0.9.8</version>
+  <version>0.9.9-SNAPSHOT</version>
   <name>Glory - JUnit test idioms</name>
   <description>There's a nice knock-down argument for you</description>
   <dependencies>
