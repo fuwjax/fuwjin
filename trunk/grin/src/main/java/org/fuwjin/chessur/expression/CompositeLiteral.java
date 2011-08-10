@@ -12,9 +12,10 @@ package org.fuwjin.chessur.expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a composite or dynamic literal.
@@ -72,11 +73,11 @@ public class CompositeLiteral implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
       final StringBuilder builder = new StringBuilder();
       for(final Expression value: values) {
-         final Object result = value.resolve(input, output, scope);
+         final Object result = value.resolve(input, output, scope, trace);
          builder.append(result);
       }
       return builder.toString();

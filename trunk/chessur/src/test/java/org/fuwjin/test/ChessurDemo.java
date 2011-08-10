@@ -45,8 +45,8 @@ public class ChessurDemo {
    @Test
    public void demoGrin() throws Exception {
       final Catalog parser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
-      final Catalog grin = (Catalog)parser.exec(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"),
-            System.out, env);
+      final Catalog grin = (Catalog)parser.acceptFrom(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"))
+            .publishTo(System.out).withState(env).exec();
       assertNotNull(grin.get("EndOfFile"));
    }
 
@@ -58,15 +58,16 @@ public class ChessurDemo {
    public void demoGrinCode() throws Exception {
       new File("target/generated/org/fuwjin/chessur/generated").mkdirs();
       final Catalog cat = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
-      final Catalog serial = (Catalog)cat.exec(reader("org/fuwjin/chessur/generated/GrinCodeGenerator.cat", "UTF-8"),
-            System.out, env);
+      final Catalog serial = (Catalog)cat
+            .acceptFrom(reader("org/fuwjin/chessur/generated/GrinCodeGenerator.cat", "UTF-8")).publishTo(System.out)
+            .withState(env).exec();
       final Map<String, Object> environment = new HashMap<String, Object>();
       environment.put("cat", cat);
       environment.put("package", "org.fuwjin.chessur.generated");
       environment.put("className", "Chessur");
       final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/Chessur.java", "UTF-8");
       try {
-         serial.exec(writer, environment);
+         serial.publishTo(writer).withState(environment).exec();
       } finally {
          writer.close();
       }
@@ -86,7 +87,7 @@ public class ChessurDemo {
       environment.put("className", "ChessurCodeGen");
       final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/ChessurCodeGen.java", "UTF-8");
       try {
-         serial.exec(writer, environment);
+         serial.publishTo(writer).withState(environment).exec();
       } finally {
          writer.close();
       }
@@ -100,11 +101,12 @@ public class ChessurDemo {
    public void demoGrinSerial() throws Exception {
       new File("target/generated").mkdirs();
       final Catalog cat = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
-      final Catalog serial = (Catalog)cat.exec(reader("org/fuwjin/chessur/generated/GrinSerializer.cat", "UTF-8"),
-            System.out, env);
+      final Catalog serial = (Catalog)cat
+            .acceptFrom(reader("org/fuwjin/chessur/generated/GrinSerializer.cat", "UTF-8")).publishTo(System.out)
+            .withState(env).exec();
       final Writer writer = writer("target/generated/grin.parse.test.cat", "UTF-8");
       try {
-         serial.exec(writer, singletonMap("cat", cat));
+         serial.publishTo(writer).withState(singletonMap("cat", cat)).exec();
       } finally {
          writer.close();
       }

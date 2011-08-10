@@ -10,10 +10,12 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.CodePointInStream;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
+import java.io.StringReader;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.StandardEnv;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * An expression representing redirected script input.
@@ -33,11 +35,11 @@ public class ScriptInput implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Object val = value.resolve(input, output, scope);
-      final SourceStream in = CodePointInStream.streamOf(String.valueOf(val));
-      return spec.resolve(in, output, scope);
+      final Object val = value.resolve(input, output, scope, trace);
+      final Source in = StandardEnv.acceptFrom(new StringReader(String.valueOf(val)));
+      return spec.resolve(in, output, scope, trace.newInput(in));
    }
 
    /**

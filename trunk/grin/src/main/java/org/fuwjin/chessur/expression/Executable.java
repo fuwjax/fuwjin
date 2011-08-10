@@ -16,122 +16,84 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import org.fuwjin.chessur.Script;
-import org.fuwjin.chessur.ScriptState;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.StandardEnv;
 
 /**
  * Base utility class for all things transformative.
  */
 public abstract class Executable implements Script {
    @Override
+   public Script acceptFrom(final InputStream input) {
+      return acceptFrom(StandardEnv.acceptFrom(input));
+   }
+
+   @Override
+   public Script acceptFrom(final Reader input) {
+      return acceptFrom(StandardEnv.acceptFrom(input));
+   }
+
+   @Override
+   public Script acceptFrom(final Source input) {
+      return Execution.acceptFrom(this, input);
+   }
+
+   @Override
    public Object exec() throws ExecutionException {
-      return exec(new ScriptState());
+      return Execution.exec(this);
    }
 
    @Override
-   public Object exec(final InputStream input) throws ExecutionException {
-      return exec(new ScriptState(input));
+   public Script logTo(final Logger log) {
+      return logTo(StandardEnv.logTo(log));
    }
 
    @Override
-   public Object exec(final InputStream input, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(input, environment));
+   public Script logTo(final PrintStream log) {
+      return logTo(StandardEnv.logTo(log));
    }
 
    @Override
-   public Object exec(final InputStream input, final PrintStream output) throws ExecutionException {
-      return exec(new ScriptState(input, output));
+   public Script logTo(final Sink log) {
+      return Execution.logTo(this, log);
    }
 
    @Override
-   public Object exec(final InputStream input, final PrintStream output, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(input, output, environment));
-   }
-
-   @Override
-   public Object exec(final InputStream input, final Writer output) throws ExecutionException {
-      return exec(new ScriptState(input, output));
-   }
-
-   @Override
-   public Object exec(final InputStream input, final Writer output, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(input, output, environment));
-   }
-
-   @Override
-   public Object exec(final Map<String, ? extends Object> environment) throws ExecutionException {
-      return exec(new ScriptState(environment));
-   }
-
-   @Override
-   public Object exec(final PrintStream output) throws ExecutionException {
-      return exec(new ScriptState(output));
-   }
-
-   @Override
-   public Object exec(final PrintStream output, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(output, environment));
-   }
-
-   @Override
-   public Object exec(final Reader input) throws ExecutionException {
-      return exec(new ScriptState(input));
-   }
-
-   @Override
-   public Object exec(final Reader input, final Map<String, ? extends Object> environment) throws ExecutionException {
-      return exec(new ScriptState(input, environment));
-   }
-
-   @Override
-   public Object exec(final Reader input, final PrintStream output) throws ExecutionException {
-      return exec(new ScriptState(input, output));
-   }
-
-   @Override
-   public Object exec(final Reader input, final PrintStream output, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(input, output, environment));
-   }
-
-   @Override
-   public Object exec(final Reader input, final Writer output) throws ExecutionException {
-      return exec(new ScriptState(input, output));
-   }
-
-   @Override
-   public Object exec(final Reader input, final Writer output, final Map<String, ? extends Object> environment)
-         throws ExecutionException {
-      return exec(new ScriptState(input, output, environment));
-   }
-
-   @Override
-   public Object exec(final ScriptState state) throws ExecutionException {
-      try {
-         return state.exec(expression());
-      } catch(final AbortedException e) {
-         throw new ExecutionException(String.format("Execution of %s aborted", name()), e);
-      } catch(final ResolveException e) {
-         throw new ExecutionException(String.format("Execution of %s failed", name()), e);
-      }
-   }
-
-   @Override
-   public Object exec(final Writer output) throws ExecutionException {
-      return exec(new ScriptState(output));
-   }
-
-   @Override
-   public Object exec(final Writer output, final Map<String, ? extends Object> environment) throws ExecutionException {
-      return exec(new ScriptState(output, environment));
+   public Script logTo(final Writer log) {
+      return logTo(StandardEnv.logTo(log));
    }
 
    @Override
    public abstract String name();
 
-   protected abstract Expression expression() throws AbortedException;
+   @Override
+   public Script publishTo(final PrintStream output) {
+      return publishTo(StandardEnv.publishTo(output));
+   }
+
+   @Override
+   public Script publishTo(final Sink output) {
+      return Execution.publishTo(this, output);
+   }
+
+   @Override
+   public Script publishTo(final Writer output) {
+      return publishTo(StandardEnv.publishTo(output));
+   }
+
+   @Override
+   public Script withState(final Map<String, ? extends Object> environment) {
+      return withState(StandardEnv.withState(environment));
+   }
+
+   @Override
+   public Script withState(final Scope environment) {
+      return Execution.withState(this, environment);
+   }
+
+   protected abstract Expression expression();
 }

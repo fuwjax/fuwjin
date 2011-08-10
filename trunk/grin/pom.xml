@@ -15,7 +15,12 @@
       <groupId>org.fuwjin</groupId>
       <artifactId>dinah</artifactId>
       <version>0.9.7.6-SNAPSHOT</version>
-      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.fuwjin</groupId>
+      <artifactId>glory</artifactId>
+      <version>0.9.7.6-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

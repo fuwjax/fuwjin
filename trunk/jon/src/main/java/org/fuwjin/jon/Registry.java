@@ -90,7 +90,7 @@ public class Registry {
       env.put("true", true);
       env.put("false", false);
       env.put("type", type);
-      final Object value = parser().exec(input, System.out, env);
+      final Object value = parser().acceptFrom(input).publishTo(System.out).withState(env).exec();
       if(value instanceof Reference) {
          return ((Reference)value).value();
       }

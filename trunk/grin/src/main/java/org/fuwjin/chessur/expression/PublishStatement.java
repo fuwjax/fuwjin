@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Publishes a value to an outstream.
@@ -30,9 +31,9 @@ public class PublishStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Object result = value.resolve(input, output, scope);
+      final Object result = value.resolve(input, output, scope, trace);
       output.append(result);
       return Adapter.UNSET;
    }

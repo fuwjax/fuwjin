@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.StringReader;
 import java.io.StringWriter;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.expression.Executable;
 
 public class CatalogTestHarness {
    private final Catalog catalog;
@@ -20,7 +19,7 @@ public class CatalogTestHarness {
          throws Exception {
       final StringWriter writer = new StringWriter();
       final StringReader reader = new StringReader(input);
-      final Object ret = ((Executable)catalog.get(script)).exec(reader, writer);
+      final Object ret = catalog.get(script).acceptFrom(reader).publishTo(writer).exec();
       assertThat("Script did not return expected result", ret, is(result));
       assertEquals("Writer did not match expected output", writer.toString(), output);
       assertTrue("Reader did not reach EOF", reader.read() == -1);

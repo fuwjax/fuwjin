@@ -10,11 +10,13 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.CodePointInStream;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.ObjectOutStream;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.StandardEnv;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * An expression representing redirected script I/O.
@@ -34,12 +36,13 @@ public class ScriptPipe implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final SinkStream out = ObjectOutStream.stream();
-      source.resolve(input, out, scope);
-      final SourceStream in = CodePointInStream.streamOf(out.toString());
-      return sink.resolve(in, output, scope);
+      final StringWriter writer = new StringWriter();
+      final Sink out = StandardEnv.publishTo(writer);
+      source.resolve(input, out, scope, trace.newOutput(out));
+      final Source in = StandardEnv.acceptFrom(new StringReader(writer.toString()));
+      return sink.resolve(in, output, scope, trace.newInput(in));
    }
 
    /**

@@ -77,7 +77,7 @@ public class ScriptFormatDemo {
    @Test
    public void testFormatting() throws Exception {
       final Writer formatterOutput = new StringWriter();
-      catFormatter.exec(newReader(".cat"), formatterOutput);
+      catFormatter.acceptFrom(newReader(".cat")).publishTo(formatterOutput).exec();
       assertEquals(formatterOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
@@ -90,7 +90,7 @@ public class ScriptFormatDemo {
    public void testHardSerialization() throws Exception {
       final Catalog cat = manager.loadCat(file(".cat"));
       final Writer serialOutput = new StringWriter();
-      catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
+      catSerializer.publishTo(serialOutput).withState(Collections.singletonMap("cat", cat)).exec();
       assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
@@ -103,9 +103,9 @@ public class ScriptFormatDemo {
       final Map<String, Object> env = new HashMap<String, Object>();
       env.put("name", path.getName());
       env.put("manager", manager);
-      final Catalog cat = (Catalog)catParser.exec(newReader(".cat"), env);
+      final Catalog cat = (Catalog)catParser.acceptFrom(newReader(".cat")).withState(env).exec();
       final Writer serialOutput = new StringWriter();
-      catSerializer.exec(serialOutput, Collections.singletonMap("cat", cat));
+      catSerializer.publishTo(serialOutput).withState(Collections.singletonMap("cat", cat)).exec();
       assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 

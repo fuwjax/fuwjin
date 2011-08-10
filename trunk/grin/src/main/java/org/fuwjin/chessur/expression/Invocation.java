@@ -13,12 +13,12 @@ package org.fuwjin.chessur.expression;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * 
@@ -68,25 +68,24 @@ public class Invocation implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException, AbortedException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
       final Object[] args = new Object[params.size()];
       int index = 0;
       for(final Expression param: params) {
          try {
-            final Object result = param.resolve(input, output, scope);
+            final Object result = param.resolve(input, output, scope, trace);
             args[index++] = result;
          } catch(final ResolveException e) {
-            throw new ResolveException(e, "Could not resolve %s argument %d: %s", name(), index, snapshot);
+            throw trace.fail(e, "Could not resolve %s argument %d", name(), index);
          }
       }
       try {
          return function.invoke(args);
       } catch(final InvocationTargetException e) {
-         throw new ResolveException(e.getCause(), "Failure in invocation target %s: %s", name(), snapshot);
+         throw trace.fail(e.getCause(), "Failure in invocation target %s", name());
       } catch(final AdaptException e) {
-         throw new ResolveException(e, "Could not invoke %s: %s", name(), snapshot);
+         throw trace.fail(e, "Could not invoke %s", name());
       }
    }
 

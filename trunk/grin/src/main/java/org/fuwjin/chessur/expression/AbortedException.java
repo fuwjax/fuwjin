@@ -1,11 +1,10 @@
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.util.BusinessException;
 
 /**
  * Thrown during a scripted abort.
  */
-public class AbortedException extends BusinessException {
+public class AbortedException extends GrinException {
    private static final long serialVersionUID = 1L;
 
    /**
@@ -13,8 +12,8 @@ public class AbortedException extends BusinessException {
     * @param pattern the message pattern
     * @param args the message arguments
     */
-   public AbortedException(final String pattern, final Object... args) {
-      super(pattern, args);
+   public AbortedException(final Object iSummary, final Object oSummary, final String pattern, final Object... args) {
+      super(iSummary, oSummary, pattern, args);
    }
 
    /**
@@ -23,23 +22,12 @@ public class AbortedException extends BusinessException {
     * @param pattern the message pattern
     * @param args the message arguments
     */
-   public AbortedException(final Throwable cause, final String pattern, final Object... args) {
-      super(cause, pattern, args);
+   public AbortedException(final Object iSummary, final Object oSummary, final Throwable cause, final String pattern,
+         final Object... args) {
+      super(iSummary, oSummary, cause, pattern, args);
    }
 
-   @Override
-   public Throwable getCause() {
-      if(super.getCause() instanceof AbortedException) {
-         return super.getCause().getCause();
-      }
-      return super.getCause();
-   }
-
-   @Override
-   public String getMessage() {
-      if(super.getCause() instanceof AbortedException) {
-         return super.getCause().getMessage() + "\n" + super.getMessage();
-      }
-      return super.getMessage();
+   public AbortedException(final Throwable cause, final String message) {
+      super(cause, message);
    }
 }

@@ -4,12 +4,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -123,7 +126,8 @@ public class ScriptExecutionDemo {
       final Map<String, Object> env = new HashMap<String, Object>();
       env.put("name", file.getName());
       env.put("manager", manager);
-      return (Catalog)catParser.exec(new FileReader(new File(file, file.getName() + ".cat")), env);
+      return (Catalog)catParser.acceptFrom(new FileReader(new File(file, file.getName() + ".cat"))).withState(env)
+            .exec();
    }
 
    private static String addSource(final Map<String, String> sources, final String simpleName, final Catalog cat,
@@ -139,9 +143,9 @@ public class ScriptExecutionDemo {
       environment.put("className", mainName);
       environment.put("moduleName", simpleName);
       if(mainName.equals(simpleName)) {
-         catCodeGenerator.exec(code, environment);
+         catCodeGenerator.publishTo(code).withState(environment).exec();
       } else {
-         catCodeGenerator.get("Module").exec(code, environment);
+         catCodeGenerator.get("Module").publishTo(code).withState(environment).exec();
       }
       sources.put(className, code.toString());
       return className;
@@ -208,7 +212,8 @@ public class ScriptExecutionDemo {
    public void testModelParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.modelCat().exec(newReader("input.txt"), output, environment());
+         final Object result = data.modelCat().acceptFrom(newReader("input.txt")).publishTo(output)
+               .withState(environment()).exec();
          assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(result, is(matcher(file("matcher.cat"))));
       } catch(final ExecutionException e) {
@@ -224,7 +229,8 @@ public class ScriptExecutionDemo {
    public void testParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.cat().exec(newReader("input.txt"), output, environment());
+         final Object result = data.cat().acceptFrom(newReader("input.txt")).publishTo(output).withState(environment())
+               .exec();
          assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(result, is(matcher(file("matcher.cat"))));
       } catch(final ExecutionException e) {
@@ -236,10 +242,10 @@ public class ScriptExecutionDemo {
       return new File(caseFolder, suffix);
    }
 
-   private Reader newReader(final String suffix) throws FileNotFoundException {
+   private Reader newReader(final String suffix) throws FileNotFoundException, UnsupportedEncodingException {
       final File f = file(suffix);
       if(f.exists()) {
-         return new FileReader(f);
+         return new InputStreamReader(new FileInputStream(f), "UTF-8");
       }
       return new StringReader("");
    }

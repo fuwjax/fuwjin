@@ -13,10 +13,11 @@ package org.fuwjin.chessur.expression;
 import static java.util.Collections.unmodifiableCollection;
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a sequence of statements.
@@ -33,10 +34,10 @@ public class Block implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
       for(final Expression statement: statements) {
-         statement.resolve(input, output, scope);
+         statement.resolve(input, output, scope, trace);
       }
       return Adapter.UNSET;
    }

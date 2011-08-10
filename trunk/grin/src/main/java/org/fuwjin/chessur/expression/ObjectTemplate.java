@@ -9,11 +9,11 @@ package org.fuwjin.chessur.expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Function;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * An expression representing a serialized object.
@@ -42,25 +42,24 @@ public class ObjectTemplate implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException, AbortedException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
       final Object object;
       try {
          object = constructor.invoke();
       } catch(final Exception e) {
-         throw new ResolveException(e, "Could not construct object from template: %s: %s", type, snapshot);
+         throw trace.fail(e, "Could not construct object from template: %s", type);
       }
       for(final FieldTemplate field: setters) {
          try {
-            final Object result = field.resolve(input, output, scope);
+            final Object result = field.resolve(input, output, scope, trace);
             field.invoke(object, result);
          } catch(final ResolveException e) {
-            throw new ResolveException(e, "could not resolve value for %s: %s", field.name(), snapshot);
+            throw trace.fail(e, "could not resolve value for %s", field.name());
          } catch(final AbortedException e) {
             throw e;
          } catch(final Exception e) {
-            throw new ResolveException(e, "could not inject value for %s: %s", field.name(), snapshot);
+            throw trace.fail(e, "could not inject value for %s", field.name());
          }
       }
       return object;

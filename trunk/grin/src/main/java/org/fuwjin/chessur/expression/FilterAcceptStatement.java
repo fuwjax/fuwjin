@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
 import org.fuwjin.dinah.Adapter;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Accepts based on a filter.
@@ -50,21 +50,20 @@ public class FilterAcceptStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
       if(isNot) {
-         if(filter.allow((Integer)input.next(snapshot).value())) {
-            throw new ResolveException("Unexpected match: %s: %s", filter, snapshot);
+         if(filter.allow(input.next())) {
+            throw trace.fail("Unexpected match: %s", filter);
          }
-         input.read(snapshot);
+         input.read();
          return Adapter.UNSET;
       }
-      if(filter.allow((Integer)input.next(snapshot).value())) {
-         input.read(snapshot);
+      if(filter.allow(input.next())) {
+         input.read();
          return Adapter.UNSET;
       }
-      throw new ResolveException("Did not match filter: %s: %s", filter, snapshot);
+      throw trace.fail("Did not match filter: %s", filter);
    }
 
    @Override

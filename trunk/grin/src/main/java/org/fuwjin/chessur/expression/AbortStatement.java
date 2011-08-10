@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.Snapshot;
-import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
+
 
 /**
  * Represents an unrecoverable failure.
@@ -30,14 +31,13 @@ public class AbortStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
          throws AbortedException, ResolveException {
-      final Snapshot snapshot = new Snapshot(input, output, scope);
       try {
-         final Object val = value.resolve(input, output, scope);
-         throw new AbortedException("%s: %s", val, snapshot);
+         final Object val = value.resolve(input, output, scope, trace);
+         throw trace.abort("%s", val);
       } catch(final ResolveException e) {
-         throw new AbortedException(e, "Abort string could not be generated: %s", snapshot);
+         throw trace.abort(e, "Abort string could not be generated");
       }
    }
 

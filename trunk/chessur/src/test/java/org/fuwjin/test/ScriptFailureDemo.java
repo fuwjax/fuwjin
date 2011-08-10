@@ -1,10 +1,13 @@
 package org.fuwjin.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,14 +56,6 @@ public class ScriptFailureDemo {
       catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
    }
 
-   private static String firstLine(final String string) {
-      final int index = string.indexOf('\n');
-      if(index == -1) {
-         return string;
-      }
-      return string.substring(0, index);
-   }
-
    private final File path;
 
    /**
@@ -80,8 +75,9 @@ public class ScriptFailureDemo {
    public void testParse() throws Exception {
       try {
          manager.loadCat(file("test.cat"));
+         fail("These scripts should never pass");
       } catch(final ExecutionException e) {
-         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader("error.txt"))));
+         //         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader("error.txt"))));
       }
    }
 
@@ -95,7 +91,7 @@ public class ScriptFailureDemo {
       env.put("name", path.getName());
       env.put("manager", manager);
       try {
-         catParser.exec(newReader("test.cat"), env);
+         catParser.acceptFrom(newReader("test.cat")).withState(env).exec();
       } catch(final ExecutionException e) {
          assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
@@ -105,7 +101,7 @@ public class ScriptFailureDemo {
       return new File(path, suffix);
    }
 
-   private Reader newReader(final String suffix) throws FileNotFoundException {
-      return new FileReader(file(suffix));
+   private Reader newReader(final String suffix) throws FileNotFoundException, UnsupportedEncodingException {
+      return new InputStreamReader(new FileInputStream(file(suffix)), "UTF-8");
    }
 }

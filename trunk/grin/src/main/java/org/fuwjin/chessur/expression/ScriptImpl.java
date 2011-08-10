@@ -10,9 +10,10 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.chessur.stream.Environment;
-import org.fuwjin.chessur.stream.SinkStream;
-import org.fuwjin.chessur.stream.SourceStream;
+import org.fuwjin.grin.env.Scope;
+import org.fuwjin.grin.env.Sink;
+import org.fuwjin.grin.env.Source;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * Represents a Specificaton reference.
@@ -47,9 +48,9 @@ public class ScriptImpl extends Executable implements Expression {
    }
 
    @Override
-   public Object resolve(final SourceStream input, final SinkStream output, final Environment scope)
-         throws ResolveException, AbortedException {
-      return expression().resolve(input, output, scope);
+   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+         throws AbortedException, ResolveException {
+      return expression().resolve(input, output, scope, trace);
    }
 
    @Override
@@ -58,9 +59,9 @@ public class ScriptImpl extends Executable implements Expression {
    }
 
    @Override
-   protected Expression expression() throws AbortedException {
+   protected Expression expression() {
       if(decl == null) {
-         throw new AbortedException("Undefined script " + name);
+         throw new IllegalStateException("Undefined script " + name);
       }
       return decl;
    }
