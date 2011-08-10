@@ -1,0 +1,360 @@
+alias org.fuwjin.jon.Registry as Registry
+alias org.fuwjin.jon.Reference as Reference
+alias java.lang.Class as Class
+alias java.lang.Object as Object
+alias java.lang.Enum as Enum
+alias java.lang.Boolean as Boolean
+alias java.lang.Character as Character
+alias java.lang.Integer as Integer
+alias java.lang.Long as Long
+alias java.lang.Double as Double
+alias java.lang.Float as Float
+alias java.lang.Short as Short
+alias java.lang.Byte as Byte
+alias java.lang.String as String
+alias java.lang.Number as Number
+alias java.lang.reflect.Array as Array
+alias java.util.Map as Map
+alias java.util.HashMap as HashMap
+alias java.util.Collection as Collection
+alias java.util.ArrayList as ArrayList
+alias org.fuwjin.util.TypeUtils as TypeUtils
+alias java.lang.StringBuilder as StringBuilder
+alias java.lang.Character.toChars as toChars
+alias org.fuwjin.util.TypeUtils.forName as typeOf
+alias org.fuwjin.dinah.Function as Function
+alias org.fuwjin.dinah.FunctionSignature as FunctionSignature
+
+<Root> {
+  result = <Element>
+  could repeat {
+    assume Registry.hasUnresolvedReferences(registry)
+    name = <Reference>
+    accept '=' <S>
+    type = null
+    value = <Value>
+    Registry.store(registry, name, value)
+  }
+  assume not Registry.hasUnresolvedReferences(registry)  
+  return result
+}
+<Element> {
+  either {
+    name = <Reference>
+    either {
+      accept '=' <S>
+      value = <Value>
+      Registry.store(registry, name, value)
+    } or {
+      value = Registry.retrieve(registry, name)
+    }
+  } or {
+    value = <Value>
+  }
+  return value
+}
+<Reference> {
+  accept '&'
+  return <Identifier>
+}
+<Identifier> {
+  repeat accept in a-z, A-Z, 0-9, _
+  id = match
+  <S>
+  return id
+}
+<Value> {
+  could type = <ClassCast>
+  either value = <Null>
+  or value = <KnownType>
+  or value = <UnknownType>
+  <S>
+  return value
+}
+<KnownType> {
+  assume type
+  either value = <KnownMap>
+  or value = <KnownObject>
+  or value = <KnownList>
+  or value = <KnownArray>
+  or value = <KnownString>
+  or value = <KnownBoolean>
+  or value = <KnownNumber>
+  or value = <KnownClass>
+  or value = <KnownEnum>
+  return value
+}
+<UnknownType> {
+  assume not type
+  either value = <Map>
+  or value = <List>
+  or value = <String> 
+  or value = <Boolean>
+  or value = <Number>
+  return value
+}
+<ClassCast> {
+  accept '(' <S>
+  either {
+    name = <Reference>
+    either {
+      accept '=' <S>
+      value = <Class>
+      Registry.store(registry, name, value)
+    } or {
+      value = Registry.retrieve(registry, name)
+    }
+  } or {
+    value = <Class>
+  }
+  <S>
+  accept ')' <S>
+  # TODO: compare type to value?
+  return value
+}
+<KnownClass> {
+  assume Class.isAssignableFrom(type)
+  return <Class>
+}
+<Class> {
+  repeat accept in a-z, A-Z, 0-9, _, $, ., [, ]
+  return Registry.adapt(registry, match, Class.class())
+}
+<KnownString>{
+  value = <String>
+  either {
+    assume TypeUtils.isAssignableFrom(type, String.class())    
+  } or {
+    either assume Character.isAssignableFrom(type)
+    or assume char.isAssignableFrom(type)
+    assume Object.equals(String.length(value),Number.intValue(1))
+    value = String.charAt(value,0)
+  } or {
+    constructor = Registry.getFunction(registry, type, "new", String.class())
+    value = Function.invoke(constructor, value)
+  } or {
+    valueOf = Registry.getFunction(registry, type, "valueOf", String.class())
+    value = Function.invoke(valueOf, value)
+  } or abort "could not create 'type' from \"'value'\""
+  return value
+}
+<KnownObject> {
+  accept '{' <S>
+  constructor = Registry.getFunction(registry, type, "new")
+  value = Function.invoke(constructor)
+  <Fields>
+  could repeat {
+    accept '|' <S>
+    type = TypeUtils.getSupertype(type)
+    <Fields>
+  }
+  accept '}'
+  return value
+}
+<Fields> {
+  could {
+    <Field>
+    could repeat {
+      accept ',' <S>
+      <Field>
+    }
+  }
+}
+<Field> {
+  name = <Identifier>
+  setter = Registry.getFunction(registry, type, name, 2)
+  accept ':' <S>
+  signature = Function.signature(setter)
+  type = FunctionSignature.argType(signature,1)
+  val = <Element>
+  Registry.set(registry, value, setter, val)
+}
+<KnownMap> {
+  assume Map.isAssignableFrom(type) 
+  constructor = Registry.getFunction(registry, type, "new")
+  value = Function.invoke(constructor)
+  accept '{' <S>
+  <Entries>
+  accept '}'
+  return value
+}
+<Map> {
+  accept '{' <S>
+  value = HashMap.new()
+  <Entries>
+  accept '}'
+  return value
+}
+<Entries> {
+  type = null
+  could {
+    <Entry>
+    could repeat {
+      accept ',' <S>
+      <Entry>
+    }
+  }
+}
+<Entry> {
+  key = <Element>
+  accept ':' <S>
+  val = <Element>
+  Registry.put(registry, value, key, val)
+}
+<KnownArray> {
+  assume TypeUtils.isArray(type)
+  arrayType = type
+  value = ArrayList.new()
+  accept '[' <S>
+  type = TypeUtils.getComponentType(type)
+  <Elements>
+  accept ']'
+  return Registry.adapt(registry, value, arrayType)
+}
+<KnownList> {
+  assume Collection.isAssignableFrom(type)
+  constructor = Registry.getFunction(registry, type, "new")
+  value = Function.invoke(constructor)
+  accept '[' <S>
+  type = null
+  <Elements>
+  accept ']'
+  return value
+}
+<List> {
+  accept '[' <S>
+  value = ArrayList.new()
+  type = null
+  <Elements>
+  accept ']'
+  return value
+}
+<Elements> {
+  could {
+    Registry.add(registry, value, <Element>)
+    could repeat {
+      accept ',' <S>
+      Registry.add(registry, value, <Element>)
+    }
+  }
+}
+<String> {
+  accept '"'
+  value = <StringChars>
+  accept '"'
+  return value
+}
+<StringChars> {
+  builder = StringBuilder.new()
+  could repeat either {
+    ch = next
+    accept not in ",\\
+    StringBuilder.append(builder, toChars(ch))
+  } or {
+    accept '\\'
+    either {
+      accept 'n'
+      StringBuilder.append(builder, "\n")
+    } or {
+      accept 't'
+      StringBuilder.append(builder, "\t")
+    } or {
+      accept 'r'
+      StringBuilder.append(builder, "\r")
+    } or {
+      ch = next
+      accept next
+      StringBuilder.append(builder, toChars(ch))
+    }
+  }
+  return StringBuilder.toString(builder)
+}
+<KnownBoolean> {
+  either assume Boolean.isAssignableFrom(type)
+  or assume boolean.isAssignableFrom(type)
+  return <Boolean>
+}
+<Boolean> {
+  either {
+    accept 'true'
+    value = true
+  } or {
+    accept 'false'
+    value = false
+  }
+  return value
+}
+<Null> {
+  accept 'null'
+  return null
+}
+<Number> {
+  repeat accept in 0-9,e,E,.,-
+  num = match
+  either {
+    accept in l,L
+    value = Long.parseLong(num)
+  } or {
+    accept in f,F
+    value = Float.parseFloat(num)
+  } or {
+    accept in d,D
+    value = Double.parseDouble(num)
+  } or {
+    value = Integer.parseInt(num)
+  } or {
+    value = Long.parseLong(num)
+  } or {
+    value = Double.parseDouble(num)
+  }
+  return value
+}
+<KnownNumber> {
+  either assume Number.isAssignableFrom(type)
+  or TypeUtils.isPrimitive(type)
+  repeat accept in 0-9,e,E,.,-
+  num = match
+  either {
+    either assume Long.isAssignableFrom(type)
+    or assume long.isAssignableFrom(type)
+    could accept in l,L
+    value = Long.parseLong(num)
+  } or {
+    either assume Float.isAssignableFrom(type)
+    or assume float.isAssignableFrom(type)
+    could accept in f,F
+    value = Float.parseFloat(num)
+  } or {
+    either assume Double.isAssignableFrom(type)
+    or assume double.isAssignableFrom(type)
+    could accept in d,D
+    value = Double.parseDouble(num)
+  } or {
+    either assume Integer.isAssignableFrom(type)
+    or assume int.isAssignableFrom(type)
+    value = Integer.parseInt(num)
+  } or {
+    either assume Short.isAssignableFrom(type)
+    or assume short.isAssignableFrom(type)
+    value = Short.parseShort(num)
+  } or {
+    either assume Byte.isAssignableFrom(type)
+    or assume byte.isAssignableFrom(type)
+    value = Byte.parseByte(num)
+  } or {
+    value = Integer.parseInt(num)
+  } or {
+    value = Long.parseLong(num)
+  } or {
+    value = Double.parseDouble(num)
+  }
+  return value
+}
+<KnownEnum> {
+  assume TypeUtils.isEnum(type)
+  valueOf = Registry.getFunction(registry, type, "valueOf", String.class())
+  return Function.invoke(valueOf, <Identifier>)
+}
+<S> {
+  could repeat accept in \ , \n, \r, \t
+}

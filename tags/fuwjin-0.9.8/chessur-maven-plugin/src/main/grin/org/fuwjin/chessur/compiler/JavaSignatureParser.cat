@@ -1,0 +1,429 @@
+alias org.fuwjin.compiler.VirtualClass as VirtualClass
+alias java.lang.Character.isJavaIdentifierStart(int) as identifierStart
+alias java.lang.Character.isJavaIdentifierPart(int) as identifierPart
+alias java.lang.Boolean.TRUE as true
+alias java.lang.Boolean.FALSE as false
+
+#7.3
+<CompilationUnit> {
+  cls = VirtualClass.new()
+  <S>
+  could category = <PackageDeclaration>
+  could repeat <ImportDeclaration>
+  could repeat <TypeDeclaration>
+  return cls
+}
+#7.4.1
+<PackageDeclaration> {
+  could repeat <Annotation>
+  accept 'package' <Sep>
+  package = <QualifiedIdentifier>
+  <SEMI>
+  return package
+}
+#7.5
+<ImportDeclaration> {
+  accept 'import' <Sep>
+  static = false()
+  onDemand = false()
+  could {
+    accept 'static' <Sep>
+    static = true()
+  }
+  name = <QualifiedIdentifier>
+  could {
+    accept '.' <S>
+    accept '*' <S>
+    onDemand = true()
+  }
+  <SEMI>
+  VirtualClass.addImport(cls, name, static, onDemand)
+}
+#7.6
+<TypeDeclaration> {
+  either <NormalClassDeclaration>
+  or <EnumDeclaration>
+  or <NormalInterfaceDeclaration>
+  or <AnnotationTypeDeclaration>
+  or <SEMI>
+}
+#8.1
+<NormalClassDeclaration> {
+  <Modifiers>
+  accept 'class' <Sep>
+  category = "'category'.'<Identifier>'"
+  could <GenericExpression>
+  could {
+    accept 'extends' <Sep>
+    <Type>
+  }
+  could {
+    accept 'implements' <Sep>
+    <Types>
+  }
+  accept '{' <S>
+  could repeat <ClassBodyDeclaration>
+  accept '}' <S>
+}
+#8.1.5
+<Types> {
+  <Type>
+  could repeat {
+    <COMMA>
+    <Type>
+  }
+}
+#8.1.6
+<ClassBodyDeclaration> {
+  either <FieldDeclaration>
+  or <ConstructorDeclaration>
+  or <MethodDeclaration>
+  or <TypeDeclaration>
+  or <Initializer>
+  or <SEMI>
+}
+#8.3
+<FieldDeclaration> {
+  modifiers = <Modifiers>
+  type = <Type>
+  name = <VariableDeclarator>
+  VirtualClass.addField(cls, modifiers, category, name, type)
+  could repeat {
+    <COMMA>
+    name = <VariableDeclarator>
+    VirtualClass.addField(cls, modifiers, category, name, type)
+  }
+  <SEMI>
+}
+#8.3
+<VariableDeclarator> {
+  name = <VariableDeclaratorId>
+  could {
+    accept '=' <S>
+    <Expression>
+  }
+  return name
+}
+#8.3
+<VariableDeclaratorId> {
+  name = <Identifier>
+  could type = <Dims> #TODO: ignoring this kind of type currently
+  return name
+}
+#8.3.1
+<Modifiers> {
+  modifiers = VirtualClass.newModifiers()
+  could repeat <Modifier>
+  return modifiers
+}
+#8.1.1
+<Modifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    or accept 'abstract'
+    or accept 'static'
+    or accept 'final'
+    or accept 'strictfp'
+    or accept 'transient'
+    or accept 'volatile'
+    or accept 'synchronized'
+    or accept 'native'
+    VirtualClass.addModifier(modifiers, match)
+    <Sep>
+  }
+}
+#8.4
+<MethodDeclaration> {
+  modifiers = <Modifiers>
+  could <GenericExpression>
+  <Type>
+  name = <Identifier>
+  accept '(' <S>
+  params = <FormalParameterList>
+  accept ')' <S>
+  could <Dims>
+  could {
+    accept 'throws' <Sep>
+    <Types>
+  }
+  either <Block>
+  or <SEMI>
+  VirtualClass.addMethod(cls, modifiers, category, name, params)
+}
+#8.4.1
+<FormalParameterList> {
+  list = VirtualClass.newParameterList()
+  could {
+    VirtualClass.addParameter(list, <FormalParameter>)
+    could repeat {
+      <COMMA>
+      VirtualClass.addParameter(list, <FormalParameter>)
+    }
+  }
+  return list
+}
+#8.4.1
+<FormalParameter> {
+  could <Modifiers>
+  type = <Type>
+  could {
+    accept '...' <S>
+    type = "'type'[]"
+  }
+  <VariableDeclaratorId>
+  return type
+}
+#8.7
+<Initializer> {
+  could {
+    accept 'static' <Sep>
+  }
+  <Block>
+}
+#8.8
+<ConstructorDeclaration> {
+  modifiers = <Modifiers>
+  could <GenericExpression>
+  <Identifier>
+  accept '(' <S>
+  params = <FormalParameterList>
+  accept ')' <S>
+  could {
+    accept 'throws' <Sep>
+    <Types>
+  }
+  <Block>
+  VirtualClass.addConstructor(cls, modifiers, category, params)
+}
+#8.9
+<EnumDeclaration> {
+  could <Modifiers>
+  accept 'enum' <Sep>
+  <Identifier>
+  could {
+    accept 'implements' <Sep>
+    <Types>
+  }
+  accept '{' <S>
+  could <EnumConstants>
+  could {
+    <COMMA>
+  }
+  could {
+    <SEMI>
+    could <ClassBodyDeclarations>
+  }
+  accept '}' <S>
+}
+#8.9
+<EnumConstants> {
+  <EnumConstant>
+  could repeat {
+    <COMMA>
+    <EnumConstant>
+  }
+}
+#8.9
+<EnumConstant> {
+  could repeat <Annotation>
+  <Identifier>
+  could <ParenExpression>
+  could <ClassBody>
+}
+#9.1
+<NormalInterfaceDeclaration> {
+  could <Modifiers>
+  accept 'interface' <S>
+  <Identifier>
+  could <GenericExpression>
+  could {
+    accept 'extends' <Sep>
+    <Types>
+  }
+  accept '{' <S>
+  could repeat <InterfaceMemberDeclaration>
+  accept '}' <S>
+}
+#9.1.4
+<InterfaceMemberDeclaration> {
+  either <FieldDeclaration>
+  or <MethodDeclaration>
+  or <TypeDeclaration>
+  or <SEMI>
+}
+#9.6
+<AnnotationTypeDeclaration> {
+  could <Modifiers>
+  accept '@' <S>
+  accept 'interface' <Sep>
+  <Identifier>
+  accept '{' <S>
+  could repeat <AnnotationTypeElementDeclaration>
+  accept '}' <S>
+}
+#9.6
+<AnnotationTypeElementDeclaration> {
+  either {
+    could <Modifiers>
+    <Type>
+    <Identifier>
+    accept '(' <S>
+    accept ')' <S>
+    could {
+      accept 'default' <Sep>
+      <Expression>
+    }
+    <SEMI>
+  } or <FieldDeclaration>
+  or <TypeDeclaration>
+  or <SEMI>
+}
+#9.7
+<Annotation> {
+  accept '@' <S>
+  <QualifiedIdentifier>
+  could <ParenExpression>
+}
+#14.2
+<Block> {
+  accept '{' <S>
+  could repeat either <StringLiteral>
+  or <CharacterLiteral>
+  or <Comment>
+  or <Block>
+  or accept not '}'
+  accept '}' <S>
+}
+#15.10
+<Dims> {
+  repeat {
+    accept '[' <S>
+    accept ']' <S>
+    type = "'type'[]"
+  }
+  return type
+}
+#15.27
+<Expression> {
+  either <StringLiteral>
+  or <CharacterLiteral>
+  or <Comment>
+  or <Block>
+  or accept not in \,, ;
+}
+<ParenExpression> {
+  accept '(' <S>
+  either <StringLiteral>
+  or <CharacterLiteral>
+  or <Comment>
+  or <Block>
+  or <ParenExpression>
+  or accept not ')'
+  accept ')' <S>
+}
+#6.5 implied
+<QualifiedIdentifier> {
+  name = <Identifier>
+  could repeat {
+    accept '.' <S>
+    name = "'name'.'<Identifier>'"
+  }
+  return name
+}
+#4.3
+<Type> {
+  type = <QualifiedIdentifier>
+  could <GenericExpression>
+  return type
+}
+#4.5.1
+<GenericExpression> {
+  accept '<' <S>
+  either <Comment>
+  or <GenericExpression>
+  or accept not '>'
+  accept '>' <S>
+}
+#3.4
+<LineTerminator> {
+  accept in \r, \n
+}
+#3.5 implied
+<Sep> {
+  assume not identifierPart(next)
+  <S>
+}
+#3.5 implied
+<S> {
+  could repeat either <WhiteSpace>
+  or <Comment>
+}
+#3.6
+<WhiteSpace> {
+  either accept in \ , \t #TODO: include \f
+  or <LineTerminator>
+}
+#3.7
+<Comment> {
+  either <TraditionalComment>
+  or <EndOfLineComment>
+}
+#3.7
+<TraditionalComment> {
+  accept '/*'
+  could repeat accept not '*/'
+  accept '*/'
+}
+#3.7
+<EndOfLineComment> {
+  accept '//'
+  could repeat {
+    assume not <LineTerminator>
+    accept next
+  }
+  either <LineTerminator>
+  or assume not next
+}
+#3.8
+<Identifier> {
+  assume identifierStart(next)
+  accept next
+  could repeat {
+    assume identifierPart(next)
+    accept next
+  }
+  name = match
+  <S>
+  return name
+}
+#3.10.4
+<CharacterLiteral> {
+  accept '\''
+  either {
+    accept '\\'
+    accept next
+    could repeat accept not '\''
+  } or accept next
+  accept '\''
+  <S>
+}
+#3.10.5
+<StringLiteral> {
+  accept '"'
+  could repeat either {
+    accept '\\'
+    accept next
+  } or accept not '"'
+  accept '"'
+  <S>
+}
+
+<SEMI> {
+  accept ';' <S>
+}
+<COMMA> {
+  accept ',' <S>
+}

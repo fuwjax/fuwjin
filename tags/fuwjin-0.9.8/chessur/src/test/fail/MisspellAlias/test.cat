@@ -1,0 +1,5 @@
+aileaz Something as SomethingElse
+
+<Root> {
+    publish "hello, world"
+}

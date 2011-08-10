@@ -1,0 +1,5 @@
+alias org.fuwjin.util.Matchers as Matcher
+
+<Root> {
+  return Matcher.stringValue(java.lang.StringBuilder.new("test"))
+}

@@ -1,0 +1,5 @@
+&map = ( &class = org.fuwjin.sample.SampleObject ) { 
+  id : &id ,
+  name : &name
+}
+&id=17&name="Bob"

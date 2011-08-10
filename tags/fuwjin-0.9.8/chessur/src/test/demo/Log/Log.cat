@@ -1,0 +1,14 @@
+<Root> 
+{
+  either 
+  {
+    publish 'Hello, World!'
+    log 'Hello, World!'
+    assume java.lang.Boolean.FALSE()
+  } 
+  or 
+  {
+    publish 'Hi, Mom!'
+    log 'Hi, Mom!'
+  }
+}

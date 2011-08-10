@@ -1,0 +1,2 @@
+double
+java.lang.Double
