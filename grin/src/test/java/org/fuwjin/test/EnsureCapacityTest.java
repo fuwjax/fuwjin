@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Random;
-import org.fuwjin.grin.env.AbstractSource;
+import org.fuwjin.grin.env.AcceptStream;
 import org.junit.Test;
 
 public class EnsureCapacityTest {
-   private AbstractSource source = newSource();
+   private AcceptStream source = newSource();
    private final Random r = new Random();
 
    @Test
@@ -52,8 +52,8 @@ public class EnsureCapacityTest {
       }
    }
 
-   protected AbstractSource newSource() {
-      return new AbstractSource(null, 3, 5) {
+   protected AcceptStream newSource() {
+      return new AcceptStream(null, 3, 5) {
          private int index;
 
          @Override

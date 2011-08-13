@@ -15,26 +15,26 @@ import org.fuwjin.chessur.expression.ResolveException;
 import org.fuwjin.dinah.Adapter;
 
 public class StandardTrace implements Trace {
-   private final AbstractSource input;
-   private final AbstractSink output;
+   private final AcceptStream input;
+   private final PublishStream output;
    private final Writer log;
    private Deque<Bindings> scope = new ArrayDeque<Bindings>();
 
    public StandardTrace(final Reader in, final Writer out, final Bindings env, final Writer logger) {
-      input = new AbstractSource(in);
-      output = new AbstractSink(out);
+      input = new AcceptStream(in);
+      output = new PublishStream(out);
       scope.push(env);
       log = logger;
    }
 
-   private StandardTrace(final AbstractSink out, final StandardTrace parent) {
+   private StandardTrace(final PublishStream out, final StandardTrace parent) {
       output = out;
       input = parent.input;
       scope = parent.scope;
       log = parent.log;
    }
 
-   private StandardTrace(final AbstractSource in, final StandardTrace parent) {
+   private StandardTrace(final AcceptStream in, final StandardTrace parent) {
       input = in;
       output = parent.output;
       scope = parent.scope;
@@ -99,14 +99,14 @@ public class StandardTrace implements Trace {
 
    @Override
    public Trace newInput(final String in) {
-      final AbstractSource tempInput = new AbstractSource(new StringReader(in));
+      final AcceptStream tempInput = new AcceptStream(new StringReader(in));
       return new StandardTrace(tempInput, this);
    }
 
    @Override
    public Trace newOutput() {
       final StringWriter writer = new StringWriter();
-      final AbstractSink out = new AbstractSink(writer);
+      final PublishStream out = new PublishStream(writer);
       return new StandardTrace(out, this) {
          @Override
          public String toString() {
@@ -220,7 +220,7 @@ public class StandardTrace implements Trace {
       }
    }
 
-   protected void release(final IoInfo io, final int mark) throws AbortedException {
+   protected void release(final AbstractIoInfo io, final int mark) throws AbortedException {
       try {
          io.release(mark);
       } catch(final IOException e) {

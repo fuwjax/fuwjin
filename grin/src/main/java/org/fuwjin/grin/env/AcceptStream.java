@@ -4,14 +4,14 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 
-public class AbstractSource extends AbstractIoInfo<int[]> {
+public class AcceptStream extends AbstractIoInfo<int[]> {
    private final Reader reader;
 
-   public AbstractSource(final Reader reader) {
+   public AcceptStream(final Reader reader) {
       this.reader = reader;
    }
 
-   public AbstractSource(final Reader reader, final int initialFactor, final int maxFactor) {
+   public AcceptStream(final Reader reader, final int initialFactor, final int maxFactor) {
       super(initialFactor, maxFactor);
       this.reader = reader;
    }
