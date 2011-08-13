@@ -75,6 +75,19 @@ public class CatalogManagerImpl extends FunctionProviderDecorator implements Cat
       return loadCat(file.getAbsolutePath(), reader(new FileInputStream(file), charset));
    }
 
+   public Catalog loadCat(final Reader reader) throws IOException, ExecutionException {
+      final Map<String, Object> map = new HashMap<String, Object>();
+      map.put("name", "eval");
+      map.put("manager", this);
+      try {
+         return (Catalog)interpret(readAll(reader), new StringBuilder(), new StringBuilder(), map);
+      } catch(final IOException e) {
+         throw e;
+      } catch(final Exception e) {
+         throw new ExecutionException("could not execute catalog", e);
+      }
+   }
+
    /**
     * Loads a catalog from a file.
     * @param path the path to the catalog file

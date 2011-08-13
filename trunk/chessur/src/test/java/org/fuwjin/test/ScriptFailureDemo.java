@@ -1,21 +1,22 @@
 package org.fuwjin.test;
 
+import static org.fuwjin.util.StreamUtils.reader;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManagerImpl;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.StreamUtils;
@@ -29,8 +30,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Parameterized.class)
 public class ScriptFailureDemo {
-   private static CatalogManagerImpl manager;
-   private static Catalog catParser;
+   private static CompiledScript catParser;
+   private static ScriptEngine engine;
 
    /**
     * The parameters for the test.
@@ -52,8 +53,17 @@ public class ScriptFailureDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManagerImpl();
-      catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      final ScriptEngineManager engines = new ScriptEngineManager();
+      engine = engines.getEngineByName("chessur");
+      catParser = ((Compilable)engine).compile(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"));
+   }
+
+   private static String firstLine(final String string) {
+      final int index = string.indexOf('\n');
+      if(index == -1) {
+         return string;
+      }
+      return string.substring(0, index);
    }
 
    private final File path;
@@ -74,10 +84,10 @@ public class ScriptFailureDemo {
    @Test
    public void testParse() throws Exception {
       try {
-         manager.loadCat(file("test.cat"));
+         engine.eval(newReader("test.cat"));
          fail("These scripts should never pass");
-      } catch(final ExecutionException e) {
-         //         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader("error.txt"))));
+      } catch(final ScriptException e) {
+         assertEquals(e.getCause().getMessage(), firstLine(StreamUtils.readAll(newReader("error.txt"))));
       }
    }
 
@@ -87,21 +97,17 @@ public class ScriptFailureDemo {
     */
    @Test
    public void testSoftParse() throws Exception {
-      final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("name", path.getName());
-      env.put("manager", manager);
+      final ScriptContext context = new SimpleScriptContext();
+      context.setReader(newReader("test.cat"));
+      context.setAttribute("name", path.getName(), ScriptContext.ENGINE_SCOPE);
       try {
-         catParser.acceptFrom(newReader("test.cat")).withState(env).exec();
-      } catch(final ExecutionException e) {
+         catParser.eval(context);
+      } catch(final ScriptException e) {
          assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
    }
 
-   private File file(final String suffix) {
-      return new File(path, suffix);
-   }
-
    private Reader newReader(final String suffix) throws FileNotFoundException, UnsupportedEncodingException {
-      return new InputStreamReader(new FileInputStream(file(suffix)), "UTF-8");
+      return reader(new File(path, suffix).getPath(), "UTF-8");
    }
 }

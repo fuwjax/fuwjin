@@ -1,5 +1,6 @@
 package org.fuwjin.test;
 
+import static org.fuwjin.util.StreamUtils.reader;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -21,11 +22,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManagerImpl;
-import org.fuwjin.chessur.expression.CatalogImpl;
-import org.fuwjin.chessur.expression.CatalogProxy;
+import org.fuwjin.chessur.ChessurScript;
+import org.fuwjin.grin.env.StandardTrace;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.RuntimeClassLoader;
@@ -44,7 +51,7 @@ import org.junit.runner.RunWith;
 public class ScriptExecutionDemo {
    private static final class TestData {
       private final File file;
-      private Catalog cat;
+      private CompiledScript cat;
       private Catalog modelCat;
       private Method interpreter;
 
@@ -52,7 +59,7 @@ public class ScriptExecutionDemo {
          this.file = file;
       }
 
-      public Catalog cat() throws Exception {
+      public CompiledScript cat() throws Exception {
          if(cat == null) {
             cat = loadCatalog(file);
          }
@@ -74,9 +81,9 @@ public class ScriptExecutionDemo {
       }
    }
 
-   private static CatalogManagerImpl manager;
-   private static Catalog catCodeGenerator;
-   private static Catalog catParser;
+   private static ScriptEngine manager;
+   private static CompiledScript catCodeGenerator;
+   private static CompiledScript catParser;
    private static RuntimeClassLoader loader;
 
    /**
@@ -104,13 +111,15 @@ public class ScriptExecutionDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManagerImpl();
-      catCodeGenerator = manager.loadCat("org/fuwjin/chessur/generated/GrinCodeGenerator.cat");
-      catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
+      final ScriptEngineManager engines = new ScriptEngineManager();
+      manager = engines.getEngineByName("chessur");
+      catCodeGenerator = ((Compilable)manager).compile(reader("org/fuwjin/chessur/generated/GrinCodeGenerator.cat",
+            "UTF-8"));
+      catParser = ((Compilable)manager).compile(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"));
       loader = new RuntimeClassLoader();
    }
 
-   static Method compile(final String simpleClassName, final Catalog cat) throws Exception {
+   static Method compile(final String simpleClassName, final CompiledScript cat) throws Exception {
       final Map<String, String> sources = new HashMap<String, String>();
       final String className = addSource(sources, simpleClassName, cat, simpleClassName);
       loader.compile(sources);
@@ -118,41 +127,44 @@ public class ScriptExecutionDemo {
       return parserClass.getMethod("interpret", CharSequence.class, Appendable.class, Appendable.class, Map.class);
    }
 
-   static Catalog loadCatalog(final File file) throws ExecutionException, IOException {
-      return manager.loadCat(new File(file, file.getName() + ".cat"));
+   static CompiledScript loadCatalog(final File file) throws ScriptException, IOException {
+      return ((Compilable)manager).compile(reader(new File(file, file.getName() + ".cat").getPath(), "UTF-8"));
    }
 
-   static Catalog parseModel(final File file) throws FileNotFoundException, ExecutionException {
-      final Map<String, Object> env = new HashMap<String, Object>();
-      env.put("name", file.getName());
-      env.put("manager", manager);
-      return (Catalog)catParser.acceptFrom(new FileReader(new File(file, file.getName() + ".cat"))).withState(env)
-            .exec();
+   static Catalog parseModel(final File file) throws Exception {
+      final ScriptContext context = new SimpleScriptContext();
+      context.setReader(new FileReader(new File(file, file.getName() + ".cat")));
+      context.setAttribute("name", file.getName(), ScriptContext.ENGINE_SCOPE);
+      return (Catalog)catParser.eval(context);
    }
 
-   private static String addSource(final Map<String, String> sources, final String simpleName, final Catalog cat,
-         final String mainName) throws ExecutionException {
-      for(final CatalogProxy module: ((CatalogImpl)cat).modules()) {
-         addSource(sources, module.name(), module.catalog(), mainName);
+   private static String addSource(final Map<String, String> sources, final String simpleName,
+         final CompiledScript cat, final String mainName) throws Exception {
+      for(final Map.Entry<String, ChessurScript> module: ((ChessurScript)cat).modules()) {
+         addSource(sources, module.getKey(), module.getValue(), mainName);
       }
       final String className = "org.fuwjin.internal.generated." + simpleName;
       final Writer code = new StringWriter();
-      final Map<String, Object> environment = new HashMap<String, Object>();
-      environment.put("cat", cat);
+      final Bindings environment = manager.createBindings();
+      environment.put("cat", ((ChessurScript)cat).catalog());
       environment.put("package", "org.fuwjin.internal.generated");
       environment.put("className", mainName);
       environment.put("moduleName", simpleName);
+      final ScriptContext context = new SimpleScriptContext();
+      context.setWriter(code);
+      context.setBindings(environment, ScriptContext.ENGINE_SCOPE);
       if(mainName.equals(simpleName)) {
-         catCodeGenerator.publishTo(code).withState(environment).exec();
+         catCodeGenerator.eval(context);
       } else {
-         catCodeGenerator.get("Module").publishTo(code).withState(environment).exec();
+         environment.put("main", "Module");
+         ((ChessurScript)catCodeGenerator).eval(context);
       }
       sources.put(className, code.toString());
       return className;
    }
 
-   private static Map<String, ? extends Object> environment() {
-      final Map<String, Object> env = new HashMap<String, Object>();
+   private static Bindings environment() {
+      final Bindings env = manager.createBindings();
       env.put("var", "test");
       return env;
    }
@@ -167,7 +179,7 @@ public class ScriptExecutionDemo {
 
    private static Matcher<Object> matcher(final File file) throws Exception {
       if(file.exists()) {
-         return (Matcher<Object>)manager.loadCat(file).exec();
+         return (Matcher<Object>)manager.eval(new FileReader(file));
       }
       return CoreMatchers.nullValue();
    }
@@ -212,11 +224,11 @@ public class ScriptExecutionDemo {
    public void testModelParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.modelCat().acceptFrom(newReader("input.txt")).publishTo(output)
-               .withState(environment()).exec();
+         final Object result = data.modelCat().eval(
+               new StandardTrace(newReader("input.txt"), output, environment(), new StringWriter()));
          assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(result, is(matcher(file("matcher.cat"))));
-      } catch(final ExecutionException e) {
+      } catch(final ScriptException e) {
          assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
    }
@@ -229,11 +241,14 @@ public class ScriptExecutionDemo {
    public void testParsing() throws Exception {
       final Writer output = new StringWriter();
       try {
-         final Object result = data.cat().acceptFrom(newReader("input.txt")).publishTo(output).withState(environment())
-               .exec();
+         final ScriptContext context = new SimpleScriptContext();
+         context.setWriter(output);
+         context.setBindings(environment(), ScriptContext.ENGINE_SCOPE);
+         context.setReader(newReader("input.txt"));
+         final Object result = data.cat().eval(context);
          assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(result, is(matcher(file("matcher.cat"))));
-      } catch(final ExecutionException e) {
+      } catch(final ScriptException e) {
          assertEquals(e.getCause().getMessage(), StreamUtils.readAll(newReader("error.txt")));
       }
    }

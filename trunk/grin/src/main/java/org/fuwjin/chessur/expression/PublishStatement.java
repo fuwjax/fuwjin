@@ -11,9 +11,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -31,10 +28,9 @@ public class PublishStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
-      final Object result = value.resolve(input, output, scope, trace);
-      output.append(result);
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
+      final Object result = value.resolve(trace);
+      trace.publish(result);
       return Adapter.UNSET;
    }
 

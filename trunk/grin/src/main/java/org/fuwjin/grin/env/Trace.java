@@ -25,7 +25,7 @@ public interface Trace {
     */
    AbortedException abort(Throwable cause, String pattern, Object... args);
 
-   void append(Object value);
+   void accept() throws ResolveException;
 
    /**
     * Fails the current resolve operation.
@@ -44,9 +44,19 @@ public interface Trace {
     */
    ResolveException fail(Throwable cause, String pattern, Object... args);
 
-   Trace newInput(Source in);
+   Object get(String name);
 
-   Trace newOutput(Sink out);
+   void log(Object value) throws AbortedException;
+
+   Trace newInput(String in);
+
+   Trace newOutput();
+
+   int next() throws ResolveException;
+
+   void publish(Object value) throws AbortedException;
+
+   void put(String name, Object value);
 
    /**
     * Resolves the expression.

@@ -1,6 +1,6 @@
 package org.fuwjin.grin.env;
 
-import org.fuwjin.chessur.expression.AbortedException;
+import java.io.IOException;
 import org.fuwjin.util.BusinessException;
 
 public abstract class AbstractIoInfo<A> implements IoInfo {
@@ -36,13 +36,15 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
     * The size of the values and lock arrays.
     */
    private int size;
+   private int maxSize;
 
    public AbstractIoInfo() {
-      this(10);
+      this(10, 30);
    }
 
-   public AbstractIoInfo(final int order) {
-      size = 1 << order;
+   public AbstractIoInfo(final int startFactor, final int maxFactor) {
+      size = 1 << startFactor;
+      maxSize = 1 << maxFactor;
       this.values = newArray(size);
       lock = new int[size];
       mask = size - 1;
@@ -65,7 +67,7 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
    }
 
    @Override
-   public void release(final int mark) throws AbortedException {
+   public void release(final int mark) throws IOException {
       lock[mark & mask]--;
    }
 
@@ -123,7 +125,7 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
          }
          final String s = valueAt(i);
          if(s != null) {
-            out.append(s);
+            out.append(s.replace("\n", "\\n"));
          }
       }
       if(high == mark) {
@@ -142,8 +144,11 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
 
    protected void ensureCapacity() {
       if(nextIndex == streamIndex) {
-         final int newStreamIndex = streamIndex + 1;
-         if(lock[newStreamIndex & mask] > 0) {
+         streamIndex++;
+         if(lock[streamIndex & mask] > 0) {
+            if(size >= maxSize) {
+               throw new IllegalStateException("Cannot grow past " + maxSize);
+            }
             final int newSize = size << 1;
             if((streamIndex & size) > 0) {
                values = resize(values, newArray(newSize), size, 0);
@@ -155,7 +160,6 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
             size = newSize;
             mask = size - 1;
          }
-         streamIndex = newStreamIndex;
       }
    }
 

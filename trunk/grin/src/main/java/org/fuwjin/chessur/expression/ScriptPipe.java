@@ -10,12 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
-import org.fuwjin.grin.env.StandardEnv;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -36,13 +30,11 @@ public class ScriptPipe implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
-      final StringWriter writer = new StringWriter();
-      final Sink out = StandardEnv.publishTo(writer);
-      source.resolve(input, out, scope, trace.newOutput(out));
-      final Source in = StandardEnv.acceptFrom(new StringReader(writer.toString()));
-      return sink.resolve(in, output, scope, trace.newInput(in));
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
+      final Trace output = trace.newOutput();
+      source.resolve(output);
+      final Trace input = trace.newInput(output.toString());
+      return sink.resolve(input);
    }
 
    /**

@@ -1,27 +1,27 @@
 package org.fuwjin.grin.env;
 
 import java.io.IOException;
-import org.fuwjin.chessur.expression.AbortedException;
+import java.io.Writer;
 
-public abstract class AbstractSink extends AbstractIoInfo<String[]> implements Sink {
+public class AbstractSink extends AbstractIoInfo<String[]> {
    private int locks;
    private int index;
+   private final Writer writer;
 
-   @Override
-   public void append(final Object value) {
-      try {
-         final String str = value == null ? "" : value.toString();
-         final int p = nextIndex();
-         ensureCapacity();
-         array()[indexOf(p)] = str;
-         if(locks == 0) {
-            appendImpl(str);
-            index++;
-         }
-         advance(str);
-      } catch(final IOException e) {
-         // do nothing?
+   public AbstractSink(final Writer writer) {
+      this.writer = writer;
+   }
+
+   public void append(final Object value) throws IOException {
+      final String str = value == null ? "" : value.toString();
+      final int p = nextIndex();
+      ensureCapacity();
+      array()[indexOf(p)] = str;
+      if(locks == 0) {
+         writer.append(str);
+         index++;
       }
+      advance(str);
    }
 
    @Override
@@ -31,20 +31,15 @@ public abstract class AbstractSink extends AbstractIoInfo<String[]> implements S
    }
 
    @Override
-   public void release(final int mark) throws AbortedException {
+   public void release(final int mark) throws IOException {
       super.release(mark);
       locks--;
       while(index < nextIndex() && !isMarked(index)) {
-         try {
-            appendImpl(valueAt(index));
-         } catch(final IOException e) {
-            throw new AbortedException(e, "Could not publish to output stream");
-         }
+         final String str = valueAt(index);
+         writer.append(str);
          index++;
       }
    }
-
-   protected abstract void appendImpl(String value) throws IOException;
 
    @Override
    protected String[] newArray(final int size) {

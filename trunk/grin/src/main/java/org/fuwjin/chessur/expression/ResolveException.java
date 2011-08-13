@@ -1,6 +1,5 @@
 package org.fuwjin.chessur.expression;
 
-
 /**
  * Thrown when a script cannot continue.
  */
@@ -25,9 +24,5 @@ public class ResolveException extends GrinException {
    public ResolveException(final Object iSummary, final Object oSummary, final Throwable cause, final String pattern,
          final Object... args) {
       super(iSummary, oSummary, cause, pattern, args);
-   }
-
-   public ResolveException(final String pattern, final Object... args) {
-      super(pattern, args);
    }
 }

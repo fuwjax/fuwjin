@@ -3,6 +3,7 @@ package org.fuwjin.chessur;
 /**
  * Abstraction over a collection of scripts.
  */
+@Deprecated
 public interface Module {
    /**
     * Returns a script by name. This method will always return a Script. If the

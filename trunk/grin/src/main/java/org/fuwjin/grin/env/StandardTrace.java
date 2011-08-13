@@ -1,20 +1,44 @@
 package org.fuwjin.grin.env;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
 import org.fuwjin.chessur.expression.AbortedException;
 import org.fuwjin.chessur.expression.Expression;
 import org.fuwjin.chessur.expression.ResolveException;
+import org.fuwjin.dinah.Adapter;
 
 public class StandardTrace implements Trace {
    private final AbstractSource input;
    private final AbstractSink output;
-   private final Sink log;
-   private AbstractScope scope;
+   private final Writer log;
+   private Deque<Bindings> scope = new ArrayDeque<Bindings>();
 
-   public StandardTrace(final AbstractSource in, final AbstractSink out, final AbstractScope env, final Sink logger) {
-      input = in;
-      output = out;
-      scope = env;
+   public StandardTrace(final Reader in, final Writer out, final Bindings env, final Writer logger) {
+      input = new AbstractSource(in);
+      output = new AbstractSink(out);
+      scope.push(env);
       log = logger;
+   }
+
+   private StandardTrace(final AbstractSink out, final StandardTrace parent) {
+      output = out;
+      input = parent.input;
+      scope = parent.scope;
+      log = parent.log;
+   }
+
+   private StandardTrace(final AbstractSource in, final StandardTrace parent) {
+      input = in;
+      output = parent.output;
+      scope = parent.scope;
+      log = parent.log;
    }
 
    @Override
@@ -32,8 +56,12 @@ public class StandardTrace implements Trace {
    }
 
    @Override
-   public void append(final Object value) {
-      log.append(value);
+   public void accept() throws ResolveException {
+      try {
+         input.read();
+      } catch(final IOException e) {
+         throw fail(e, "unexpected EOF");
+      }
    }
 
    @Override
@@ -51,13 +79,63 @@ public class StandardTrace implements Trace {
    }
 
    @Override
-   public Trace newInput(final Source in) {
-      return new StandardTrace((AbstractSource)in, output, scope, log);
+   public Object get(final String name) {
+      for(final Bindings bindings: scope) {
+         if(bindings.containsKey(name)) {
+            return bindings.get(name);
+         }
+      }
+      return Adapter.UNSET;
    }
 
    @Override
-   public Trace newOutput(final Sink out) {
-      return new StandardTrace(input, (AbstractSink)out, scope, log);
+   public void log(final Object value) throws AbortedException {
+      try {
+         log.append(String.valueOf(value)).append('\n');
+      } catch(final IOException e) {
+         throw abort(e, "could not log %s", value);
+      }
+   }
+
+   @Override
+   public Trace newInput(final String in) {
+      final AbstractSource tempInput = new AbstractSource(new StringReader(in));
+      return new StandardTrace(tempInput, this);
+   }
+
+   @Override
+   public Trace newOutput() {
+      final StringWriter writer = new StringWriter();
+      final AbstractSink out = new AbstractSink(writer);
+      return new StandardTrace(out, this) {
+         @Override
+         public String toString() {
+            return writer.toString();
+         }
+      };
+   }
+
+   @Override
+   public int next() throws ResolveException {
+      try {
+         return input.next();
+      } catch(final IOException e) {
+         throw fail(e, "unexpected EOF");
+      }
+   }
+
+   @Override
+   public void publish(final Object value) throws AbortedException {
+      try {
+         output.append(value);
+      } catch(final IOException e) {
+         throw abort(e, "could not publish %s", value);
+      }
+   }
+
+   @Override
+   public void put(final String name, final Object value) {
+      scope.peek().put(name, value);
    }
 
    @Override
@@ -69,14 +147,14 @@ public class StandardTrace implements Trace {
       final int oLine = output.line();
       final int oCol = output.column();
       try {
-         return expression.resolve(input, output, scope, this);
+         return expression.resolve(this);
       } catch(final ResolveException e) {
          input.seek(iMark, iLine, iCol);
          output.seek(oMark, oLine, oCol);
          throw e;
       } finally {
-         input.release(iMark);
-         output.release(oMark);
+         release(input, iMark);
+         release(output, oMark);
       }
    }
 
@@ -84,9 +162,9 @@ public class StandardTrace implements Trace {
    public Object resolve(final String name, final Expression expression) throws AbortedException, ResolveException {
       final Object iSummary = input.summary();
       final Object oSummary = output.summary();
-      scope = scope.newScope();
+      scope.push(new SimpleBindings());
       try {
-         return expression.resolve(input, output, scope, this);
+         return expression.resolve(this);
       } catch(final AbortedException e) {
          e.append(iSummary, oSummary, "in %s", name);
          throw e;
@@ -94,7 +172,7 @@ public class StandardTrace implements Trace {
          e.append(iSummary, oSummary, "in %s", name);
          throw e;
       } finally {
-         scope = scope.parent();
+         scope.pop();
       }
    }
 
@@ -107,12 +185,12 @@ public class StandardTrace implements Trace {
       final int oLine = output.line();
       final int oCol = output.column();
       try {
-         return expression.resolve(input, output, scope, this);
+         return expression.resolve(this);
       } finally {
          input.seek(iMark, iLine, iCol);
          output.seek(oMark, oLine, oCol);
-         input.release(iMark);
-         output.release(oMark);
+         release(input, iMark);
+         release(output, oMark);
       }
    }
 
@@ -120,11 +198,16 @@ public class StandardTrace implements Trace {
    public Object resolveMatch(final String name, final Expression expression) throws AbortedException, ResolveException {
       final Object iSummary = input.summary();
       final Object oSummary = output.summary();
-      scope = scope.newScope();
-      final Match match = input.newMatch();
-      scope.put("match", match);
+      scope.push(new SimpleBindings());
+      final int mark = input.mark();
+      put("match", new Object() {
+         @Override
+         public String toString() {
+            return input.substring(mark);
+         }
+      });
       try {
-         return expression.resolve(input, output, scope, this);
+         return expression.resolve(this);
       } catch(final AbortedException e) {
          e.append(iSummary, oSummary, "in %s", name);
          throw e;
@@ -132,8 +215,16 @@ public class StandardTrace implements Trace {
          e.append(iSummary, oSummary, "in %s", name);
          throw e;
       } finally {
-         match.release();
-         scope = scope.parent();
+         scope.pop();
+         release(input, mark);
+      }
+   }
+
+   protected void release(final IoInfo io, final int mark) throws AbortedException {
+      try {
+         io.release(mark);
+      } catch(final IOException e) {
+         throw abort(e, "Could not release io");
       }
    }
 }

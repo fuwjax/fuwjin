@@ -1,6 +1,8 @@
 package org.fuwjin.jon;
 
+import static org.fuwjin.util.StreamUtils.reader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -8,22 +10,27 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManagerImpl;
-import org.fuwjin.chessur.Script;
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
+import org.fuwjin.chessur.ChessurScriptEngine;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
 import org.fuwjin.dinah.FunctionProvider;
 import org.fuwjin.dinah.FunctionProvider.NoSuchFunctionException;
 
 public class Registry {
-   private static CatalogManagerImpl manager = new CatalogManagerImpl();
-   private static Catalog jonParser;
+   private static ScriptEngine engine = new ScriptEngineManager().getEngineByName("chessur");
+   private static CompiledScript jonParser;
 
-   private static Script parser() throws ExecutionException, IOException {
+   private static CompiledScript parser() throws ScriptException, IOException {
       if(jonParser == null) {
-         jonParser = manager.loadCat("org/fuwjin/jon/JonParser.cat");
+         jonParser = ((Compilable)engine).compile(reader("org/fuwjin/jon/JonParser.cat", "UTF-8"));
       }
       return jonParser;
    }
@@ -34,7 +41,7 @@ public class Registry {
    private int count = 0;
 
    public Registry() {
-      this(manager);
+      this(((ChessurScriptEngine)engine).manager());
    }
 
    public Registry(final FunctionProvider provider) {
@@ -47,7 +54,7 @@ public class Registry {
          container.adapt(provider, type);
          return container;
       }
-      return manager.adapt(value, type);
+      return provider.adapt(value, type);
    }
 
    public void add(final Collection c, final Object value) throws Exception {
@@ -84,13 +91,17 @@ public class Registry {
    }
 
    public Object load(final Reader input, final Type type) throws Exception {
-      final Map<String, Object> env = new HashMap<String, Object>();
+      final Bindings env = engine.createBindings();
       env.put("registry", this);
       env.put("null", null);
       env.put("true", true);
       env.put("false", false);
       env.put("type", type);
-      final Object value = parser().acceptFrom(input).publishTo(System.out).withState(env).exec();
+      final ScriptContext context = new SimpleScriptContext();
+      context.setReader(input);
+      context.setWriter(new OutputStreamWriter(System.out));
+      context.setBindings(env, ScriptContext.ENGINE_SCOPE);
+      final Object value = parser().eval(context);
       if(value instanceof Reference) {
          return ((Reference)value).value();
       }

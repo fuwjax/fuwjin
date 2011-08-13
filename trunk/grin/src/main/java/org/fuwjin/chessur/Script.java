@@ -1,15 +1,9 @@
 package org.fuwjin.chessur;
 
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.io.Writer;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
+import javax.script.ScriptException;
+import org.fuwjin.grin.env.Trace;
 
 /**
  * The executable script interface. Script executions have four central pieces
@@ -33,56 +27,7 @@ import org.fuwjin.grin.env.Source;
  * null if there was no return statement in the script.
  */
 public interface Script {
-   /**
-    * Executes the script with a byte-based InputStream input, no output and no
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the byte-based input
-    * @return the script
-    */
-   Script acceptFrom(final InputStream input);
-
-   /**
-    * Executes the script with a code point-based Reader input, no output and no
-    * initial environment. Returns the result of the script or null if there is
-    * no return statement in the script.
-    * @param input the code point-based input
-    * @return the result of the script
-    */
-   Script acceptFrom(final Reader input);
-
-   Script acceptFrom(final Source input);
-
-   /**
-    * Executes the script with no input, output or initial environment. Returns
-    * the result of the script or null if there is no return statement in the
-    * script.
-    * @return the result of the script
-    * @throws ExecutionException if the script fails to execute
-    */
-   Object exec() throws ExecutionException;
-
-   Script logTo(final Logger log);
-
-   /**
-    * Executes the script with no input, a PrintStream output and no initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param log the output
-    * @return the result of the script
-    */
-   Script logTo(final PrintStream log);
-
-   Script logTo(final Sink log);
-
-   /**
-    * Executes the script with no input, a Writer output and no initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param log the output
-    * @return the result of the script
-    */
-   Script logTo(final Writer log);
+   Object eval(Trace trace) throws ScriptException;
 
    /**
     * Returns a name for this script. Note that the same underlying script may
@@ -90,35 +35,4 @@ public interface Script {
     * @return the name
     */
    String name();
-
-   /**
-    * Executes the script with no input, a PrintStream output and no initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param output the output
-    * @return the result of the script
-    */
-   Script publishTo(final PrintStream output);
-
-   Script publishTo(Sink output);
-
-   /**
-    * Executes the script with no input, a Writer output and no initial
-    * environment. Returns the result of the script or null if there is no
-    * return statement in the script.
-    * @param output the output
-    * @return the result of the script
-    */
-   Script publishTo(final Writer output);
-
-   /**
-    * Executes the script with no input, no output and an initial environment.
-    * Returns the result of the script or null if there is no return statement
-    * in the script.
-    * @param environment the initial environment
-    * @return the result of the script
-    */
-   Script withState(final Map<String, ? extends Object> environment);
-
-   Script withState(Scope environment);
 }

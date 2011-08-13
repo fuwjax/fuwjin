@@ -1,6 +1,6 @@
 package org.fuwjin.grin.env;
 
-import org.fuwjin.chessur.expression.AbortedException;
+import java.io.IOException;
 
 public interface IoInfo {
    public abstract int column();
@@ -9,7 +9,7 @@ public interface IoInfo {
 
    public abstract int mark();
 
-   public abstract void release(final int mark) throws AbortedException;
+   public abstract void release(final int mark) throws IOException;
 
    public abstract void seek(final int mark, final int line, final int column);
 

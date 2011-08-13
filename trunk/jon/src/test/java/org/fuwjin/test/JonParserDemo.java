@@ -10,7 +10,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.fuwjin.chessur.CatalogManagerImpl;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import org.fuwjin.chessur.ChessurScriptEngine;
 import org.fuwjin.jon.Registry;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
@@ -26,7 +28,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Parameterized.class)
 public class JonParserDemo {
-   private static CatalogManagerImpl manager;
+   private static ScriptEngine engine;
 
    /**
     * The parameters for the test.
@@ -48,12 +50,12 @@ public class JonParserDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManagerImpl();
+      engine = new ScriptEngineManager().getEngineByName("chessur");
    }
 
    private static Matcher<Object> matcher(final File file) throws Exception {
       if(file.exists()) {
-         return (Matcher<Object>)manager.loadCat(file).exec();
+         return (Matcher<Object>)engine.eval(new FileReader(file));
       }
       return CoreMatchers.nullValue();
    }
@@ -87,7 +89,7 @@ public class JonParserDemo {
             if(type.trim().length() == 0) {
                continue;
             }
-            final Type cls = (Type)manager.adapt(type.trim(), Type.class);
+            final Type cls = ((ChessurScriptEngine)engine).manager().adapt(type.trim(), Type.class);
             final Object object = new Registry().load(newReader("demo.typed.jon"), cls);
             assertThat(object, matcher(file("matcher.cat")));
          }

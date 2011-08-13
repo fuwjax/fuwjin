@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 
@@ -31,10 +28,10 @@ public class AbortStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
       try {
-         final Object val = value.resolve(input, output, scope, trace);
+         final Object val = value.resolve(trace);
          throw trace.abort("%s", val);
       } catch(final ResolveException e) {
          throw trace.abort(e, "Abort string could not be generated");

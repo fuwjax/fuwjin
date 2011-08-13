@@ -1,6 +1,5 @@
 package org.fuwjin.chessur.expression;
 
-
 /**
  * Thrown during a scripted abort.
  */
@@ -25,9 +24,5 @@ public class AbortedException extends GrinException {
    public AbortedException(final Object iSummary, final Object oSummary, final Throwable cause, final String pattern,
          final Object... args) {
       super(iSummary, oSummary, cause, pattern, args);
-   }
-
-   public AbortedException(final Throwable cause, final String message) {
-      super(cause, message);
    }
 }

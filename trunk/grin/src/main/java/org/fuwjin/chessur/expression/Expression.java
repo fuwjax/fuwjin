@@ -10,9 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -21,12 +18,9 @@ import org.fuwjin.grin.env.Trace;
 public interface Expression {
    /**
     * Resolves an input stream and scope to an output stream and return value.
-    * @param input the input source
-    * @param output the output destination
-    * @param scope the variable environment
     * @return the resolved value
     * @throws AbortedException if the script intentionally aborts
     * @throws ResolveException if the script fails
     */
-   Object resolve(Source input, Sink output, Scope scope, Trace trace) throws AbortedException, ResolveException;
+   Object resolve(Trace trace) throws AbortedException, ResolveException;
 }

@@ -11,9 +11,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -42,33 +39,31 @@ public class ValueAcceptStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
       if(value.equals(Variable.NEXT)) {
-         input.read();
+         trace.accept();
          return Adapter.UNSET;
       }
-      final Object result = value.resolve(input, output, scope, trace);
+      final Object result = value.resolve(trace);
       final String str = String.valueOf(result);
       if(isNot) {
          try {
             trace.resolveAndRevert(new Expression() {
                @Override
-               public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-                     throws AbortedException, ResolveException {
+               public Object resolve(final Trace trace) throws AbortedException, ResolveException {
                   int codePoint;
                   for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
                      codePoint = str.codePointAt(index);
-                     if(codePoint != input.next()) {
+                     if(codePoint != trace.next()) {
                         throw trace.fail("failed while matching %s", str);
                      }
-                     input.read();
+                     trace.accept();
                   }
                   return Adapter.UNSET;
                }
             });
          } catch(final ResolveException e) {
-            input.read();
+            trace.accept();
             return Adapter.UNSET;
          }
          throw trace.fail("failed while matching %s", str);
@@ -76,10 +71,10 @@ public class ValueAcceptStatement implements Expression {
       int codePoint;
       for(int index = 0; index < str.length(); index += Character.charCount(codePoint)) {
          codePoint = str.codePointAt(index);
-         if(codePoint != input.next()) {
+         if(codePoint != trace.next()) {
             throw trace.fail("failed while matching %s", str);
          }
-         input.read();
+         trace.accept();
       }
       return Adapter.UNSET;
    }

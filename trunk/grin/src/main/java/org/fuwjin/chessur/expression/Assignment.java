@@ -11,9 +11,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -42,11 +39,10 @@ public class Assignment implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
       try {
-         final Object result = value.resolve(input, output, scope, trace);
-         scope.put(name, result);
+         final Object result = value.resolve(trace);
+         trace.put(name, result);
          return Adapter.UNSET;
       } catch(final ResolveException e) {
          throw trace.fail(e, "could not assign to %s", name);

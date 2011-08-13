@@ -12,9 +12,6 @@ package org.fuwjin.chessur.expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -73,11 +70,11 @@ public class CompositeLiteral implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
       final StringBuilder builder = new StringBuilder();
       for(final Expression value: values) {
-         final Object result = value.resolve(input, output, scope, trace);
+         final Object result = value.resolve(trace);
          builder.append(result);
       }
       return builder.toString();
