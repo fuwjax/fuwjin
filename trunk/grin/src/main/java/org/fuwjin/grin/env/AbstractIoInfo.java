@@ -3,7 +3,7 @@ package org.fuwjin.grin.env;
 import java.io.IOException;
 import org.fuwjin.util.BusinessException;
 
-public abstract class AbstractIoInfo<A> implements IoInfo {
+public abstract class AbstractIoInfo<A> {
    /**
     * The index of the value after the "current" value.
     */
@@ -50,35 +50,29 @@ public abstract class AbstractIoInfo<A> implements IoInfo {
       mask = size - 1;
    }
 
-   @Override
    public int column() {
       return column;
    }
 
-   @Override
    public int line() {
       return line;
    }
 
-   @Override
    public int mark() {
       lock[nextIndex & mask]++;
       return nextIndex;
    }
 
-   @Override
    public void release(final int mark) throws IOException {
       lock[mark & mask]--;
    }
 
-   @Override
    public void seek(final int mark, final int line, final int column) {
       nextIndex = mark;
       this.line = line;
       this.column = column;
    }
 
-   @Override
    public Object summary() {
       return BusinessException.concatObject("[", line, ",", column < 0 ? -column : column, "] ", around());
    }

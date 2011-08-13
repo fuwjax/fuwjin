@@ -3,12 +3,12 @@ package org.fuwjin.grin.env;
 import java.io.IOException;
 import java.io.Writer;
 
-public class AbstractSink extends AbstractIoInfo<String[]> {
+public class PublishStream extends AbstractIoInfo<String[]> {
    private int locks;
    private int index;
    private final Writer writer;
 
-   public AbstractSink(final Writer writer) {
+   public PublishStream(final Writer writer) {
       this.writer = writer;
    }
 
