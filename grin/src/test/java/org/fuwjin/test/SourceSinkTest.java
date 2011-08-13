@@ -2,15 +2,14 @@ package org.fuwjin.test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import javax.script.SimpleBindings;
 import org.fuwjin.chessur.expression.AbortedException;
 import org.fuwjin.chessur.expression.Expression;
 import org.fuwjin.chessur.expression.ResolveException;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
-import org.fuwjin.grin.env.StandardEnv;
+import org.fuwjin.grin.env.StandardTrace;
 import org.fuwjin.grin.env.Trace;
 import org.fuwjin.util.AssertThat;
 import org.junit.Test;
@@ -18,11 +17,10 @@ import org.junit.Test;
 public class SourceSinkTest {
    private final class Transfer3 implements Expression {
       @Override
-      public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-            throws AbortedException, ResolveException {
+      public Object resolve(final Trace trace) throws AbortedException, ResolveException {
          for(int i = 0; i < 3; i++) {
-            output.append((char)input.next());
-            input.read();
+            trace.publish((char)trace.next());
+            trace.accept();
          }
          return null;
       }
@@ -30,99 +28,96 @@ public class SourceSinkTest {
 
    private final class Transfer3AndMatch implements Expression {
       @Override
-      public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-            throws AbortedException, ResolveException {
+      public Object resolve(final Trace trace) throws AbortedException, ResolveException {
          for(int i = 0; i < 3; i++) {
-            output.append((char)input.next());
-            input.read();
+            trace.publish((char)trace.next());
+            trace.accept();
          }
-         assertThat(scope.get("match").toString(), is("alp"));
+         assertThat(trace.get("match").toString(), is("alp"));
          return null;
       }
    }
 
    private final class Transfer3ThenFail implements Expression {
       @Override
-      public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-            throws AbortedException, ResolveException {
+      public Object resolve(final Trace trace) throws AbortedException, ResolveException {
          for(int i = 0; i < 3; i++) {
-            output.append((char)input.next());
-            input.read();
+            trace.publish((char)trace.next());
+            trace.accept();
          }
          throw trace.fail("oops");
       }
    }
 
-   private final Source source = StandardEnv.acceptFrom(new StringReader("alphabet"));
+   private final Reader source = new StringReader("alphabet");
    private final StringWriter writer = new StringWriter();
-   private final Sink sink = StandardEnv.publishTo(writer);
-   private final Trace trace = StandardEnv.newTrace(source, sink, StandardEnv.NO_SCOPE, StandardEnv.NO_SINK);
+   private final Trace trace = new StandardTrace(source, writer, new SimpleBindings(), new StringWriter());
 
    @Test
-   public void testInput() throws ResolveException {
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      assertThat(source.next(), is((int)'l'));
-      source.read();
-      assertThat(source.next(), is((int)'p'));
-      source.read();
-      assertThat(source.next(), is((int)'h'));
-      source.read();
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      assertThat(source.next(), is((int)'b'));
-      source.read();
-      assertThat(source.next(), is((int)'e'));
-      source.read();
-      assertThat(source.next(), is((int)'t'));
-      source.read();
+   public void testInput() throws Exception {
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'l'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'p'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'h'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'b'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'e'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'t'));
+      trace.accept();
       new AssertThat() {
          @Override
          public void when() throws ResolveException {
-            source.next();
+            trace.next();
          }
       }.willThrow(ResolveException.class);
       new AssertThat() {
          @Override
          public void when() throws ResolveException {
-            source.read();
+            trace.accept();
          }
       }.willThrow(ResolveException.class);
    }
 
    @Test
    public void testOutput() throws Exception {
-      sink.append("hi");
+      trace.publish("hi");
       assertThat(writer.toString(), is("hi"));
-      sink.append(", ");
+      trace.publish(", ");
       assertThat(writer.toString(), is("hi, "));
-      sink.append("mom");
+      trace.publish("mom");
       assertThat(writer.toString(), is("hi, mom"));
-      sink.append('!');
+      trace.publish('!');
       assertThat(writer.toString(), is("hi, mom!"));
-      sink.append(null);
+      trace.publish(null);
       assertThat(writer.toString(), is("hi, mom!"));
    }
 
    @Test
    public void testResolve() throws Exception {
       trace.resolve(new Transfer3());
-      assertThat(source.next(), is((int)'h'));
-      source.read();
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'h'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("alps"));
    }
 
    @Test
    public void testResolveAndRevert() throws Exception {
       trace.resolveAndRevert(new Transfer3());
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      assertThat(source.next(), is((int)'l'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'l'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("s"));
    }
 
@@ -134,11 +129,11 @@ public class SourceSinkTest {
             trace.resolveAndRevert(new Transfer3ThenFail());
          }
       }.willThrow(ResolveException.class).withMessage("oops: [1,3] \"alp⎀\" -> [1,3] \"alp⎀\"");
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      assertThat(source.next(), is((int)'l'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'l'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("s"));
    }
 
@@ -150,22 +145,22 @@ public class SourceSinkTest {
             trace.resolve(new Transfer3ThenFail());
          }
       }.willThrow(ResolveException.class).withMessage("oops: [1,3] \"alp⎀\" -> [1,3] \"alp⎀\"");
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      assertThat(source.next(), is((int)'l'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'l'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("s"));
    }
 
    @Test
    public void testResolveMatch() throws Exception {
       trace.resolveMatch("test", new Transfer3AndMatch());
-      assertThat(source.next(), is((int)'h'));
-      source.read();
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'h'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("alps"));
    }
 
@@ -183,11 +178,11 @@ public class SourceSinkTest {
    @Test
    public void testResolveName() throws Exception {
       trace.resolve("test", new Transfer3());
-      assertThat(source.next(), is((int)'h'));
-      source.read();
-      assertThat(source.next(), is((int)'a'));
-      source.read();
-      sink.append("s");
+      assertThat(trace.next(), is((int)'h'));
+      trace.accept();
+      assertThat(trace.next(), is((int)'a'));
+      trace.accept();
+      trace.publish("s");
       assertThat(writer.toString(), is("alps"));
    }
 

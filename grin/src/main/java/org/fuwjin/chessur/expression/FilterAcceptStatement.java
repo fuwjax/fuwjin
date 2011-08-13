@@ -11,9 +11,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -50,17 +47,16 @@ public class FilterAcceptStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
       if(isNot) {
-         if(filter.allow(input.next())) {
+         if(filter.allow(trace.next())) {
             throw trace.fail("Unexpected match: %s", filter);
          }
-         input.read();
+         trace.accept();
          return Adapter.UNSET;
       }
-      if(filter.allow(input.next())) {
-         input.read();
+      if(filter.allow(trace.next())) {
+         trace.accept();
          return Adapter.UNSET;
       }
       throw trace.fail("Did not match filter: %s", filter);

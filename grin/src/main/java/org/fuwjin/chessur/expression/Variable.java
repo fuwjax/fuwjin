@@ -11,9 +11,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.adapter.StandardAdapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -25,9 +22,8 @@ public class Variable implements Expression {
     */
    public static final Variable NEXT = new Variable("next") {
       @Override
-      public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-            throws AbortedException, ResolveException {
-         return input.next();
+      public Object resolve(final Trace trace) throws AbortedException, ResolveException {
+         return trace.next();
       }
    };
    private final String name;
@@ -49,9 +45,8 @@ public class Variable implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
-      final Object value = scope.get(name);
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
+      final Object value = trace.get(name);
       if(StandardAdapter.isSet(value)) {
          return value;
       }

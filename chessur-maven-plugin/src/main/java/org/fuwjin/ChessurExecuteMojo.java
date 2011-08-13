@@ -1,5 +1,6 @@
 package org.fuwjin;
 
+import static org.fuwjin.util.StreamUtils.reader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,16 +13,19 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleScriptContext;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
-import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManagerImpl;
 
 /**
  * Goal which runs a Grin Catalog against every file in a fileset.
@@ -30,6 +34,23 @@ import org.fuwjin.chessur.CatalogManagerImpl;
  * @phase generate-sources
  */
 public class ChessurExecuteMojo extends AbstractMojo {
+   private final class MavenLogger extends Writer {
+      @Override
+      public void close() throws IOException {
+         // do nothing
+      }
+
+      @Override
+      public void flush() throws IOException {
+         // do nothing
+      }
+
+      @Override
+      public void write(final char[] chars, final int offset, final int length) throws IOException {
+         getLog().info(new String(chars, offset, length));
+      }
+   }
+
    /**
     * File encoding for the input files.
     * @parameter expression="${project.build.sourceEncoding}"
@@ -80,6 +101,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
     */
    private MavenProject project;
    private ClassLoader loader;
+   private final MavenLogger mavenLogger = new MavenLogger();
 
    /**
     * Creates a new instance.
@@ -107,8 +129,9 @@ public class ChessurExecuteMojo extends AbstractMojo {
    public void execute() throws MojoExecutionException, MojoFailureException {
       try {
          getLog().info("Transforming " + sourceDirectory + " to " + outputDirectory);
-         final CatalogManagerImpl manager = new CatalogManagerImpl();
-         final Catalog cat = manager.loadCat(catFile);
+         final ScriptEngineManager engines = new ScriptEngineManager();
+         final ScriptEngine engine = engines.getEngineByName("chessur");
+         final CompiledScript cat = ((Compilable)engine).compile(reader(catFile, "UTF-8"));
          loader = loader();
          transform(cat, sourceDirectory, null);
          if(project != null) {
@@ -146,7 +169,7 @@ public class ChessurExecuteMojo extends AbstractMojo {
       return path.substring(0, path.length() - sourceExtension.length());
    }
 
-   private void transform(final Catalog cat, final File source, final File dest) throws MojoExecutionException {
+   private void transform(final CompiledScript cat, final File source, final File dest) throws MojoExecutionException {
       if(source.isDirectory()) {
          for(final File file: source.listFiles()) {
             transform(cat, file, dest == null ? new File("") : new File(dest, source.getName()));
@@ -168,14 +191,19 @@ public class ChessurExecuteMojo extends AbstractMojo {
                   try {
                      final Writer writer = new OutputStreamWriter(output, fileEncoding);
                      try {
-                        final Map<String, Object> map = new HashMap<String, Object>();
+                        final Bindings map = cat.getEngine().createBindings();
                         map.put("folder", dest);
-                        map.put("package", dest.getPath().substring(1).replaceAll("/", "."));
+                        map.put("package", dest.getPath().substring(1).replace("/", ".").replace("\\", "."));
                         map.put("target", target);
                         map.put("name", name);
                         map.put("loader", loader);
-                        cat.acceptFrom(reader).publishTo(writer).withState(map).exec();
-                     } catch(final ExecutionException e) {
+                        final ScriptContext context = new SimpleScriptContext();
+                        context.setReader(reader);
+                        context.setWriter(writer);
+                        context.setErrorWriter(mavenLogger);
+                        context.setBindings(map, ScriptContext.ENGINE_SCOPE);
+                        cat.eval(context);
+                     } catch(final ScriptException e) {
                         throw new MojoExecutionException("Could not transform from " + path(source) + " to "
                               + path(target), e);
                      } finally {

@@ -10,11 +10,6 @@
  ******************************************************************************/
 package org.fuwjin.chessur.expression;
 
-import java.io.StringWriter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
-import org.fuwjin.grin.env.StandardEnv;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -43,12 +38,10 @@ public class ScriptOutput implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
-         throws AbortedException, ResolveException {
-      final StringWriter writer = new StringWriter();
-      final Sink out = StandardEnv.publishTo(writer);
-      final Object result = spec.resolve(input, out, scope, trace.newOutput(out));
-      scope.put(name, writer.toString());
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
+      final Trace output = trace.newOutput();
+      final Object result = spec.resolve(output);
+      trace.put(name, output.toString());
       return result;
    }
 

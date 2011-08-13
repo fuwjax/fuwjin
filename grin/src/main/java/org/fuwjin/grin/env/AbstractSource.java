@@ -1,44 +1,30 @@
 package org.fuwjin.grin.env;
 
+import java.io.EOFException;
 import java.io.IOException;
-import org.fuwjin.chessur.expression.AbortedException;
-import org.fuwjin.chessur.expression.ResolveException;
+import java.io.Reader;
 
-public abstract class AbstractSource extends AbstractIoInfo<int[]> implements Source {
-   public Match newMatch() {
-      return new Match() {
-         private final int start = mark();
+public class AbstractSource extends AbstractIoInfo<int[]> {
+   private final Reader reader;
 
-         @Override
-         public void release() throws AbortedException {
-            AbstractSource.this.release(start);
-         }
-
-         @Override
-         public String toString() {
-            return substring(start);
-         }
-      };
+   public AbstractSource(final Reader reader) {
+      this.reader = reader;
    }
 
-   @Override
-   public int next() throws ResolveException {
-      int codePoint;
+   public AbstractSource(final Reader reader, final int initialFactor, final int maxFactor) {
+      super(initialFactor, maxFactor);
+      this.reader = reader;
+   }
+
+   public int next() throws IOException {
       if(isEmpty()) {
-         codePoint = readImpl();
-      } else {
-         codePoint = codePointAt(nextIndex());
+         return readImpl();
       }
-      if(codePoint == EOF) {
-         throw new ResolveException("unexpected EOF: %s -> [1,0] SOF", summary());
-      }
-      return codePoint;
+      return codePointAt(nextIndex());
    }
 
-   @Override
-   public void read() throws ResolveException {
-      final int codePoint = next();
-      advance(codePoint);
+   public void read() throws IOException {
+      advance(next());
    }
 
    protected int codePointAt(final int index) {
@@ -50,28 +36,28 @@ public abstract class AbstractSource extends AbstractIoInfo<int[]> implements So
       return new int[size];
    }
 
-   protected abstract int readChar() throws IOException;
-
-   protected int readImpl() {
-      int ch;
-      final int p = nextIndex();
-      ensureCapacity();
-      try {
-         ch = readChar();
-         if(ch != EOF && Character.isHighSurrogate((char)ch)) {
-            final char hi = (char)ch;
-            ch = readChar();
-            if(ch != EOF) {
-               ch = Character.toCodePoint(hi, (char)ch);
-               ensureCapacity();
-               array()[indexOf(p + 1)] = EOF;
-            }
-         }
-      } catch(final IOException e) {
-         ch = EOF;
+   protected char readChar() throws IOException {
+      final int ch = reader.read();
+      if(ch == -1) {
+         throw new EOFException();
       }
-      array()[indexOf(p)] = ch;
-      return ch;
+      return (char)ch;
+   }
+
+   protected int readImpl() throws IOException {
+      final int p = nextIndex();
+      final char hi = readChar();
+      ensureCapacity();
+      if(Character.isHighSurrogate(hi)) {
+         final char lo = readChar();
+         ensureCapacity();
+         final int ch = Character.toCodePoint(hi, lo);
+         array()[indexOf(p + 1)] = -1;
+         array()[indexOf(p)] = ch;
+         return ch;
+      }
+      array()[indexOf(p)] = hi;
+      return hi;
    }
 
    protected String substring(final int start) {
@@ -89,8 +75,6 @@ public abstract class AbstractSource extends AbstractIoInfo<int[]> implements So
    protected String valueAt(final int index) {
       final int ch = codePointAt(index);
       switch(ch) {
-      case EOF:
-         return null;
       case '\n':
          return "\\n";
       case '\t':

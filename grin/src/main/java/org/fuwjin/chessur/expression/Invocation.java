@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.fuwjin.dinah.Adapter.AdaptException;
 import org.fuwjin.dinah.Function;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -68,13 +65,13 @@ public class Invocation implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
       final Object[] args = new Object[params.size()];
       int index = 0;
       for(final Expression param: params) {
          try {
-            final Object result = param.resolve(input, output, scope, trace);
+            final Object result = param.resolve(trace);
             args[index++] = result;
          } catch(final ResolveException e) {
             throw trace.fail(e, "Could not resolve %s argument %d", name(), index);

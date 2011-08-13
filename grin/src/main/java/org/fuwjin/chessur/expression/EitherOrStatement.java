@@ -14,9 +14,6 @@ import static java.util.Collections.unmodifiableCollection;
 import java.util.ArrayList;
 import java.util.List;
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -44,12 +41,12 @@ public class EitherOrStatement implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
       int index = statements.size();
       for(final Expression statement: statements) {
          if(--index == 0) {
-            return statement.resolve(input, output, scope, trace);
+            return statement.resolve(trace);
          }
          try {
             return trace.resolve(statement);

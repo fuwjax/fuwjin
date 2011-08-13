@@ -14,9 +14,6 @@ import static java.util.Collections.unmodifiableCollection;
 import java.util.ArrayList;
 import java.util.List;
 import org.fuwjin.dinah.Adapter;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -34,10 +31,10 @@ public class Block implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
       for(final Expression statement: statements) {
-         statement.resolve(input, output, scope, trace);
+         statement.resolve(trace);
       }
       return Adapter.UNSET;
    }

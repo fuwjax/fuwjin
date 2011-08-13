@@ -1,5 +1,6 @@
 package org.fuwjin.test;
 
+import static org.fuwjin.util.StreamUtils.reader;
 import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,12 +10,16 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import javax.script.Bindings;
+import javax.script.Compilable;
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.SimpleScriptContext;
 import org.fuwjin.chessur.Catalog;
-import org.fuwjin.chessur.CatalogManagerImpl;
+import org.fuwjin.chessur.ChessurScript;
 import org.fuwjin.util.Parameterized;
 import org.fuwjin.util.Parameterized.Parameters;
 import org.fuwjin.util.StreamUtils;
@@ -28,10 +33,10 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Parameterized.class)
 public class ScriptFormatDemo {
-   private static CatalogManagerImpl manager;
-   private static Catalog catParser;
-   private static Catalog catFormatter;
-   private static Catalog catSerializer;
+   private static ScriptEngine engine;
+   private static CompiledScript catParser;
+   private static CompiledScript catFormatter;
+   private static CompiledScript catSerializer;
 
    /**
     * The parameters for the test.
@@ -53,10 +58,11 @@ public class ScriptFormatDemo {
     */
    @BeforeClass
    public static void setUp() throws Exception {
-      manager = new CatalogManagerImpl();
-      catParser = manager.loadCat("org/fuwjin/chessur/generated/GrinParser.cat");
-      catFormatter = manager.loadCat("org/fuwjin/chessur/generated/GrinFormatter.cat");
-      catSerializer = manager.loadCat("org/fuwjin/chessur/generated/GrinSerializer.cat");
+      final ScriptEngineManager engines = new ScriptEngineManager();
+      engine = engines.getEngineByName("chessur");
+      catParser = ((Compilable)engine).compile(reader("org/fuwjin/chessur/generated/GrinParser.cat", "UTF-8"));
+      catFormatter = ((Compilable)engine).compile(reader("org/fuwjin/chessur/generated/GrinFormatter.cat", "UTF-8"));
+      catSerializer = ((Compilable)engine).compile(reader("org/fuwjin/chessur/generated/GrinSerializer.cat", "UTF-8"));
    }
 
    private final File path;
@@ -77,7 +83,10 @@ public class ScriptFormatDemo {
    @Test
    public void testFormatting() throws Exception {
       final Writer formatterOutput = new StringWriter();
-      catFormatter.acceptFrom(newReader(".cat")).publishTo(formatterOutput).exec();
+      final ScriptContext context = new SimpleScriptContext();
+      context.setReader(newReader(".cat"));
+      context.setWriter(formatterOutput);
+      catFormatter.eval(context);
       assertEquals(formatterOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
@@ -88,9 +97,12 @@ public class ScriptFormatDemo {
     */
    @Test
    public void testHardSerialization() throws Exception {
-      final Catalog cat = manager.loadCat(file(".cat"));
+      final CompiledScript cat = ((Compilable)engine).compile(reader(file(".cat").getPath(), "UTF-8"));
       final Writer serialOutput = new StringWriter();
-      catSerializer.publishTo(serialOutput).withState(Collections.singletonMap("cat", cat)).exec();
+      final ScriptContext context = new SimpleScriptContext();
+      context.setWriter(serialOutput);
+      context.setAttribute("cat", ((ChessurScript)cat).catalog(), ScriptContext.ENGINE_SCOPE);
+      catSerializer.eval(context);
       assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 
@@ -100,12 +112,17 @@ public class ScriptFormatDemo {
     */
    @Test
    public void testSerialization() throws Exception {
-      final Map<String, Object> env = new HashMap<String, Object>();
+      final Bindings env = engine.createBindings();
       env.put("name", path.getName());
-      env.put("manager", manager);
-      final Catalog cat = (Catalog)catParser.acceptFrom(newReader(".cat")).withState(env).exec();
+      final ScriptContext context = new SimpleScriptContext();
+      context.setReader(newReader(".cat"));
+      context.setBindings(env, ScriptContext.ENGINE_SCOPE);
+      final Catalog cat = (Catalog)catParser.eval(context);
       final Writer serialOutput = new StringWriter();
-      catSerializer.publishTo(serialOutput).withState(Collections.singletonMap("cat", cat)).exec();
+      final ScriptContext serialContext = new SimpleScriptContext();
+      serialContext.setWriter(serialOutput);
+      serialContext.setAttribute("cat", cat, ScriptContext.ENGINE_SCOPE);
+      catSerializer.eval(serialContext);
       assertEquals(serialOutput.toString(), StreamUtils.readAll(newReader(".formatted.cat")));
    }
 

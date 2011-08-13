@@ -1,9 +1,6 @@
 package org.fuwjin.chessur.expression;
 
 import org.fuwjin.dinah.Function;
-import org.fuwjin.grin.env.Scope;
-import org.fuwjin.grin.env.Sink;
-import org.fuwjin.grin.env.Source;
 import org.fuwjin.grin.env.Trace;
 
 /**
@@ -46,9 +43,9 @@ public class FieldTemplate implements Expression {
    }
 
    @Override
-   public Object resolve(final Source input, final Sink output, final Scope scope, final Trace trace)
+   public Object resolve(final Trace trace)
          throws AbortedException, ResolveException {
-      return value.resolve(input, output, scope, trace);
+      return value.resolve(trace);
    }
 
    /**
