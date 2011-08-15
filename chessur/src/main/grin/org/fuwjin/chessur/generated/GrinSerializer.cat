@@ -126,7 +126,7 @@ alias java.util.Map.Entry.getValue as value
 
 <AssumeStatement>{
   assume AssumeStatement.instanceof(statement)
-  publish "assume "
+  publish "assuming "
   could {
     assume AssumeStatement.isNot(statement)
     publish "not "

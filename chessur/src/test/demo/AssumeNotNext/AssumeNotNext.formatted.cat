@@ -1,4 +1,4 @@
 <Root> {
-  assume not next
+  assuming not input:next
   return 'yes'
 }

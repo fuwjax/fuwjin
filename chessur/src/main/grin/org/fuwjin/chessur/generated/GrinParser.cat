@@ -158,6 +158,7 @@ alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
 
 <Statement>{
   either stmt = <AssumeStatement>   # assume <Value>, assume not <Value>, assume <Statement>, assume not <Statement>
+  or stmt = <AssumingStatement> # assuming <Statement>
   or stmt = <EitherOrStatement> # either <Statement> or <Statement> or <Statement> ...
   or stmt = <CouldStatement>    # could <Statement>
   or stmt = <RepeatStatement>   # repeat <Statement>
@@ -184,6 +185,13 @@ alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
   either stmt = AssumeStatement.new(notted, <Value>)
   or stmt = AssumeStatement.new(notted, <Statement>)
   or abort "assume keyword requires value or in keyword"
+  return stmt
+}
+<AssumingStatement>{
+  accept 'assuming' <Sep>
+  either stmt = AssumeStatement.new(Boolean.FALSE(), <Value>)
+  or stmt = AssumeStatement.new(Boolean.FALSE(), <Statement>)
+  or abort "assuming keyword requires a statement"
   return stmt
 }
 <EitherOrStatement>{
@@ -352,7 +360,9 @@ alias org.fuwjin.dinah.ConstraintBuilder as ConstraintBuilder
   return Declaration.match(script)
 }
 <NextValue>{
-  accept 'next' <Sep>
+  either accept 'next' 
+  or accept 'input:next'
+  <Sep>
   return Variable.NEXT()
 }
 

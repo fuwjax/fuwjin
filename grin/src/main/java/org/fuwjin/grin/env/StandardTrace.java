@@ -20,23 +20,23 @@ public class StandardTrace implements Trace {
    private final Writer log;
    private Deque<Bindings> scope = new ArrayDeque<Bindings>();
 
-   public StandardTrace(final Reader in, final Writer out, final Bindings env, final Writer logger) {
+   public StandardTrace(final Reader in, final Writer out, final Writer logger, final Bindings env) {
       input = new AcceptStream(in);
       output = new PublishStream(out);
       scope.push(env);
       log = logger;
    }
 
-   private StandardTrace(final PublishStream out, final StandardTrace parent) {
-      output = out;
-      input = parent.input;
+   StandardTrace(final AcceptStream in, final StandardTrace parent) {
+      input = in;
+      output = parent.output;
       scope = parent.scope;
       log = parent.log;
    }
 
-   private StandardTrace(final AcceptStream in, final StandardTrace parent) {
-      input = in;
-      output = parent.output;
+   StandardTrace(final PublishStream out, final StandardTrace parent) {
+      output = out;
+      input = parent.input;
       scope = parent.scope;
       log = parent.log;
    }
@@ -203,7 +203,7 @@ public class StandardTrace implements Trace {
       put("match", new Object() {
          @Override
          public String toString() {
-            return input.substring(mark);
+            return match(mark);
          }
       });
       try {
@@ -220,7 +220,11 @@ public class StandardTrace implements Trace {
       }
    }
 
-   protected void release(final AbstractIoInfo io, final int mark) throws AbortedException {
+   protected String match(final int mark) {
+      return input.substring(mark);
+   }
+
+   protected void release(final AbstractStream<?> io, final int mark) throws AbortedException {
       try {
          io.release(mark);
       } catch(final IOException e) {

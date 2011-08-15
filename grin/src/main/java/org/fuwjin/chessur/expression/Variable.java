@@ -20,7 +20,7 @@ public class Variable implements Expression {
    /**
     * Represents the next character.
     */
-   public static final Variable NEXT = new Variable("next") {
+   public static final Variable NEXT = new Variable("input:next") {
       @Override
       public Object resolve(final Trace trace) throws AbortedException, ResolveException {
          return trace.next();

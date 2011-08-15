@@ -7,6 +7,6 @@
   publish match
 }
 <B> {
-  repeat accept next
+  repeat accept input:next
   publish java.lang.String.toUpperCase(match)
 }

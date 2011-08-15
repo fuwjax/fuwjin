@@ -51,7 +51,7 @@ public class ChessurScript extends CompiledScript {
          script = ((CatalogImpl)catalog).get((String)bindings.get("main"));
       }
       return script
-            .eval(new StandardTrace(context.getReader(), context.getWriter(), bindings, context.getErrorWriter()));
+            .eval(new StandardTrace(context.getReader(), context.getWriter(), context.getErrorWriter(), bindings));
    }
 
    @Override

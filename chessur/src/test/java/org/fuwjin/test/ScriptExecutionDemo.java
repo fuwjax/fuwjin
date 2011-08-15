@@ -225,7 +225,7 @@ public class ScriptExecutionDemo {
       final Writer output = new StringWriter();
       try {
          final Object result = data.modelCat().eval(
-               new StandardTrace(newReader("input.txt"), output, environment(), new StringWriter()));
+               new StandardTrace(newReader("input.txt"), output, new StringWriter(), environment()));
          assertEquals(output.toString(), StreamUtils.readAll(newReader("output.txt")));
          assertThat(result, is(matcher(file("matcher.cat"))));
       } catch(final ScriptException e) {

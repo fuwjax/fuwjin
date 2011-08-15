@@ -3,7 +3,7 @@ package org.fuwjin.grin.env;
 import java.io.IOException;
 import org.fuwjin.util.BusinessException;
 
-public abstract class AbstractIoInfo<A> {
+public abstract class AbstractStream<A> {
    /**
     * The index of the value after the "current" value.
     */
@@ -38,11 +38,11 @@ public abstract class AbstractIoInfo<A> {
    private int size;
    private int maxSize;
 
-   public AbstractIoInfo() {
+   public AbstractStream() {
       this(10, 30);
    }
 
-   public AbstractIoInfo(final int startFactor, final int maxFactor) {
+   public AbstractStream(final int startFactor, final int maxFactor) {
       size = 1 << startFactor;
       maxSize = 1 << maxFactor;
       this.values = newArray(size);
