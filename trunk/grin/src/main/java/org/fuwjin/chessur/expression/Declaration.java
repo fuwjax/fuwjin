@@ -44,8 +44,7 @@ public class Declaration implements Expression {
       if(match == null) {
          match = new Variable("match") {
             @Override
-            public Object resolve(final Trace trace)
-                  throws AbortedException, ResolveException {
+            public Object resolve(final Trace trace) throws AbortedException, ResolveException {
                return super.resolve(trace).toString();
             }
          };
@@ -62,8 +61,7 @@ public class Declaration implements Expression {
    }
 
    @Override
-   public Object resolve(final Trace trace)
-         throws AbortedException, ResolveException {
+   public Object resolve(final Trace trace) throws AbortedException, ResolveException {
       if(match == null) {
          return trace.resolve(name, exec);
       }
@@ -86,8 +84,7 @@ public class Declaration implements Expression {
       returns = value;
       exec = new Expression() {
          @Override
-         public Object resolve(final Trace trace)
-               throws AbortedException, ResolveException {
+         public Object resolve(final Trace trace) throws AbortedException, ResolveException {
             block.resolve(trace);
             return returns.resolve(trace);
          }

@@ -81,7 +81,7 @@ public class ChessurDemo {
       environment.put("className", "Chessur");
       final Writer writer = writer("target/generated/org/fuwjin/chessur/generated/Chessur.java", "UTF-8");
       try {
-         serial.eval(new StandardTrace(null, writer, environment, null));
+         serial.eval(new StandardTrace(null, writer, null, environment));
       } finally {
          writer.close();
       }
@@ -129,7 +129,7 @@ public class ChessurDemo {
       final Bindings bindings = new SimpleBindings();
       bindings.put("cat", ((ChessurScript)cat).catalog());
       try {
-         serial.eval(new StandardTrace(null, writer, bindings, null));
+         serial.eval(new StandardTrace(null, writer, null, bindings));
       } finally {
          writer.close();
       }

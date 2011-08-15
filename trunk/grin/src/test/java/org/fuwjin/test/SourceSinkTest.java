@@ -51,7 +51,7 @@ public class SourceSinkTest {
 
    private final Reader source = new StringReader("alphabet");
    private final StringWriter writer = new StringWriter();
-   private final Trace trace = new StandardTrace(source, writer, new SimpleBindings(), new StringWriter());
+   private final Trace trace = new StandardTrace(source, writer, new StringWriter(), new SimpleBindings());
 
    @Test
    public void testInput() throws Exception {

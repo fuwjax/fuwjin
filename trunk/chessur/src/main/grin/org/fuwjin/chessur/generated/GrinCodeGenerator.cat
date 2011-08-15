@@ -513,7 +513,13 @@ public class 'moduleName' {
   publish "'indent'try {"
   Indent.increase(indent)
   statement = getNext(statements)
+  subIndex = AtomicInteger.incrementAndGet(varIndex)
+  oldInput = input
+  input = "sub'subIndex'"
+  publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
   <Statement>
+  publish "'indent''input'.commit();"
+  input = oldInput
   Indent.decrease(indent)
   exIndex = AtomicInteger.incrementAndGet(varIndex)
   exception = "e'exIndex'"
@@ -530,7 +536,13 @@ public class 'moduleName' {
     assume hasNext(statements)
     publish "'indent'try {"
     Indent.increase(indent)
+    subIndex = AtomicInteger.incrementAndGet(varIndex)
+    oldInput = input
+    input = "sub'subIndex'"
+    publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
     <Statement>
+    publish "'indent''input'.commit();"
+    input = oldInput
     Indent.decrease(indent)
     exIndex = AtomicInteger.incrementAndGet(varIndex)
     exception = "e'exIndex'"
@@ -540,7 +552,13 @@ public class 'moduleName' {
     Indent.decrease(indent)
     publish "'indent'}"
   } or {
+    subIndex = AtomicInteger.incrementAndGet(varIndex)
+    oldInput = input
+    input = "sub'subIndex'"
+    publish "'indent'final StringCursor 'input' = 'oldInput'.sub();"
     <Statement>
+    publish "'indent''input'.commit();"
+    input = oldInput
   }  
 }
 <ConditionalAbortStatement>{

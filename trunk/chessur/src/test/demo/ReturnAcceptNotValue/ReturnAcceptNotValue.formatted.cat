@@ -1,5 +1,5 @@
 <Root> {
-  ch = next
+  ch = input:next
   accept not 'value'
   return ch
 }

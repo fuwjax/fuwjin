@@ -81,6 +81,7 @@ alias org.fuwjin.util.Indent as Indent
   or <Invocation> >> val
   or <Number> >> val
   or <Object> >> val
+  or val = <NamespaceName>
   or val = <Name>
   return val
 }
@@ -101,15 +102,17 @@ alias org.fuwjin.util.Indent as Indent
 }
 
 <AssumeStatement>{
-  accept 'assume' <Sep>
-  publish "assume "
+  either accept 'assume'
+  or accept 'assuming' 
+  <Sep>
+  publish "assuming "
   could {
     accept 'not' <Sep>
     publish "not "
   }
   either publish <Value>
   or publish <Statement>
-  or abort "assume keyword requires value or in keyword"
+  or abort "assuming keyword requires value or in keyword"
 }
 <EitherOrStatement>{
   accept 'either' <Sep>
@@ -384,6 +387,24 @@ alias org.fuwjin.util.Indent as Indent
 <Name>{
   id = <Identifier> <S>
   return id
+}
+<NamespaceName>{
+  id = <NamespaceIdentifier> <S>
+  return id
+}
+<NamespaceIdentifier>{
+  either {
+    accept 'next'
+    value = 'input:next'
+  } or {
+    <Identifier>
+    could repeat{
+      accept ':'
+      <Identifier>
+    }
+    value = match
+  }
+  return value
 }
 <QualifiedName>{
   id = <QualifiedIdentifier> <S>

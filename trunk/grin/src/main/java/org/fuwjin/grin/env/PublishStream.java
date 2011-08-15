@@ -3,7 +3,7 @@ package org.fuwjin.grin.env;
 import java.io.IOException;
 import java.io.Writer;
 
-public class PublishStream extends AbstractIoInfo<String[]> {
+public class PublishStream extends AbstractStream<String[]> {
    private int locks;
    private int index;
    private final Writer writer;

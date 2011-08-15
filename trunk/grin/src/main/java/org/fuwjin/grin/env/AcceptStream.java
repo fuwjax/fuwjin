@@ -4,7 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 
-public class AcceptStream extends AbstractIoInfo<int[]> {
+public class AcceptStream extends AbstractStream<int[]> {
    private final Reader reader;
 
    public AcceptStream(final Reader reader) {
