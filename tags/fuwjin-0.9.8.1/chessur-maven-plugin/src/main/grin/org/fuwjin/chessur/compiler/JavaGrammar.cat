@@ -1,0 +1,1871 @@
+alias java.lang.Character.isJavaIdentifierStart(int) as identifierStart
+alias java.lang.Character.isJavaIdentifierPart(int) as identifierPart
+alias java.lang.System.out as out
+alias java.io.PrintStream.println as logger
+
+#7.3
+<CompilationUnit> {
+  <S>
+  could <PackageDeclaration>
+  could <ImportDeclarations>
+  <TypeDeclarations>
+  return match
+}
+#7.3
+<ImportDeclarations> {
+  repeat <ImportDeclaration>
+}
+#7.3
+<TypeDeclarations> {
+  repeat <TypeDeclaration>
+}
+#7.4.1
+<PackageDeclaration> {
+  could <Annotations>
+  accept 'package' <Sep>
+  <PackageName>
+  accept ';' <S>
+}
+#7.5
+<ImportDeclaration> {
+  accept 'import' <Sep>
+  could {
+    accept 'static' <Sep>
+  }
+  <QualifiedIdentifier>
+  could {
+    accept '.' <S>
+    accept '*' <S>
+  }
+  accept ';' <S>
+}
+#7.5.1 omitted SingleTypeImportDeclaration
+#7.5.2 omitted TypeImportOnDemandDeclaration
+#7.5.3 omitted SingleStaticImportDeclaration
+#7.5.4 omitted StaticImportOnDemandDeclaration
+#7.6
+<TypeDeclaration> {
+  either {
+    accept ';' <S>
+  } or <InterfaceDeclaration>
+  or <ClassDeclaration>
+}
+#8.1
+<ClassDeclaration> {
+  either <EnumDeclaration>
+  or <NormalClassDeclaration>
+}
+#8.1
+<NormalClassDeclaration> {
+  could <ClassModifiers>
+  accept 'class' <Sep>
+  <Identifier>
+  could <TypeParameters>
+  could <Super>
+  could <Interfaces>
+  <ClassBody>
+}
+#8.1.1
+<ClassModifiers> {
+  repeat <ClassModifier>
+}
+#8.1.1
+<ClassModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    or accept 'abstract'
+    or accept 'static'
+    or accept 'final'
+    or accept 'strictfp'
+    <Sep>
+  }
+}
+#8.1.2
+<TypeParameters> {
+  accept '<' <S>
+  <TypeParameterList>
+  accept '>' <S>
+}
+#8.1.2
+<TypeParameterList> {
+  <TypeParameter>
+  could repeat {
+    accept ',' <S>
+    <TypeParameter>
+  }
+}
+#8.1.4
+<Super> {
+  accept 'extends' <Sep>
+  <ClassType>
+}
+#8.1.4
+<ClassType> {
+  <TypeDeclSpecifier>
+  could <TypeArguments>
+}
+#8.1.5
+<Interfaces> {
+  accept 'implements' <Sep>
+  <InterfaceTypeList>
+}
+#8.1.5
+<InterfaceTypeList> {
+  <InterfaceType>
+  could repeat {
+    accept ',' <S>
+    <InterfaceType>
+  }
+}
+#8.1.5
+<InterfaceType> {
+  <TypeDeclSpecifier>
+  could <TypeArguments>
+}
+#8.1.6
+<ClassBody> {
+  accept '{' <S>
+  could <ClassBodyDeclarations>
+  accept '}' <S>
+}
+#8.1.6
+<ClassBodyDeclarations> {
+  repeat <ClassBodyDeclaration>
+}
+#8.1.6
+<ClassBodyDeclaration> {
+  either <ClassMemberDeclaration>
+  or <InstanceInitializer>
+  or <StaticInitializer>
+  or <ConstructorDeclaration>
+}
+#8.1.6
+<ClassMemberDeclaration> {
+  either <FieldDeclaration>
+  or <MethodDeclaration>
+  or <ClassDeclaration>
+  or <InterfaceDeclaration>
+  or {
+    accept ';' <S>
+  }
+}
+#8.3
+<FieldDeclaration> {
+  could <FieldModifiers>
+  <Type>
+  <VariableDeclarators>
+  accept ';' <S>
+}
+#8.3
+<VariableDeclarators> {
+  <VariableDeclarator>
+  could repeat {
+    accept ',' <S>
+    <VariableDeclarator>
+  }
+}
+#8.3
+<VariableDeclarator> {
+  <VariableDeclaratorId>
+  could {
+    accept '=' <S>
+    <VariableInitializer>
+  }
+}
+#8.3
+<VariableDeclaratorId> {
+  <Identifier>
+  could repeat {
+    accept '[' <S>
+    accept ']' <S>
+  }
+}
+#8.3
+<VariableInitializer> {
+  either <Expression>
+  or <ArrayInitializer>
+}
+#8.3.1
+<FieldModifiers> {
+  repeat <FieldModifier>
+}
+#8.3.1
+<FieldModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    or accept 'static'
+    or accept 'final'
+    or accept 'transient'
+    or accept 'volatile'
+    <Sep>
+  }
+}
+#8.4
+<MethodDeclaration> {
+  <MethodHeader>
+  <MethodBody>
+}
+#8.4
+<MethodHeader> {
+  could <MethodModifiers>
+  could <TypeParameters>
+  <ResultType>
+  <MethodDeclarator>
+  could <Throws>
+}
+#8.4
+<ResultType> {
+  either <Type>
+  or {
+    accept 'void' <Sep>
+  }
+}
+#8.4
+<MethodDeclarator> {
+  <Identifier>
+  accept '(' <S>
+  could <FormalParameterList>
+  accept ')' <S>
+  could repeat {
+    accept '[' <S>
+    accept ']' <S>
+  }
+}
+#8.4.1
+<FormalParameterList> {
+  either <LastFormalParameter>
+  or {
+    <FormalParameters>
+    accept ',' <S>
+    <LastFormalParameter>
+  } or <FormalParameters>
+}
+#8.4.1
+<FormalParameters> {
+  <FormalParameter>
+  could repeat {
+    accept ',' <S>
+    <FormalParameter>
+  }
+}
+#8.4.1
+<FormalParameter> {
+  could <VariableModifiers>
+  <Type>
+  <VariableDeclaratorId>
+}
+#8.4.1
+<VariableModifiers> {
+  repeat <VariableModifier>
+}
+#8.4.1
+<VariableModifier> {
+  either <Annotation>
+  or {
+    accept 'final' <Sep>
+  }
+}
+#8.4.1
+<LastFormalParameter> {
+  could <VariableModifiers>
+  <Type>
+  accept '...' <S>
+  <VariableDeclaratorId>
+}
+#8.4.3
+<MethodModifiers> {
+  repeat <MethodModifier>
+}
+#8.4.3
+<MethodModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    or accept 'abstract'
+    or accept 'static'
+    or accept 'final'
+    or accept 'synchronized'
+    or accept 'native'
+    or accept 'strictfp'
+    <Sep>
+  }
+}
+#8.4.6
+<Throws> {
+  accept 'throws' <Sep>
+  <ExceptionTypeList>
+}
+#8.4.6
+<ExceptionTypeList> {
+  <ExceptionType>
+  could repeat {
+    accept ',' <S>
+    <ExceptionType>
+  }
+}
+#8.4.6
+<ExceptionType> {
+  either <ClassType>
+  or <TypeVariable>
+}
+#8.4.7
+<MethodBody> {
+  either <Block>
+  or {
+    accept ';' <S>
+  }
+}
+#8.6
+<InstanceInitializer> {
+  <Block>
+}
+#8.7
+<StaticInitializer> {
+  accept 'static' <Sep>
+  <Block>
+}
+#8.8
+<ConstructorDeclaration> {
+  could <ConstructorModifiers>
+  <ConstructorDeclarator>
+  could <Throws>
+  <ConstructorBody>
+}
+#8.8
+<ConstructorDeclarator> {
+  could <TypeParameters>
+  <SimpleTypeName>
+  accept '(' <S>
+  could <FormalParameterList>
+  accept ')' <S>
+}
+#8.8.3
+<ConstructorModifiers> {
+  repeat <ConstructorModifier>
+}
+#8.8.3
+<ConstructorModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    <Sep>
+  }
+}
+#8.8.7
+<ConstructorBody> {
+  accept '{' <S>
+  could <ExplicitConstructorInvocation>
+  could <BlockStatements>
+  accept '}' <S>
+}
+#8.8.7.1
+<ExplicitConstructorInvocation> {
+  either {
+    could <NonWildTypeArguments>
+    either accept 'this'
+    or accept 'super' 
+  } or {
+    <Primary>
+    accept '.' <S>
+    could <NonWildTypeArguments>
+    accept 'super'
+  }
+  <Sep>
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+  accept ';' <S>
+}
+#8.8.7.1
+<NonWildTypeArguments> {
+  accept '<' <S>
+  <ReferenceTypeList>
+  accept '>' <S>
+}
+#8.8.7.1
+<ReferenceTypeList> {
+  <ReferenceType>
+  could repeat {
+    accept ',' <S>
+    <ReferenceType>
+  }
+}
+#8.9
+<EnumDeclaration> {
+  could <ClassModifiers>
+  accept 'enum' <Sep>
+  <Identifier>
+  could <Interfaces>
+  <EnumBody>
+}
+#8.9
+<EnumBody> {
+  accept '{' <S>
+  could <EnumConstants>
+  could {
+    accept ',' <S>
+  }
+  could <EnumBodyDeclarations>
+  accept '}' <S>
+}
+#8.9
+<EnumConstants> {
+  <EnumConstant>
+  could repeat {
+    accept ',' <S>
+    <EnumConstant>
+  }
+}
+#8.9
+<EnumConstant> {
+  could <Annotations>
+  <Identifier>
+  could <Arguments>
+  could <ClassBody>
+}
+#8.9
+<Arguments> { 
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+}
+#8.9
+<EnumBodyDeclarations> {
+  accept ';' <S>
+  could <ClassBodyDeclarations>
+}
+#9.1
+<InterfaceDeclaration> {
+  either <NormalInterfaceDeclaration>
+  or <AnnotationTypeDeclaration>
+}
+#9.1
+<NormalInterfaceDeclaration> {
+  could <InterfaceModifiers>
+  accept 'interface' <S>
+  <Identifier>
+  could <TypeParameters>
+  could <ExtendsInterfaces>
+  <InterfaceBody>
+}
+#9.1.1
+<InterfaceModifiers> {
+  repeat <InterfaceModifier>
+}
+#9.1.1
+<InterfaceModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'protected'
+    or accept 'private'
+    or accept 'abstract'
+    or accept 'static'
+    or accept 'strictfp'
+    <Sep>
+  }
+}
+#9.1.3
+<ExtendsInterfaces> {
+  accept 'extends' <Sep>
+  <InterfaceType>
+  could repeat {
+    accept ',' <S>
+    <InterfaceType>
+  }
+}
+#9.1.3
+<InterfaceType> {
+  <TypeDeclSpecifier>
+  could <TypeArguments>
+}
+#9.1.4
+<InterfaceBody> {
+  accept '{' <S>
+  could <InterfaceMemberDeclarations>
+  accept '}' <S>
+}
+#9.1.4
+<InterfaceMemberDeclarations> {
+  repeat <InterfaceMemberDeclaration>
+}
+#9.1.4
+<InterfaceMemberDeclaration> {
+  either <ConstantDeclaration>
+  or <AbstractMethodDeclaration>
+  or <ClassDeclaration>
+  or <InterfaceDeclaration>
+  or {
+    accept ';' <S>
+  }
+}
+#9.3
+<ConstantDeclaration> {
+  could <ConstantModifiers>
+  <Type>
+  <VariableDeclarators>
+  accept ';' <S>
+}
+#9.3
+<ConstantModifiers> {
+  repeat <ConstantModifier>
+}
+#9.3
+<ConstantModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'static'
+    or accept 'final'
+    <Sep>
+  }
+}
+#9.4
+<AbstractMethodDeclaration> {
+  could <AbstractMethodModifiers>
+  could <TypeParameters>
+  <ResultType>
+  <MethodDeclarator>
+  could <Throws>
+  accept ';' <S>
+}
+#9.4
+<AbstractMethodModifiers> {
+  repeat <AbstractMethodModifier>
+}
+#9.4
+<AbstractMethodModifier> {
+  either <Annotation>
+  or {
+    either accept 'public'
+    or accept 'abstract'
+    <Sep>
+  }
+}
+#9.6
+<AnnotationTypeDeclaration> {
+  could <InterfaceModifiers>
+  accept '@' <S>
+  accept 'interface' <Sep>
+  <Identifier>
+  <AnnotationTypeBody>
+}
+#9.6
+<AnnotationTypeBody> {
+  accept '{' <S>
+  could <AnnotationTypeElementDeclarations>
+  accept '}' <S>
+}
+#9.6
+<AnnotationTypeElementDeclarations> {
+  repeat <AnnotationTypeElementDeclaration>
+}
+#9.6
+<AnnotationTypeElementDeclaration> {
+  either {
+    could <AbstractMethodModifiers>
+    <Type>
+    <Identifier>
+    accept '(' <S>
+    accept ')' <S>
+    could <DefaultValue>
+    accept ';' <S>
+  } or <ConstantDeclaration>
+  or <ClassDeclaration>
+  or <InterfaceDeclaration>
+  or <EnumDeclaration>
+  or <AnnotationTypeDeclaration>
+  or {
+    accept ';' <S>
+  }
+}
+#9.6
+<DefaultValue> {
+  accept 'default' <Sep>
+  <ElementValue>
+}
+#9.7
+<Annotations> {
+  repeat <Annotation>
+}
+#9.7
+<Annotation> {
+  either <NormalAnnotation>
+  or <MarkerAnnotation>
+  or <SingleElementAnnotation>
+}
+#9.7
+<NormalAnnotation> {
+  accept '@' <S>
+  <TypeName>
+  accept '(' <S>
+  could <ElementValuePairs>
+  accept ')' <S>
+}
+#9.7
+<ElementValuePairs> {
+  <ElementValuePair>
+  could repeat {
+    accept ',' <S>
+    <ElementValuePair>
+  }
+}
+#9.7
+<ElementValuePair> {
+  <Identifier>
+  accept '=' <S>
+  <ElementValue>
+}
+#9.7
+<ElementValue> {
+  either <ConditionalExpression>
+  or <Annotation>
+  or <ElementValueArrayInitializer>
+}
+#9.7
+<ElementValueArrayInitializer> {
+  accept '{' <S>
+  could <ElementValues>
+  could {
+    accept ',' <S>
+  }
+  accept '}' <S>
+}
+#9.7
+<ElementValues> {
+  <ElementValue>
+  could repeat {
+    accept ',' <S>
+    <ElementValue>
+  }
+}
+#9.7
+<MarkerAnnotation> {
+  accept '@' <S>
+  <TypeName>
+}
+#9.7
+<SingleElementAnnotation> {
+  accept '@' <S>
+  <TypeName>
+  accept '(' <S>
+  <ElementValue>
+  accept ')' <S>
+}
+#10.6
+<ArrayInitializer> {
+  accept '{' <S>
+  could <VariableInitializers>
+  could {
+    accept ',' <S>
+  }
+  accept '}' <S>
+}
+#10.6
+<VariableInitializers> {
+  <VariableInitializer>
+  could repeat {
+    accept ',' <S>
+    <VariableInitializer>
+  }
+}
+#14.2
+<Block> {
+  accept '{' <S>
+  could <BlockStatements>
+  accept '}' <S>
+}
+#14.2
+<BlockStatements> {
+  repeat <BlockStatement>
+}
+#14.2
+<BlockStatement> {
+  either <LocalVariableDeclarationStatement>
+  or <ClassDeclaration>
+  or <Statement>
+}
+#14.4
+<LocalVariableDeclarationStatement> {
+  <LocalVariableDeclaration>
+  accept ';' <S>
+}
+#14.4
+<LocalVariableDeclaration> {
+  could <VariableModifiers>
+  <Type>
+  <VariableDeclarators>
+}
+#14.5
+<Statement> {
+  either <StatementWithoutTrailingSubstatement>
+  or <LabeledStatement>
+  or <IfThenElseStatement>
+  or <WhileStatement>
+  or <ForStatement>
+}
+#!4.5
+<StatementWithoutTrailingSubstatement> {
+  either <Block>
+  or <EmptyStatement>
+  or <ExpressionStatement>
+  or <AssertStatement>
+  or <SwitchStatement>
+  or <DoStatement>
+  or <BreakStatement>
+  or <ContinueStatement>
+  or <ReturnStatement>
+  or <SynchronizedStatement>
+  or <ThrowStatement>
+  or <TryStatement>
+}
+#14.5 omitted StatementNoShortIf
+#14.6
+<EmptyStatement> {
+  accept ';' <S>
+}
+#14.7
+<LabeledStatement> {
+  <Identifier>
+  accept ':' <S>
+  <Statement>
+}
+#14.7 omitted LabeledStatementNoShortIf
+#14.8
+<ExpressionStatement> {
+  <StatementExpression>
+  accept ';' <S>
+}
+#14.8
+<StatementExpression> {
+  either <Assignment>
+  or <PreIncrementExpression>
+  or <PreDecrementExpression>
+  or <PostIncrementExpression>
+  or <PostDecrementExpression>
+  or <MethodInvocation>
+  or <ClassInstanceCreationExpression>
+}
+#14.9
+<IfThenElseStatement> {
+  accept 'if' <Sep>
+  accept '(' <S>
+  <Expression>
+  accept ')' <S>
+  <Statement>
+  could {
+    accept 'else' <Sep>
+    <Statement>
+  }
+}
+#14.9 omitted IfThenStatement, IfThenElseStatementNoShortIf
+#14.10
+<AssertStatement> {
+  accept 'assert' <Sep>
+  <Expression> #TODO: Expression1?
+  could {
+    accept ':' <S>
+    <Expression> #TODO: Expression2?
+  }
+  accept ';' <S>
+}
+#14.11
+<SwitchStatement> {
+  accept 'switch' <Sep>
+  accept '(' <S>
+  <Expression>
+  accept ')' <S>
+  <SwitchBlock>
+}
+#14.11
+<SwitchBlock> {
+  accept '{' <S>
+  could <SwitchBlockStatementGroups>
+  could <SwitchLabels>
+  accept '}' <S>
+}
+#14.11
+<SwitchBlockStatementGroups> {
+  repeat <SwitchBlockStatementGroup>
+}
+#14.11
+<SwitchBlockStatementGroup> {
+  <SwitchLabels>
+  <BlockStatements>
+}
+#14.11
+<SwitchLabels> {
+  repeat <SwitchLabel>
+}
+#14.11
+<SwitchLabel> {
+  either {
+    accept 'case' <Sep>
+    <ConstantExpression>
+  } or {
+    accept 'case' <Sep>
+    <EnumConstantName>
+  } or {
+    accept 'default' <Sep>
+  }
+  accept ':' <S>
+}
+#14.11
+<EnumConstantName> {
+  <Identifier>
+}
+#14.12
+<WhileStatement> {
+  accept 'while' <Sep>
+  accept '(' <S>
+  <Expression>
+  accept ')' <S>
+  <Statement>
+}
+#14.12 omitted WhileStatementNoShortIf
+#14.13
+<DoStatement> {
+  accept 'do' <Sep>
+  <Statement>
+  accept 'while' <Sep>
+  accept '(' <S>
+  <Expression>
+  accept ')' <S>
+  accept ';' <S>
+}
+#14.14
+<ForStatement> {
+  either <BasicForStatement>
+  or <EnhancedForStatement>
+}
+#14.14.1
+<BasicForStatement> {
+  accept 'for' <Sep>
+  accept '(' <S>
+  could <ForInit>
+  accept ';' <S>
+  could <Expression>
+  accept ';' <S>
+  could <ForUpdate>
+  accept ')' <S>
+  <Statement>
+}
+#14.14.1 omitted ForStatementNoShortIf
+#14.14.1
+<ForInit> {
+  either <StatementExpressionList>
+  or <LocalVariableDeclaration>
+}
+#14.14.1
+<ForUpdate> {
+  <StatementExpressionList>
+}
+#14.14.1
+<StatementExpressionList> {
+  <StatementExpression>
+  could repeat {
+    accept ',' <S>
+    <StatementExpression>
+  }
+}
+#14.14.2
+<EnhancedForStatement> {
+  accept 'for' <Sep>
+  accept '(' <S>
+  could <VariableModifiers>
+  <Type>
+  <Identifier>
+  accept ':' <S>
+  <Expression>
+  accept ')' <S>
+  <Statement>
+}
+#14.15
+<BreakStatement> {
+  accept 'break' <Sep>
+  could <Identifier>
+  accept ';' <S>
+}
+#14.16
+<ContinueStatement> {
+  accept 'continue' <Sep>
+  could <Identifier>
+  accept ';' <S>
+}
+#14.17
+<ReturnStatement> {
+  accept 'return' <Sep>
+  could <Expression>
+  accept ';' <S>
+}
+#14.18
+<ThrowStatement> {
+  accept 'throw' <Sep>
+  <Expression>
+  accept ';' <S>
+}
+#14.19
+<SynchronizedStatement> {
+  accept 'synchronized' <Sep>
+  accept '(' <S>
+  <Expression>
+  accept ')' <S>
+  <Block>
+}
+#14.20
+<TryStatement> {
+  accept 'try' <Sep>
+  <Block>
+  either {
+    could <Catches>
+    <Finally>
+  } or <Catches>
+}
+#14.20
+<Catches> {
+  repeat <CatchClause>
+}
+#14.20
+<CatchClause> {
+  accept 'catch' <Sep>
+  accept '(' <S>
+  <FormalParameter>
+  accept ')' <S>
+  <Block>
+}
+#14.20
+<Finally> {
+  accept 'finally' <Sep>
+  <Block>
+}
+#15.8
+<Primary> {
+  either {
+    <PrimaryPrefix>
+    could repeat <PrimaryTrailer>
+  } or {
+    <ArrayCreationExpression>
+    could {
+      either <ClassInstanceCreationSecondary>
+      or <MethodInvocationSecondary>
+      or <FieldAccessSecondary>
+      could repeat <PrimaryTrailer>
+    }
+  }
+}
+#15.8 implied
+<PrimaryTrailer> {
+  either <ClassInstanceCreationSecondary>
+  or <MethodInvocationSecondary>
+  or <ArrayAccessSecondary>
+  or <FieldAccessSecondary>
+}
+#15.8 implied
+<PrimaryLeader> {
+  either {
+    <PrimaryPrefix>
+    could repeat {
+      <PrimaryTrailer>
+      assume accept in .,[
+    } 
+  } or {
+    <ArrayCreationExpression>
+    could {
+      either <ClassInstanceCreationSecondary>
+      or <MethodInvocationSecondary>
+      or <FieldAccessSecondary>
+      assume accept in .,[
+      could repeat {
+        <PrimaryTrailer>
+        assume accept in .,[
+      } 
+    }
+  }
+}
+#15.8 omitted PrimaryNoNewArray
+#15.8 implied
+<PrimaryPrefix> {
+  either <Literal>
+  or {
+    <Type>
+    accept '.' <S>
+    accept 'class' <Sep>
+  } or {
+    accept 'void' <Sep>
+    accept '.' <S>
+    accept 'class' <Sep>
+  } or {
+    accept 'this' <Sep>
+  } or {
+    <ClassName>
+    accept '.' <S>
+    accept 'this' <Sep>
+  } or {
+    accept '(' <S>
+    <Expression>
+    accept ')' <S>
+  } or <ClassInstanceCreationPrimary>
+  or <MethodInvocationPrimary>
+  or <ArrayAccessPrimary>
+  or <FieldAccessPrimary>
+}
+#15.9
+<ClassInstanceCreationExpression> {
+  either {
+    <PrimaryLeader>
+    <ClassInstanceCreationSecondary>
+  } or <ClassInstanceCreationPrimary>
+}
+#15.9 implied
+<ClassInstanceCreationPrimary> {
+  accept 'new' <Sep>
+  could <TypeArguments>
+  <ClassOrInterfaceType>
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+  could <ClassBody>
+}
+#15.9 implied
+<ClassInstanceCreationSecondary> {
+  accept '.' <S>
+  accept 'new' <Sep> 
+  could <TypeArguments>
+  <Identifier>
+  could <TypeArguments> #TODO: verify this should appear twice?
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+  could <ClassBody>
+}
+#15.9
+<ArgumentList> {
+  <Expression>
+  could repeat {
+    accept ',' <S>
+    <Expression>
+  }
+}
+#15.10
+<ArrayCreationExpression> {
+  accept 'new' <Sep>
+  either {
+    either <PrimitiveType>
+    or <ClassOrInterfaceType>
+    <DimExprs>
+    could <Dims>
+  } or {
+    either <PrimitiveType>
+    or <ClassOrInterfaceType>
+    <Dims>
+    <ArrayInitializer>
+  }
+}  
+#15.10
+<DimExprs> {
+  repeat <DimExpr>
+}
+#15.10
+<DimExpr> {
+  accept '[' <S>
+  <Expression>
+  accept ']' <S>
+}
+#15.10
+<Dims> {
+  repeat {
+    accept '[' <S>
+    accept ']' <S>
+  }
+}
+#15.11
+<FieldAccess> {
+  either {
+    <PrimaryLeader>
+    <FieldAccessSecondary>
+  } or <FieldAccessPrimary>
+}
+#15.11 implied
+<FieldAccessPrimary> {
+  could {
+    <ClassName>
+    accept '.' <S>
+  }    
+  accept 'super' <Sep>
+  accept '.' <S>
+  <Identifier>
+} 
+#15.11 implied
+<FieldAccessSecondary> {
+  accept '.' <S>
+  <Identifier>
+}  
+#15.12
+<MethodInvocation> {
+  either {
+    <PrimaryLeader>
+    <MethodInvocationSecondary>
+  } or <MethodInvocationPrimary>
+}
+#15.12
+<MethodInvocationPrimary> {
+  either {
+    accept 'super' <Sep>
+    accept '.' <S>
+    could <NonWildTypeArguments>
+    <Identifier>
+  } or {
+    <ClassName>
+    accept '.' <S>
+    accept 'super' <Sep>
+    accept '.' <S>
+    could <NonWildTypeArguments>
+    <Identifier>
+  } or {
+    <TypeName>
+    accept '.' <S>
+    <NonWildTypeArguments>
+    <Identifier>
+  } or <MethodName> # <TypeName> . <Identifier>
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+}
+#15.12
+<MethodInvocationSecondary> {
+  accept '.' <S>
+  could <NonWildTypeArguments>
+  <Identifier>
+  accept '(' <S>
+  could <ArgumentList>
+  accept ')' <S>
+}
+#15.13
+<ArrayAccess> {
+  either <ArrayAccessPrimary>
+  or {
+    <PrimaryLeader>
+    <ArrayAccessSecondary>
+  }
+}
+#15.13
+<ArrayAccessPrimary> {
+  <ExpressionName>
+  accept '[' <S>
+  <Expression>
+  accept ']' <S>
+}
+#15.13 implied
+<ArrayAccessSecondary> {
+  accept '[' <S>
+  <Expression>
+  accept ']' <S>
+}
+#15.14
+<PostfixExpression> {
+  either <PostIncrementExpression>
+  or <PostDecrementExpression>
+  or <Primary>
+  or <ExpressionName>
+}
+#15.14.2
+<PostIncrementExpression> {
+  <LeftHandSide>
+  accept '++' <S>
+}
+#15.14.3
+<PostDecrementExpression> {
+  <LeftHandSide>
+  accept '--' <S>
+}
+#15.15
+<UnaryExpression> {
+  either <PreIncrementExpression>
+  or <PreDecrementExpression>
+  or {
+    accept in +,\- <S>
+    <UnaryExpression>
+  } or <UnaryExpressionNotPlusMinus>
+}
+#15.15
+<PreIncrementExpression> {
+  accept '++' <S>
+  <LeftHandSide>
+}
+#15.15
+<PreDecrementExpression> {
+  accept '--' <S>
+  <LeftHandSide>
+}
+#15.15
+<UnaryExpressionNotPlusMinus> {
+  either {
+    accept in ~,! <S>
+    <UnaryExpression>
+  } or <CastExpression>
+  or <PostfixExpression>
+}
+#15.16
+<CastExpression> {
+  either {
+    accept '(' <S>
+    <PrimitiveType>
+    could <Dims>
+    accept ')' <S>
+    <UnaryExpression>
+  } or {
+    accept '(' <S>
+    <ReferenceType>
+    accept ')' <S>
+    <UnaryExpressionNotPlusMinus>
+  }
+}
+#15.17
+<MultiplicativeExpression> {
+  <UnaryExpression>
+  could repeat {
+    accept in *,/,% <S>
+    <UnaryExpression>
+  } 
+}
+#15.18
+<AdditiveExpression> {
+  <MultiplicativeExpression>
+  could repeat {
+    accept in +,\- <S>
+    <MultiplicativeExpression>
+  }
+}
+#15.19
+<ShiftExpression> {
+  <AdditiveExpression>
+  could repeat {
+    either accept '<<'
+    or accept '>>>'
+    or accept '>>'
+    <S>
+    <AdditiveExpression>
+  }
+}
+#15.20
+<RelationalExpression> {
+  <ShiftExpression>
+  could repeat {
+    either {
+      either accept '<='
+      or accept '>='
+      or accept '<'
+      or accept '>'
+      <S>
+      <ShiftExpression>
+    } or {
+      accept 'instanceof' <Sep>
+      <ReferenceType>
+    }
+  }
+}
+#15.21
+<EqualityExpression> {
+  <RelationalExpression>
+  could repeat {
+    either accept '=='
+    or accept '!='
+    <S>
+    <RelationalExpression>
+  }
+}
+#15.22
+<AndExpression> {
+  <EqualityExpression>
+  could repeat {
+    accept '&' <S>
+    <EqualityExpression>
+  }
+}
+#15.22
+<ExclusiveOrExpression> {
+  <AndExpression>
+  could repeat {
+    accept '^' <S>
+    <AndExpression>
+  }
+}
+#15.22
+<InclusiveOrExpression> {
+  <ExclusiveOrExpression>
+  could repeat {
+    accept '|' <S>
+    <ExclusiveOrExpression>
+  }
+}
+#15.23
+<ConditionalAndExpression> {
+  <InclusiveOrExpression>
+  could repeat {
+    accept '&&' <S>
+    <InclusiveOrExpression>
+  }
+}
+#15.24
+<ConditionalOrExpression> {
+  <ConditionalAndExpression>
+  could repeat {
+    accept '||' <S>
+    <ConditionalAndExpression>
+  }
+}
+#15.25
+<ConditionalExpression> {
+  <ConditionalOrExpression>
+  could {
+    accept '?' <S>
+    <Expression>
+    accept ':' <S>
+    <ConditionalExpression>
+  }
+}
+#15.26
+<AssignmentExpression> {
+  either <Assignment>
+  or <ConditionalExpression>
+}
+#15.26
+<Assignment> {
+  <LeftHandSide>
+  <AssignmentOperator>
+  <AssignmentExpression>
+}
+#15.26
+<LeftHandSide> {
+  either <ArrayAccess>
+  or <FieldAccess>
+  or <ExpressionName>
+}
+#15.26
+<AssignmentOperator> {
+  could {
+    either accept in *,/,%,+,\-,&,^,|
+    or accept '<<'
+    or accept '>>>'
+    or accept '>>'
+    or assume not accept '=='
+  }
+  accept '=' <S>
+}
+#15.27
+<Expression> {
+  <AssignmentExpression>
+}
+#15.28
+<ConstantExpression> {
+  <Expression>
+}
+
+#6.5 implied
+<QualifiedIdentifier> {
+  <Identifier>
+  could repeat {
+    accept '.' <S>
+    <Identifier>
+  }
+}
+#6.5
+<PackageName> {
+  <QualifiedIdentifier>
+}
+#6.5
+<TypeName> {
+  <QualifiedIdentifier>
+}
+#6.5
+<ExpressionName> {
+  <QualifiedIdentifier>
+}
+#6.5
+<MethodName> {
+  <QualifiedIdentifier>
+}
+#6.5 errata
+<ClassName> {
+  <QualifiedIdentifier>
+}
+#6.5 errata
+<SimpleTypeName> {
+  <Identifier>
+}
+#6.5
+<PackageOrTypeName> {
+  <QualifiedIdentifier>
+}
+#6.5
+<AmbiguousName> {
+  <QualifiedIdentifier>
+}
+#4.1
+<Type> {
+  either <ReferenceType>
+  or <PrimitiveType>
+}
+#4.2
+<PrimitiveType> {
+  either <NumericType>
+  or {
+    accept 'boolean' <Sep>
+  }
+}
+#4.2
+<NumericType> {
+  either <IntegralType>
+  or <FloatingPointType>
+}
+#4.2
+<IntegralType> {
+  either accept 'byte'
+  or accept 'short'
+  or accept 'int'
+  or accept 'long'
+  or accept 'char'
+  <Sep>
+}
+#4.2
+<FloatingPointType> {
+  either accept 'float'
+  or accept 'double'
+  <Sep>
+}
+#4.3
+<ReferenceType> {
+  either <ClassOrInterfaceType>
+  or <TypeVariable>
+  or {
+    <PrimitiveType>
+    <Dims>
+  }
+  could <Dims>
+}
+#4.3
+<ClassOrInterfaceType> {
+  either <ClassType>
+  or <InterfaceType>
+}
+#4.3
+<ClassType> {
+  <TypeDeclSpecifier>
+  could <TypeArguments>
+}
+#4.3
+<InterfaceType> {
+  <TypeDeclSpecifier>
+  could <TypeArguments>
+}
+#4.3
+<TypeDeclSpecifier> {
+  <QualifiedIdentifier> # either <TypeName> or <ClassOrInterfaceType> . <Identifier>
+}
+#4.3
+<TypeName> {
+  <QualifiedIdentifier>
+}
+#4.3
+<TypeVariable> {
+  <Identifier>
+}
+#4.3 omitted ArrayType
+#4.4
+<TypeParameter> {
+  <TypeVariable>
+  could <TypeBound>
+}
+#4.4
+<TypeBound> {
+  accept 'extends' <Sep>
+  <ClassOrInterfaceType>
+  could <AdditionalBoundList>
+}
+#4.4
+<AdditionalBoundList> {
+  repeat <AdditionalBound>
+}
+#4.4
+<AdditionalBound> {
+  accept '&' <S>
+  <InterfaceType>
+}
+#4.5.1
+<TypeArguments> {
+  accept '<' <S>
+  <ActualTypeArgumentList>
+  accept '>' <S>
+}
+#4.5.1
+<ActualTypeArgumentList> {
+  <ActualTypeArgument>
+  could repeat {
+    accept ',' <S>
+    <ActualTypeArgument>
+  }
+}
+#4.5.1
+<ActualTypeArgument> {
+  either <ReferenceType>
+  or <Wildcard>
+}
+#4.5.1
+<Wildcard> {
+  accept '?' <S>
+  could <WildcardBounds>
+}
+#4.5.1
+<WildcardBounds> {
+  either accept 'extends'
+  or accept 'super' 
+  <Sep>
+  <ReferenceType>
+}
+#3.4
+<LineTerminator> {
+  either accept '\r\n'
+  or accept in \r, \n
+}
+#3.4 omitted: InputCharacter
+#3.5 implied
+<Sep> {
+  assume not identifierPart(next)
+  <S>
+}
+#3.5 implied
+<S> {
+  could repeat either <WhiteSpace>
+  or <Comment>
+}
+#3.5 omitted: Input, InputElements, InputElement, Token, Sub
+#3.6
+<WhiteSpace> {
+  either accept in \ , \t #TODO: include \f
+  or <LineTerminator>
+}
+#3.7
+<Comment> {
+  either <TraditionalComment>
+  or <EndOfLineComment>
+}
+#3.7
+<TraditionalComment> {
+  accept '/*'
+  could repeat accept not '*/'
+  accept '*/'
+}
+#3.7
+<EndOfLineComment> {
+  accept '//'
+  could repeat {
+    assume not <LineTerminator>
+    accept next
+  }
+  either <LineTerminator>
+  or assume not next
+}
+#3.7 omitted: CommentTail, CommentTailStar, NotStar, NotStarNotSlash, CharactersInLine
+#3.8
+<Identifier> {
+  assume not <Reserved>
+  assume identifierStart(next)
+  accept next
+  could repeat {
+    assume identifierPart(next)
+    accept next
+  }
+  <S>
+}
+#3.8 implied
+<Reserved> {
+  either <Keyword>
+  or <BooleanLiteral>
+  or <NullLiteral>
+}
+# 3.8 omitted: IdentifierChars, JavaLetter, JavaLetterOrDigit
+#3.9
+<Keyword> {
+  either accept 'abstract'
+  or accept 'assert'
+  or accept 'boolean'
+  or accept 'break'
+  or accept 'byte'
+  or accept 'case'
+  or accept 'catch'
+  or accept 'char'
+  or accept 'class'
+  or accept 'const'
+  or accept 'continue'
+  or accept 'default'
+  or accept 'double'
+  or accept 'do'
+  or accept 'else'
+  or accept 'enum'
+  or accept 'extends'
+  or accept 'finally'
+  or accept 'final'
+  or accept 'float'
+  or accept 'for'
+  or accept 'if'
+  or accept 'goto'
+  or accept 'implements'
+  or accept 'import'
+  or accept 'instanceof'
+  or accept 'interface'
+  or accept 'int'
+  or accept 'long'
+  or accept 'native'
+  or accept 'new'
+  or accept 'package'
+  or accept 'private'
+  or accept 'protected'
+  or accept 'public'
+  or accept 'return'
+  or accept 'short'
+  or accept 'static'
+  or accept 'strictfp'
+  or accept 'super'
+  or accept 'switch'
+  or accept 'synchronized'
+  or accept 'this'
+  or accept 'throws'
+  or accept 'throw'
+  or accept 'transient'
+  or accept 'try'
+  or accept 'void'
+  or accept 'volatile'
+  or accept 'while'
+  <Sep>
+}
+#3.10
+<Literal> {
+  either <FloatingPointLiteral>
+  or <IntegerLiteral>
+  or <CharacterLiteral>
+  or <StringLiteral>
+  or <BooleanLiteral>
+  or <NullLiteral>
+}
+#3.10.1
+<IntegerLiteral> {
+  either <HexIntegerLiteral>
+  or <OctalIntegerLiteral>
+  or <DecimalIntegerLiteral>
+  <Sep>
+}
+#3.10.1
+<DecimalIntegerLiteral> {
+  <DecimalNumeral>
+  could <IntegerTypeSuffix>
+}
+#3.10.1
+<HexIntegerLiteral> {
+  <HexNumeral>
+  could <IntegerTypeSuffix>
+}
+#3.10.1
+<OctalIntegerLiteral> {
+  <OctalNumeral>
+  could <IntegerTypeSuffix>
+}
+#3.10.1
+<IntegerTypeSuffix> {
+  accept in l,L
+}
+#3.10.1
+<DecimalNumeral> {
+  either accept '0'
+  or {
+    <NonZeroDigit>
+    could <Digits>
+  }
+}
+#3.10.1
+<Digits> {
+  repeat <Digit>
+}
+#3.10.1
+<Digit> {
+  accept in 0-9
+}
+#3.10.1
+<NonZeroDigit> {
+  accept in 1-9
+}
+#3.10.1
+<HexNumeral> {
+  accept '0'
+  accept in x,X
+  <HexDigits>
+}
+#3.10.1
+<HexDigits> {
+  repeat <HexDigit>
+}
+#3.10.1
+<HexDigit> {
+  accept in 0-9,a-f,A-F
+}
+#3.10.1
+<OctalNumeral> {
+  accept '0'
+  <OctalDigits>
+}
+#3.10.1
+<OctalDigits> {
+  repeat <OctalDigit>
+}
+#3.10.1
+<OctalDigit> {
+  accept in 0-7
+}
+#3.10.2
+<FloatingPointLiteral> {
+  either <DecimalFloatingPointLiteral>
+  or <HexadecimalFloatingPointLiteral>
+  <Sep>
+}
+#3.10.2
+<DecimalFloatingPointLiteral> {
+  either {
+    <Digits>
+    accept '.'
+    could <Digits>
+    could <ExponentPart>
+    could <FloatTypeSuffix>
+  } or {
+    accept '.'
+    <Digits>
+    could <ExponentPart>
+    could <FloatTypeSuffix>
+  } or {
+    <Digits>
+    <ExponentPart>
+    could <FloatTypeSuffix>
+  } or {
+    <Digits>
+    <FloatTypeSuffix>
+  }
+}
+#3.10.2
+<ExponentPart> {
+  <ExponentIndicator>
+  <SignedInteger>
+}
+#3.10.2
+<ExponentIndicator> {
+  accept in e,E
+}
+#3.10.2
+<SignedInteger> {
+  could <Sign>
+  <Digits>
+}
+#3.10.2
+<Sign> {
+  accept in +,\-
+}
+#3.10.2
+<FloatTypeSuffix> {
+  accept in f,F,d,D
+}
+#3.10.2
+<HexadecimalFloatingPointLiteral> {
+  <HexSignificand>
+  <BinaryExponent>
+  could <FloatTypeSuffix>
+}
+#3.10.2
+<HexSignificand> {
+  either {
+    accept '0'
+    accept in x,X
+    could <HexDigits>
+    accept '.'
+    <HexDigits>
+  } or {
+    <HexNumeral>
+    could accept '.'
+  }
+}
+#3.10.2
+<BinaryExponent> {
+  <BinaryExponentIndicator>
+  <SignedInteger>
+}
+#3.10.2
+<BinaryExponentIndicator> {
+  accept in p,P
+}
+#3.10.3
+<BooleanLiteral> {
+  either accept 'true'
+  or accept 'false'
+  <Sep>
+}
+#3.10.4
+<CharacterLiteral> {
+  accept '\''
+  either <SingleCharacter>
+  or <EscapeSequence>
+  accept '\''
+  <S>
+}
+#3.10.4
+<SingleCharacter> {
+  accept not in ',\\,\n,\r
+}
+#3.10.5
+<StringLiteral> {
+  accept '"'
+  could <StringCharacters>
+  accept '"'
+  <S>
+}
+#3.10.5
+<StringCharacters> {
+  repeat <StringCharacter>
+}
+#3.10.5
+<StringCharacter> {
+  either accept not in ",\\,\n,\r
+  or <EscapeSequence>
+}
+#3.10.6
+<EscapeSequence> {
+  either {
+    accept '\\'
+    accept in b,t,n,f,r,",',\\
+  } or <OctalEscape>
+}
+#3.10.6
+<OctalEscape> {
+  accept '\\'
+  either {
+    <ZeroToThree>
+    <OctalDigit>
+    <OctalDigit>
+  } or {
+    <OctalDigit>
+    could <OctalDigit>
+  }
+}
+#3.10.6
+<ZeroToThree> {
+  accept in 0-3
+}
+#3.10.7
+<NullLiteral> {
+  accept 'null' <Sep>
+}

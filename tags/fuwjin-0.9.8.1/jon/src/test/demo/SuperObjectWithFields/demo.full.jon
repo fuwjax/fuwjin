@@ -1,0 +1,6 @@
+&map = ( &class = org.fuwjin.sample.ChildObject ) {
+  values : [ 1 , 2 , 3 ]
+  | 
+  id : 42 ,
+  name : "Hope"
+}

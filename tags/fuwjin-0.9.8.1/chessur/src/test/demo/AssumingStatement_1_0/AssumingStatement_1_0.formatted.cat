@@ -1,0 +1,4 @@
+<Root> {
+  assuming accept 'a'
+  publish 'yes'
+}

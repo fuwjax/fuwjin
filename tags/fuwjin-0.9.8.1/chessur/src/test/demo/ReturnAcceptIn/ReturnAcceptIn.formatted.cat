@@ -1,0 +1,5 @@
+<Root> {
+  ch = input:next
+  accept in _, a-z
+  return ch
+}

@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>fuwjin</artifactId>
+    <groupId>org.fuwjin</groupId>
+    <version>0.9.8.1</version>
+  </parent>
+  <groupId>org.fuwjin</groupId>
+  <artifactId>grin</artifactId>
+  <version>0.9.8.1</version>
+  <name>Grin Model</name>
+  <description>The Grin runtime model for Chessur</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.fuwjin</groupId>
+      <artifactId>dinah</artifactId>
+      <version>0.9.8.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.fuwjin</groupId>
+      <artifactId>glory</artifactId>
+      <version>0.9.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

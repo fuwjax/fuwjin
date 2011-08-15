@@ -1,0 +1,5 @@
+<Root> {
+  ch = input:next
+  accept input:next
+  return ch
+}

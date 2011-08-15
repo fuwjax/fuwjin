@@ -1,0 +1,10 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+
+<Root> {
+  arr = int[].new(3)
+  int[].set(arr,0,1)
+  int[].set(arr,1,2)
+  int[].set(arr,2,3)
+  return Matcher.is(arr)
+}

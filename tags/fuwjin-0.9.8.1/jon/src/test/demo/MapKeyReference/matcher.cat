@@ -1,0 +1,9 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.Boolean as Boolean
+alias java.util.HashMap as Map
+
+<Root> {
+  map = Map.new()
+  Map.put(map, "hello, reference!", "value")
+  return Matcher.is(map)
+}

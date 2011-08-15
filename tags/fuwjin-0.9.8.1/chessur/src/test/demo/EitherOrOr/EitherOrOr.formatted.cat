@@ -1,0 +1,6 @@
+<Root> {
+  either accept 'a'
+  or accept 'c'
+  or accept 'e'
+  return match
+}

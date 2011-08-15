@@ -1,0 +1,6 @@
+alias org.hamcrest.CoreMatchers as Matcher
+alias java.lang.String as String
+
+<Root> {
+  return Matcher.is(String.charAt("A",0))
+}
