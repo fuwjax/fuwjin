@@ -127,6 +127,9 @@ In the summary below, the following conventions are followed:
   * *_`Ident`_`[`_`Key`_`+]`*: insert. Inserts the value after the key, only available on indexed arrays
     * can assign if: the key is valid for the given array and has not been mapped to a value yet
     * fails assign if: the key is not a valid type for the given array, or if the key has already been mapped, or the variable Ident is not an array
+  * *_`Ident`_`[+]`*: Add. Adds the value to the end of the array, only available on indexed arrays
+    * can assign if: the given array is indexed
+    * fails assign if: the variable Ident is not an array
 
 == Values ==
 
