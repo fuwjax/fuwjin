@@ -6,49 +6,35 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Scope;
-import javax.inject.Singleton;
 
-public class Diioc {
-	private Class<? extends Annotation> scope;
+public class Diioc implements Context{
+	private Context[] contexts;
 
-	public Diioc(){
-		this(Singleton.class);
+	public Diioc(Object... context){
+		this.contexts = new Context[context.length];
+		int i = 0;
+		for(Object o: context){
+			if(o instanceof Context){
+				this.contexts[i++] = (Context)o;
+			}else{
+				this.contexts[i++] = new ReflectiveContext(o);
+			}
+		}
 	}
 	
-	public Diioc(Class<? extends Annotation> scope){
-		if(!scope.isAnnotationPresent(Scope.class)){
-			throw new IllegalArgumentException(scope+" must be an @Scope annotation");
-		}
-		this.scope = scope;
-	}
-	
-	public <T> T create(Class<T> type) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		return create(type, null);
-	}
-
-	private <T extends AccessibleObject> T access(T obj) {
-		if(!obj.isAccessible()){
-			obj.setAccessible(true);
-		}
-		return obj;
-	}
-
-	public <T> T injectMembers(T instance, Object context) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+	public <T> T inject(T instance) throws Exception{
 		Class<?> type = instance.getClass();
 		while(type != null){
 			for(Field field: type.getDeclaredFields()){
 				if(field.isAnnotationPresent(Inject.class)){
-					access(field).set(instance, create(field.getType(), context));
+					access(field).set(instance, create(field.getType(), field.getAnnotations()));
 				}
 			}
 			for(Method method: type.getDeclaredMethods()){
 				if(method.isAnnotationPresent(Inject.class)){
-					access(method).invoke(instance, createArray(method.getParameterTypes(), context));
+					invoke(instance, method);
 				}
 			}
 			type = type.getSuperclass();
@@ -56,40 +42,55 @@ public class Diioc {
 		return instance;
 	}
 
-	private Object[] createArray(Class<?>[] types, Object context) throws InstantiationException,
-			IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static <T extends AccessibleObject> T access(T obj) {
+		if(!obj.isAccessible()){
+			obj.setAccessible(true);
+		}
+		return obj;
+	}
+
+	public <T> T create(Class<T> type, Annotation... qualifiers) throws Exception {
+		T o = create(this, new Key<T>(type, qualifiers));
+		if(o != null){
+			return o;
+		}
+		Constructor<?>[] constructors = type.getDeclaredConstructors();
+		if(constructors.length == 1){
+			return type.cast(invoke(constructors[0]));
+		}
+		for(Constructor<?> c: constructors){
+			if(c.isAnnotationPresent(Inject.class)){
+				return type.cast(invoke(c));
+			}
+		}
+		return inject(access(type.getDeclaredConstructor()).newInstance());
+	}
+	
+	@Override
+	public <T> T create(Diioc root, Key<T> key) throws Exception {
+		for(Context context: contexts){
+			T obj = context.create(root, key);
+			if(obj != null){
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	public Object[] createArray(Class<?>[] types, Annotation[][] qualifiers) throws Exception {
 		Object[] args = new Object[types.length];
 		for(int i=0;i<args.length;i++){
-			args[i] = create(types[i], context);
+			args[i] = create(types[i], qualifiers[i]);
 		}
 		return args;
 	}
+	
+	public <T> T invoke(Constructor<T> c) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, Exception{
+		return inject(access(c).newInstance(createArray(c.getParameterTypes(), c.getParameterAnnotations())));
+	}
 
-	public <T> T create(Class<T> type, Object context) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		if(context != null){
-			Class<?> cls = context.getClass();
-			while(cls != null){
-				for(Field field: cls.getDeclaredFields()){
-					if(type.isAssignableFrom(field.getType()) && field.isAnnotationPresent(scope)){
-						return (T)access(field).get(context);
-					}
-					if(Provider.class.isAssignableFrom(field.getType()) && field.getGenericType() instanceof ParameterizedType && type.isAssignableFrom(((Class<?>)((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0]))){
-						return ((Provider<T>)access(field).get(context)).get();
-					}
-				}
-				for(Method method: cls.getDeclaredMethods()){
-					if(type.isAssignableFrom(method.getReturnType()) && method.isAnnotationPresent(Provides.class)){
-						return (T)access(method).invoke(context, createArray(method.getParameterTypes(), context));
-					}
-				}
-				cls = cls.getSuperclass();
-			}
-		}
-		for(Constructor<?> c: type.getDeclaredConstructors()){
-			if(c.isAnnotationPresent(Inject.class)){
-				return injectMembers((T)access(c).newInstance(createArray(c.getParameterTypes(), context)), context);
-			}
-		}
-		return injectMembers(access(type.getDeclaredConstructor()).newInstance(), context);
+	public Object invoke(Object instance, Method method) throws Exception {
+		return access(method).invoke(instance, createArray(method.getParameterTypes(), method.getParameterAnnotations()));
 	}
 }
+
