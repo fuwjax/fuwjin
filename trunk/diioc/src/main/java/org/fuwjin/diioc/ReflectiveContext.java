@@ -1,41 +1,51 @@
 package org.fuwjin.diioc;
 
-import static org.fuwjin.diioc.Diioc.access;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import javax.inject.Provider;
 
-public class ReflectiveContext implements Context {
-	private Object context;
+public class ReflectiveContext extends AbstractContext {
+	private BindingMap bindings = new BindingMap();
 
 	public ReflectiveContext(Object context) {
-		this.context = context;
-	}
-	
-	@Override
-	public <T> T create(Diioc root, Key<T> key) throws Exception {
-		if(key.satisfies(null, context.getClass(), context.getClass().getAnnotations())){
-			return key.cast(context);
-		}
+		bindings.add(new ConstantBinding<Object>(context));
 		Class<?> cls = context.getClass();
 		while(cls != null){
-			for(Field field: cls.getDeclaredFields()){
-				if(key.satisfies(field.getName(), field.getType(), field.getAnnotations())){
-					return key.cast(access(field).get(context));
+			for(final Field field: cls.getDeclaredFields()){
+				if(field.isSynthetic()){
+					continue;
 				}
-				if(Provider.class.isAssignableFrom(field.getType()) && key.satisfies(field.getName(), Key.parameter(field.getGenericType(),0), field.getAnnotations())){
-					return key.cast(((Provider<?>)access(field).get(context)).get());
+				if(Provider.class.isAssignableFrom(field.getType())){
+					if(Modifier.isStatic(field.getModifiers())){
+						bindings.add(new ProviderFieldBinding(field));
+					}else{
+						bindings.add(new ProviderFieldBinding(field, context));
+					}
+				}else{
+					if(Modifier.isStatic(field.getModifiers())){
+						bindings.add(new FieldBinding(field));
+					}else{
+						bindings.add(new FieldBinding(field, context));
+					}
 				}
 			}
-			for(Method method: cls.getDeclaredMethods()){
-				if(method.isAnnotationPresent(Provides.class) && key.satisfies(method.getName(), method.getReturnType(), method.getAnnotations())){
-					return key.cast(root.invoke(context, method));
+			for(final Method method: cls.getDeclaredMethods()){
+				if(method.isAnnotationPresent(Provides.class)){
+					if(Modifier.isStatic(method.getModifiers())){
+						bindings.add(new MethodBinding(method));
+					}else{
+						bindings.add(new MethodBinding(method, context));
+					}
 				}
 			}
 			cls = cls.getSuperclass();
 		}
-		return null;
+	}
+
+	@Override
+	public <T> Binding<T> bind(Key<T> key) throws Exception {
+		return bindings.bind(key);
 	}
 }

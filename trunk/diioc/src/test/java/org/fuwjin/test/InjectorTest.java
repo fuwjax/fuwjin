@@ -6,7 +6,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
-import org.fuwjin.diioc.Diioc;
+import org.fuwjin.diioc.Injector;
 import org.fuwjin.diioc.Provides;
 import org.fuwjin.sample.NamedObject;
 import org.fuwjin.sample.SimpleConstructorInjection;
@@ -16,58 +16,58 @@ import org.fuwjin.sample.SimpleSetterInjection;
 import org.fuwjin.sample.SimpleSingleton;
 import org.junit.Test;
 
-public class DiiocTest {
+public class InjectorTest {
 	@Test
 	public void testSimpleSample() throws Exception {
-		SimpleSample obj = new Diioc().create(SimpleSample.class);
+		SimpleSample obj = new Injector().create(SimpleSample.class);
 		assertEquals("simple sample", obj.toString());
 	}
 
 	@Test
 	public void testSimpleFieldInjection() throws Exception {
-		SimpleFieldInjection obj = new Diioc().create(SimpleFieldInjection.class);
+		SimpleFieldInjection obj = new Injector().create(SimpleFieldInjection.class);
 		assertEquals("simple field = simple sample", obj.toString());
 	}
 
 	@Test
 	public void testSimpleSetterInjection() throws Exception {
-		SimpleSetterInjection obj = new Diioc().create(SimpleSetterInjection.class);
+		SimpleSetterInjection obj = new Injector().create(SimpleSetterInjection.class);
 		assertEquals("simple setter = simple sample", obj.toString());
 	}
 
 	@Test
 	public void testSimpleConstructorInjection() throws Exception {
-		SimpleConstructorInjection obj = new Diioc().create(SimpleConstructorInjection.class);
+		SimpleConstructorInjection obj = new Injector().create(SimpleConstructorInjection.class);
 		assertEquals("simple constructor = simple sample", obj.toString());
 	}
 
 	@Test
 	public void testDirectSample() throws Exception {
-		SimpleSample obj = new Diioc(new SimpleSample("direct")).create(SimpleSample.class);
+		SimpleSample obj = new Injector(new SimpleSample("direct")).create(SimpleSample.class);
 		assertEquals("direct", obj.toString());
 	}
 
 	@Test
 	public void testDirectFieldInjection() throws Exception {
-		SimpleFieldInjection obj = new Diioc(new SimpleSample("direct")).create(SimpleFieldInjection.class);
+		SimpleFieldInjection obj = new Injector(new SimpleSample("direct")).create(SimpleFieldInjection.class);
 		assertEquals("simple field = direct", obj.toString());
 	}
 
 	@Test
 	public void testDirectSetterInjection() throws Exception {
-		SimpleSetterInjection obj = new Diioc(new SimpleSample("direct")).create(SimpleSetterInjection.class);
+		SimpleSetterInjection obj = new Injector(new SimpleSample("direct")).create(SimpleSetterInjection.class);
 		assertEquals("simple setter = direct", obj.toString());
 	}
 
 	@Test
 	public void testDirectConstructorInjection() throws Exception {
-		SimpleConstructorInjection obj = new Diioc(new SimpleSample("direct")).create(SimpleConstructorInjection.class);
+		SimpleConstructorInjection obj = new Injector(new SimpleSample("direct")).create(SimpleConstructorInjection.class);
 		assertEquals("simple constructor = direct", obj.toString());
 	}
 
 	@Test
 	public void testSingleton() throws Exception {
-		SimpleSample obj = new Diioc(new Object(){
+		SimpleSample obj = new Injector(new Object(){
 			@Singleton SimpleSample sample = new SimpleSample("custom");
 		}).create(SimpleSample.class);
 		assertEquals("custom", obj.toString());
@@ -75,7 +75,7 @@ public class DiiocTest {
 
 	@Test
 	public void testSingletonClass() throws Exception {
-		SimpleSingleton obj = new Diioc(new Object(){
+		SimpleSingleton obj = new Injector(new Object(){
 			SimpleSingleton sample = new SimpleSingleton("singleton");
 		}).create(SimpleSingleton.class);
 		assertEquals("singleton", obj.toString());
@@ -83,7 +83,7 @@ public class DiiocTest {
 
 	@Test
 	public void testSingletonInjection() throws Exception {
-		SimpleSetterInjection obj = new Diioc(new Object(){
+		SimpleSetterInjection obj = new Injector(new Object(){
 			@Singleton SimpleSample sample = new SimpleSample("custom");
 		}).create(SimpleSetterInjection.class);
 		assertEquals("simple setter = custom", obj.toString());
@@ -91,7 +91,7 @@ public class DiiocTest {
 
 	@Test
 	public void testNonSingletonInjection() throws Exception {
-		SimpleSetterInjection obj = new Diioc(new Object(){
+		SimpleSetterInjection obj = new Injector(new Object(){
 			SimpleSample sample = new SimpleSample("custom");
 		}).create(SimpleSetterInjection.class);
 		assertEquals("simple setter = custom", obj.toString());
@@ -99,7 +99,7 @@ public class DiiocTest {
 
 	@Test
 	public void testProvides() throws Exception {
-		SimpleSample obj = new Diioc(new Object(){
+		SimpleSample obj = new Injector(new Object(){
 			@Provides SimpleSample sample(){
 				return new SimpleSample("provided");
 			}
@@ -109,7 +109,7 @@ public class DiiocTest {
 
 	@Test
 	public void testProvidesInjection() throws Exception {
-		SimpleFieldInjection obj = new Diioc(new Object(){
+		SimpleFieldInjection obj = new Injector(new Object(){
 			@Provides SimpleSample sample(){
 				return new SimpleSample("provided");
 			}
@@ -119,7 +119,7 @@ public class DiiocTest {
 
 	@Test
 	public void testNonProvidesInjection() throws Exception {
-		SimpleFieldInjection obj = new Diioc(new Object(){
+		SimpleFieldInjection obj = new Injector(new Object(){
 			SimpleSample sample(){
 				return new SimpleSample("provided");
 			}
@@ -129,7 +129,7 @@ public class DiiocTest {
 
 	@Test
 	public void testProvider() throws Exception {
-		SimpleSample obj = new Diioc(new Object(){
+		SimpleSample obj = new Injector(new Object(){
 			Provider<SimpleSample> provider = new Provider<SimpleSample>(){
 				@Override
 				public SimpleSample get() {
@@ -142,7 +142,7 @@ public class DiiocTest {
 
 	@Test
 	public void testProviderInjection() throws Exception {
-		SimpleConstructorInjection obj = new Diioc(new Object(){
+		SimpleConstructorInjection obj = new Injector(new Object(){
 			Provider<SimpleSample> provider = new Provider<SimpleSample>(){
 				@Override
 				public SimpleSample get() {
@@ -155,7 +155,7 @@ public class DiiocTest {
 
 	@Test
 	public void testNamedInjection() throws Exception {
-		NamedObject obj = new Diioc(new Object(){
+		NamedObject obj = new Injector(new Object(){
 			@Named("name") String objName = "diioc";
 		}).create(NamedObject.class);
 		assertEquals("name = diioc", obj.toString());
@@ -163,7 +163,7 @@ public class DiiocTest {
 
 	@Test
 	public void testImplicitNamedInjection() throws Exception {
-		NamedObject obj = new Diioc(new Object(){
+		NamedObject obj = new Injector(new Object(){
 			String name = "diioc";
 		}).create(NamedObject.class);
 		assertEquals("name = diioc", obj.toString());

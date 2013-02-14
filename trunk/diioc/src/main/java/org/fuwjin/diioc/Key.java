@@ -1,11 +1,16 @@
 package org.fuwjin.diioc;
 
+import static org.fuwjin.diioc.Binding.Strategy.EXISTS;
+import static org.fuwjin.diioc.Binding.Strategy.NONE;
+import static org.fuwjin.diioc.Binding.Strategy.PROVIDED;
+
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.util.Arrays;
 
 import javax.inject.Named;
 import javax.inject.Qualifier;
+
+import org.fuwjin.diioc.Binding.Strategy;
 
 public class Key<T> {
 	private Class<T> type;
@@ -14,46 +19,82 @@ public class Key<T> {
 	public Key(Class<T> type, Annotation... qualifiers){
 		this.type = type;
 		this.qualifiers = qualifiers;
-		
+	}
+	
+	public Binding<?> betterOf(Binding<?> target, Binding<?> best) {
+		if(target == null){
+			return best;
+		}
+		if(best == null && target.strategy() == NONE){
+			return target;
+		}
+		if(!type.isAssignableFrom(target.key().type())){
+			return best;
+		}
+		for(Annotation qualifier: qualifiers){
+			if(isQualifier(qualifier) && !target.key().hasQualifier(qualifier)){
+				return best;
+			}
+		}
+		if(best == null){
+			return target;
+		}
+		switch(best.strategy()){
+		case NONE:
+			return target;
+		case CREATED:
+			if(target.strategy() == EXISTS || target.strategy() == PROVIDED){
+				break;
+			}
+			return best;
+		case PROVIDED:
+			if(target.strategy() == EXISTS && !target.key().type().equals(type)){
+				break;
+			}else if(target.strategy() == PROVIDED && Types.moreSpecific(type, best.key().type(), target.key().type())){
+				break;
+			}
+			return best;
+		case EXISTS:
+			if(target.strategy() == PROVIDED && target.key().type().equals(type) && !best.key().type().equals(type)){
+				break;
+			}else if(target.strategy() == EXISTS && Types.moreSpecific(type, best.key().type(), target.key().type())){
+				break;
+			}
+			return best;
+		}
+		if(target.key().countQualifiers() >= best.key().countQualifiers()){
+			return best;
+		}
+		return target;
+	}
+	
+	protected int countQualifiers(){
+		int count = 0;
+		for(Annotation annotation: qualifiers){
+			if(isQualifier(annotation)){
+				count++;
+			}
+		}
+		return count;
 	}
 
-	public boolean satisfies(String name, Class<?> cls, Annotation... annotations) {
-		return type.isAssignableFrom(cls) && satisfies(annotations, name);
+	protected boolean isQualifier(Annotation qualifier) {
+		return qualifier.annotationType().isAnnotationPresent(Qualifier.class);
 	}
 
-	private boolean satisfies(Annotation qualifier, Annotation[] annotations, String implicitName) {
-		for(Annotation annotation: annotations){
+	protected boolean hasQualifier(Annotation qualifier) {
+		for(Annotation annotation: qualifiers){
 			if(qualifier.equals(annotation)){
 				return true;
 			}
 		}
-		if(qualifier instanceof Named){
-			return ((Named)qualifier).value().equals(implicitName);
-		}
 		return false;
-	}
-
-	private boolean satisfies(Annotation[] annotations, String implicitName) {
-		for(Annotation qualifier: qualifiers){
-			if(qualifier instanceof Qualifier && !satisfies(qualifier, annotations, implicitName)){
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static Class<?> parameter(Type generic, int index) {
-		return (Class<?>)((ParameterizedType)generic).getActualTypeArguments()[index];
 	}
 
 	public Class<T> type() {
 		return type;
 	}
 	
-	public T cast(Object o){
-		return type.cast(o);
-	}
-
 	public boolean isAnnotationPresent(Class<? extends Annotation> scope) {
 		if(type.isAnnotationPresent(scope)){
 			return true;
@@ -64,5 +105,24 @@ public class Key<T> {
 			}
 		}
 		return false;
+	}
+
+	public Annotation[] qualifiers() {
+		return qualifiers;
+	}
+	
+	public static <T> Key<T> keyOf(Class<T> type, Annotation... qualifiers) {
+		return new Key<T>(type, qualifiers);
+	}
+	
+	public static <T> Key<T> keyOf(String name, Class<T> type, Annotation... qualifiers) {
+		for(Annotation qualifier: qualifiers){
+			if(qualifier instanceof Named){
+				return keyOf(type, qualifiers);
+			}
+		}
+		qualifiers = Arrays.copyOf(qualifiers, qualifiers.length + 1);
+		qualifiers[qualifiers.length - 1] = AnnotationBuilder.newAnnotation(Named.class).with("value",name).build();
+		return keyOf(type, qualifiers);
 	}
 }
