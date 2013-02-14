@@ -4,11 +4,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.fuwjin.diioc.Diioc;
+import org.fuwjin.diioc.Injector;
 
 public class DiiocUsage {
 	@Inject 
-	private Diioc diioc;
+	private Injector diioc;
 	
 	@Inject
 	private SampleConnection resource;
@@ -20,7 +20,7 @@ public class DiiocUsage {
 	}
 
 	public static void main(String... args) throws Exception{
-		DiiocUsage usage = new Diioc(new Object(){
+		DiiocUsage usage = new Injector(new Object(){
 			String name = "1.2.3.4";
 		}).inject(new DiiocUsage(args));
 		usage.run();
@@ -28,7 +28,7 @@ public class DiiocUsage {
 
 	private void run() throws Exception {
 		for(final String arg: args){
-			Task task = new Diioc(diioc, this).create(Task.class);
+			Task task = new Injector(diioc, this).create(Task.class);
 			task.run(arg);
 		}
 	}
