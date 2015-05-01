@@ -1,0 +1,11 @@
+Grin is a fairly radical move for the Fuwjin suite. In the past, Fuwjin Suite was primary Pogo (a parser) and JON (a data language). Grin is a scripting language that supercedes both. Chessur is the Java implementation of that language, and is designed to be ported easily to other languages. In a certain sense Chessur is a fairly radical departure from pretty much any tool, and it may need a bit of justification before presentation.
+
+Pogo has been in development for almost 3 years now, and it has grown into a very useful and mature product. But there have always been two issues that were seemingly insurmountable: the syntax and the attributes.
+
+The Pogo syntax is so sufficiently similar to other parsers and regular expressions that it takes more time to discuss why Pogo doesn't work the way you might expect than to explain how it really works. The attributes are so sufficiently unlike everything else in the programming world, that it seems to defy any decent explanation at all. So Pogo requires an unreasonable level of sophistication just to create a simple grammar followed by a ridiculous amount of trial and error to pair that grammar with the attributes that would make it even marginally useful.
+
+As much as it pains me to say it, Pogo is not currently, nor will it likely ever be, ready for mainstream usage. This is made even more painful by the fact that November 2010 saw a great leap in the redesign of Pogo attributes, finally giving them a hope to be explained and understood. But reducing the attribute problem served to expose the syntax problem all the more. Pogo pushed the PEG-style syntax to its limit, and it was time for a real change.
+
+Grin is the spiritual successor to Pogo, a language born from the desire to have a deeper set of string parsing idioms than regular expressions but without the cryptic operators. Ultimately, Grin is a transformation language, capable of articulating complex exchanges between input and output streams and a set of objects.
+
+If you'd like to start experimenting with Chessur, the Java implementation of Grin, check out GettingStartedWithChessur and GettingStartedWithGrin. Perhaps you'd like to see a complete Grin program, if so, head over to GrinFormatterInGrin. And if you'd like the guided tour, then the GrinScreencasts might be just the thing.

@@ -1,0 +1,52 @@
+# Debugging and Testing Grin #
+
+Grin tries to give helpful messages when failures bubble back to the surface, but it can only report on the state at the time of the failure and not on the context. But users can supply more information in the form of Abort statements and, when not using the output stream for anything else, it can be used for logging
+
+## Understanding Failure ##
+
+Failure is a fundamental part of Grin. Failure is how "assume" assumes, "repeat" repeats, "either-or" chooses, and "accept" filters. Most of the time failures will be dealt with behind the scenes, but they can and do bubble all the way back out to the caller. When this happens unexpectedly, it can be a frustrating experience, but there are great ways of finding the problem in your script quickly.
+
+## Error Messages ##
+
+Grin attempts to provide as much context as possible during a failure. There are several possible failures in Grin.
+
+  * **unexpected EOF**: the input stream terminated while trying to read a character
+  * **Could not iterate over 1 to 17**: the input buffer has already disposed of part of the requested characters
+  * **unexpected value**: a non-default was discovered in an `assume not <Value>` statement
+  * **unexpected default**: a default was discovered in an `assume <Value>` statement
+  * **unexpected match: a-zA-Z0-9**: the input matched the filter in an `accept not in <Filter>` statement
+  * **Did not match filter: a-zA-Z0-9**: the input did not match the filter in an `accept in <Filter>` statement
+  * **failed while matching: text**: the input either did or did not match an `accept <Value>` statement
+  * **variable x is unset**: the variable named x was referenced before it was assigned a value
+  * **... could not assign to x**: the intended value for x could not be resolved
+  * **... in Script**: traces the flow of execution through scripts
+  * **... could not resolve x argument 0**: during an invocation of x, the 0th argument failed resolution
+  * **Failure in invocation target x**: during an invocation of x, the host language threw an exception
+  * **Could not invoke x**: an invocation of x failed because the values could not be adapted to the required types
+  * **Could not construct object from template: org.sample.Obj**: the org.sample.Obj could not be constructed (requires a no-arg constructor)
+  * **could not resolve value for field**: The value specified for the field did not resolve
+  * **could not inject value for field**: The host language threw an exception during the field setter invocation
+
+In addition, the script may terminate due to an Abort statement, resulting in a custom error string.
+
+## User Aborted Execution ##
+
+Abort statements are one of the easiest ways to debug a failing script. They can be inserted anywhere, and when hit, immediately terminate execution with any relevant context desired. Combined with using publish to log trace information, this can be a very powerful way of zeroing in on a logic bug in a script.
+
+To use an abort statement, simply provide a value after the "abort" keyword and let Grin handle the rest
+```
+<Script> {
+  abort "No one expects the Spanish Inquisition!"
+}
+```
+
+## Assumptions ##
+
+Assume statements are other ways of zeroing in on a problem. In general, assume statements are wasted effort, but they can help to provide clear error messages on an invalid state, especially when that invalid state would not be easy to determine from the standard error messages. For instance
+
+```
+<Demo> {
+  either assume Map.isEmpty(map)
+  or abort "Map already has 'Map.size(map)' elements in it!"
+}
+```

@@ -1,0 +1,123 @@
+# Getting started with Grin #
+
+_"A grin without a cat! It's the most curious thing I ever saw in all my life!"_
+
+Grin represents a fundamental paradigm shift in language design, part string manipulation, part shell scripting language. In a strong sense it's the language born of the same motivation as the original wiki, the simplest possible thing that might just work.
+
+It may shock you just how many features are "missing" from Grin. But hopefully you'll be even more shocked by how much more is possible when starting with so little.
+
+## Output and Input ##
+
+Grin is at it's heart a scripting language. So we'll start with a simple script.
+```
+<HelloWorld> {
+  publish "Hello, world!"
+}
+```
+
+Here we see the standard "Hello World" example as a Grin Script. The script is named `<HelloWorld>` followed by a Block in curly braces ({}). Together the script name and block make a Script Declaration. Declarations may be collected together in a Catalog, which is generally stored in a file with a ".cat" extension.
+
+The block in our `<HelloWorld>` script has a single statement starting with the keyword "publish". Publish simply means to pass the following Value, in this case "Hello, world!", to the script's output stream.
+
+Let's look at getting some input
+```
+<BasicUserInput> {
+  accept next
+}
+```
+
+This fairly benign script will consume a single character from the input stream. So here we have 2 keywords, "accept" which instructs the interpreter to read from the input if it matches the following Value, and "next" which represents the next character in the stream.
+
+The "next" keyword is used as a filter that always matches, but there are other possible filter expressions. For instance, consider
+```
+<HexDigit> {
+  accept in 0-9, a-f, A-F
+}
+```
+
+Here we have a script which will consume any number, or a case-insensitive A, B, C, D, E, or F. The keyword "in" indicates that there will be a set of ranges making up the filter. Ranges don't have to be a hyphen-separated pair. If the first and last characters are the same, then the hyphen and last character may be omitted.
+
+For a slightly more interesting example, let's say I'm secretly offended that the Romans couldn't develop a proper number system and the Arabs couldn't develop a proper alphabet forcing billions of people for thousands of years to mix two different symbol sets with horribly conflicting glyphs and therefore, I refuse, on principle, to accept those characters into my script. Nothing personal to the Romans or Arabs who might be secretly offended that I'm secretly offended.
+```
+<OurFirstRealScript> {
+  accept not in 1,I,l,0,O,5,S,2,Z,8,B
+  publish "accepted 'match'."
+}
+```
+
+The script `<OurFirstRealScript>` scans in an unoffensive character from the input stream and then publishes it to the output stream. Our filter condition this time includes the "not" keyword, which reverses the filter. So, in this example, the value of the "accept" is the next character from the input as long as it is not the number one, an uppercase I, a lowercase l, a zero, an uppercase O, etc.
+
+It may seem at first glance like "accepted 'match'" would be pretty useless, but literals allow for embedded values enclosed in single quotes. The "match" keyword represents the value of the accepted input characters during the current script's execution. So if the next character in the input was "A", then the script would publish "accepted A" to the output stream.
+
+### Flow Control ###
+
+So, fine, we've seen input, and output, but we all know the dirty details of programming live in the control structures. Grin is very different in how it handles control structures, let's look at some examples.
+
+```
+<RepetitionIsFun> {
+  repeat accept "su"
+}
+```
+We have seen this use of accept indirectly, "accept" followed by a value expression requires that the value match the input before consuming it. So "accept next" meant consume the next character from the input as long as it matches the next character from the input. Accepting a value will only accept characters from the input if they match the value, in this case, an "s" followed by a "u".
+
+This script will consume the "su" from "sue", the "susu" of "susurrous" and the "sususu" of "sususudio". It will fail if there is no "su" to consume, for instance if the input were "bob". If we wanted to match zero or more instead of one or more, we can use the keyword "could"
+```
+<OptionalRepetitionIsFunToo> {
+  could repeat accept "su"
+}
+```
+The "could" keyword can be used without "repeat" to indicate any optional statement
+```
+<OptionalStatementsAreJustAsFun> {
+  could accept a,b
+}
+```
+This script will consume the next character from the input if it is an a or b, but it won't fail if it doesn't match. Instead of a conditional statement, it is possible to try a set of ordered alternatives.
+```
+<DecisionsDecisions> {
+  either accept "the cake is a lie"
+  or accept "GlaDOS loves you"
+}
+```
+So, here either the input stream starts with "the cake is a lie" or "GlaDOS loves you". Either-or statements are processed in order, and there can be as many "or" clauses as necessary as long as there is at least one. For instance
+```
+<KindaLikeSwitchCase> {
+  either num = <Int>
+  or num = <Short>
+  or num = <Char>
+  or num = <Long>
+  or num = <Byte>
+  return num
+}
+```
+There's a whole bunch of new concepts here, so let's break it down. A Value may be named by assigning it to a variable, for instance "num = `<Int>`". An assigned value may be used later, as in "return num".
+
+Scripts may be called simply by referring to the name, and they may be used as Values, assuming they end with a "return" statement. The "return" keyword is passes the following Value to the caller of the script.
+
+### Failure ###
+
+So, we've looked at "either-or", "could", "repeat", "accept", "publish", and "return" statements. We've seen scripts called from other scripts. There have been a few assignments. We learned that values can be literals, "next", "match", variables, and even other scripts.
+
+To finish up this "Getting Started", let's look at something we've glossed over a bit. Grin is fundamentally built around the idea of failure. An "either-or" statement triggers the "or" when the "either" fails. An "accept" fails when the filter doesn't match the input. A "repeat" statement keeps repeating until it fails. A "could" statement ignores failures. Failures in Grin blur the line between Java's "if" and "try-catch" and do it all without conditions. It's no coincidence we haven't mentioned any operators, there's no concept of mathematical or comparison operators in Grin.
+
+There aren't many ways to generate root failures in Grin, in fact, the only way with the statements we've seen so far is mismatched input during "accept". Unfortunately, sometimes it's crucial to conditionally fail.
+
+Grin has another way of generating root failures, the "assume" statement. An "assume" keyword can be followed by either a Value or another Statement. In either case, regardless of whether the statement succeeds or fails, the input, output and environment will not change. An "assume" statement is a way of testing whether something would work, without any of the side effects of it actually working (mostly).
+
+Let's look at the last example with new features now
+```
+<TheRestOfTheStory> {
+  either {
+    assume java.util.Map.isEmpty(map)
+    publish "it's an empty map"
+  } or
+    publish "it's got stuff in it"
+}
+```
+Without going too far into it, that thing following the "assume" keyword is called an Invocation. Invocations are ways of calling back out to the underlying language, in this case Java. Invocations are discussed more in EmbeddedGrin. For now it's just a value that could have one of 3 resolutions: true, false, or an exception. When "assume" is followed by a Value, it will fail on two outcomes, an exception, or a default value, in this case "false".
+
+You'll also notice that the curly braces can show up in more places than just the script start and end. Any set of statements can be wrapped in curly braces to indicate that they are a composite statement. Blocks tend to show up most frequently in "either-or", "should" and "repeat" statements, though they can appear anywhere statements are legal.
+
+The "assume" statement can be negated, much like an "accept" statement.
+
+This concludes the "Getting Started with Grin", but there is still more to learn. If you want to learn more about Grin `<->` Java interoperability, check out EmbeddedGrin. If you're interested in how to manage catalogs as they grow in size, check out AdvancedScriptManagement. Looking for a pragmatic way to grow and test your scripts? Look no further than DebuggingAndTestingScripts. And if you're looking for the details, there's the GrinLanguageSpecification or the distilled down GrinQuickReference.

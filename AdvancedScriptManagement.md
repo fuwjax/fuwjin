@@ -1,0 +1,59 @@
+# Script Management #
+
+Grin is more verbose than many other parsing languages. So Catalogs for more complicated grammars can grow very large. There are a few language features in particular that support managing large grammars.
+
+## Load Declarations ##
+
+Other .cat files may be referenced within a Catalog through load declarations, for instance:
+```
+  load path/to/file.cat as File
+```
+
+Loaded catalogs become "modules" in the current catalog, and provide the following declarations:
+  * All alias declarations are brought over as-is, but alias declarations in the current catalog may override them for the current catalog.
+  * Load declarations are available to the module, but not to the catalog, they must be reloaded in the current catalog if needed.
+  * Script declarations are available using the module's name (in the example, "File") as a namespace.
+
+## Script Namespaces ##
+
+Script namespaces are very similar to XML namespaces in that the namespace is prepended with a colon to the Script name, for instance:
+
+```
+  load path/to/file.cat as File
+
+<Script> {
+  <File:ExternalScript>
+}
+```
+
+This script will call the external script in the file.cat catalog. There is currently no other way to use namespaces than by loading a catalog as a module.
+
+## Script I/O Redirection ##
+
+In rare instances it is sometimes nice to be able to funnel a custom stream into or out of a Script. One way to do that is Stream Redirection. Here's an instance of new input for a script:
+```
+<RedirectionIn> {
+  <Script> << "some input"
+}
+```
+
+The script, instead of inheriting its input, will instead accept from "some input". Any value type is permissible. But perhaps it would be more useful to save the output.
+
+```
+<RedirectionOut> {
+  <Script> >> aVariable
+}
+```
+This will save the published output from script to the "aVariable" variable rather than outputting back to the inherited stream. It's possible to chain scripts together, for instance:
+```
+<ChainedRedirection> {
+  <aScript> >> <anotherScript>
+}
+```
+Here the output of aScript is piped in as the input to anotherScript. For the curious, the value of this expression is the result of anotherScript; the return value from aScript is lost. All redirections may be used together, consider:
+```
+<RidiculousRedirection> {
+  <aScript> << "some input" >> <anotherScript> >> aVariable
+}
+```
+The input redirection must come first, and the output redirection can't continue through a variable, but this is well beyond any reasonable need for redirection. In general, this feature will not be useful to a well designed script. To see an example of a poorly designed (read: iteratively developed) script, check out GrinCodeGenerator.cat in the code base.

@@ -1,0 +1,501 @@
+# Grin Language Specification #
+
+The Grin Language is a fairly radical departure from traditional scripting languages. At first glance, it may seem easy to list all the things that are missing from Grin. But the driving force behind Grin is the sneaking suspicion that programming doesn't have to always be so hard. What happens if the simple stays easy, and the hard is pushed back to a supporting language?
+
+```
+<Catalog> {
+  repeat either <AliasDeclaration>
+  or <LoadDeclaration>
+  or <ScriptDeclaration>
+}
+```
+Note that the Grin scripts on this page are meant to illustrate rather than define. In particular, for the sake of brevity, white space is not addressed. For the language parser, please refer to GrinParser.cat in the code base.
+
+Grin is written in files called Catalogs or .cat files. Catalogs are primarily collections of Script Declarations, a Script being the primary code block in Grin, much as methods are to Java. These catalogs are implicit namespaces and may be included in other catalogs through Load Declarations. Aliases are a shortened identifier for function signatures and are declared just like Loads and Scripts in the catalog.
+
+### Alias Declaration ###
+
+```
+<AliasDeclaration> {
+  either <SignatureAlias>
+  or <NameAlias>
+}
+```
+
+Alias Declarations come in two flavors. The Name Alias allows a qualified name to be replaced with a simpler identifier. The Signature Alias maps a specific function signature to a simple name. Aliases are currently used in Invocation, Object, Type and Field resolution.
+
+#### Signature Alias ####
+
+```
+<SignatureAlias> {
+  accept 'alias'
+  <Signature>
+  accept 'as'
+  <Name>
+}
+<Signature> {
+  <QualfiedName>
+  accept '('
+  could {
+    <QualifiedName>
+    could repeat {
+      accept ','
+      <QualifiedName>
+    }
+  }
+  accept ')'
+}
+<QualifiedName> {
+  <Name>
+  could repeat {
+    accept '.'
+    <Name>
+  }
+}
+```
+
+This more complicated version of alias binds a function signature to a simple name. A Signature is a qualified name followed by a comma delimited list of qualified names enclosed in parentheses. A qualified name or "dotted name" is a series of names, possibly just one, separated by periods (.).
+
+#### Name Alias ####
+
+```
+<NameAlias> {
+  accept 'alias'
+  <QualifiedName>
+  accept 'as'
+  <Name>
+}
+```
+
+If the name alone is enough to identify the alias, the simple version of an alias binds a qualified name to a simple name. The alias name may then be substituted for the aliased qualified name in the rest of the catalog.
+
+### Load Declaration ###
+
+```
+<LoadDeclaration> {
+  accept 'load'
+  <Path>
+  accept 'as'
+  <Name>
+}
+<Path> {
+  could accept '/'
+  <QualifiedName>
+  could repeat {
+    accept '/'
+    <QualifiedName>
+  }
+}
+```
+
+A Load Declaration imports the catalog indicated by the file system path Path as the local namespace Name. All Scripts from the loaded catalog may be referenced by their namespaced name. See the Script statement for more detail.
+
+### Script Declaration ###
+
+```
+<ScriptDeclaration> {
+  <ScriptName>
+  <ScriptBlock>
+}
+<ScriptName> {
+  accept '<'
+  <Name>
+  accept '>'
+}
+<ScriptBlock> {
+  accept '{'
+  could repeat <Statement>
+  could <ReturnStatement>
+  accept '}'
+}
+```
+
+> A Script Declaration defines a script for later use within other scripts or from the underlying language. The script is a Script Block prefixed with an elevated name. The elevated name is technically up to the IDE for presentation, for instance, it may be rendered as bold or with a green background. However, for the sake of text only presentation, it is assumed to be a normal name enclosed in angle brackets.
+
+The Script Block is like a standard Block statement except that it may optionally end with a return statement. Return statements are only valid as the last statement in a script block.
+
+Scripts, when executed, have a state associated with their execution. This state is composed of an input and output stream as well as an environment, a set of named objects. In addition, the execution state may be marked as "failed". A failed execution state will not be able to resolve to a value by the underlying language implementation, generally instead resulting in an exception describing the failed state. A normal state at the end of a script execution will resolve to the value of the return statement, or to some sentinel value such as null or an unset marker if no return statement is present.
+
+## Grin Statements ##
+
+```
+<Statement> {
+  either <AcceptStatement>
+  or <PublishStatement>
+  or <AssignmentStatement>
+  or <Script>
+  or <Invocation>
+  or <BlockStatement>
+  or <CouldStatement>
+  or <RepeatStatement>
+  or <EitherOrStatement>
+  or <AssumeStatement>
+  or <AbortStatement>
+}
+```
+
+Grin Statements are the primary code elements in Grin. There are only a dozen or so statements dealing with input/output, redirection and control flow. Each statement may modify the execution state of the script, and in particular, may toggle the "failed" marker.
+
+#### Accept Statement ####
+
+```
+<AcceptStatement> {
+  accept 'accept'
+  could accept 'not'
+  either {
+    accept 'in'
+    <Filter>
+  } or <Value>
+}
+<Filter> {
+  <Range>
+  could repeat {
+    accept ','
+    <Range>
+  }
+}
+<Range> {
+  accept next
+  could {
+    accept '-'
+    accept next
+  }
+} 
+```
+
+Accept statements consume matching characters from the input stream associated with the script. The Filtered version accepts a character if it falls in any of the ranges in the filter (or doesn't fall in any ranges if the "not" keyword is present). The value version consumes a sequence of characters if the input matches the resolved value. If the "not" keyword is present in the value version, it consumes the next character from the input if the input does not match the resolved value.
+
+An accept statement will set the state "failure" marker if the input does not match the acceptance criteria. Additionally, the statement will set the state "failure" marker if the value cannot be resolved in the value version of the statement.
+
+#### Publish Statement ####
+
+```
+<PublishStatement> {
+  accept 'publish'
+  <Value>
+}
+```
+
+Publish statements serialize the resolved value to the output stream.
+
+A publish statement will set the state "failure" marker if the value cannot be resolved. A publish statement will **not** set the state "failure" marker if the value cannot be serialized to the output stream, as the serialization will likely be buffered. It is appropriate for the script to abort execution when the output buffer can no longer be serialized to the output stream.
+
+#### Assignment ####
+
+```
+<AssignmentStatement> {
+  <Name>
+  accept '='
+  <Value>
+}
+```
+
+Assignments associate the resolved value with the name in the current environment. This association will not leave the current script, i.e. a Script cannot modify the name-value mapping for the caller.
+
+An assignment will set the state "failure" marker if the value cannot be resolved. An assignment will always successfully associate a name with a resolved value.
+
+#### Script ####
+
+```
+<Script> {
+  <ScriptId>
+  could {
+    accept '<<'
+    <Value>
+  }
+  could repeat {
+    accept '>>'
+    <ScriptId>
+  }
+  could {
+    accept '>>'
+    <Name>
+  }
+}
+<ScriptId> {
+  accept '<'
+  <Name>
+  could {
+    accept ':'
+    <Name>
+  }
+  accept '>'
+```
+
+Script redirections are calls to other scripts. Scripts located in the same catalog as the caller should omit the namespace, while scripts in loaded catalogs should use the local namespace from the load command.
+
+Script redirections normally inherit the input, output and environment of the caller. After the script has executed, control will be returned to the caller. Any changes to the input and/or output will remain, however, the environment will be restored to the same mappings as before the call.
+
+The input to a script may be redirected by a caller to a resolved value. This value will be serialized to a stream as though in a publish statement, and then passed as the input stream to the script.
+
+The output to a script may be chained or piped as the input to another script. In this case, the output stream of the first is supplied as the input stream to the second.
+
+Note that while a Script may be a value, and therefore both "`<`A> >> `<`B>" and "`<`B> `<<` `<`A>" are valid statements, they are not equivalent. "`<`A> >> `<`B>" pipes the output stream from `<`A> into `<`B> as `<`B>'s input stream. "`<`B> `<<` `<`A>" first resolves `<`A> to a value, serializes that value to a temporary stream, and then uses that stream as the input for `<`B>. While this may seem unnecessarily complex at first, IO redirection was designed to mimic normal basic pipe behavior in common operating system shells and will likely be rarely used in practice.
+
+The output of a script may be assigned to a name. As a script may be a value, this means that "result = `<`A> >> output" would map `<`A>'s return value as "result" and the output stream as "output" in the caller's environment.
+
+A script may be used as a value, and it will resolve to the return value of the script. If there is no return statement or if the state "failure" marker is set, then the script will not resolve to a value.
+
+The script redirection will set the state "failure" marker if the call fails or if the input value cannot be resolved.
+
+#### Invocation ####
+
+```
+<Invocation> {
+  <QualfiedName>
+  accept '('
+  could {
+    <Value>
+    could repeat {
+      accept ','
+      <Value>
+    }
+  }
+  accept ')'
+}
+```
+
+An Invocation redirects control back to the underlying implementation language, presumably to handle some task which is not expressible in Grin. The details behind mapping a qualified name to an execution target in the underlying language is implementation dependent. However, the initial name of the qualified name may be an alias name regardless of the implementation, and therefore the alias declarations must be referenced when determining the fully qualified name.
+
+An invocation may be used as a value, and it will resolve to the return value of the execution target. If there is no return value (for instance, with void methods) or if the arguments could not be resolved, or if there is no binding for the invocation, or if the execution target fails, then the invocation will not resolve to a value.
+
+An invocation will set the state "failure" marker if the arguments cannot be resolved, or if there is no binding in the underlying implementation for the qualified name with the specified arguments, or if the underlying execution target fails.
+
+#### Block Statement ####
+
+```
+<BlockStatement> {
+  accept '{'
+  could repeat <Statement>
+  accept '}'
+}
+```
+
+A block is a set of statements enclosed in curly braces. When the block statement executes, it will execute each of the inner statements in order. If any statement sets the state "failure" marker, the block will not execute any further statements.
+
+The block will set the state "failure" marker if any inner statement sets the state "failure" marker. In particular, the block will **not** set the state "failure" marker if there are no inner statements.
+
+#### Assume Statement ####
+
+```
+<AssumeStatement> {
+  accept 'assume'
+  could accept 'not'
+  either <Value>
+  or <Statement>
+}
+```
+
+An Assume statement is designed to make an assertion without altering the current state. After an Assume statement completes, regardless of whether the state "failure" marker is set or not, the input, output and environment should be identical to when the Assume statement started execution.
+
+The Assume statement technically performs two checks on values. First, it checks that the value can be resolved. Next, it checks that the resolved value is not a "default" value. What constitutes a "default" is subject to the implementation, but in general, false for booleans, zero for numeric types and null for objects is fairly standard. On a statement, the Assume statement just checks that the statement will execute.
+
+The Assume statement sets the state "failure" marker if the value or statement cannot be resolved, or if the value is a "default" (or the inverse if the "not" keyword is used)
+
+#### Either/Or Statement ####
+
+```
+<EitherOrStatement> {
+  accept 'either'
+  <Statement>
+  repeat {
+    accept 'or'
+    <Statement>
+  }
+}
+```
+
+An either/or statement is an ordered set of optional statements. Each statement will proceed in order until a statement succeeds. If every statement sets the "failure" marker, then the either/or statement will set the marker as well. At each step, if a statement sets the "failure" marker, then the state will be reset to the same state as when the either/or statement started before executing the next option.
+
+The either/or statement sets the state "failure" marker if no option can apply to the current state.
+
+#### Could Statement ####
+
+```
+<CouldStatement> {
+  accept 'could'
+  <Statement>
+}
+```
+
+A could statement will attempt to execute the statement. If the statement sets the state "failure" marker, the could statement will clear the marker.
+
+The could statement will **not** set the state "failure" marker.
+
+#### Repeat Statement ####
+
+```
+<RepeatStatement> {
+  accept 'repeat'
+  <Statement>
+}
+```
+
+A repeat statement will attempt to execute the statement at least once. If the statement cannot be executed at least once, then it will set the state "failure" marker. Otherwise the statement will execute until it sets the marker, and the repeat will then clear the marker.
+
+The repeat statement will set the state "failure" marker if the statement cannot be executed at least once.
+
+#### Abort Statement ####
+
+```
+<AbortStatement> {
+  accept 'abort'
+  <Value>
+}
+```
+
+An abort statement completely halts all script execution and returns control immediately to the underlying implementation language. The resolved value may be used as part of the failure information passed to the underlying caller. If the value cannot be resolved, a generic message is supplied instead.
+
+The abort statement will not set the state "failure" marker, instead it will always terminate script execution.
+
+#### Return Statement ####
+
+```
+<ReturnStatement> {
+  accept 'return'
+  <Value>
+}
+```
+
+A return statement returns the resolved value as the value of the enclosing script. It may only be used as the final statement in a script block.
+
+The return statement will set the state "failure" marker if the value cannot be resolved.
+
+## Grin Values ##
+
+```
+<Value> {
+  either <Script>
+  or <Invocation>
+  or <StaticLiteral>
+  or <DynamicLiteral>
+  or <NumericLiteral>
+  or <ObjectLiteral>
+  or <MatchVariable>
+  or <NextVariable>
+  or <Variable>
+}
+```
+
+There are several values in Grin. Variables fetch a bound object from the environment. Redirection statements (scripts and invocations) may also be used as values. Literals are rich ways of specifying interesting objects, but which may still require runtime resolution. Scripts and Invocations may both be used as values.
+
+#### Static Literals ####
+
+```
+<StaticLiteral> {
+  accept '\''
+  could repeat accept not '\''
+  accept '\''
+}
+```
+
+Static literals are enclosed in single quotes. They resolve to the string value within the quotes.
+
+#### Dynamic Literals ####
+
+```
+<DynamicLiteral> {
+  accept '\"'
+  could repeat either {
+    accept '\''
+    <Value>
+    accept '\''
+  } or repeat accept not in ', "
+  accept '\"'
+}
+```
+
+Dynamic literals are enclosed in double quotes. The significant difference between these and static literals is that values may be enclosed in single quotes. Then when the dynamic literal is resolved, each of the internal values are resolved and their location within the literal is replaced by the resolved value.
+
+The dynamic literal will fail to resolve if any of the inner values fail to resolve.
+
+#### Numeric Literals ####
+
+```
+<NumericLiteral> {
+  could accept '-'
+  either {
+    repeat accept in 0-9
+    could accept '.'
+  } or {
+    accept '.'
+    accept in 0-9
+  }
+  could repeat accept in 0-9
+  could {
+    accept in e,E
+    could accept '-'
+    could repeat accept in 0-9
+  }
+}
+```
+
+A numeric literal is an untyped number. How and when the underlying language maps the value to a real numeric type is implementation dependent.
+
+### Object Literal ###
+
+```
+<ObjectLiteral> {
+  accept '('
+  <QualifiedName>
+  accept ')'
+  accept '{'
+  could {
+    <FieldLiteral>
+    could repeat{
+       accept ','
+       <FieldLiteral>
+    }
+  }
+  accept '}'
+}
+<FieldLiteral> {
+  <Name>
+  accept ':'
+  <Value>
+}
+```
+
+Object literals allow construction and population of objects. The Qualified Name in the parentheses determines the type of the object, and it is constructed using a default constructor. The Field Literal's Name is the field to set, and the Value is the new value.
+
+### Match Variable ###
+
+```
+<MatchVariable> {
+  accept 'match'
+}
+```
+
+A match variable is a special reserved name representing the input accepted during the current script.
+
+### Next Variable ###
+
+```
+<NextVariable> {
+  accept 'next'
+}
+```
+
+A next variable is a special reserved name representing the next character in the input.
+
+### Variable ###
+
+```
+<Variable> {
+  <Name>
+}
+```
+
+Variables are named references to environment bindings. There are two in particular, match and next, which are specially defined variables. Other variables such as true, false, or null may be provided by the implementation.
+
+Variables resolve to a value if they have been set to a value in the current environment, or any of its parent environments.
+
+### Name ###
+
+`<Name>` should be the only reference still undefined. The characters allowed in name are generally dependent on the underlying language. In Chessur for instance, they are valid Java identifiers. It should be safe to always assume the following Names at least
+
+```
+<Name> {
+  repeat accept in A-Z, a-z, 0-9, _
+}
+```

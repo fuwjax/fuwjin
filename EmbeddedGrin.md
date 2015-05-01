@@ -1,0 +1,67 @@
+# Embedded Grin #
+
+Grin has no mathematical or comparison operators, no ability to define new Data Objects or perform I/O operations. So to do all the heavy lifting, Grin relies on bindings to the host language.
+
+## Invocations ##
+
+Grin's simplicity is due in large part to the ability to call back to a host language. Those callbacks are referred to within Grin as Invocations. Here's an example invocation:
+
+```
+  org.sample.SomeClass.doSomething(aTarget, aValue)
+```
+
+An Invocation looks a lot like a method call, and for good reason; under the covers most functions map straight to method calls. The major difference between functions and methods is that functions do not have a "target", an object acting as "this" or "self" within the function, much as static methods don't have a target. The general rule of thumb is that the target is the first parameter, but this is subject to the implementation of the Function Provider.
+
+Because these bindings are generally mapped back to real classes in the host language, it is very difficult if not impossible to write portable Grin scripts. See AdvancedScriptManagement for strategies that may help scripts stay more portable. See GettingStartedWithDinah for more information on the bindings specifically available in Chessur.
+
+## Aliases ##
+
+Because typing invocation names can get tedious in a hurry, the long names can be avoided through aliasing.
+
+```
+alias org.sample.SomeClass as SomeClass
+...
+SomeClass.doSomething(aTarget, aValue)
+```
+
+Here we have an alias that is very similar to a Java import, but we could have just as easily given an even shorter identifier for the alias, such as:
+```
+alias org.sample.SomeClass as SC
+...
+SC.doSomething(aTarget, aValue)
+```
+
+And aliases are not restricted to the "class" level. They can replace any part of a qualified identifier, so both of the following aliases are valid:
+```
+alias org.sample.SomeClass.doSomething as doIt
+alias org.sample as sample
+...
+doIt(aTarget, aValue)
+sample.SomeClass.doSomething(aTarget, aValue)
+```
+
+It's good to play around with aliases to see what works well for you, but the suggestion is to treat them much like Java imports.
+
+Aliases can play another role as well. Sometimes, in languages like Java, overloaded and overridden methods can become indistinguishable when only referring to them by name. The functions will generally execute correctly, however there are times when it pays to be more precise.
+
+A complete signature can be aliased in addition to just the name. To continue our example:
+```
+alias org.sample.SomeClass.doSomething(org.sample.SomeClass, java.lang.String) as doIt
+...
+doIt(aTarget, aValue)
+```
+This will restrict the reflected method to be exactly one taking a SomeClass and a String. Unfortunately this may not always be enough to completely resolve which function should be invoked; this will hopefully be resolved in Grin soon.
+
+## Streams ##
+
+Grin grew from a parser language, so streams are an integral way for the host language to communicate with Grin.
+
+Generally, streams in an implementation will wrap other, more standard ways of streaming bytes and/or characters. But Grin Streams have an important feature that prevents them from being simple wrappers over standard streams: they may be rewound to any point and replayed. This usually requires non-trivial buffering to keep from blowing out the heap on large files.
+
+## Initial Environment ##
+
+The host language can supply an initial set of environment variables to a Grin Script execution.
+
+## Return Values ##
+
+Grin Scripts may return variables back to the host language, and should not, to the best of its ability, expose any internal workings of the implementation to do so.
