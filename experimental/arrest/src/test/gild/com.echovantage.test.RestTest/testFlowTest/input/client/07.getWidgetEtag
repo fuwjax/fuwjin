@@ -1,0 +1,9 @@
+GET /api/widget/1 HTTP/1.1
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:07 GMT
+If-None-Match: b890030e59101d85
+Accept: */*
+Accept-Charset: UTF-8
+Accept-Encoding: identity
+Accept-Language: en-US
+

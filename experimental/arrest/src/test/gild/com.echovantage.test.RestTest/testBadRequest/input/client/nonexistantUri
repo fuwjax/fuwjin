@@ -1,0 +1,8 @@
+GET /does/not/exist HTTP/1.1
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:23 GMT
+Content-Type: text/plain; charset=UTF-8
+Content-Language: en-US
+Content-MD5: ZajifYh5KDgxtmS9i38K1A==
+
+Hello, World!

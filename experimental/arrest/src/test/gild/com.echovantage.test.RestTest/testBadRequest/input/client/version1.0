@@ -1,0 +1,4 @@
+GET / HTTP/1.0
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:23 GMT
+

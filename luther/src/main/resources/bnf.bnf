@@ -1,0 +1,34 @@
+#start rules
+#ignore [ \n\t\r]
+
+rules:= directive rules
+rules:= rule rules
+rules:= token rules
+rules:= ''
+directive:= start
+directive:= ignore
+start:= '#' 'start' expression
+ignore:= '#' 'ignore' expression
+rule:= symbol ':=' expression
+token:= symbol '=' expression
+expression:= symbol expression
+expression:= literal expression
+expression:= class expression
+expression:= ''
+
+symbol= [_A-Za-z] symboltail
+symboltail= [_A-Za-z0-9] symboltail
+symboltail= ''
+literal= ['] single [']
+single= [^'\\] single
+single= escape single
+single= ''
+escape= '\\' [^]
+class= '[' chars ']'
+class= '[^' chars ']'
+chars= char chars
+chars= range chars
+chars= ''
+char= [^\\\]\-]
+char= escape
+range= char '-' char

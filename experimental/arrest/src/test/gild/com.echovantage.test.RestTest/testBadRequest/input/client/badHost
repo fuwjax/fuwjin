@@ -1,0 +1,4 @@
+GET / HTTP/1.1
+Host: example.com
+X-Test-Date: Fri, 04 Jul 2014 01:05:23 GMT
+

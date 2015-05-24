@@ -1,0 +1,47 @@
+[
+  {
+    name:"Scarred Minotaur",
+    type:"Beast",
+    cost:3,
+    power:6,
+    sacrifice:2,
+    text:"The opposing player reveals his hand and discards all Soldier cards from his hand.",
+    onDiscard: "opponent.hand.reveal;opponent.hand.filter(Soldier).discard"
+  },
+  {
+    name:"Gut Augur",
+    type:"Oracle",
+    cost:3,
+    power:1,
+    sacrifice:4,
+    text:"The opposing player chooses and discards 1 card from his hand. Then reveal the top card of the deck. If an Oracle is revealed, you draw 1 card.",
+    onPortent: "opponent.hand.choose(opponent,1).discard;if(deck.draw(1).discard.type == Oracle) deck.draw(1).take"
+  },
+  {
+    name:"Brazen Slayer",
+    type:"Soldier",
+    cost:4,
+    power:3,
+    sacrifice:2,
+    text:"You may discard a Beast card from your hand. If you do, use the discarded Beast's ability.",
+    onEntry: "c = hand.filter(Beast).choose(0,1).discard;if(c != null) c.onDiscard"
+  },
+  {
+    name:"Mistress of the Wilds",
+    type:"Soldier",
+    cost:2,
+    power:2,
+    sacrifice:3,
+    text:"You may move an opposing Beast from this City to the discard pile.",
+    onEntry: "this.city.opposing.filter(Beast).choose(0,1).discard"
+  },
+  {
+    name:"Detaining Sentry",
+    type:"Soldier",
+    cost:2,
+    power:2,
+    sacrifice:4,
+    text:"Look at the opposing player's hand. Choose a Unit card from his hand and move it to your hand",
+    onEntry: "opponent.hand.reveal;opponent.hand.filter(Unit).choose(self,1).take"
+  }
+]

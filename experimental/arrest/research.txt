@@ -1,0 +1,139 @@
+Ignored Headers
+	Transfer Management
+		Continuation
+			status.Continue
+			status.ExpectationFailed
+			header.Expect
+status.LengthRequired
+status.PartialContent
+status.RequestedRangeNotSatisfiable
+status.RequestEntityTooLarge
+status.RequestTimeout
+status.RequestUriTooLong
+header.AcceptRanges
+header.ContentRange
+header.IfRange
+header.Range
+header.RetryAfter
+header.TE
+header.Trailer
+header.TransferEncoding
+
+Protocol Management
+status.Accepted
+status.ResetContent
+status.ServiceUnavailable
+status.SwitchingProtocols
+status.Unused
+status.UseProxy
+header.Connection
+header.Pragma
+
+Cache/Proxy Managemnt
+status.NonAuthorativeInformation
+status.BadGateway
+status.GatewayTimeout
+status.ProxyAuthenticationRequired
+header.CacheControl
+header.Age
+header.Expires
+header.MaxForwards
+header.ProxyAuthenticate
+header.ProxyAuthorization
+header.Vary
+header.Via
+header.Warning
+
+Agent Info
+header.From
+header.Referer
+header.UserAgent
+
+Authentication/Authorization
+status.Forbidden
+status.PaymentRequired
+status.Unauthorized
+header.Authorization
+header.WWWAuthenticate
+
+
+
+
+Content Metadata
+media type
+representation
+character encoding
+byte encoding (gzip, etc.)
+language
+
+Used Request Headers
+ Accept
+ AcceptCharset
+AcceptEncoding
+ AcceptLanguage
+ Host
+ IfMatch
+ IfModifiedSince
+ IfNoneMatch
+ IfUnmodifiedSince
+ContentEncoding
+ ContentLanguage
+ ContentLength
+ ContentMD5
+ ContentType
+
+Supported Response Headers
+ Date
+ Server
+ Allow
+ Location
+ ETag
+ LastModified
+ContentEncoding
+ ContentLanguage
+ ContentLength
+ContentLocation
+ ContentMD5
+ ContentType
+
+Request parts
+version
+method
+uri
+host
+accept metadata constraint (accept, acceptcharset, acceptencoding, acceptlanguage)
+preconditions (ifmatch, ifnonematch, ifmodifiedsince, ifunmodifiedsince)
+content metadata (contentencoding, contentlanguage, contenttype)
+content data
+
+
+Request-Response flow
+if there is an error in reading from the request in the following, return BadRequest
+if there is any other error, return InternalServerError
+if the version is not HTTP/1.1, return HttpVersionNotSupported
+if the method is not known to the server return NotImplemented
+if the host is not registered, return BadRequest
+header.host and request.uri determine which Resource to use
+ if the resource was moved, return MovedPermanently
+ if the locator used non-identity information to find the resource, return Found
+ if the resource was deleted, return Gone
+ ... TemporarilyMoved
+else if the resource does not exist, return NotFound
+get the handlers that support the method on this resource
+if the handler set is empty, return MethodNotAllowed
+filter the handlers to just those that accept the content metadata
+if the handler set is now empty, return UnsupportedMediaType
+filter the handlers to just those that meet the accept metadata constraint
+if the handler set is now empty, return NotAcceptable
+if the handler set has more than one option, return MultipleChoices
+if the preconditions are not satisfied by this resource,
+	if this is a GET or HEAD return NotModified
+	else return PreconditionFailed
+call the handler with the content
+if the handler could not perform the operation due to changes in the state of the resource, return Conflict
+if the handler returns void, return NoContent
+if the handler created a subordinate resource, return Created
+if the handler returns a representation of this resource, return OK
+if the handler modified another resource, return SeeOther
+
+

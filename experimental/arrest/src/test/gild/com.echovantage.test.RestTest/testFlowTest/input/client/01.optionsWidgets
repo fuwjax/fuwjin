@@ -1,0 +1,4 @@
+OPTIONS /api/widgets HTTP/1.1
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:01 GMT
+

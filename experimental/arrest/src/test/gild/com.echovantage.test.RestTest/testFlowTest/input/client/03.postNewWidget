@@ -1,0 +1,9 @@
+POST /api/widgets HTTP/1.1
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:03 GMT
+Content-Length: 17
+Content-Type: application/json
+Content-Language: en-US
+Content-MD5: 2uFtXRRcFVl7/Lgop7sI2A==
+
+{value:"initial"}

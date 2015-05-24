@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Date: Fri, 04 Jul 2014 01:05:10 GMT
+Server: test
+ETag: d8e0e8093b88992a
+Last-Modified: Fri, 04 Jul 2014 01:05:05 GMT
+Content-Type: application/json
+Content-Length: 25
+Content-MD5: r6sfkhPAuOkAE5+kodAVhg==
+Connection: keep-alive
+
+{"value":"Hello, World!"}

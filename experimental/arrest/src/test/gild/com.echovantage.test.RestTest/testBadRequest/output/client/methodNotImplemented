@@ -1,0 +1,7 @@
+HTTP/1.1 501 Not Implemented
+Date: Fri, 04 Jul 2014 01:05:23 GMT
+Server: test
+Allow: DELETE,GET,HEAD,OPTIONS,POST,PUT
+Content-Length: 0
+Connection: keep-alive
+

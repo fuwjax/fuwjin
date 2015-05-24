@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Date: Fri, 04 Jul 2014 01:05:04 GMT
+Server: test
+ETag: 1f41c554afdf3068
+Last-Modified: Fri, 04 Jul 2014 01:05:03 GMT
+Content-Type: application/json
+Content-Length: 19
+Content-MD5: uHEVk774YBQKdMEuE71LTw==
+Connection: keep-alive
+
+{"value":"initial"}

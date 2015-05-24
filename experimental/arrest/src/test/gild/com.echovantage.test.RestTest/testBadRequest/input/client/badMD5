@@ -1,0 +1,9 @@
+GET /api/widgets HTTP/1.1
+Host: localhost
+X-Test-Date: Fri, 04 Jul 2014 01:05:23 GMT
+Content-Length: 23
+Content-Type: application/json
+Content-Language: en-US
+Content-MD5: 1234Zqz5nP9keWdRTThfcw==
+
+{value:"Hello, World!"}

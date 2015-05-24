@@ -1,0 +1,9 @@
+HTTP/1.1 201 Created
+Date: Fri, 04 Jul 2014 01:05:03 GMT
+Server: test
+Location: /api/widget/1
+ETag: 1f41c554afdf3068
+Last-Modified: Fri, 04 Jul 2014 01:05:03 GMT
+Content-Length: 0
+Connection: keep-alive
+
