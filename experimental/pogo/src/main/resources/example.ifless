@@ -1,0 +1,371 @@
+#I'm not 100% sure this is even possible, but it's a very interesting progression.
+#Instead of treating Pogo as a grammar with some scripting tacked on, why not make it
+#a proper language. There are no operators besides assignment, and very few keywords.
+#
+#Here's a quick summary of the keywords:
+#  import    - syntactic sugar to avoid all those nasty fully qualified names
+#  new       - syntactic sugar that maps to the postage "new" funciton, 
+#              e.g. "new Grammar(postage)" maps to "Grammar.new(postage)"
+#  repeat    - a loop that must execute at least once, the same as the Pogo "+" operator
+#  return    - returns a value as the result of the rule. Must be the last line of the rule def.
+#  match     - represents the input content currently matched by the containing rule
+#  either/or - sets up a block much like Java's if/else, the same as the Pogo "/" operator
+#  is        - tests that an expression would parse without actually parsing, the same as "&"
+#  not       - tests that an expression would not parse without actually parsing, the same as "!"
+#              strictly speaking the keyword is really "assert not", anything else is just sugar
+#  could     - a block that optionally may exist, the same as "?"
+#  in        - consumes one of the following comma-delimited ranges or characters, the same as "[]"
+#              e.g. "in a-z, A-Z, 0-9, _" is the same as "[a-zA-Z0-9_]". Space and comma are escaped: "\ " or "\,"
+#  scan      - consumes the next character, the same as ".". I couldn't come up with a good keyword for this one.
+#
+#Since everything is prefix or block, the language doesn't need any end of statement terminators,
+#and whitespace (including newlines) is optional. Which is why you'll sometimes see:
+#  'x'
+#  <Spacing>
+#and other times see just:
+#  'x' <Spacing>
+#
+#There are some interesting phrases that are possible:
+#  while in a-z, A-Z
+#which is [a-zA-Z]* in Pogo
+#
+#  do in a-z try in 0-9
+#which is [a-z]+[0-9]? in Pogo
+#
+#  while not 'a'
+#this is (!'a' .)* in Pogo, which could be mapped to
+#  while{
+#    assert not 'a'
+#    @
+#  }
+#but this is more verbose and uses @. There really should be a better keyword than "@" for the Pogo "." operator.
+#
+#So when actually parsing, <XXX> "calls" rule XXX, 'literal' matches the literal, 
+#and a method call-ish looking thing invokes the corresponding postage function.
+#
+#The Grammar below does not match this syntax, but the new attribute syntax on Pogo.
+
+
+
+import org.fuwjin.pogo.*
+
+<Grammar>{
+   grammar = new Grammar(postage)
+   <Spacing>
+   repeat{
+     name = <Identifier>
+     scan '<-' 
+     <Spacing>
+     grammar.add(name, <Expression>)
+   }
+   <EndOfFile>
+   grammar.resolve()
+   return grammar
+}
+<Expression>{
+  first = <Sequence>
+  either{
+    is not '/'
+    option = first
+  } or {
+    option = new OptionParser
+    option.add(first)
+    do{
+      scan '/' 
+      <Spacing>
+      option.add(<Sequence>)
+    }
+  }
+  return option
+}
+<Sequence>{
+  first = <Statement>
+  either{
+    second = <Statement>
+    seq = new SequenceParser
+    seq.add(first)
+    seq.add(second)
+    could repeat{
+      seq.add(<Statement>)
+    }
+  } or {
+    seq = first
+  }
+  return seq
+}
+<Statement>{
+  either{
+    stmt = <Attribute>
+  } or {
+    stmt = <Prefix>
+  }
+  return stmt
+}
+<Prefix>{
+  either{
+    scan '&' 
+    <Spacing>
+    prefix = new PositiveLookahead(<Assertion>)
+  } or {
+    scan '!' 
+    <Spacing>
+    prefix = new NegativeLookahead(<Assertion>)
+  } or {
+    prefix = <Suffix>
+  }
+  return prefix
+}
+<Assertion>{
+  either{
+    scan '{' 
+    <Spacing>
+    assertion = <Function>
+    scan '}' 
+    <Spacing>
+  }or{
+    assertion = <Suffix>
+  }
+  return assertion
+}
+<Suffix>{
+  primary = <Primary>
+  either{
+    scan '?' 
+    <Spacing>
+    suffix = new OptionalParser(primary)
+  }or{
+    scan '*' 
+    <Spacing>
+    suffix = new OptionalSeriesParser(primary)
+  }or{
+    scan '+' 
+    <Spacing>
+    suffix = new RequiredSeriesParser(primary)
+  }or{
+    suffix = primary
+  }
+  return suffix
+}
+<Primary>{
+  either{
+    scan '(' 
+    <Spacing>
+    primary = <Expression>
+    scan ')' 
+    <Spacing>
+  } or {
+    primary = <Reference>
+  } or {
+    primary = <Literal>
+  } or {
+    primary = <CharClass>
+  } or {
+    scan '.' 
+    <Spacing>
+    primary = CharacterParser.DOT()
+  }
+  return primary
+}
+<Reference>{
+  name = <Identifier>
+  is not '<'
+  ref = new RuleReference(name)
+  could{
+    scan ':' 
+    <Spacing>
+    ref.attribute(<Attribute>)
+  }
+  return ref
+}
+<Attribute>{
+  scan '{' 
+  <Spacing>
+  either{
+    attr = <Assignment>
+  } or {
+    attr = <Function>
+  }
+  scan '}' 
+  <Spacing>
+  return attr
+}
+<Assignment>{
+  name = <Identifier>
+  scan '=' 
+  <Spacing>
+  either{
+    attr = <Function>
+  } or {
+    attr = new AttributeVariable(<Identifier>)
+  }
+  attr.assignTo(name)
+  return attr
+}
+<Function>{
+  name = <QualifiedIdentifier>
+  scan '(' 
+  <Spacing>
+  function = new AttributeFunction(name)
+  could{
+    function.addParameter(<Identifier>)
+    could repeat{
+      scan ',' 
+      <Spacing>
+      function.addParameter(<Identifier>)
+    }
+  }
+  scan ')' 
+  <Spacing>
+  return function
+}
+<Literal>{
+  either{
+    scan '\''
+    lit = new LiteralParser
+    could repeat{
+      is not '\''
+      lit.append(<Char>)
+    }
+    scan '\'' 
+    <Spacing>
+  } or {
+    scan '"'
+    lit = new LiteralParser
+    could repeat{
+      is not '"'
+      lit.append(<Char>)
+    }
+    scan '"' 
+    <Spacing>
+  }
+  return lit
+}
+<CharClass>{
+  scan '['
+  set = new CharSetParser
+  could repeat{
+    is not ']'
+    first = <Char>
+    either{
+      scan '-'
+      set.addRange(first, <Char>)
+    } or {
+      set.addChar(first)
+    }
+  }
+  scan ']' 
+  <Spacing>
+  return set
+}
+<Identifier>{
+  id = <Ident>
+  <Spacing>
+  return id
+}
+<QualifiedIdentifier>{
+  id = <QualifiedIdent>
+  <Spacing>
+  return id
+}
+<QualifiedIdent>{
+  <Ident>
+  could either {
+    repeat scan '[]'
+    <QualifiedSep>
+    <SimpleQualIdent>
+  } or {
+    <QualifiedSep>
+    <QualifiedIdent>
+  }
+  return match
+}
+<QualifiedSep>{
+  scan in ., $
+}
+<SimpleQualIdent>{
+  <Ident>
+  could repeat{
+    <QualifiedSep>
+    <Ident>
+  }
+}
+<Ident>{
+  <IdentStart>
+  could repeat <IdentPart>
+  return match
+}
+<IdentStart>{
+  ch = scan
+  is Character.isIdentifierStart(ch)
+}
+<IdentPart>{
+  ch = scan
+  is Character.isIdentifierPart(ch)
+}
+<Char>{
+  either{
+    scan '\\'
+    char = <EscapeChar>
+  } or {
+    char = <PlainChar>
+  }
+  return char
+}
+<PlainChar>{
+  return scan not '\\'
+}
+<EscapeChar>{
+  either{
+    escape = <Operator>
+  } or {
+    scan 'n'
+    escape = LiteralParser.NEWLINE
+  } or {
+    scan 'r'
+    escape = LiteralParser.RETURN
+  } or {
+    scan 't'
+    escape = LiteralParser.TAB
+  } or {
+    scan 'x'
+    escape = <HexChar>
+  } or {
+    escape = <OctalChar>
+  }
+  return escape
+}
+<Operator>{
+  return scan in -, ', ", [, ], \\
+}
+<HexChar>{
+  repeat scan in 0-9, A-F, a-f
+  return LiteralParser.parseHex(match)
+}
+<OctalChar>{
+  either{
+    scan in 0-3
+    scan in 0-7
+    scan in 0-7
+  }or{
+    scan in 0-7
+    could scan in 0-7
+  }
+  return LiteralParser.parseOctal(match)
+}
+
+<Spacing>{
+  could repeat scan in \ , \n, \r, \t
+}
+<Comment>{
+  scan '#'
+  could repeat scan not in \r, \n
+  either{
+    scan '\n'
+  }or{
+    scan '\r'
+    could scan '\n'
+  }
+}
+<EndOfFile>{
+  is not scan
+}
