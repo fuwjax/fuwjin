@@ -3,48 +3,53 @@ package org.fuwjin.luther;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.fuwjin.sample.StandardModel;
+
 public class Symbol {
-    private String name;
-    private SymbolState start;
-    private String toString;
-    private Supplier<Model> modelSupplier;
+	private final String name;
+	private SymbolState start;
+	private String toString;
+	private Supplier<StandardModel> modelSupplier;
 
-    void init(String name, SymbolState start, String toString, Supplier<Model> modelSupplier) {
-        this.name = name;
-        this.start = start;
-        this.toString = toString;
-        this.modelSupplier = modelSupplier;
-    }
+	Symbol(final String name) {
+		this.name = name;
+	}
 
-    public SymbolState start() {
-        return start;
-    }
+	void init(final SymbolState start, final String toString, final Supplier<StandardModel> modelSupplier) {
+		this.start = start;
+		this.toString = toString;
+		this.modelSupplier = modelSupplier;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        try {
-            Symbol o = (Symbol) obj;
-            return Objects.equals(name, o.name);
-        } catch (Exception e) {
-            return false;
-        }
-    }
+	public SymbolState start() {
+		return start;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(name);
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		try {
+			final Symbol o = (Symbol) obj;
+			return Objects.equals(name, o.name);
+		} catch (final Exception e) {
+			return false;
+		}
+	}
 
-    @Override
-    public String toString() {
-        return toString;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(name);
+	}
 
-    public String name() {
-        return name;
-    }
+	@Override
+	public String toString() {
+		return toString;
+	}
 
-    public Model model() {
-        return modelSupplier.get();
-    }
+	public String name() {
+		return name;
+	}
+
+	public StandardModel model() {
+		return modelSupplier.get();
+	}
 }

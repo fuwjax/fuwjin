@@ -3,65 +3,68 @@ package org.fuwjin.luther;
 import java.util.Objects;
 import java.util.Set;
 
+import org.fuwjin.sample.StandardModel;
+
 public class SymbolBuilder {
 	public Symbol build() {
-		if(symbol == null){
-			symbol = new Symbol();
-			symbol.init(name, start.build(), start.walk(), () -> new StandardModel(symbol));
+		if (symbol == null) {
+			symbol = new Symbol(name);
+			symbol.init(start.build(), start.walk(), () -> new StandardModel(symbol));
 		}
 		return symbol;
 	}
 
-	private enum FreezeState{
+	private enum FreezeState {
 		Thawed, Freezing, Frozen;
 	}
+
 	private Symbol symbol;
 	private final String name;
-	private SymbolStateBuilder start;
+	private final SymbolStateBuilder start;
 	private boolean rightCycle;
 	private Boolean nullable;
 	private boolean checking;
 
-	public SymbolBuilder(String name){
+	public SymbolBuilder(final String name) {
 		this.name = name;
 		start = new SymbolStateBuilder(this);
 	}
-	
-	public SymbolStateChain start(){
+
+	public SymbolStateChain start() {
 		return start;
 	}
-	
-	public boolean isRightCycle(){
+
+	public boolean isRightCycle() {
 		return rightCycle;
 	}
-	
-	public boolean isNullable(){
+
+	public boolean isNullable() {
 		return nullable;
 	}
-	
+
 	@Override
-   public boolean equals(Object obj){
-		try{
-			SymbolBuilder o = (SymbolBuilder)obj;
+	public boolean equals(final Object obj) {
+		try {
+			final SymbolBuilder o = (SymbolBuilder) obj;
 			return Objects.equals(name, o.name);
-		}catch(Exception e){
+		} catch (final Exception e) {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
-	   return Objects.hashCode(name);
-	}
-	
-	@Override
-	public String toString() {
-	   return start.walk();
+		return Objects.hashCode(name);
 	}
 
-	public Boolean checkNullable(){
-		if(nullable == null){
-			if(checking){
+	@Override
+	public String toString() {
+		return start.walk();
+	}
+
+	public Boolean checkNullable() {
+		if (nullable == null) {
+			if (checking) {
 				return null;
 			}
 			checking = true;
@@ -73,27 +76,27 @@ public class SymbolBuilder {
 
 	public void collapse() {
 		start.collapse();
-   }
+	}
 
 	public boolean checkRightCycle() {
-		if(checking){
+		if (checking) {
 			return true;
 		}
 		checking = true;
 		rightCycle = start.checkRightCycle();
 		checking = false;
 		return false;
-   }
+	}
 
 	public void checkRightRoot() {
 		start.checkRightRoot();
-   }
+	}
 
 	public String name() {
-	   return name;
-   }
+		return name;
+	}
 
 	public Set<SymbolBuilder> buildPredict() {
 		return start.buildPredict();
-   }
+	}
 }

@@ -10,12 +10,12 @@ LR
 LC
 LP
 - Rule = Symbol Expression
--- A Declaration is a capital letter symbol followed by an Expression
+-- A Rule declaration is a capital letter symbol followed by an Expression
+R2X
+- Expression = Symbol Expression | Digit Expression | Value Expression | ''
 --  any capital letters in the Expression will be interpreted as symbol references,
 --  any digit is interpreted as a regular expression reference, and
 --  any other character is interpreted as a literal
-R2X
-- Expression = Symbol Expression | Digit Expression | Value Expression | ''
 X2X
 X3X
 X4X
@@ -30,7 +30,7 @@ X
 30-9
 - Value = [^\n0-9A-Z\\]
 -- A value is anything that isn't a newline, symbol or digit
-4^\n\\1-9A-Z
+4^\n\\0-9A-Z
 - Comment = '-' Ignored
 -- A Comment is a dash followed by Ignored text
 C-I

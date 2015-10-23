@@ -1,113 +1,90 @@
 package org.fuwjin.luther;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator.OfInt;
 import java.util.Set;
+
+import org.echovantage.util.io.IntReader;
 
 public class ParsePosition {
 	private Map<Transition, Transition> items = new HashMap<>();
-	private Map<Symbol, Transition> transitives = new HashMap<>();
-	private Set<Symbol> predict = new LinkedHashSet<>();
-	public final int index;
-	
-	private ParsePosition(int index){
-		this.index = index;
-	}
-	
-	public ParsePosition(Symbol accept) {
-		index = 0;
-		add(new Transition(accept, this));
-		predict();
-   }
+	private Map<Transition, Transition> oldItems = new HashMap<>();
+	private final Set<Symbol> predict = new LinkedHashSet<>();
+	private final Map<Symbol, Origin> origins = new HashMap<>();
+	private int index;
 
-	private void add(Transition next){
-		if(next == null){
+	public Model parse(final Symbol accept, final IntReader input) {
+		index = 0;
+		final OfInt iter = input.stream().iterator();
+		// can't just call save, as we need the predict set from accept
+		add(new Transition(accept, origin(accept)));
+		while (iter.hasNext()) {
+			predict();
+			clear();
+			acceptNext(iter.nextInt());
+		}
+		return result(accept);
+	}
+
+	private void acceptNext(final int ch) {
+		index++;
+		oldItems.values().stream().map(item -> item.accept(ch)).forEach(this::add);
+	}
+
+	private void clear() {
+		final Map<Transition, Transition> temp = oldItems;
+		oldItems = items;
+		items = temp;
+		items.clear();
+		predict.clear();
+		origins.clear();
+	}
+
+	private Origin origin(final Symbol symbol) {
+		return origins.computeIfAbsent(symbol, s -> new Origin(index));
+	}
+
+	private void add(final Transition next) {
+		if (next == null) {
 			return;
 		}
-		if(!items.containsKey(next)){
-			items.put(next, next);
-			if(next.isComplete()){
-				Model result = next.result();
-				Transition mark = markOf(next);
-				if(mark != null){
-					add(mark.accept(next.lhs(), result));
-				}else{
-					for(Transition item: next.origin().awaiting(next.lhs())){
-						add(item.accept(next.lhs(), result));
-					}
-				}
-			}
-			predict.addAll(next.predict());
-		}else{ // grammar is ambiguous
-			items.get(next).result().addAlternative(next.result());
+		if (!items.containsKey(next)) {
+			save(next);
+			next.complete(this::add);
+			next.predict().stream().filter(predict::add).forEach(this::save);
+		} else { // grammar is ambiguous
+			items.get(next).addAlternative(next);
 		}
 	}
-	
-	public ParsePosition accept(int ch) {
-		ParsePosition set = new ParsePosition(index+1);
-		for(Transition item: items.values()){
-			set.add(item.accept(ch));
+
+	private void save(final Symbol symbol) {
+		save(new Transition(symbol, origin(symbol)));
+	}
+
+	private void save(final Transition item) {
+		items.put(item, item);
+		for (final Symbol pending : item.pending()) {
+			origin(pending).addAwaiting(item);
 		}
-		set.predict();
-      return set;
-   }
+	}
 
 	private void predict() {
-	   for(Symbol s: predict){
-	   	Transition t = new Transition(s, this);
-			items.put(t,t);
-		}
-		for(Transition item: items.values()){
-			Symbol rr = item.rightCycle();
-			if(rr != null && awaiting(rr).size() == 1){
-				Transition mark = markOf(item);
-				if(mark == null){
-					transitives.put(rr, item);
-				}else{
-					transitives.put(rr, mark.mark(item));
-				}
+		for (final Transition item : items.values()) {
+			final Symbol rr = item.rightCycle();
+			if (rr != null) {
+				origin(rr).setMark(item);
 			}
 		}
-   }
-	
-	private static Transition markOf(Transition item){
-		return item.origin().transitives.get(item.lhs());
 	}
-	
-	private Collection<Transition> awaiting(Symbol transition) {
-		// this could be more efficient
-		List<Transition> list = new ArrayList<>();
-		for(Transition item: items.values()){
-			if(item.pending().contains(transition)){
-				list.add(item);
+
+	private Model result(final Symbol symbol) {
+		for (final Transition item : items.values()) {
+			if (item.isModelFor(symbol)) {
+				return item;
 			}
 		}
-	   return list;
-   }
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append(index).append("\n");
-		for(Transition item: items.values()){
-			builder.append(item).append("\n");
-		}
-		for(Map.Entry<Symbol, Transition> entry: transitives.entrySet()){
-			builder.append(entry.getKey().name()).append(": ").append(entry.getValue()).append("\n");
-		}
-	   return builder.toString();
+		throw new IllegalArgumentException("Invalid or incomplete input");
 	}
-
-    public Model result(Symbol symbol) {
-        for(Transition item: items.values()){
-            if(symbol.equals(item.lhs()) && item.isComplete()){
-                return item.result();
-            }
-        }
-        throw new IllegalArgumentException("Invalid or incomplete input");
-    }
 }
