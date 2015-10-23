@@ -1,19 +1,27 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.builder;
 
-import java.util.*;
-
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
-public class SymbolStateBuilder implements SymbolStateChain {
+import org.fuwjin.luther.SymbolState;
+import org.fuwjin.luther.model.Model;
+
+public class SymbolStateBuilder {
 	private SymbolBuilder lhs;
 	private Set<String> names = new HashSet<>();
 	private Map<SymbolBuilder, SymbolStateBuilder> symbolic = new HashMap<>();
 	private Map<Codepoints, SymbolStateBuilder> literals = new HashMap<>();
 	private Set<SymbolBuilder> predict;
 	private SymbolBuilder rightCycle;
-	private boolean complete;
+	private Function<Model, ?> complete;
 	private SymbolState state;
 
 	SymbolStateBuilder(SymbolBuilder lhs){
@@ -49,9 +57,9 @@ public class SymbolStateBuilder implements SymbolStateChain {
         return s;
     }
 
-    public void complete(String name) {
+    public void complete(String name, Function<Model, ?> transform) {
         names.add(name);
-		this.complete = true;
+		this.complete = transform;
    }
 
 	public String walk(){
@@ -85,11 +93,12 @@ public class SymbolStateBuilder implements SymbolStateChain {
 	   	ensure(entry.getKey()).merge(entry.getValue());
 	   }
 	   names.addAll(state.names);
-	   complete |= state.complete;
+	   //TODO that last option is wrong, but what is right?
+	   complete = complete == null ? state.complete : state.complete == null ? complete : complete.equals(state.complete) ? complete : complete;
    }
 
 	public boolean checkNullable() {
-		if(complete){
+		if(complete != null){
 			return true;
 		}
 		for(Map.Entry<SymbolBuilder, SymbolStateBuilder> entry: symbolic.entrySet()){
@@ -152,7 +161,7 @@ public class SymbolStateBuilder implements SymbolStateChain {
 			if(entry.getValue().checkRightCycle()){
 				return true;
 			}
-			if(entry.getValue().complete && entry.getKey().checkRightCycle()){
+			if(entry.getValue().complete != null && entry.getKey().checkRightCycle()){
 				return true;
 			}
 		}
@@ -168,7 +177,7 @@ public class SymbolStateBuilder implements SymbolStateChain {
 		}
 		if(symbolic.size() == 1 && literals.isEmpty()){
 			for(Map.Entry<SymbolBuilder, SymbolStateBuilder> entry: symbolic.entrySet()){
-				if(entry.getKey().isRightCycle() && entry.getValue().complete){
+				if(entry.getKey().isRightCycle() && entry.getValue().complete != null){
 					rightCycle = entry.getKey();
 				}
 			}

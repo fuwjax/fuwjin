@@ -16,7 +16,7 @@ public class Origin {
 	/*
 	 * This is technically not sufficient to determine equality for the origin,
 	 * as there is one origin per symbol per index. This definition of equals is
-	 * for the benefit of Transition
+	 * for the benefit of Transition which is already per symbol.
 	 */
 	@Override
 	public boolean equals(final Object obj) {
@@ -58,5 +58,13 @@ public class Origin {
 
 	public Transition markOf(final Transition transition) {
 		return mark == null ? transition : mark.markOf(transition);
+	}
+
+	public void triggerTransform() {
+		if(mark != null){
+			mark.transformChildren();
+		}else if(awaiting.size() == 1){
+			awaiting.get(0).transformChildren();
+		}
 	}
 }

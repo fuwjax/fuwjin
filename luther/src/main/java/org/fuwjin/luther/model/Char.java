@@ -1,4 +1,4 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.model;
 
 public class Char implements Node {
 	private final int ch;
@@ -9,8 +9,17 @@ public class Char implements Node {
 
 	@Override
 	public StringBuilder match(final StringBuilder builder) {
-		builder.appendCodePoint(ch);
-		return builder;
+		return builder.appendCodePoint(ch);
+	}
+	
+	@Override
+	public Integer value() {
+		return ch;
+	}
+	
+	@Override
+	public Node result() {
+		return this;
 	}
 
 	@Override

@@ -1,0 +1,205 @@
+package org.fuwjin.luther.bnf;
+
+import static java.util.function.Function.identity;
+import static org.fuwjin.luther.model.Model.named;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.echovantage.util.io.IntReader;
+import org.fuwjin.luther.Grammar;
+import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.builder.Codepoints;
+import org.fuwjin.luther.builder.GrammarBuilder;
+import org.fuwjin.luther.builder.SymbolBuilder;
+import org.fuwjin.luther.builder.SymbolStateBuilder;
+import org.fuwjin.luther.model.Model;
+import org.fuwjin.luther.model.Node;
+
+public class BnfGrammar {
+	static class Builder extends GrammarBuilder{
+		private Builder standardBnfRules() {
+			rule(false, "#ignore", Model::match, any(' ', '\n', '\t', '\r'));
+			rule(true, "#start", this::grammar, symbol("rules"));
+			rule(true, "rules", this::add, symbol("directive"), symbol("rules"));
+			rule(true, "rules", this::add, symbol("rule"), symbol("rules"));
+			rule(true, "rules", this::newList);
+			rule(true, "directive", this::rule, of('#'), symbol("symbol"), symbol("expression"));
+			rule(true, "rule", this::rule, symbol("symbol"), of(':'), symbol("expression"));
+			rule(true, "expression", this::add, symbol("symbol"), symbol("expression"));
+			rule(true, "expression", this::addAll, symbol("literal"), symbol("expression"));
+			rule(true, "expression", this::add, symbol("class"), symbol("expression"));
+			rule(true, "expression", this::newList);
+
+			rule(false, "symbol", this::reference, of('_').range('A', 'Z').range('a', 'z'), symbol("symboltail"));
+			rule(false, "symboltail", identity(), of('_').range('A', 'Z').range('a', 'z').range('0', '9'), symbol("symboltail"));
+			rule(false, "symboltail", identity());
+			rule(false, "literal", this::literal, of('\''), symbol("single"), of('\''));
+			rule(false, "single", identity(), any('\'', '\\').negate(), symbol("single"));
+			rule(false, "single", identity(), symbol("escape"), symbol("single"));
+			rule(false, "single", identity());
+			rule(false, "escape", m -> (int)'\n', of('\\'), of('n'));
+			rule(false, "escape", m -> (int)'\t', of('\\'), of('t'));
+			rule(false, "escape", m -> (int)'\r', of('\\'), of('r'));
+			rule(false, "escape", m -> m.children().get(1), of('\\'), any('\\', '"', '\''));
+			rule(false, "class", this::charClass, of('['), symbol("chars"), of(']'));
+			rule(false, "class", this::negateClass, of('['), of('^'), symbol("chars"), of(']'));
+			rule(false, "chars", this::addChar, symbol("char"), symbol("chars"));
+			rule(false, "chars", this::addRange, symbol("range"), symbol("chars"));
+			rule(false, "chars", this::newClass);
+			rule(false, "char", m -> m.children().get(0), any('\\', ']', '-').negate());
+			rule(false, "char", this::pass, symbol("escape"));
+			rule(false, "range", this::range, symbol("char"), of('-'), symbol("char"));
+			return this;
+		}
+		
+		private Grammar grammar(Model model){
+			List<Rule> rules = (List<Rule>)model.getValue("rules");
+			Builder builder = new Builder();
+			rules.forEach(rule -> rule.applyTo(builder));
+			return builder.build("#start");
+		}
+		
+		private Reference reference(Model model){
+			return new Reference(model.match());
+		}
+		
+		private Literal literal(Model model){
+			return new Literal(model.get("single").match());
+		}
+		
+		private List addAll(Model model){
+			List expressions = (List)model.getValue("expression");
+			expressions.addAll(((Literal)model.getValue("literal")).toExpressions());
+			return expressions;
+		}
+		
+		private Range range(Model model){
+			List<Model> chars = model.getAll("char").collect(Collectors.toList());
+			return new Range((Integer)chars.get(0).value(), (Integer)chars.get(1).value());
+		}
+		
+		private Stream<Model> children(Model model){
+			return model.modelChildren().filter(named("#ignore").negate());
+		}
+		
+		private Object negateClass(Model model){
+			return new CharClass(((Codepoints)model.getValue("chars")).negate());
+		}
+		
+		private Object charClass(Model model){
+			return new CharClass(((Codepoints)model.getValue("chars")));
+		}
+		
+		private Object newClass(Model model){
+			return new Codepoints();
+		}
+		
+		private Object addChar(Model model){
+			Codepoints codepoints = (Codepoints)model.getValue("chars");
+			codepoints.add((Integer)model.getValue("char"));
+			return codepoints;
+		}
+		
+		private class Range {
+			private int lo;
+			private int hi;
+
+			public Range(int lo, int hi) {
+				this.lo = lo;
+				this.hi = hi;
+			}
+		}
+		
+		private Object addRange(Model model){
+			Codepoints codepoints = (Codepoints)model.getValue("chars");
+			Range range = (Range)model.getValue("range");
+			codepoints.range(range.lo, range.hi);
+			return codepoints;
+		}
+		
+		private Object pass(Model model){
+			return children(model).findAny().get();
+		}
+		
+		private List add(Model model){
+			List<Model> children = children(model).collect(Collectors.toList());
+			Object value = children.get(0);
+			List list = (List)children.get(1);
+			list.add(value);
+			return list;
+		}
+		
+		private List newList(Model model){
+			return new ArrayList();
+		}
+		
+		private Rule rule(Model model){
+			return new Rule((String)model.getValue("symbol"), (List<Expression>)model.getValue("expression"));
+		}
+
+		SymbolBuilder rule(final boolean useIgnore, final String lhs, Function<Model, ?> transform, final Object... steps) {
+			final SymbolBuilder s = symbol(lhs);
+			SymbolStateBuilder state = s.start();
+			final String[] names = names(steps);
+			int index = 0;
+			for (final Object step : steps) {
+				if (useIgnore && index > 0) {
+					state = state.ensure(name(index, names), symbol("#ignore"));
+				}
+				if (step instanceof SymbolBuilder) {
+					state = state.ensure(name(index, names), (SymbolBuilder) step);
+				} else if (step instanceof Codepoints) {
+					state = state.ensure(name(index, names), (Codepoints) step);
+				}
+				++index;
+			}
+			if("#start".equals(lhs)){
+				state = state.ensure(name(index, names), symbol("#ignore"));
+			}
+			state.complete(name(index, names), transform);
+			return s;
+		}
+
+		private static String[] names(final Object... steps) {
+			final String[] names = new String[steps.length];
+			for (int i = 0; i < names.length; i++) {
+				if (steps[i] instanceof Symbol) {
+					names[i] = ((Symbol) steps[i]).name();
+				} else if (steps[i] instanceof Codepoints) {
+					names[i] = steps[i].toString();
+				}
+			}
+			return names;
+		}
+
+		private static String name(final int dot, final String... names) {
+			final StringBuilder builder = new StringBuilder();
+			for (int i = 0; i < names.length; i++) {
+				builder.append(i == dot ? '.' : i > 0 ? ' ' : "").append(names[i]);
+			}
+			if (dot >= names.length) {
+				builder.append('.');
+			}
+			return builder.toString();
+		}
+		
+		static Codepoints of(final int option) {
+			return new Codepoints().add(option);
+		}
+
+		private static Codepoints any(final int... options) {
+			return new Codepoints().add(options);
+		}
+	}
+	
+	private final Grammar bnf = new Builder().standardBnfRules().build("<start>");
+
+	public Grammar grammar(final IntReader input) throws IOException {
+		return (Grammar)bnf.parse(input);
+	}
+}

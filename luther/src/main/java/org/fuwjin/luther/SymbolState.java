@@ -2,7 +2,10 @@ package org.fuwjin.luther;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.IntFunction;
+
+import org.fuwjin.luther.model.Model;
 
 public class SymbolState {
     private Symbol lhs;
@@ -11,16 +14,16 @@ public class SymbolState {
     private IntFunction<SymbolState> literals;
     private Set<Symbol> predict;
     private Symbol rightCycle;
-    private boolean complete;
+	private Function<Model, ?> transform;
 
-    void init(Symbol lhs, Map<Symbol, SymbolState> symbolic, IntFunction<SymbolState> literals, Set<Symbol> predict, Symbol rightCycle, boolean complete, String toString) {
+    public void init(Symbol lhs, Map<Symbol, SymbolState> symbolic, IntFunction<SymbolState> literals, Set<Symbol> predict, Symbol rightCycle, Function<Model, ?> transform, String toString) {
         this.lhs = lhs;
         this.symbolic = symbolic;
         this.literals = literals;
         this.predict = predict;
         this.rightCycle = rightCycle;
-        this.complete = complete;
         this.toString = toString;
+		this.transform = transform;
     }
 
     public Set<Symbol> pending() {
@@ -44,7 +47,7 @@ public class SymbolState {
     }
 
     public boolean isComplete() {
-        return complete;
+        return transform != null;
     }
 
     public Symbol rightCycle() {
@@ -55,4 +58,8 @@ public class SymbolState {
     public String toString() {
         return toString;
     }
+    
+	public Object result(Model model) {
+		return transform.apply(model);
+	}
 }

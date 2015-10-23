@@ -3,8 +3,13 @@ package org.fuwjin.luther;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import org.fuwjin.luther.model.Char;
+import org.fuwjin.luther.model.Model;
+import org.fuwjin.luther.model.Node;
+import org.fuwjin.luther.model.StandardModel;
 
 public class Transition implements Model {
 	private final SymbolState state;
@@ -54,25 +59,21 @@ public class Transition implements Model {
 
 	private Transition append(final SymbolState to, final Node node, final Transition insertionPoint) {
 		if (insertion == null) {
-			return add(to, node, insertionPoint);
+			final Node[] newChildren = Arrays.copyOf(children, children.length + 1);
+			newChildren[children.length] = node;
+			return new Transition(to, orig, newChildren, insertionPoint);
 		}
 		final Node[] newChildren = Arrays.copyOf(children, children.length);
 		newChildren[children.length - 1] = ((Transition) newChildren[children.length - 1]).append(node, insertionPoint);
 		return new Transition(to, orig, newChildren, insertionPoint);
 	}
 
-	private Transition add(final SymbolState to, final Node value, final Transition insertPoint) {
-		final Node[] newChildren = Arrays.copyOf(children, children.length + 1);
-		newChildren[children.length] = value;
-		return new Transition(to, orig, newChildren, insertPoint);
+	public Stream<Symbol> predict() {
+		return state.predict().stream();
 	}
 
-	public Set<Symbol> predict() {
-		return state.predict();
-	}
-
-	public Set<Symbol> pending() {
-		return state.pending();
+	public Stream<Symbol> pending() {
+		return state.pending().stream();
 	}
 
 	public Symbol rightCycle() {
@@ -90,12 +91,7 @@ public class Transition implements Model {
 			final Transition o = (Transition) obj;
 			return state.equals(o.state) && orig.equals(o.orig);
 		} catch (final Exception e) {
-			try {
-				final Model o = (Model) obj;
-				return symbol().equals(o.symbol()) && children().equals(o.children());
-			} catch (final Exception ex) {
-				return false;
-			}
+			return false;
 		}
 	}
 
@@ -124,5 +120,21 @@ public class Transition implements Model {
 
 	public boolean isModelFor(final Symbol symbol) {
 		return symbol.equals(state.lhs()) && state.isComplete();
+	}
+
+	public void triggerTransform() {
+		orig.triggerTransform();
+	}
+	
+	@Override
+	public Object value() {
+		Object result = state.result(this);
+		return result == this ? new StandardModel(this) : result;
+	}
+
+	public void transformChildren() {
+		for(int index = 0; index < children.length - 1; index++){
+			children[index] = children[index].result();
+		}
 	}
 }

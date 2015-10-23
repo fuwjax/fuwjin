@@ -1,21 +1,17 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.builder;
 
 import java.util.Objects;
 import java.util.Set;
 
-import org.fuwjin.sample.StandardModel;
+import org.fuwjin.luther.Symbol;
 
 public class SymbolBuilder {
 	public Symbol build() {
 		if (symbol == null) {
 			symbol = new Symbol(name);
-			symbol.init(start.build(), start.walk(), () -> new StandardModel(symbol));
+			symbol.init(start.build(), start.walk());
 		}
 		return symbol;
-	}
-
-	private enum FreezeState {
-		Thawed, Freezing, Frozen;
 	}
 
 	private Symbol symbol;
@@ -30,7 +26,7 @@ public class SymbolBuilder {
 		start = new SymbolStateBuilder(this);
 	}
 
-	public SymbolStateChain start() {
+	public SymbolStateBuilder start() {
 		return start;
 	}
 

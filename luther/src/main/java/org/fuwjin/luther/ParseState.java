@@ -2,20 +2,22 @@ package org.fuwjin.luther;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.PrimitiveIterator.OfInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.echovantage.util.io.IntReader;
 
-public class ParsePosition {
+public class ParseState {
 	private Map<Transition, Transition> items = new HashMap<>();
 	private Map<Transition, Transition> oldItems = new HashMap<>();
 	private final Set<Symbol> predict = new LinkedHashSet<>();
 	private final Map<Symbol, Origin> origins = new HashMap<>();
 	private int index;
 
-	public Model parse(final Symbol accept, final IntReader input) {
+	public Object parse(final Symbol accept, final IntReader input) {
 		index = 0;
 		final OfInt iter = input.stream().iterator();
 		// can't just call save, as we need the predict set from accept
@@ -30,7 +32,13 @@ public class ParsePosition {
 
 	private void acceptNext(final int ch) {
 		index++;
-		oldItems.values().stream().map(item -> item.accept(ch)).forEach(this::add);
+		List<Transition> consumers = oldItems.values().stream().map(item -> item.accept(ch)).filter(this::add).collect(Collectors.toList());
+		if(consumers.size() == 0){
+			throw new IllegalArgumentException("Invalid input at position "+index);
+		}
+		if(consumers.size() == 1){
+			consumers.get(0).triggerTransform();
+		}
 	}
 
 	private void clear() {
@@ -46,17 +54,19 @@ public class ParsePosition {
 		return origins.computeIfAbsent(symbol, s -> new Origin(index));
 	}
 
-	private void add(final Transition next) {
+	private boolean add(final Transition next) {
 		if (next == null) {
-			return;
+			return false;
 		}
-		if (!items.containsKey(next)) {
-			save(next);
-			next.complete(this::add);
-			next.predict().stream().filter(predict::add).forEach(this::save);
-		} else { // grammar is ambiguous
+		if (items.containsKey(next)) {
+			// grammar is ambiguous
 			items.get(next).addAlternative(next);
+			return false;
 		}
+		save(next);
+		next.complete(this::add);
+		next.predict().filter(predict::add).forEach(this::save);
+		return true;
 	}
 
 	private void save(final Symbol symbol) {
@@ -65,9 +75,7 @@ public class ParsePosition {
 
 	private void save(final Transition item) {
 		items.put(item, item);
-		for (final Symbol pending : item.pending()) {
-			origin(pending).addAwaiting(item);
-		}
+		item.pending().forEach(pending -> origin(pending).addAwaiting(item));
 	}
 
 	private void predict() {
@@ -79,12 +87,7 @@ public class ParsePosition {
 		}
 	}
 
-	private Model result(final Symbol symbol) {
-		for (final Transition item : items.values()) {
-			if (item.isModelFor(symbol)) {
-				return item;
-			}
-		}
-		throw new IllegalArgumentException("Invalid or incomplete input");
+	private Object result(final Symbol symbol) {
+		return items.values().stream().filter(item -> item.isModelFor(symbol)).findAny().orElseThrow(() -> new IllegalArgumentException("Invalid or incomplete input")).value();
 	}
 }

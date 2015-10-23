@@ -1,4 +1,4 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.model;
 
 public interface Node {
 	StringBuilder match(StringBuilder builder);
@@ -6,4 +6,8 @@ public interface Node {
 	default String match() {
 		return match(new StringBuilder()).toString();
 	}
+	
+	Object value();
+	
+	Node result();
 }

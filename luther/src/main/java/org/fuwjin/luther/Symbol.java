@@ -1,24 +1,19 @@
 package org.fuwjin.luther;
 
 import java.util.Objects;
-import java.util.function.Supplier;
-
-import org.fuwjin.sample.StandardModel;
 
 public class Symbol {
 	private final String name;
 	private SymbolState start;
 	private String toString;
-	private Supplier<StandardModel> modelSupplier;
 
-	Symbol(final String name) {
+	public Symbol(final String name) {
 		this.name = name;
 	}
 
-	void init(final SymbolState start, final String toString, final Supplier<StandardModel> modelSupplier) {
+	public void init(final SymbolState start, final String toString) {
 		this.start = start;
 		this.toString = toString;
-		this.modelSupplier = modelSupplier;
 	}
 
 	public SymbolState start() {
@@ -47,9 +42,5 @@ public class Symbol {
 
 	public String name() {
 		return name;
-	}
-
-	public StandardModel model() {
-		return modelSupplier.get();
 	}
 }

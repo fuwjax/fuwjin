@@ -6,24 +6,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.fuwjin.luther.Char;
 import org.fuwjin.luther.Grammar;
-import org.fuwjin.luther.Model;
-import org.fuwjin.luther.Node;
-import org.fuwjin.sample.SimpleGrammar;
-import org.fuwjin.sample.StandardModel;
+import org.fuwjin.luther.model.Char;
+import org.fuwjin.luther.model.Model;
+import org.fuwjin.luther.model.Node;
+import org.fuwjin.luther.model.StandardModel;
+import org.fuwjin.sample.SimpleGrammarBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 public class GrammarTest {
-	private SimpleGrammar g;
+	private SimpleGrammarBuilder g;
 	private Grammar grammar;
 
 	@Before
 	public void setup() {
-		g = new SimpleGrammar();
+		g = new SimpleGrammarBuilder();
 	}
 
 	@Test
@@ -109,7 +108,6 @@ public class GrammarTest {
 	}
 
 	private Model parse(final String input) throws IOException {
-		final List<Node> children = grammar.parse(codepoints(input)).children();
-		return (Model) (children.isEmpty() ? null : children.get(0));
+		return (Model)grammar.parse(codepoints(input));
 	}
 }
