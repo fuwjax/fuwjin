@@ -1,7 +1,7 @@
 package org.fuwjin.luther.bnf;
 
 import static java.util.function.Function.identity;
-import static org.fuwjin.luther.model.Model.named;
+import static org.fuwjin.luther.Model.named;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,16 +12,15 @@ import java.util.stream.Stream;
 
 import org.echovantage.util.io.IntReader;
 import org.fuwjin.luther.Grammar;
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.Model;
 import org.fuwjin.luther.builder.Codepoints;
 import org.fuwjin.luther.builder.GrammarBuilder;
 import org.fuwjin.luther.builder.SymbolBuilder;
 import org.fuwjin.luther.builder.SymbolStateBuilder;
-import org.fuwjin.luther.model.Model;
-import org.fuwjin.luther.model.Node;
+import org.fuwjin.luther.impl.Symbol;
 
 public class BnfGrammar {
-	static class Builder extends GrammarBuilder{
+	static class Builder extends GrammarBuilder {
 		private Builder standardBnfRules() {
 			rule(false, "#ignore", Model::match, any(' ', '\n', '\t', '\r'));
 			rule(true, "#start", this::grammar, symbol("rules"));
@@ -36,15 +35,16 @@ public class BnfGrammar {
 			rule(true, "expression", this::newList);
 
 			rule(false, "symbol", this::reference, of('_').range('A', 'Z').range('a', 'z'), symbol("symboltail"));
-			rule(false, "symboltail", identity(), of('_').range('A', 'Z').range('a', 'z').range('0', '9'), symbol("symboltail"));
+			rule(false, "symboltail", identity(), of('_').range('A', 'Z').range('a', 'z').range('0', '9'),
+					symbol("symboltail"));
 			rule(false, "symboltail", identity());
 			rule(false, "literal", this::literal, of('\''), symbol("single"), of('\''));
 			rule(false, "single", identity(), any('\'', '\\').negate(), symbol("single"));
 			rule(false, "single", identity(), symbol("escape"), symbol("single"));
 			rule(false, "single", identity());
-			rule(false, "escape", m -> (int)'\n', of('\\'), of('n'));
-			rule(false, "escape", m -> (int)'\t', of('\\'), of('t'));
-			rule(false, "escape", m -> (int)'\r', of('\\'), of('r'));
+			rule(false, "escape", m -> (int) '\n', of('\\'), of('n'));
+			rule(false, "escape", m -> (int) '\t', of('\\'), of('t'));
+			rule(false, "escape", m -> (int) '\r', of('\\'), of('r'));
 			rule(false, "escape", m -> m.children().get(1), of('\\'), any('\\', '"', '\''));
 			rule(false, "class", this::charClass, of('['), symbol("chars"), of(']'));
 			rule(false, "class", this::negateClass, of('['), of('^'), symbol("chars"), of(']'));
@@ -56,93 +56,94 @@ public class BnfGrammar {
 			rule(false, "range", this::range, symbol("char"), of('-'), symbol("char"));
 			return this;
 		}
-		
-		private Grammar grammar(Model model){
-			List<Rule> rules = (List<Rule>)model.getValue("rules");
-			Builder builder = new Builder();
+
+		private Grammar grammar(final Model model) {
+			final List<Rule> rules = (List<Rule>) model.getValue("rules");
+			final Builder builder = new Builder();
 			rules.forEach(rule -> rule.applyTo(builder));
 			return builder.build("#start");
 		}
-		
-		private Reference reference(Model model){
+
+		private Reference reference(final Model model) {
 			return new Reference(model.match());
 		}
-		
-		private Literal literal(Model model){
+
+		private Literal literal(final Model model) {
 			return new Literal(model.get("single").match());
 		}
-		
-		private List addAll(Model model){
-			List expressions = (List)model.getValue("expression");
-			expressions.addAll(((Literal)model.getValue("literal")).toExpressions());
+
+		private List addAll(final Model model) {
+			final List expressions = (List) model.getValue("expression");
+			expressions.addAll(((Literal) model.getValue("literal")).toExpressions());
 			return expressions;
 		}
-		
-		private Range range(Model model){
-			List<Model> chars = model.getAll("char").collect(Collectors.toList());
-			return new Range((Integer)chars.get(0).value(), (Integer)chars.get(1).value());
+
+		private Range range(final Model model) {
+			final List<Model> chars = model.getAll("char").collect(Collectors.toList());
+			return new Range((Integer) chars.get(0).value(), (Integer) chars.get(1).value());
 		}
-		
-		private Stream<Model> children(Model model){
+
+		private Stream<Model> children(final Model model) {
 			return model.modelChildren().filter(named("#ignore").negate());
 		}
-		
-		private Object negateClass(Model model){
-			return new CharClass(((Codepoints)model.getValue("chars")).negate());
+
+		private Object negateClass(final Model model) {
+			return new CharClass(((Codepoints) model.getValue("chars")).negate());
 		}
-		
-		private Object charClass(Model model){
-			return new CharClass(((Codepoints)model.getValue("chars")));
+
+		private Object charClass(final Model model) {
+			return new CharClass((Codepoints) model.getValue("chars"));
 		}
-		
-		private Object newClass(Model model){
+
+		private Object newClass(final Model model) {
 			return new Codepoints();
 		}
-		
-		private Object addChar(Model model){
-			Codepoints codepoints = (Codepoints)model.getValue("chars");
-			codepoints.add((Integer)model.getValue("char"));
+
+		private Object addChar(final Model model) {
+			final Codepoints codepoints = (Codepoints) model.getValue("chars");
+			codepoints.add((Integer) model.getValue("char"));
 			return codepoints;
 		}
-		
-		private class Range {
-			private int lo;
-			private int hi;
 
-			public Range(int lo, int hi) {
+		private class Range {
+			private final int lo;
+			private final int hi;
+
+			public Range(final int lo, final int hi) {
 				this.lo = lo;
 				this.hi = hi;
 			}
 		}
-		
-		private Object addRange(Model model){
-			Codepoints codepoints = (Codepoints)model.getValue("chars");
-			Range range = (Range)model.getValue("range");
+
+		private Object addRange(final Model model) {
+			final Codepoints codepoints = (Codepoints) model.getValue("chars");
+			final Range range = (Range) model.getValue("range");
 			codepoints.range(range.lo, range.hi);
 			return codepoints;
 		}
-		
-		private Object pass(Model model){
+
+		private Object pass(final Model model) {
 			return children(model).findAny().get();
 		}
-		
-		private List add(Model model){
-			List<Model> children = children(model).collect(Collectors.toList());
-			Object value = children.get(0);
-			List list = (List)children.get(1);
+
+		private List add(final Model model) {
+			final List<Model> children = children(model).collect(Collectors.toList());
+			final Object value = children.get(0);
+			final List list = (List) children.get(1);
 			list.add(value);
 			return list;
 		}
-		
-		private List newList(Model model){
+
+		private List newList(final Model model) {
 			return new ArrayList();
 		}
-		
-		private Rule rule(Model model){
-			return new Rule((String)model.getValue("symbol"), (List<Expression>)model.getValue("expression"));
+
+		private Rule rule(final Model model) {
+			return new Rule((String) model.getValue("symbol"), (List<Expression>) model.getValue("expression"));
 		}
 
-		SymbolBuilder rule(final boolean useIgnore, final String lhs, Function<Model, ?> transform, final Object... steps) {
+		SymbolBuilder rule(final boolean useIgnore, final String lhs, final Function<Model, ?> transform,
+				final Object... steps) {
 			final SymbolBuilder s = symbol(lhs);
 			SymbolStateBuilder state = s.start();
 			final String[] names = names(steps);
@@ -158,7 +159,7 @@ public class BnfGrammar {
 				}
 				++index;
 			}
-			if("#start".equals(lhs)){
+			if ("#start".equals(lhs)) {
 				state = state.ensure(name(index, names), symbol("#ignore"));
 			}
 			state.complete(name(index, names), transform);
@@ -187,7 +188,7 @@ public class BnfGrammar {
 			}
 			return builder.toString();
 		}
-		
+
 		static Codepoints of(final int option) {
 			return new Codepoints().add(option);
 		}
@@ -196,10 +197,10 @@ public class BnfGrammar {
 			return new Codepoints().add(options);
 		}
 	}
-	
+
 	private final Grammar bnf = new Builder().standardBnfRules().build("<start>");
 
 	public Grammar grammar(final IntReader input) throws IOException {
-		return (Grammar)bnf.parse(input);
+		return (Grammar) bnf.parse(input);
 	}
 }

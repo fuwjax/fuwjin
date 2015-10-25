@@ -11,8 +11,8 @@ import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
-import org.fuwjin.luther.SymbolState;
-import org.fuwjin.luther.model.Model;
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.impl.SymbolState;
 
 public class SymbolStateBuilder {
 	private SymbolBuilder lhs;

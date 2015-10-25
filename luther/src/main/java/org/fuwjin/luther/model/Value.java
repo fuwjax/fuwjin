@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.Node;
+import org.fuwjin.luther.impl.Symbol;
 
 public class Value implements Model {
 	private final Object value;

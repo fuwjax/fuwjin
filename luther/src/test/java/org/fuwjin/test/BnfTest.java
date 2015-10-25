@@ -1,7 +1,7 @@
 package org.fuwjin.test;
 
+import org.fuwjin.luther.Model;
 import org.fuwjin.luther.bnf.BnfGrammar;
-import org.fuwjin.luther.model.Model;
 import org.junit.Test;
 
 import java.io.IOException;

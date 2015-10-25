@@ -1,10 +1,12 @@
-package org.fuwjin.luther.model;
+package org.fuwjin.luther;
 
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.impl.Symbol;
+import org.fuwjin.luther.model.MigratedModel;
+import org.fuwjin.luther.model.Value;
 
 public interface Model extends Node {
 	Symbol symbol();
@@ -16,39 +18,39 @@ public interface Model extends Node {
 		children().forEach(node -> node.match(builder));
 		return builder;
 	}
-	
-	static Predicate<Model> named(String name){
+
+	static Predicate<Model> named(final String name) {
 		return model -> model.symbol().name().equals(name);
 	}
 
 	default Stream<Model> modelChildren() {
 		return children().stream().filter(Model.class::isInstance).map(Model.class::cast);
 	}
-	
-	default Model get(String name){
+
+	default Model get(final String name) {
 		return getAll(name).findFirst().orElse(null);
 	}
-	
-	default Stream<Model> getAll(String name){
+
+	default Stream<Model> getAll(final String name) {
 		return modelChildren().filter(named(name));
 	}
-	
-	default Object getValue(String name){
+
+	default Object getValue(final String name) {
 		return getAllValues(name).findFirst().orElse(null);
 	}
-	
-	default Stream<Object> getAllValues(String name){
+
+	default Stream<Object> getAllValues(final String name) {
 		return getAll(name).map(Model::value);
 	}
-	
+
 	@Override
 	default Model result() {
-		Object result = value();
-		if (!(result instanceof Model)){
+		final Object result = value();
+		if (!(result instanceof Model)) {
 			return new Value(symbol(), result);
 		}
-		Model model = (Model)result;
-		if(symbol().equals(model.symbol())){
+		final Model model = (Model) result;
+		if (symbol().equals(model.symbol())) {
 			return model;
 		}
 		return new MigratedModel(symbol(), model);

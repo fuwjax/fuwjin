@@ -1,4 +1,4 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.impl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.Node;
 import org.fuwjin.luther.model.Char;
-import org.fuwjin.luther.model.Model;
-import org.fuwjin.luther.model.Node;
 import org.fuwjin.luther.model.StandardModel;
 
 public class Transition implements Model {

@@ -1,5 +1,7 @@
 package org.fuwjin.luther.model;
 
+import org.fuwjin.luther.Node;
+
 public class Char implements Node {
 	private final int ch;
 

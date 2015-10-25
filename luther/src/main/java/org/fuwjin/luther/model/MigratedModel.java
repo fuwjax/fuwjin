@@ -2,7 +2,9 @@ package org.fuwjin.luther.model;
 
 import java.util.List;
 
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.Node;
+import org.fuwjin.luther.impl.Symbol;
 
 public class MigratedModel implements Model {
 	private Model model;

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.Node;
+import org.fuwjin.luther.impl.Symbol;
 
 /**
  * Created by fuwjax on 2/4/15.

@@ -1,11 +1,11 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.impl;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-import org.fuwjin.luther.model.Model;
+import org.fuwjin.luther.Model;
 
 public class SymbolState {
     private Symbol lhs;

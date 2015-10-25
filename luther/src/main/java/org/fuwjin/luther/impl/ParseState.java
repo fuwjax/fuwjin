@@ -1,4 +1,4 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.impl;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;

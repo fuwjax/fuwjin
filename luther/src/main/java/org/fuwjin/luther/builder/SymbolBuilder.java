@@ -3,7 +3,7 @@ package org.fuwjin.luther.builder;
 import java.util.Objects;
 import java.util.Set;
 
-import org.fuwjin.luther.Symbol;
+import org.fuwjin.luther.impl.Symbol;
 
 public class SymbolBuilder {
 	public Symbol build() {

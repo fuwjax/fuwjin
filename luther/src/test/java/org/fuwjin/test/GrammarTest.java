@@ -8,9 +8,9 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 
 import org.fuwjin.luther.Grammar;
+import org.fuwjin.luther.Model;
+import org.fuwjin.luther.Node;
 import org.fuwjin.luther.model.Char;
-import org.fuwjin.luther.model.Model;
-import org.fuwjin.luther.model.Node;
 import org.fuwjin.luther.model.StandardModel;
 import org.fuwjin.sample.SimpleGrammarBuilder;
 import org.junit.Before;
@@ -108,6 +108,6 @@ public class GrammarTest {
 	}
 
 	private Model parse(final String input) throws IOException {
-		return (Model)grammar.parse(codepoints(input));
+		return (Model) grammar.parse(codepoints(input));
 	}
 }

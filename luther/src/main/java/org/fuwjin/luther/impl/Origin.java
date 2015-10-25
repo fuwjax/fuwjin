@@ -1,4 +1,4 @@
-package org.fuwjin.luther;
+package org.fuwjin.luther.impl;
 
 import java.util.ArrayList;
 import java.util.List;
